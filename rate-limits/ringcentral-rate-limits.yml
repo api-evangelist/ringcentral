@@ -5,32 +5,70 @@ provider: RingCentral
 providerId: ringcentral
 created: '2026-05-08'
 modified: '2026-05-08'
-reconciled: false
+reconciled: true
 tags:
-- Communications
-- UCaaS
-- Voice
-- Video
-- Contact Center
-- Rate Limiting
-- Quotas
-- Throttling
-description: Placeholder rate-limit artifact for RingCentral. Replace with real limits once the pipeline
-  researches the provider's rate-limit documentation.
-notes: Initial scaffold — limits have not yet been reconciled against the provider's documentation.
+  - Communications
+  - UCaaS
+  - Voice
+  - Video
+  - Contact Center
+  - Rate Limiting
+  - Quotas
+  - Throttling
+description: >-
+  RingCentral applies per-user, per-application rate limits to every REST API call. Each operation is bucketed into one of four categories — Light, Medium, Heavy, or Auth — each with its own per-minute quota. Exceeding a quota returns HTTP 429 with a Retry-After header. Default per-app limits can be raised via the Developer Console for production-graded apps.
+notes: >-
+  Limits below are RingCentral's published defaults. Actual app limits may be higher (graduated apps) or lower (sandbox). Always check the X-Rate-Limit-* and Retry-After response headers at runtime.
 sources:
-- https://www.ringcentral.com/
+  - https://developers.ringcentral.com/guide/basics/rate-limits
+  - https://developers.ringcentral.com/guide/basics/throttling
 responseCodes:
   throttled: 429
 limits:
-- name: Default
-  scope: account
-  metric: varies
-  limit: see provider documentation
-  notes: Pending reconciliation.
+  - name: Light Category
+    scope: user-per-app
+    metric: requests
+    limit: 50
+    timeFrame: minute
+    notes: >-
+      Read-mostly endpoints such as account lookups, fetching extensions, and reading message metadata.
+  - name: Medium Category
+    scope: user-per-app
+    metric: requests
+    limit: 40
+    timeFrame: minute
+    notes: >-
+      Standard REST operations including most sends, updates, and listings.
+  - name: Heavy Category
+    scope: user-per-app
+    metric: requests
+    limit: 10
+    timeFrame: minute
+    notes: >-
+      Expensive operations such as bulk messaging, fax sends, large reporting/analytics queries, and recording downloads.
+  - name: Authentication Category
+    scope: user-per-app
+    metric: requests
+    limit: 5
+    timeFrame: minute
+    notes: >-
+      Token issuance, refresh, and revocation endpoints (/restapi/oauth/*).
+headers:
+  - name: X-Rate-Limit-Limit
+    description: Requests allowed in the current window for the matching category.
+  - name: X-Rate-Limit-Remaining
+    description: Requests still available in the current window.
+  - name: X-Rate-Limit-Window
+    description: Length of the rolling rate-limit window (seconds).
+  - name: Retry-After
+    description: Seconds the client should wait before issuing the next request after a 429 response.
 policies:
-- name: Backoff Strategy
-  description: Clients should implement exponential backoff with jitter and honor any Retry-After header.
+  - name: Backoff Strategy
+    description: >-
+      Clients must implement exponential backoff with jitter and honor the Retry-After header. Apps should also respect category-specific quotas by inspecting the X-Rate-Limit-* headers returned on every response.
+  - name: App Graduation
+    description: >-
+      Apps in sandbox have lower defaults than production. After graduation through the Developer Console, an app receives the standard production quotas above; further increases are negotiated with RingCentral.
 maintainers:
-- FN: Kin Lane
-  email: kin@apievangelist.com
+  - FN: Kin Lane
+    email: kin@apievangelist.com

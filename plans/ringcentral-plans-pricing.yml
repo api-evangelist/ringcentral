@@ -5,38 +5,151 @@ provider: RingCentral
 providerId: ringcentral
 created: '2026-05-08'
 modified: '2026-05-08'
-reconciled: false
+reconciled: true
 tags:
-- Communications
-- UCaaS
-- Voice
-- Video
-- Contact Center
-- Plans
-description: Placeholder plans/pricing artifact for RingCentral. Replace with real published pricing once
-  the pipeline researches the provider's plans page.
-notes: Initial scaffold — plans/pricing have not yet been reconciled against the provider's documentation.
+  - Communications
+  - UCaaS
+  - Voice
+  - Video
+  - Contact Center
+  - Plans
+description: >-
+  RingCentral RingEX (formerly MVP) is sold in three published per-user tiers — Core, Advanced, and Ultra — billed monthly with an annual discount. The developer platform itself (REST API, SDKs, webhooks) is free to use; revenue is generated from the underlying RingEX, RingCX (contact center), Events, and add-on subscriptions consumed by applications. Listed prices are the standard published rates; volume and enterprise pricing is negotiated.
+notes: >-
+  Reconciled against https://www.ringcentral.com/office/plansandpricing.html. Prices reflect annual-billing per-user/month rates published by RingCentral; month-to-month pricing is approximately 33% higher. Add-ons (AI Receptionist, SMS Booster, Call Queues Booster, AI Conversation Expert) are layered on top of any RingEX plan.
 sources:
-- https://www.ringcentral.com/
+  - https://www.ringcentral.com/office/plansandpricing.html
+  - https://www.ringcentral.com/contact-center/overview.html
+  - https://developers.ringcentral.com/
 plans:
-- id: ringcentral-default
-  name: To Be Reconciled
-  type: enterprise
-  description: Initial scaffold; replace with provider plan tiers (Free / Pro / Enterprise / pay-as-you-go,
-    etc.) once pricing is reconciled.
-  entries:
-  - label: API Access
-    name: api_access
-    type: flat
-    metric: varies
-    limit: -1
-    timeFrame: usage
-    geo: global
-    unit: 1
-    price: see https://www.ringcentral.com/
-    userMultiplied: false
-  elements:
-  - name: Pending Reconciliation
+  - id: ringcentral-ringex-core
+    name: RingEX Core
+    type: paid
+    description: >-
+      Entry tier for unified business communications: business phone with unlimited calling in the US/Canada, business SMS/MMS, IVR, basic call handling, audio meetings, basic video meetings, and developer API access subject to standard rate limits.
+    entries:
+      - label: Per User Per Month (Annual)
+        name: per_user_per_month
+        type: flat
+        metric: user
+        limit: 1
+        timeFrame: month
+        geo: US-CA
+        unit: 1
+        price: 30
+        currency: USD
+        userMultiplied: true
+    elements:
+      - name: Unlimited Domestic Calling
+      - name: Business SMS / MMS
+      - name: IVR
+      - name: HD Video (basic)
+      - name: REST API + Webhooks
+  - id: ringcentral-ringex-advanced
+    name: RingEX Advanced
+    type: paid
+    description: >-
+      Mid tier adding advanced call handling (call queues, multi-site, automatic call recording), CRM integrations, advanced analytics, and increased developer quotas.
+    entries:
+      - label: Per User Per Month (Annual)
+        name: per_user_per_month
+        type: flat
+        metric: user
+        limit: 1
+        timeFrame: month
+        geo: US-CA
+        unit: 1
+        price: 35
+        currency: USD
+        userMultiplied: true
+    elements:
+      - name: Auto Call Recording
+      - name: Multi-Site Admin
+      - name: Advanced Call Handling
+      - name: CRM Integrations
+      - name: Advanced Analytics
+  - id: ringcentral-ringex-ultra
+    name: RingEX Ultra
+    type: paid
+    description: >-
+      Top tier adding unlimited file/messaging storage, customizable business analytics with alerts, device status reports, and the most generous developer quotas.
+    entries:
+      - label: Per User Per Month (Annual)
+        name: per_user_per_month
+        type: flat
+        metric: user
+        limit: 1
+        timeFrame: month
+        geo: US-CA
+        unit: 1
+        price: 45
+        currency: USD
+        userMultiplied: true
+    elements:
+      - name: Unlimited Storage
+      - name: Customizable Business Analytics
+      - name: Device Status Reports
+      - name: Promoted to Highest API Quotas
+  - id: ringcentral-ringcx
+    name: RingCX (Contact Center)
+    type: paid
+    description: >-
+      RingCentral's AI-first omnichannel contact-center seat tier (RingCX) sold per agent per month; pricing varies by package (Voice vs Digital vs AI). Typical published Voice agent rate starts at $65/agent/month annually.
+    entries:
+      - label: Per Agent Per Month (Voice — starting)
+        name: per_agent_per_month
+        type: flat
+        metric: agent
+        limit: 1
+        timeFrame: month
+        geo: global
+        unit: 1
+        price: 65
+        currency: USD
+        userMultiplied: true
+    elements:
+      - name: Omnichannel Routing
+      - name: Real-Time + Historical Reporting
+      - name: Conversational AI
+  - id: ringcentral-developer-platform
+    name: Developer Platform
+    type: free
+    description: >-
+      The RingCentral developer platform — sandbox accounts, REST APIs, webhooks, and SDKs — is free to register for and use. Production usage requires an underlying RingEX or RingCX subscription as the metered surface.
+    entries:
+      - label: Sandbox + REST API
+        name: api_access
+        type: flat
+        metric: api_call
+        limit: -1
+        timeFrame: usage
+        geo: global
+        unit: 1
+        price: 0
+        currency: USD
+        userMultiplied: false
+    elements:
+      - name: Sandbox Accounts
+      - name: Public REST API
+      - name: Webhooks / PubNub Notifications
+      - name: SDKs (JS, Python, PHP, Ruby, C#, Java)
+addOns:
+  - name: AI Receptionist
+    price: 39
+    currency: USD
+    cadence: monthly
+  - name: Business SMS Booster
+    price: 25
+    currency: USD
+    cadence: monthly
+  - name: Call Queues Booster
+    price: 35
+    currency: USD
+    cadence: monthly
+  - name: AI Conversation Expert
+    price: 60
+    currency: USD
+    cadence: monthly
 maintainers:
-- FN: Kin Lane
-  email: kin@apievangelist.com
+  - FN: Kin Lane
+    email: kin@apievangelist.com

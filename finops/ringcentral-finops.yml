@@ -5,22 +5,24 @@ provider: RingCentral
 providerId: ringcentral
 created: '2026-05-08'
 modified: '2026-05-08'
-reconciled: false
+reconciled: true
 tags:
-- Communications
-- UCaaS
-- Voice
-- Video
-- Contact Center
-- FinOps
-- Cost Management
-- FOCUS
-description: FOCUS-aligned FinOps placeholder for RingCentral. Pipeline will replace with the provider's
-  real billing-model details once researched.
-notes: Initial scaffold — billing model has not yet been reconciled.
+  - Communications
+  - UCaaS
+  - Voice
+  - Video
+  - Contact Center
+  - FinOps
+  - Cost Management
+  - FOCUS
+description: >-
+  RingCentral's billing surface is a per-seat SaaS subscription model (RingEX Core/Advanced/Ultra and RingCX agent seats) with usage-priced overages for international calling, SMS/MMS volume, fax pages, and toll-free minutes. The developer API itself is not metered — costs flow through the underlying RingEX/RingCX subscription consumed by the application. Add-on subscriptions (AI Receptionist, SMS Booster, Call Queues Booster, AI Conversation Expert) are flat monthly fees layered on top of seat counts.
+notes: >-
+  Reconciled against RingCentral published pricing as of 2026-05-08. RingCentral does not publish a public FOCUS-formatted billing export; usage detail is available via the Admin Portal and Cost Management exports for enterprise contracts.
 sources:
-- https://www.ringcentral.com/
-- https://focus.finops.org/focus-specification/v1-3/
+  - https://www.ringcentral.com/office/plansandpricing.html
+  - https://www.ringcentral.com/contact-center/overview.html
+  - https://focus.finops.org/focus-specification/v1-3/
 alignedWith:
   framework: FinOps Foundation Framework
   frameworkUrl: https://www.finops.org/framework/
@@ -30,38 +32,92 @@ alignedWith:
 publisherName: RingCentral
 serviceCategory: Communications
 billingModel:
-  pricingCategory: To Be Reconciled
+  pricingCategory: Per-Seat Subscription with Usage Overages
   billingFrequency: Monthly
+  billingTerm: Annual or Month-to-Month
   billingCurrency: USD
   chargeCategories:
-  - Usage
-  - Purchase
-  - Adjustment
+    - Subscription
+    - Usage
+    - Adjustment
+    - Tax
+  commitmentDiscount: Annual prepay discount of approximately 33% versus monthly term
 focusColumns:
-  ServiceName: RingCentral
+  ServiceName: RingCentral RingEX
   ServiceCategory: Communications
   ProviderName: RingCentral
   PublisherName: RingCentral
   InvoiceIssuerName: RingCentral
   BillingCurrency: USD
-  ChargeCategory: Usage
+  ChargeCategory: Subscription
+  PricingCategory: Standard Pricing
+  CommitmentDiscountCategory: Spend
 meters:
-- name: api_usage
-  description: Catch-all meter pending reconciliation against the provider's published metering.
-  unit: varies
-  aggregation: sum
-  dimensions:
-  - account
-  - resource
+  - name: ringex_seats
+    description: Per-user RingEX subscription (Core / Advanced / Ultra).
+    unit: seat-month
+    aggregation: max
+    dimensions:
+      - account
+      - user
+      - plan_tier
+  - name: ringcx_agent_seats
+    description: Per-agent RingCX contact-center subscription.
+    unit: seat-month
+    aggregation: max
+    dimensions:
+      - account
+      - agent
+      - package
+  - name: international_minutes
+    description: Outbound minutes outside the bundled US/Canada plan.
+    unit: minute
+    aggregation: sum
+    dimensions:
+      - account
+      - destination_country
+      - call_type
+  - name: sms_segments
+    description: Outbound SMS/MMS segments beyond bundled allotments (A2P 10DLC).
+    unit: segment
+    aggregation: sum
+    dimensions:
+      - account
+      - direction
+      - country
+  - name: toll_free_minutes
+    description: Inbound minutes on toll-free DIDs.
+    unit: minute
+    aggregation: sum
+    dimensions:
+      - account
+      - did
+  - name: fax_pages
+    description: Outbound fax pages above the bundled allotment.
+    unit: page
+    aggregation: sum
+    dimensions:
+      - account
+  - name: addon_subscriptions
+    description: Add-on subscriptions (AI Receptionist, SMS Booster, Call Queues Booster, AI Conversation Expert).
+    unit: subscription-month
+    aggregation: max
+    dimensions:
+      - account
+      - addon_name
 principles:
-- name: Visibility
-  description: Pull provider invoices or usage exports until a self-serve usage feed is documented.
-- name: Allocation
-  description: Tag invoice line items to consuming business units in your FinOps store.
-- name: Optimization
-  description: Levers depend on the provider's billing model; review at renewal once reconciled.
-- name: Accountability
-  description: Assign a contract owner to review billing against negotiated terms.
+  - name: Visibility
+    description: >-
+      Pull invoice exports and Admin Portal usage reports into your cost-allocation pipeline. RingCentral does not expose a public FOCUS-formatted feed; for very large accounts request a custom usage export from your account team.
+  - name: Allocation
+    description: >-
+      Tag seats by department/cost-center via the Admin Portal and reconcile against your HRIS to chargeback by team. Add-ons should be allocated to the function that uses them (e.g., contact-center add-ons to the support BU).
+  - name: Optimization
+    description: >-
+      Right-size seat tier (Core vs Advanced vs Ultra) per persona; reclaim seats for terminated employees promptly; consolidate add-ons where overlapping; renegotiate at renewal once usage data is in hand.
+  - name: Accountability
+    description: >-
+      Designate a contract owner per RingCentral agreement; review monthly invoices against forecast; track international and SMS overages as leading indicators of plan-tier mismatch.
 maintainers:
-- FN: Kin Lane
-  email: kin@apievangelist.com
+  - FN: Kin Lane
+    email: kin@apievangelist.com
