@@ -1,0 +1,80 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Insights
+  description: 'RingCentral API — Insights. 1 operations. Lead operation: Interaction Analytics. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Insights
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-insights
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Insights business capability. Self-contained, no shared references.
+    resources:
+    - name: ai-insights-v1-async-analyze-interaction
+      path: /ai/insights/v1/async/analyze-interaction
+      operations:
+      - name: caianalyzeinteraction
+        method: POST
+        description: Interaction Analytics
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-insights-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Insights. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/ai/insights/v1/async/analyze-interaction
+      name: ai-insights-v1-async-analyze-interaction
+      description: REST surface for ai-insights-v1-async-analyze-interaction.
+      operations:
+      - method: POST
+        name: caianalyzeinteraction
+        description: Interaction Analytics
+        call: platform-insights.caianalyzeinteraction
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-insights-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Insights. One tool per consumed operation, routed inline through this capability's
+      consumes block.
+    tools:
+    - name: interaction-analytics
+      description: Interaction Analytics
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-insights.caianalyzeinteraction
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

@@ -1,0 +1,486 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Regional Settings
+  description: 'RingCentral API — Regional Settings. 9 operations. Lead operation: List Countries. Self-contained Naftiko
+    capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Regional Settings
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-regional-settings
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Regional Settings business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-dictionary-country
+      path: /restapi/v1.0/dictionary/country
+      operations:
+      - name: listcountries
+        method: GET
+        description: List Countries
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: loginAllowed
+          in: query
+          type: boolean
+          description: Specifies whether the logging-in with the phone numbers of this country
+        - name: signupAllowed
+          in: query
+          type: boolean
+          description: Indicates whether a signup/billing is allowed for a country. If
+        - name: numberSelling
+          in: query
+          type: boolean
+          description: Specifies if RingCentral sells phone numbers of this country
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive number values
+        - name: perPage
+          in: query
+          type: integer
+          description: Indicates a page size (number of items)
+        - name: freeSoftphoneLine
+          in: query
+          type: boolean
+          description: Specifies if free phone line for softphone is available for a
+    - name: restapi-v1.0-dictionary-country-countryId
+      path: /restapi/v1.0/dictionary/country/{countryId}
+      operations:
+      - name: readcountry
+        method: GET
+        description: Get Country
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: countryId
+          in: path
+          type: integer
+          description: Internal identifier of a country
+          required: true
+    - name: restapi-v1.0-dictionary-language
+      path: /restapi/v1.0/dictionary/language
+      operations:
+      - name: listlanguages
+        method: GET
+        description: List Languages
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-dictionary-language-languageId
+      path: /restapi/v1.0/dictionary/language/{languageId}
+      operations:
+      - name: readlanguage
+        method: GET
+        description: Get Language
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: languageId
+          in: path
+          type: integer
+          description: Internal identifier of a language
+          required: true
+    - name: restapi-v1.0-dictionary-location
+      path: /restapi/v1.0/dictionary/location
+      operations:
+      - name: listlocations
+        method: GET
+        description: List Locations
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: orderBy
+          in: query
+          type: string
+          description: Sorts results by the property specified
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive number values
+        - name: perPage
+          in: query
+          type: integer
+          description: Indicates a page size (number of items)
+        - name: stateId
+          in: query
+          type: string
+          description: Internal identifier of a state
+        - name: withNxx
+          in: query
+          type: boolean
+          description: Specifies if `nxx` codes are returned
+    - name: restapi-v1.0-dictionary-state
+      path: /restapi/v1.0/dictionary/state
+      operations:
+      - name: liststates
+        method: GET
+        description: List States
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: allCountries
+          in: query
+          type: boolean
+          description: If set to `true` then states of all countries are returned and
+        - name: countryId
+          in: query
+          type: integer
+          description: Internal identifier of a country
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive number values
+        - name: perPage
+          in: query
+          type: integer
+          description: Indicates a page size (number of items)
+        - name: withPhoneNumbers
+          in: query
+          type: boolean
+          description: If `true` the list of states with phone numbers available for
+    - name: restapi-v1.0-dictionary-state-stateId
+      path: /restapi/v1.0/dictionary/state/{stateId}
+      operations:
+      - name: readstate
+        method: GET
+        description: Get State
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: stateId
+          in: path
+          type: integer
+          description: Internal identifier of a state
+          required: true
+    - name: restapi-v1.0-dictionary-timezone
+      path: /restapi/v1.0/dictionary/timezone
+      operations:
+      - name: listtimezones
+        method: GET
+        description: List Timezones
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive number values
+        - name: perPage
+          in: query
+          type: integer
+          description: Indicates a page size (number of items). If not specified, the value is '100' by default
+    - name: restapi-v1.0-dictionary-timezone-timezoneId
+      path: /restapi/v1.0/dictionary/timezone/{timezoneId}
+      operations:
+      - name: readtimezone
+        method: GET
+        description: Get Timezone
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: timezoneId
+          in: path
+          type: integer
+          description: Internal identifier of a timezone
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-regional-settings-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Regional Settings. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/dictionary/country
+      name: restapi-v1-0-dictionary-country
+      description: REST surface for restapi-v1.0-dictionary-country.
+      operations:
+      - method: GET
+        name: listcountries
+        description: List Countries
+        call: platform-regional-settings.listcountries
+        with:
+          loginAllowed: rest.loginAllowed
+          signupAllowed: rest.signupAllowed
+          numberSelling: rest.numberSelling
+          page: rest.page
+          perPage: rest.perPage
+          freeSoftphoneLine: rest.freeSoftphoneLine
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/country/{countryid}
+      name: restapi-v1-0-dictionary-country-countryid
+      description: REST surface for restapi-v1.0-dictionary-country-countryId.
+      operations:
+      - method: GET
+        name: readcountry
+        description: Get Country
+        call: platform-regional-settings.readcountry
+        with:
+          countryId: rest.countryId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/language
+      name: restapi-v1-0-dictionary-language
+      description: REST surface for restapi-v1.0-dictionary-language.
+      operations:
+      - method: GET
+        name: listlanguages
+        description: List Languages
+        call: platform-regional-settings.listlanguages
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/language/{languageid}
+      name: restapi-v1-0-dictionary-language-languageid
+      description: REST surface for restapi-v1.0-dictionary-language-languageId.
+      operations:
+      - method: GET
+        name: readlanguage
+        description: Get Language
+        call: platform-regional-settings.readlanguage
+        with:
+          languageId: rest.languageId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/location
+      name: restapi-v1-0-dictionary-location
+      description: REST surface for restapi-v1.0-dictionary-location.
+      operations:
+      - method: GET
+        name: listlocations
+        description: List Locations
+        call: platform-regional-settings.listlocations
+        with:
+          orderBy: rest.orderBy
+          page: rest.page
+          perPage: rest.perPage
+          stateId: rest.stateId
+          withNxx: rest.withNxx
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/state
+      name: restapi-v1-0-dictionary-state
+      description: REST surface for restapi-v1.0-dictionary-state.
+      operations:
+      - method: GET
+        name: liststates
+        description: List States
+        call: platform-regional-settings.liststates
+        with:
+          allCountries: rest.allCountries
+          countryId: rest.countryId
+          page: rest.page
+          perPage: rest.perPage
+          withPhoneNumbers: rest.withPhoneNumbers
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/state/{stateid}
+      name: restapi-v1-0-dictionary-state-stateid
+      description: REST surface for restapi-v1.0-dictionary-state-stateId.
+      operations:
+      - method: GET
+        name: readstate
+        description: Get State
+        call: platform-regional-settings.readstate
+        with:
+          stateId: rest.stateId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/timezone
+      name: restapi-v1-0-dictionary-timezone
+      description: REST surface for restapi-v1.0-dictionary-timezone.
+      operations:
+      - method: GET
+        name: listtimezones
+        description: List Timezones
+        call: platform-regional-settings.listtimezones
+        with:
+          page: rest.page
+          perPage: rest.perPage
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/timezone/{timezoneid}
+      name: restapi-v1-0-dictionary-timezone-timezoneid
+      description: REST surface for restapi-v1.0-dictionary-timezone-timezoneId.
+      operations:
+      - method: GET
+        name: readtimezone
+        description: Get Timezone
+        call: platform-regional-settings.readtimezone
+        with:
+          timezoneId: rest.timezoneId
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-regional-settings-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Regional Settings. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: list-countries
+      description: List Countries
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-regional-settings.listcountries
+      with:
+        loginAllowed: tools.loginAllowed
+        signupAllowed: tools.signupAllowed
+        numberSelling: tools.numberSelling
+        page: tools.page
+        perPage: tools.perPage
+        freeSoftphoneLine: tools.freeSoftphoneLine
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-country
+      description: Get Country
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-regional-settings.readcountry
+      with:
+        countryId: tools.countryId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-languages
+      description: List Languages
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-regional-settings.listlanguages
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-language
+      description: Get Language
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-regional-settings.readlanguage
+      with:
+        languageId: tools.languageId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-locations
+      description: List Locations
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-regional-settings.listlocations
+      with:
+        orderBy: tools.orderBy
+        page: tools.page
+        perPage: tools.perPage
+        stateId: tools.stateId
+        withNxx: tools.withNxx
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-states
+      description: List States
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-regional-settings.liststates
+      with:
+        allCountries: tools.allCountries
+        countryId: tools.countryId
+        page: tools.page
+        perPage: tools.perPage
+        withPhoneNumbers: tools.withPhoneNumbers
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-state
+      description: Get State
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-regional-settings.readstate
+      with:
+        stateId: tools.stateId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-timezones
+      description: List Timezones
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-regional-settings.listtimezones
+      with:
+        page: tools.page
+        perPage: tools.perPage
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-timezone
+      description: Get Timezone
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-regional-settings.readtimezone
+      with:
+        timezoneId: tools.timezoneId
+      outputParameters:
+      - type: object
+        mapping: $.

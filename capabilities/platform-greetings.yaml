@@ -1,0 +1,304 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Greetings
+  description: 'RingCentral API — Greetings. 7 operations. Lead operation: Create Custom User Greeting. Self-contained Naftiko
+    capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Greetings
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-greetings
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Greetings business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-extension-extensionId-greeting
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/greeting
+      operations:
+      - name: createcustomusergreeting
+        method: POST
+        description: Create Custom User Greeting
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: apply
+          in: query
+          type: boolean
+          description: Specifies whether to apply an answering rule or not. If set to
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-extensionId-greeting-greetingId
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/greeting/{greetingId}
+      operations:
+      - name: readcustomgreeting
+        method: GET
+        description: Get Custom Greeting
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-extension-extensionId-greeting-greetingId-content
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/greeting/{greetingId}/content
+      operations:
+      - name: readgreetingcontent
+        method: GET
+        description: Get Extension Greeting Media Content
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-greeting
+      path: /restapi/v1.0/account/{accountId}/greeting
+      operations:
+      - name: createcompanygreeting
+        method: POST
+        description: Create Company Greeting
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-greeting-greetingId-content
+      path: /restapi/v1.0/account/{accountId}/greeting/{greetingId}/content
+      operations:
+      - name: readaccountgreetingcontent
+        method: GET
+        description: Get Account Greeting Media Content
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-dictionary-greeting
+      path: /restapi/v1.0/dictionary/greeting
+      operations:
+      - name: liststandardgreetings
+        method: GET
+        description: List Standard Greetings
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: type
+          in: query
+          type: string
+          description: Type of greeting, specifying the case when the greeting is played
+        - name: usageType
+          in: query
+          type: string
+          description: Usage type of greeting, specifying if the greeting is applied for user extension or department (call
+            queue) extension
+    - name: restapi-v1.0-dictionary-greeting-greetingId
+      path: /restapi/v1.0/dictionary/greeting/{greetingId}
+      operations:
+      - name: readstandardgreeting
+        method: GET
+        description: Get Standard Greeting
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-greetings-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Greetings. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/greeting
+      name: restapi-v1-0-account-accountid-extension-extensionid-greeting
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-greeting.
+      operations:
+      - method: POST
+        name: createcustomusergreeting
+        description: Create Custom User Greeting
+        call: platform-greetings.createcustomusergreeting
+        with:
+          apply: rest.apply
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/greeting/{greetingid}
+      name: restapi-v1-0-account-accountid-extension-extensionid-greeting-greetingid
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-greeting-greetingId.
+      operations:
+      - method: GET
+        name: readcustomgreeting
+        description: Get Custom Greeting
+        call: platform-greetings.readcustomgreeting
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/greeting/{greetingid}/content
+      name: restapi-v1-0-account-accountid-extension-extensionid-greeting-greetingid-content
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-greeting-greetingId-content.
+      operations:
+      - method: GET
+        name: readgreetingcontent
+        description: Get Extension Greeting Media Content
+        call: platform-greetings.readgreetingcontent
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/greeting
+      name: restapi-v1-0-account-accountid-greeting
+      description: REST surface for restapi-v1.0-account-accountId-greeting.
+      operations:
+      - method: POST
+        name: createcompanygreeting
+        description: Create Company Greeting
+        call: platform-greetings.createcompanygreeting
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/greeting/{greetingid}/content
+      name: restapi-v1-0-account-accountid-greeting-greetingid-content
+      description: REST surface for restapi-v1.0-account-accountId-greeting-greetingId-content.
+      operations:
+      - method: GET
+        name: readaccountgreetingcontent
+        description: Get Account Greeting Media Content
+        call: platform-greetings.readaccountgreetingcontent
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/greeting
+      name: restapi-v1-0-dictionary-greeting
+      description: REST surface for restapi-v1.0-dictionary-greeting.
+      operations:
+      - method: GET
+        name: liststandardgreetings
+        description: List Standard Greetings
+        call: platform-greetings.liststandardgreetings
+        with:
+          type: rest.type
+          usageType: rest.usageType
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/greeting/{greetingid}
+      name: restapi-v1-0-dictionary-greeting-greetingid
+      description: REST surface for restapi-v1.0-dictionary-greeting-greetingId.
+      operations:
+      - method: GET
+        name: readstandardgreeting
+        description: Get Standard Greeting
+        call: platform-greetings.readstandardgreeting
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-greetings-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Greetings. One tool per consumed operation, routed inline through this
+      capability's consumes block.
+    tools:
+    - name: create-custom-user-greeting
+      description: Create Custom User Greeting
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-greetings.createcustomusergreeting
+      with:
+        apply: tools.apply
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-custom-greeting
+      description: Get Custom Greeting
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-greetings.readcustomgreeting
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-extension-greeting-media-content
+      description: Get Extension Greeting Media Content
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-greetings.readgreetingcontent
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-company-greeting
+      description: Create Company Greeting
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-greetings.createcompanygreeting
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-account-greeting-media-content
+      description: Get Account Greeting Media Content
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-greetings.readaccountgreetingcontent
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-standard-greetings
+      description: List Standard Greetings
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-greetings.liststandardgreetings
+      with:
+        type: tools.type
+        usageType: tools.usageType
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-standard-greeting
+      description: Get Standard Greeting
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-greetings.readstandardgreeting
+      outputParameters:
+      - type: object
+        mapping: $.

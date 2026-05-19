@@ -1,0 +1,143 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Meetings History
+  description: 'RingCentral API — Meetings History. 2 operations. Lead operation: List Video Meetings. Self-contained Naftiko
+    capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Meetings History
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-meetings-history
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Meetings History business capability. Self-contained, no shared references.
+    resources:
+    - name: rcvideo-v1-history-meetings
+      path: /rcvideo/v1/history/meetings
+      operations:
+      - name: listvideomeetings
+        method: GET
+        description: List Video Meetings
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: text
+          in: query
+          type: string
+          description: Search text
+        - name: pageToken
+          in: query
+          type: string
+          description: Token to get the next page
+        - name: perPage
+          in: query
+          type: integer
+          description: Number of records returned
+        - name: type
+          in: query
+          type: string
+          description: 'Specify what kind of meeting should be returned. Possible values: All, My, Deleted, Shared'
+        - name: startTime
+          in: query
+          type: integer
+          description: Unix timestamp in milliseconds (inclusive) indicates the start time of meetings which should be included
+            in response
+        - name: endTime
+          in: query
+          type: integer
+          description: Unix timestamp in milliseconds (inclusive) indicates the end time of meetings which should be included
+            in response
+    - name: rcvideo-v1-history-meetings-meetingId
+      path: /rcvideo/v1/history/meetings/{meetingId}
+      operations:
+      - name: getvideomeeting
+        method: GET
+        description: Get Video Meeting
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-meetings-history-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Meetings History. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/rcvideo/v1/history/meetings
+      name: rcvideo-v1-history-meetings
+      description: REST surface for rcvideo-v1-history-meetings.
+      operations:
+      - method: GET
+        name: listvideomeetings
+        description: List Video Meetings
+        call: platform-meetings-history.listvideomeetings
+        with:
+          text: rest.text
+          pageToken: rest.pageToken
+          perPage: rest.perPage
+          type: rest.type
+          startTime: rest.startTime
+          endTime: rest.endTime
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/rcvideo/v1/history/meetings/{meetingid}
+      name: rcvideo-v1-history-meetings-meetingid
+      description: REST surface for rcvideo-v1-history-meetings-meetingId.
+      operations:
+      - method: GET
+        name: getvideomeeting
+        description: Get Video Meeting
+        call: platform-meetings-history.getvideomeeting
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-meetings-history-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Meetings History. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: list-video-meetings
+      description: List Video Meetings
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-meetings-history.listvideomeetings
+      with:
+        text: tools.text
+        pageToken: tools.pageToken
+        perPage: tools.perPage
+        type: tools.type
+        startTime: tools.startTime
+        endTime: tools.endTime
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-video-meeting
+      description: Get Video Meeting
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-meetings-history.getvideomeeting
+      outputParameters:
+      - type: object
+        mapping: $.

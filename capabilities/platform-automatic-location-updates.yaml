@@ -1,0 +1,1634 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Automatic Location Updates
+  description: 'RingCentral API — Automatic Location Updates. 36 operations. Lead operation: List Devices. Self-contained
+    Naftiko capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Automatic Location Updates
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-automatic-location-updates
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Automatic Location Updates business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-devices
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/devices
+      operations:
+      - name: listdevicesautomaticlocationupdates
+        method: GET
+        description: List Devices
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: featureEnabled
+          in: query
+          type: boolean
+          description: Filters entries by their status of Automatic Location Updates
+        - name: modelId
+          in: query
+          type: string
+          description: Internal identifier of a device model for filtering. Multiple
+        - name: compatibleOnly
+          in: query
+          type: boolean
+          description: Filters devices which support HELD protocol
+        - name: searchString
+          in: query
+          type: string
+          description: Filters entries which have device name or model name containing
+        - name: orderBy
+          in: query
+          type: string
+          description: Comma-separated list of fields to order results prefixed by
+        - name: perPage
+          in: query
+          type: integer
+          description: 'Indicates a page size (number of items). The values supported:'
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive number values
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-devices-bulk-assign
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/devices/bulk-assign
+      operations:
+      - name: assignmultipledevicesautomaticlocationupdates
+        method: POST
+        description: Enable Automatic Location Updates Feature
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-networks
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/networks
+      operations:
+      - name: listnetworks
+        method: GET
+        description: Get Network Map
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: searchString
+          in: query
+          type: string
+          description: Filters entries by the specified substring (search by chassis
+        - name: orderBy
+          in: query
+          type: string
+          description: Comma-separated list of fields to order results prefixed by '+'
+        - name: perPage
+          in: query
+          type: integer
+          description: 'Indicates a page size (number of items). The values supported:'
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive number values
+      - name: createnetwork
+        method: POST
+        description: Create Network
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-networks-networkId
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/networks/{networkId}
+      operations:
+      - name: readnetwork
+        method: GET
+        description: Get Network
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: networkId
+          in: path
+          type: string
+          description: Internal identifier of a network
+          required: true
+      - name: updatenetwork
+        method: PUT
+        description: Update Network
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: networkId
+          in: path
+          type: string
+          description: Internal identifier of a network
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deletenetwork
+        method: DELETE
+        description: Delete Network
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: networkId
+          in: path
+          type: array
+          description: Internal identifier of a network
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-switches
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/switches
+      operations:
+      - name: listaccountswitches
+        method: GET
+        description: List Account Switches
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: searchString
+          in: query
+          type: string
+          description: Filters entries by the specified substring (search by chassis
+        - name: orderBy
+          in: query
+          type: string
+          description: Comma-separated list of fields to order results prefixed by '+'
+        - name: perPage
+          in: query
+          type: integer
+          description: 'Indicates a page size (number of items). The values supported:'
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive number values
+      - name: createswitch
+        method: POST
+        description: Create Switch
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-switches-bulk-creat
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/switches-bulk-create
+      operations:
+      - name: createmultipleswitches
+        method: POST
+        description: Create Multiple Switches
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-switches-bulk-updat
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/switches-bulk-update
+      operations:
+      - name: updatemultipleswitches
+        method: POST
+        description: Update Multiple Switches
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-switches-bulk-valid
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/switches-bulk-validate
+      operations:
+      - name: validatemultipleswitches
+        method: POST
+        description: Validate Multiple Switches
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-switches-switchId
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/switches/{switchId}
+      operations:
+      - name: readswitch
+        method: GET
+        description: Get Switch
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: switchId
+          in: path
+          type: string
+          required: true
+      - name: updateswitch
+        method: PUT
+        description: Update Switch
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: switchId
+          in: path
+          type: string
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deleteswitch
+        method: DELETE
+        description: Delete Switch
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: switchId
+          in: path
+          type: array
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-tasks-taskId
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/tasks/{taskId}
+      operations:
+      - name: readautomaticlocationupdatestask
+        method: GET
+        description: Get Emergency Map Configuration Task
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: taskId
+          in: path
+          type: string
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-users
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/users
+      operations:
+      - name: listautomaticlocationupdatesusers
+        method: GET
+        description: List Users
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: type
+          in: query
+          type: array
+          description: Extension type. Multiple values are supported
+        - name: searchString
+          in: query
+          type: string
+          description: Filters entries containing the specified substring in user name,
+        - name: department
+          in: query
+          type: array
+          description: Department name to filter the users. The value range is 0-64;
+        - name: featureEnabled
+          in: query
+          type: boolean
+          description: Filters entries by their status of Automatic Location Updates
+        - name: orderBy
+          in: query
+          type: string
+          description: Comma-separated list of fields to order results prefixed by
+        - name: perPage
+          in: query
+          type: integer
+          description: 'Indicates a page size (number of items). The values supported:'
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive number values
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-users-bulk-assign
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/users/bulk-assign
+      operations:
+      - name: assignmultipleautomaticlocationupdatesusers
+        method: POST
+        description: Enable Automatic Location Updates for Users
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-wireless-points
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/wireless-points
+      operations:
+      - name: listwirelesspoints
+        method: GET
+        description: List Wireless Points
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: searchString
+          in: query
+          type: string
+          description: Filters entries by the specified substring (search by chassis
+        - name: orderBy
+          in: query
+          type: string
+          description: Comma-separated list of fields to order results prefixed by '+'
+        - name: perPage
+          in: query
+          type: integer
+          description: 'Indicates a page size (number of items). The values supported:'
+        - name: page
+          in: query
+          type: integer
+          description: Indicates the page number to retrieve. Only positive number values
+      - name: createwirelesspoint
+        method: POST
+        description: Create Wireless Point
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-wireless-points-bul
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/wireless-points-bulk-create
+      operations:
+      - name: createmultiplewirelesspoints
+        method: POST
+        description: Create Multiple Wireless Points
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-wireless-points-bul
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/wireless-points-bulk-update
+      operations:
+      - name: updatemultiplewirelesspoints
+        method: POST
+        description: Update Multiple Wireless Points
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-wireless-points-bul
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/wireless-points-bulk-validate
+      operations:
+      - name: validatemultiplewirelesspoints
+        method: POST
+        description: Validate Multiple Wireless Points
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-address-auto-update-wireless-points-poi
+      path: /restapi/v1.0/account/{accountId}/emergency-address-auto-update/wireless-points/{pointId}
+      operations:
+      - name: readwirelesspoint
+        method: GET
+        description: Get Wireless Point
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: pointId
+          in: path
+          type: string
+          description: Internal identifier of a point
+          required: true
+      - name: updatewirelesspoint
+        method: PUT
+        description: Update Wireless Point
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: pointId
+          in: path
+          type: string
+          description: Internal identifier of a wireless point
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deletewirelesspoint
+        method: DELETE
+        description: Delete Wireless Point
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: pointId
+          in: path
+          type: array
+          description: Internal identifier of a wireless point
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-locations
+      path: /restapi/v1.0/account/{accountId}/emergency-locations
+      operations:
+      - name: listemergencylocations
+        method: GET
+        description: List Emergency Locations
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: searchString
+          in: query
+          type: string
+          description: Filters entries containing the specified substring in 'address'
+        - name: addressStatus
+          in: query
+          type: string
+        - name: usageStatus
+          in: query
+          type: string
+        - name: domesticCountryId
+          in: query
+          type: string
+        - name: orderBy
+          in: query
+          type: string
+          description: Comma-separated list of fields to order results, prefixed by
+        - name: perPage
+          in: query
+          type: integer
+          description: Indicates a page size (number of items). The values
+        - name: page
+          in: query
+          type: integer
+          description: Indicates the page number to retrieve. Only positive number values
+      - name: createemergencylocation
+        method: POST
+        description: Add Emergency Location
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-emergency-locations-locationId
+      path: /restapi/v1.0/account/{accountId}/emergency-locations/{locationId}
+      operations:
+      - name: reademergencylocation
+        method: GET
+        description: Get Emergency Location
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: syncEmergencyAddress
+          in: query
+          type: boolean
+      - name: updateemergencylocation
+        method: PUT
+        description: Update Emergency Location
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deleteemergencylocation
+        method: DELETE
+        description: Delete Emergency Location
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: validateOnly
+          in: query
+          type: boolean
+          description: Flag indicating that validation of emergency location(s) is required
+        - name: newLocationId
+          in: query
+          type: string
+          description: Internal identifier of an emergency response location
+    - name: restapi-v1.0-account-accountId-extension-extensionId-emergency-locations
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/emergency-locations
+      operations:
+      - name: getextensionemergencylocations
+        method: GET
+        description: List User Emergency Locations
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: searchString
+          in: query
+          type: string
+          description: Filters entries by the specified substring (search by chassis
+        - name: domesticCountryId
+          in: query
+          type: string
+        - name: orderBy
+          in: query
+          type: string
+          description: Comma-separated list of fields to order results prefixed by '+'
+        - name: perPage
+          in: query
+          type: integer
+          description: 'Indicates a page size (number of items). The values supported:'
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive
+        - name: visibility
+          in: query
+          type: string
+      - name: createextensionemergencylocation
+        method: POST
+        description: Create User Emergency Location
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-extensionId-emergency-locations-locatio
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/emergency-locations/{locationId}
+      operations:
+      - name: updateextensionemergencylocation
+        method: PUT
+        description: Update User Emergency Location
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deleteextensionemergencylocation
+        method: DELETE
+        description: Delete User Emergency Location
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: validateOnly
+          in: query
+          type: boolean
+          description: Flag indicating that only validation of Emergency Response Locations
+      - name: getextensionemergencylocation
+        method: GET
+        description: Get User Emergency Location
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-automatic-location-updates-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Automatic Location Updates. One Spectral-compliant resource per consumed
+      operation, prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/devices
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-devices
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-devices.
+      operations:
+      - method: GET
+        name: listdevicesautomaticlocationupdates
+        description: List Devices
+        call: platform-automatic-location-updates.listdevicesautomaticlocationupdates
+        with:
+          featureEnabled: rest.featureEnabled
+          modelId: rest.modelId
+          compatibleOnly: rest.compatibleOnly
+          searchString: rest.searchString
+          orderBy: rest.orderBy
+          perPage: rest.perPage
+          page: rest.page
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/devices/bulk-assign
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-devices-bulk-assign
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-devices-bulk-assign.
+      operations:
+      - method: POST
+        name: assignmultipledevicesautomaticlocationupdates
+        description: Enable Automatic Location Updates Feature
+        call: platform-automatic-location-updates.assignmultipledevicesautomaticlocationupdates
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/networks
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-networks
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-networks.
+      operations:
+      - method: GET
+        name: listnetworks
+        description: Get Network Map
+        call: platform-automatic-location-updates.listnetworks
+        with:
+          searchString: rest.searchString
+          orderBy: rest.orderBy
+          perPage: rest.perPage
+          page: rest.page
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createnetwork
+        description: Create Network
+        call: platform-automatic-location-updates.createnetwork
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/networks/{networkid}
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-networks-networkid
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-networks-networkId.
+      operations:
+      - method: GET
+        name: readnetwork
+        description: Get Network
+        call: platform-automatic-location-updates.readnetwork
+        with:
+          networkId: rest.networkId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updatenetwork
+        description: Update Network
+        call: platform-automatic-location-updates.updatenetwork
+        with:
+          networkId: rest.networkId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletenetwork
+        description: Delete Network
+        call: platform-automatic-location-updates.deletenetwork
+        with:
+          networkId: rest.networkId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/switches
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-switches
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-switches.
+      operations:
+      - method: GET
+        name: listaccountswitches
+        description: List Account Switches
+        call: platform-automatic-location-updates.listaccountswitches
+        with:
+          searchString: rest.searchString
+          orderBy: rest.orderBy
+          perPage: rest.perPage
+          page: rest.page
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createswitch
+        description: Create Switch
+        call: platform-automatic-location-updates.createswitch
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/switches-bulk-create
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-switches-bulk-creat
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-switches-bulk-creat.
+      operations:
+      - method: POST
+        name: createmultipleswitches
+        description: Create Multiple Switches
+        call: platform-automatic-location-updates.createmultipleswitches
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/switches-bulk-update
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-switches-bulk-updat
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-switches-bulk-updat.
+      operations:
+      - method: POST
+        name: updatemultipleswitches
+        description: Update Multiple Switches
+        call: platform-automatic-location-updates.updatemultipleswitches
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/switches-bulk-validate
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-switches-bulk-valid
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-switches-bulk-valid.
+      operations:
+      - method: POST
+        name: validatemultipleswitches
+        description: Validate Multiple Switches
+        call: platform-automatic-location-updates.validatemultipleswitches
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/switches/{switchid}
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-switches-switchid
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-switches-switchId.
+      operations:
+      - method: GET
+        name: readswitch
+        description: Get Switch
+        call: platform-automatic-location-updates.readswitch
+        with:
+          switchId: rest.switchId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updateswitch
+        description: Update Switch
+        call: platform-automatic-location-updates.updateswitch
+        with:
+          switchId: rest.switchId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteswitch
+        description: Delete Switch
+        call: platform-automatic-location-updates.deleteswitch
+        with:
+          switchId: rest.switchId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/tasks/{taskid}
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-tasks-taskid
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-tasks-taskId.
+      operations:
+      - method: GET
+        name: readautomaticlocationupdatestask
+        description: Get Emergency Map Configuration Task
+        call: platform-automatic-location-updates.readautomaticlocationupdatestask
+        with:
+          taskId: rest.taskId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/users
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-users
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-users.
+      operations:
+      - method: GET
+        name: listautomaticlocationupdatesusers
+        description: List Users
+        call: platform-automatic-location-updates.listautomaticlocationupdatesusers
+        with:
+          type: rest.type
+          searchString: rest.searchString
+          department: rest.department
+          featureEnabled: rest.featureEnabled
+          orderBy: rest.orderBy
+          perPage: rest.perPage
+          page: rest.page
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/users/bulk-assign
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-users-bulk-assign
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-users-bulk-assign.
+      operations:
+      - method: POST
+        name: assignmultipleautomaticlocationupdatesusers
+        description: Enable Automatic Location Updates for Users
+        call: platform-automatic-location-updates.assignmultipleautomaticlocationupdatesusers
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/wireless-points
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-wireless-points
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-wireless-points.
+      operations:
+      - method: GET
+        name: listwirelesspoints
+        description: List Wireless Points
+        call: platform-automatic-location-updates.listwirelesspoints
+        with:
+          searchString: rest.searchString
+          orderBy: rest.orderBy
+          perPage: rest.perPage
+          page: rest.page
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createwirelesspoint
+        description: Create Wireless Point
+        call: platform-automatic-location-updates.createwirelesspoint
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/wireless-points-bulk-create
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-wireless-points-bul
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-wireless-points-bul.
+      operations:
+      - method: POST
+        name: createmultiplewirelesspoints
+        description: Create Multiple Wireless Points
+        call: platform-automatic-location-updates.createmultiplewirelesspoints
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/wireless-points-bulk-update
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-wireless-points-bul
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-wireless-points-bul.
+      operations:
+      - method: POST
+        name: updatemultiplewirelesspoints
+        description: Update Multiple Wireless Points
+        call: platform-automatic-location-updates.updatemultiplewirelesspoints
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/wireless-points-bulk-validate
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-wireless-points-bul
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-wireless-points-bul.
+      operations:
+      - method: POST
+        name: validatemultiplewirelesspoints
+        description: Validate Multiple Wireless Points
+        call: platform-automatic-location-updates.validatemultiplewirelesspoints
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-address-auto-update/wireless-points/{pointid}
+      name: restapi-v1-0-account-accountid-emergency-address-auto-update-wireless-points-poi
+      description: REST surface for restapi-v1.0-account-accountId-emergency-address-auto-update-wireless-points-poi.
+      operations:
+      - method: GET
+        name: readwirelesspoint
+        description: Get Wireless Point
+        call: platform-automatic-location-updates.readwirelesspoint
+        with:
+          pointId: rest.pointId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updatewirelesspoint
+        description: Update Wireless Point
+        call: platform-automatic-location-updates.updatewirelesspoint
+        with:
+          pointId: rest.pointId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletewirelesspoint
+        description: Delete Wireless Point
+        call: platform-automatic-location-updates.deletewirelesspoint
+        with:
+          pointId: rest.pointId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-locations
+      name: restapi-v1-0-account-accountid-emergency-locations
+      description: REST surface for restapi-v1.0-account-accountId-emergency-locations.
+      operations:
+      - method: GET
+        name: listemergencylocations
+        description: List Emergency Locations
+        call: platform-automatic-location-updates.listemergencylocations
+        with:
+          searchString: rest.searchString
+          addressStatus: rest.addressStatus
+          usageStatus: rest.usageStatus
+          domesticCountryId: rest.domesticCountryId
+          orderBy: rest.orderBy
+          perPage: rest.perPage
+          page: rest.page
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createemergencylocation
+        description: Add Emergency Location
+        call: platform-automatic-location-updates.createemergencylocation
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/emergency-locations/{locationid}
+      name: restapi-v1-0-account-accountid-emergency-locations-locationid
+      description: REST surface for restapi-v1.0-account-accountId-emergency-locations-locationId.
+      operations:
+      - method: GET
+        name: reademergencylocation
+        description: Get Emergency Location
+        call: platform-automatic-location-updates.reademergencylocation
+        with:
+          syncEmergencyAddress: rest.syncEmergencyAddress
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updateemergencylocation
+        description: Update Emergency Location
+        call: platform-automatic-location-updates.updateemergencylocation
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteemergencylocation
+        description: Delete Emergency Location
+        call: platform-automatic-location-updates.deleteemergencylocation
+        with:
+          validateOnly: rest.validateOnly
+          newLocationId: rest.newLocationId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/emergency-locations
+      name: restapi-v1-0-account-accountid-extension-extensionid-emergency-locations
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-emergency-locations.
+      operations:
+      - method: GET
+        name: getextensionemergencylocations
+        description: List User Emergency Locations
+        call: platform-automatic-location-updates.getextensionemergencylocations
+        with:
+          searchString: rest.searchString
+          domesticCountryId: rest.domesticCountryId
+          orderBy: rest.orderBy
+          perPage: rest.perPage
+          page: rest.page
+          visibility: rest.visibility
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createextensionemergencylocation
+        description: Create User Emergency Location
+        call: platform-automatic-location-updates.createextensionemergencylocation
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/emergency-locations/{locationid}
+      name: restapi-v1-0-account-accountid-extension-extensionid-emergency-locations-locatio
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-emergency-locations-locatio.
+      operations:
+      - method: PUT
+        name: updateextensionemergencylocation
+        description: Update User Emergency Location
+        call: platform-automatic-location-updates.updateextensionemergencylocation
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteextensionemergencylocation
+        description: Delete User Emergency Location
+        call: platform-automatic-location-updates.deleteextensionemergencylocation
+        with:
+          validateOnly: rest.validateOnly
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: GET
+        name: getextensionemergencylocation
+        description: Get User Emergency Location
+        call: platform-automatic-location-updates.getextensionemergencylocation
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-automatic-location-updates-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Automatic Location Updates. One tool per consumed operation, routed inline
+      through this capability's consumes block.
+    tools:
+    - name: list-devices
+      description: List Devices
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.listdevicesautomaticlocationupdates
+      with:
+        featureEnabled: tools.featureEnabled
+        modelId: tools.modelId
+        compatibleOnly: tools.compatibleOnly
+        searchString: tools.searchString
+        orderBy: tools.orderBy
+        perPage: tools.perPage
+        page: tools.page
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: enable-automatic-location-updates-feature
+      description: Enable Automatic Location Updates Feature
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.assignmultipledevicesautomaticlocationupdates
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-network-map
+      description: Get Network Map
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.listnetworks
+      with:
+        searchString: tools.searchString
+        orderBy: tools.orderBy
+        perPage: tools.perPage
+        page: tools.page
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-network
+      description: Create Network
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.createnetwork
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-network
+      description: Get Network
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.readnetwork
+      with:
+        networkId: tools.networkId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-network
+      description: Update Network
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.updatenetwork
+      with:
+        networkId: tools.networkId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-network
+      description: Delete Network
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-automatic-location-updates.deletenetwork
+      with:
+        networkId: tools.networkId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-account-switches
+      description: List Account Switches
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.listaccountswitches
+      with:
+        searchString: tools.searchString
+        orderBy: tools.orderBy
+        perPage: tools.perPage
+        page: tools.page
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-switch
+      description: Create Switch
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.createswitch
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-multiple-switches
+      description: Create Multiple Switches
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.createmultipleswitches
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-multiple-switches
+      description: Update Multiple Switches
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.updatemultipleswitches
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: validate-multiple-switches
+      description: Validate Multiple Switches
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.validatemultipleswitches
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-switch
+      description: Get Switch
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.readswitch
+      with:
+        switchId: tools.switchId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-switch
+      description: Update Switch
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.updateswitch
+      with:
+        switchId: tools.switchId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-switch
+      description: Delete Switch
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-automatic-location-updates.deleteswitch
+      with:
+        switchId: tools.switchId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-emergency-map-configuration-task
+      description: Get Emergency Map Configuration Task
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.readautomaticlocationupdatestask
+      with:
+        taskId: tools.taskId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-users
+      description: List Users
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.listautomaticlocationupdatesusers
+      with:
+        type: tools.type
+        searchString: tools.searchString
+        department: tools.department
+        featureEnabled: tools.featureEnabled
+        orderBy: tools.orderBy
+        perPage: tools.perPage
+        page: tools.page
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: enable-automatic-location-updates-users
+      description: Enable Automatic Location Updates for Users
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.assignmultipleautomaticlocationupdatesusers
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-wireless-points
+      description: List Wireless Points
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.listwirelesspoints
+      with:
+        searchString: tools.searchString
+        orderBy: tools.orderBy
+        perPage: tools.perPage
+        page: tools.page
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-wireless-point
+      description: Create Wireless Point
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.createwirelesspoint
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-multiple-wireless-points
+      description: Create Multiple Wireless Points
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.createmultiplewirelesspoints
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-multiple-wireless-points
+      description: Update Multiple Wireless Points
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.updatemultiplewirelesspoints
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: validate-multiple-wireless-points
+      description: Validate Multiple Wireless Points
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.validatemultiplewirelesspoints
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-wireless-point
+      description: Get Wireless Point
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.readwirelesspoint
+      with:
+        pointId: tools.pointId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-wireless-point
+      description: Update Wireless Point
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.updatewirelesspoint
+      with:
+        pointId: tools.pointId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-wireless-point
+      description: Delete Wireless Point
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-automatic-location-updates.deletewirelesspoint
+      with:
+        pointId: tools.pointId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-emergency-locations
+      description: List Emergency Locations
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.listemergencylocations
+      with:
+        searchString: tools.searchString
+        addressStatus: tools.addressStatus
+        usageStatus: tools.usageStatus
+        domesticCountryId: tools.domesticCountryId
+        orderBy: tools.orderBy
+        perPage: tools.perPage
+        page: tools.page
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: add-emergency-location
+      description: Add Emergency Location
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.createemergencylocation
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-emergency-location
+      description: Get Emergency Location
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.reademergencylocation
+      with:
+        syncEmergencyAddress: tools.syncEmergencyAddress
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-emergency-location
+      description: Update Emergency Location
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.updateemergencylocation
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-emergency-location
+      description: Delete Emergency Location
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-automatic-location-updates.deleteemergencylocation
+      with:
+        validateOnly: tools.validateOnly
+        newLocationId: tools.newLocationId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-user-emergency-locations
+      description: List User Emergency Locations
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.getextensionemergencylocations
+      with:
+        searchString: tools.searchString
+        domesticCountryId: tools.domesticCountryId
+        orderBy: tools.orderBy
+        perPage: tools.perPage
+        page: tools.page
+        visibility: tools.visibility
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-user-emergency-location
+      description: Create User Emergency Location
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-automatic-location-updates.createextensionemergencylocation
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-user-emergency-location
+      description: Update User Emergency Location
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.updateextensionemergencylocation
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-user-emergency-location
+      description: Delete User Emergency Location
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-automatic-location-updates.deleteextensionemergencylocation
+      with:
+        validateOnly: tools.validateOnly
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-user-emergency-location
+      description: Get User Emergency Location
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-automatic-location-updates.getextensionemergencylocation
+      outputParameters:
+      - type: object
+        mapping: $.

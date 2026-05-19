@@ -1,0 +1,172 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Business Hours
+  description: 'RingCentral API — Business Hours. 4 operations. Lead operation: Get Company Business Hours. Self-contained
+    Naftiko capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Business Hours
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-business-hours
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Business Hours business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-business-hours
+      path: /restapi/v1.0/account/{accountId}/business-hours
+      operations:
+      - name: readcompanybusinesshours
+        method: GET
+        description: Get Company Business Hours
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updatecompanybusinesshours
+        method: PUT
+        description: Update Company Business Hours
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-extensionId-business-hours
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/business-hours
+      operations:
+      - name: readuserbusinesshours
+        method: GET
+        description: Get User Business Hours
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updateuserbusinesshours
+        method: PUT
+        description: Update User Business Hours
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-business-hours-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Business Hours. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/business-hours
+      name: restapi-v1-0-account-accountid-business-hours
+      description: REST surface for restapi-v1.0-account-accountId-business-hours.
+      operations:
+      - method: GET
+        name: readcompanybusinesshours
+        description: Get Company Business Hours
+        call: platform-business-hours.readcompanybusinesshours
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updatecompanybusinesshours
+        description: Update Company Business Hours
+        call: platform-business-hours.updatecompanybusinesshours
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/business-hours
+      name: restapi-v1-0-account-accountid-extension-extensionid-business-hours
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-business-hours.
+      operations:
+      - method: GET
+        name: readuserbusinesshours
+        description: Get User Business Hours
+        call: platform-business-hours.readuserbusinesshours
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updateuserbusinesshours
+        description: Update User Business Hours
+        call: platform-business-hours.updateuserbusinesshours
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-business-hours-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Business Hours. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: get-company-business-hours
+      description: Get Company Business Hours
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-business-hours.readcompanybusinesshours
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-company-business-hours
+      description: Update Company Business Hours
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-business-hours.updatecompanybusinesshours
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-user-business-hours
+      description: Get User Business Hours
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-business-hours.readuserbusinesshours
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-user-business-hours
+      description: Update User Business Hours
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-business-hours.updateuserbusinesshours
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

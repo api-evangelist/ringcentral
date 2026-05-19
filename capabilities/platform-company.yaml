@@ -1,0 +1,377 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Company
+  description: 'RingCentral API — Company. 9 operations. Lead operation: Get Account Info. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Company
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-company
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Company business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId
+      path: /restapi/v1.0/account/{accountId}
+      operations:
+      - name: readaccountinfo
+        method: GET
+        description: Get Account Info
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-business-address
+      path: /restapi/v1.0/account/{accountId}/business-address
+      operations:
+      - name: readaccountbusinessaddress
+        method: GET
+        description: Get Account Business Address
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updateaccountbusinessaddress
+        method: PUT
+        description: Update Company Business Address
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-service-info
+      path: /restapi/v1.0/account/{accountId}/service-info
+      operations:
+      - name: readaccountserviceinfo
+        method: GET
+        description: Get Account Service Info
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-dictionary-brand-brandId-contracted-country
+      path: /restapi/v1.0/dictionary/brand/{brandId}/contracted-country
+      operations:
+      - name: listcontractedcountries
+        method: GET
+        description: List Contracted Countries
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: brandId
+          in: path
+          type: string
+          required: true
+    - name: restapi-v1.0-dictionary-brand-brandId-contracted-country-contractedCountryId
+      path: /restapi/v1.0/dictionary/brand/{brandId}/contracted-country/{contractedCountryId}
+      operations:
+      - name: listdomesticcountries
+        method: GET
+        description: List Domestic Countries
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: brandId
+          in: path
+          type: string
+          description: Internal identifier of a brand
+          required: true
+        - name: contractedCountryId
+          in: path
+          type: string
+          description: Internal identifier of a country
+          required: true
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive number values
+        - name: perPage
+          in: query
+          type: integer
+          description: Indicates a page size (number of items)
+    - name: restapi-v2-accounts-accountId
+      path: /restapi/v2/accounts/{accountId}
+      operations:
+      - name: getaccountinfov2
+        method: GET
+        description: Get Account Info
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v2-accounts-accountId-send-activation-email
+      path: /restapi/v2/accounts/{accountId}/send-activation-email
+      operations:
+      - name: sendactivationemailv2
+        method: POST
+        description: Send/Resend Activation Email
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v2-accounts-accountId-send-welcome-email
+      path: /restapi/v2/accounts/{accountId}/send-welcome-email
+      operations:
+      - name: sendwelcomeemailv2
+        method: POST
+        description: Send/Resend Welcome Email
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-company-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Company. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}
+      name: restapi-v1-0-account-accountid
+      description: REST surface for restapi-v1.0-account-accountId.
+      operations:
+      - method: GET
+        name: readaccountinfo
+        description: Get Account Info
+        call: platform-company.readaccountinfo
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/business-address
+      name: restapi-v1-0-account-accountid-business-address
+      description: REST surface for restapi-v1.0-account-accountId-business-address.
+      operations:
+      - method: GET
+        name: readaccountbusinessaddress
+        description: Get Account Business Address
+        call: platform-company.readaccountbusinessaddress
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updateaccountbusinessaddress
+        description: Update Company Business Address
+        call: platform-company.updateaccountbusinessaddress
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/service-info
+      name: restapi-v1-0-account-accountid-service-info
+      description: REST surface for restapi-v1.0-account-accountId-service-info.
+      operations:
+      - method: GET
+        name: readaccountserviceinfo
+        description: Get Account Service Info
+        call: platform-company.readaccountserviceinfo
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/brand/{brandid}/contracted-country
+      name: restapi-v1-0-dictionary-brand-brandid-contracted-country
+      description: REST surface for restapi-v1.0-dictionary-brand-brandId-contracted-country.
+      operations:
+      - method: GET
+        name: listcontractedcountries
+        description: List Contracted Countries
+        call: platform-company.listcontractedcountries
+        with:
+          brandId: rest.brandId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/brand/{brandid}/contracted-country/{contractedcountryid}
+      name: restapi-v1-0-dictionary-brand-brandid-contracted-country-contractedcountryid
+      description: REST surface for restapi-v1.0-dictionary-brand-brandId-contracted-country-contractedCountryId.
+      operations:
+      - method: GET
+        name: listdomesticcountries
+        description: List Domestic Countries
+        call: platform-company.listdomesticcountries
+        with:
+          brandId: rest.brandId
+          contractedCountryId: rest.contractedCountryId
+          page: rest.page
+          perPage: rest.perPage
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v2/accounts/{accountid}
+      name: restapi-v2-accounts-accountid
+      description: REST surface for restapi-v2-accounts-accountId.
+      operations:
+      - method: GET
+        name: getaccountinfov2
+        description: Get Account Info
+        call: platform-company.getaccountinfov2
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v2/accounts/{accountid}/send-activation-email
+      name: restapi-v2-accounts-accountid-send-activation-email
+      description: REST surface for restapi-v2-accounts-accountId-send-activation-email.
+      operations:
+      - method: POST
+        name: sendactivationemailv2
+        description: Send/Resend Activation Email
+        call: platform-company.sendactivationemailv2
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v2/accounts/{accountid}/send-welcome-email
+      name: restapi-v2-accounts-accountid-send-welcome-email
+      description: REST surface for restapi-v2-accounts-accountId-send-welcome-email.
+      operations:
+      - method: POST
+        name: sendwelcomeemailv2
+        description: Send/Resend Welcome Email
+        call: platform-company.sendwelcomeemailv2
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-company-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Company. One tool per consumed operation, routed inline through this capability's
+      consumes block.
+    tools:
+    - name: get-account-info
+      description: Get Account Info
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-company.readaccountinfo
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-account-business-address
+      description: Get Account Business Address
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-company.readaccountbusinessaddress
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-company-business-address
+      description: Update Company Business Address
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-company.updateaccountbusinessaddress
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-account-service-info
+      description: Get Account Service Info
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-company.readaccountserviceinfo
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-contracted-countries
+      description: List Contracted Countries
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-company.listcontractedcountries
+      with:
+        brandId: tools.brandId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-domestic-countries
+      description: List Domestic Countries
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-company.listdomesticcountries
+      with:
+        brandId: tools.brandId
+        contractedCountryId: tools.contractedCountryId
+        page: tools.page
+        perPage: tools.perPage
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-account-info-2
+      description: Get Account Info
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-company.getaccountinfov2
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: send-resend-activation-email
+      description: Send/Resend Activation Email
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-company.sendactivationemailv2
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: send-resend-welcome-email
+      description: Send/Resend Welcome Email
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-company.sendwelcomeemailv2
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

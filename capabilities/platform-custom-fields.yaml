@@ -1,0 +1,172 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Custom Fields
+  description: 'RingCentral API — Custom Fields. 4 operations. Lead operation: Get Custom Field List. Self-contained Naftiko
+    capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Custom Fields
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-custom-fields
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Custom Fields business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-custom-fields
+      path: /restapi/v1.0/account/{accountId}/custom-fields
+      operations:
+      - name: listcustomfields
+        method: GET
+        description: Get Custom Field List
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: createcustomfield
+        method: POST
+        description: Create Custom Field
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-custom-fields-fieldId
+      path: /restapi/v1.0/account/{accountId}/custom-fields/{fieldId}
+      operations:
+      - name: updatecustomfield
+        method: PUT
+        description: Update Custom Field
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deletecustomfield
+        method: DELETE
+        description: Delete Custom Field
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-custom-fields-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Custom Fields. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/custom-fields
+      name: restapi-v1-0-account-accountid-custom-fields
+      description: REST surface for restapi-v1.0-account-accountId-custom-fields.
+      operations:
+      - method: GET
+        name: listcustomfields
+        description: Get Custom Field List
+        call: platform-custom-fields.listcustomfields
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createcustomfield
+        description: Create Custom Field
+        call: platform-custom-fields.createcustomfield
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/custom-fields/{fieldid}
+      name: restapi-v1-0-account-accountid-custom-fields-fieldid
+      description: REST surface for restapi-v1.0-account-accountId-custom-fields-fieldId.
+      operations:
+      - method: PUT
+        name: updatecustomfield
+        description: Update Custom Field
+        call: platform-custom-fields.updatecustomfield
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletecustomfield
+        description: Delete Custom Field
+        call: platform-custom-fields.deletecustomfield
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-custom-fields-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Custom Fields. One tool per consumed operation, routed inline through this
+      capability's consumes block.
+    tools:
+    - name: get-custom-field-list
+      description: Get Custom Field List
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-custom-fields.listcustomfields
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-custom-field
+      description: Create Custom Field
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-custom-fields.createcustomfield
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-custom-field
+      description: Update Custom Field
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-custom-fields.updatecustomfield
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-custom-field
+      description: Delete Custom Field
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-custom-fields.deletecustomfield
+      outputParameters:
+      - type: object
+        mapping: $.

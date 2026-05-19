@@ -1,0 +1,708 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — RCM Meetings (Legacy)
+  description: 'RingCentral API — RCM Meetings (Legacy). 18 operations. Lead operation: List Scheduled Meetings. Self-contained
+    Naftiko capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - RCM Meetings (Legacy)
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-rcm-meetings-legacy
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — RCM Meetings (Legacy) business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-extension-extensionId-meeting
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting
+      operations:
+      - name: listmeetings
+        method: GET
+        description: List Scheduled Meetings
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: createmeeting
+        method: POST
+        description: Create Meeting
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-extensionId-meeting-configuration-profi
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting-configuration/profile-image
+      operations:
+      - name: createusermeetingprofileimage
+        method: POST
+        description: Upload User Meeting Profile Image
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-extensionId-meeting-recordings
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting-recordings
+      operations:
+      - name: listusermeetingrecordings
+        method: GET
+        description: List User Meeting Recordings
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: meetingId
+          in: query
+          type: string
+          description: Internal identifier of a meeting. Either `meetingId` or `meetingStartTime`/`meetingEndTime` can be
+            specified
+        - name: meetingStartTimeFrom
+          in: query
+          type: string
+          description: Recordings of meetings started after the time specified will be returned. Either `meetingId` or `meetingStartTime`/`meetingEndTime`
+            can be specified
+        - name: meetingStartTimeTo
+          in: query
+          type: string
+          description: Recordings of meetings started before the time specified will be returned. The default value is current
+            time. Either `meetingId` or `meetingStartTime`/`meetingE
+        - name: page
+          in: query
+          type: integer
+          description: Page number
+        - name: perPage
+          in: query
+          type: integer
+          description: Number of items per page. The `max` value is supported to indicate the maximum size - 300
+    - name: restapi-v1.0-account-accountId-extension-extensionId-meeting-service-info
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting/service-info
+      operations:
+      - name: readmeetingserviceinfo
+        method: GET
+        description: Get Meeting Service Info
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updatemeetingserviceinfo
+        method: PATCH
+        description: Update Meeting Service Info
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-extensionId-meeting-user-settings
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting/user-settings
+      operations:
+      - name: getusersetting
+        method: GET
+        description: Get Meeting User Settings
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-extension-extensionId-meeting-meetingId
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting/{meetingId}
+      operations:
+      - name: readmeeting
+        method: GET
+        description: Get Meeting Info
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updatemeeting
+        method: PUT
+        description: Update Meeting
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deletemeeting
+        method: DELETE
+        description: Delete Meeting
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: occurrenceId
+          in: query
+          type: string
+          description: Internal identifier of a recurrent meeting occurrence
+      - name: patchmeeting
+        method: PATCH
+        description: Update Meeting
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-extensionId-meeting-meetingId-end
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting/{meetingId}/end
+      operations:
+      - name: endmeeting
+        method: POST
+        description: End Meeting
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-extension-extensionId-meeting-meetingId-invitatio
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting/{meetingId}/invitation
+      operations:
+      - name: readmeetinginvitation
+        method: GET
+        description: Get Meeting Invitation
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-extension-extensionId-meetings-configuration-assi
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/meetings-configuration/assistants
+      operations:
+      - name: readassistants
+        method: GET
+        description: Get Assistants
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-extension-extensionId-meetings-configuration-assi
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/meetings-configuration/assisted
+      operations:
+      - name: readassistedusers
+        method: GET
+        description: Get Assisted Users
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-meeting-recordings
+      path: /restapi/v1.0/account/{accountId}/meeting-recordings
+      operations:
+      - name: listaccountmeetingrecordings
+        method: GET
+        description: List Account Meeting Recordings
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: meetingId
+          in: query
+          type: string
+          description: Internal identifier of a meeting. Either `meetingId` or `meetingStartTime`/`meetingEndTime` can be
+            specified
+        - name: meetingStartTimeFrom
+          in: query
+          type: string
+          description: Recordings of meetings started after the time specified will
+        - name: meetingStartTimeTo
+          in: query
+          type: string
+          description: Recordings of meetings started before the time specified will
+        - name: page
+          in: query
+          type: integer
+          description: Page number
+        - name: perPage
+          in: query
+          type: integer
+          description: Number of items per page. The `max` value is supported to indicate the maximum size - 300
+    - name: restapi-v1.0-account-accountId-meeting-locked-settings
+      path: /restapi/v1.0/account/{accountId}/meeting/locked-settings
+      operations:
+      - name: getaccountlockedsetting
+        method: GET
+        description: Get Locked Meeting Settings
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-meeting-meetingId
+      path: /restapi/v1.0/account/{accountId}/meeting/{meetingId}
+      operations:
+      - name: readaccountmeeting
+        method: GET
+        description: Get Account-level Meeting Info
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-rcm-meetings-legacy-rest
+    port: 8080
+    description: REST adapter for RingCentral API — RCM Meetings (Legacy). One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/meeting
+      name: restapi-v1-0-account-accountid-extension-extensionid-meeting
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-meeting.
+      operations:
+      - method: GET
+        name: listmeetings
+        description: List Scheduled Meetings
+        call: platform-rcm-meetings-legacy.listmeetings
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createmeeting
+        description: Create Meeting
+        call: platform-rcm-meetings-legacy.createmeeting
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/meeting-configuration/profile-image
+      name: restapi-v1-0-account-accountid-extension-extensionid-meeting-configuration-profi
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-meeting-configuration-profi.
+      operations:
+      - method: POST
+        name: createusermeetingprofileimage
+        description: Upload User Meeting Profile Image
+        call: platform-rcm-meetings-legacy.createusermeetingprofileimage
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/meeting-recordings
+      name: restapi-v1-0-account-accountid-extension-extensionid-meeting-recordings
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-meeting-recordings.
+      operations:
+      - method: GET
+        name: listusermeetingrecordings
+        description: List User Meeting Recordings
+        call: platform-rcm-meetings-legacy.listusermeetingrecordings
+        with:
+          meetingId: rest.meetingId
+          meetingStartTimeFrom: rest.meetingStartTimeFrom
+          meetingStartTimeTo: rest.meetingStartTimeTo
+          page: rest.page
+          perPage: rest.perPage
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/meeting/service-info
+      name: restapi-v1-0-account-accountid-extension-extensionid-meeting-service-info
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-meeting-service-info.
+      operations:
+      - method: GET
+        name: readmeetingserviceinfo
+        description: Get Meeting Service Info
+        call: platform-rcm-meetings-legacy.readmeetingserviceinfo
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: updatemeetingserviceinfo
+        description: Update Meeting Service Info
+        call: platform-rcm-meetings-legacy.updatemeetingserviceinfo
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/meeting/user-settings
+      name: restapi-v1-0-account-accountid-extension-extensionid-meeting-user-settings
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-meeting-user-settings.
+      operations:
+      - method: GET
+        name: getusersetting
+        description: Get Meeting User Settings
+        call: platform-rcm-meetings-legacy.getusersetting
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/meeting/{meetingid}
+      name: restapi-v1-0-account-accountid-extension-extensionid-meeting-meetingid
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-meeting-meetingId.
+      operations:
+      - method: GET
+        name: readmeeting
+        description: Get Meeting Info
+        call: platform-rcm-meetings-legacy.readmeeting
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updatemeeting
+        description: Update Meeting
+        call: platform-rcm-meetings-legacy.updatemeeting
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletemeeting
+        description: Delete Meeting
+        call: platform-rcm-meetings-legacy.deletemeeting
+        with:
+          occurrenceId: rest.occurrenceId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: patchmeeting
+        description: Update Meeting
+        call: platform-rcm-meetings-legacy.patchmeeting
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/meeting/{meetingid}/end
+      name: restapi-v1-0-account-accountid-extension-extensionid-meeting-meetingid-end
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-meeting-meetingId-end.
+      operations:
+      - method: POST
+        name: endmeeting
+        description: End Meeting
+        call: platform-rcm-meetings-legacy.endmeeting
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/meeting/{meetingid}/invitation
+      name: restapi-v1-0-account-accountid-extension-extensionid-meeting-meetingid-invitatio
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-meeting-meetingId-invitatio.
+      operations:
+      - method: GET
+        name: readmeetinginvitation
+        description: Get Meeting Invitation
+        call: platform-rcm-meetings-legacy.readmeetinginvitation
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/meetings-configuration/assistants
+      name: restapi-v1-0-account-accountid-extension-extensionid-meetings-configuration-assi
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-meetings-configuration-assi.
+      operations:
+      - method: GET
+        name: readassistants
+        description: Get Assistants
+        call: platform-rcm-meetings-legacy.readassistants
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/meetings-configuration/assisted
+      name: restapi-v1-0-account-accountid-extension-extensionid-meetings-configuration-assi
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-meetings-configuration-assi.
+      operations:
+      - method: GET
+        name: readassistedusers
+        description: Get Assisted Users
+        call: platform-rcm-meetings-legacy.readassistedusers
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/meeting-recordings
+      name: restapi-v1-0-account-accountid-meeting-recordings
+      description: REST surface for restapi-v1.0-account-accountId-meeting-recordings.
+      operations:
+      - method: GET
+        name: listaccountmeetingrecordings
+        description: List Account Meeting Recordings
+        call: platform-rcm-meetings-legacy.listaccountmeetingrecordings
+        with:
+          meetingId: rest.meetingId
+          meetingStartTimeFrom: rest.meetingStartTimeFrom
+          meetingStartTimeTo: rest.meetingStartTimeTo
+          page: rest.page
+          perPage: rest.perPage
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/meeting/locked-settings
+      name: restapi-v1-0-account-accountid-meeting-locked-settings
+      description: REST surface for restapi-v1.0-account-accountId-meeting-locked-settings.
+      operations:
+      - method: GET
+        name: getaccountlockedsetting
+        description: Get Locked Meeting Settings
+        call: platform-rcm-meetings-legacy.getaccountlockedsetting
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/meeting/{meetingid}
+      name: restapi-v1-0-account-accountid-meeting-meetingid
+      description: REST surface for restapi-v1.0-account-accountId-meeting-meetingId.
+      operations:
+      - method: GET
+        name: readaccountmeeting
+        description: Get Account-level Meeting Info
+        call: platform-rcm-meetings-legacy.readaccountmeeting
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-rcm-meetings-legacy-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — RCM Meetings (Legacy). One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: list-scheduled-meetings
+      description: List Scheduled Meetings
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.listmeetings
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-meeting
+      description: Create Meeting
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-rcm-meetings-legacy.createmeeting
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: upload-user-meeting-profile-image
+      description: Upload User Meeting Profile Image
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-rcm-meetings-legacy.createusermeetingprofileimage
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-user-meeting-recordings
+      description: List User Meeting Recordings
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.listusermeetingrecordings
+      with:
+        meetingId: tools.meetingId
+        meetingStartTimeFrom: tools.meetingStartTimeFrom
+        meetingStartTimeTo: tools.meetingStartTimeTo
+        page: tools.page
+        perPage: tools.perPage
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-meeting-service-info
+      description: Get Meeting Service Info
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.readmeetingserviceinfo
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-meeting-service-info
+      description: Update Meeting Service Info
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.updatemeetingserviceinfo
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-meeting-user-settings
+      description: Get Meeting User Settings
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.getusersetting
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-meeting-info
+      description: Get Meeting Info
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.readmeeting
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-meeting
+      description: Update Meeting
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.updatemeeting
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-meeting
+      description: Delete Meeting
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-rcm-meetings-legacy.deletemeeting
+      with:
+        occurrenceId: tools.occurrenceId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-meeting-2
+      description: Update Meeting
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.patchmeeting
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: end-meeting
+      description: End Meeting
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-rcm-meetings-legacy.endmeeting
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-meeting-invitation
+      description: Get Meeting Invitation
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.readmeetinginvitation
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-assistants
+      description: Get Assistants
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.readassistants
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-assisted-users
+      description: Get Assisted Users
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.readassistedusers
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-account-meeting-recordings
+      description: List Account Meeting Recordings
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.listaccountmeetingrecordings
+      with:
+        meetingId: tools.meetingId
+        meetingStartTimeFrom: tools.meetingStartTimeFrom
+        meetingStartTimeTo: tools.meetingStartTimeTo
+        page: tools.page
+        perPage: tools.perPage
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-locked-meeting-settings
+      description: Get Locked Meeting Settings
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.getaccountlockedsetting
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-account-level-meeting-info
+      description: Get Account-level Meeting Info
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-rcm-meetings-legacy.readaccountmeeting
+      outputParameters:
+      - type: object
+        mapping: $.

@@ -1,0 +1,206 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Adaptive Cards
+  description: 'RingCentral API — Adaptive Cards. 4 operations. Lead operation: Get Adaptive Card. Self-contained Naftiko
+    capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Adaptive Cards
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-adaptive-cards
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Adaptive Cards business capability. Self-contained, no shared references.
+    resources:
+    - name: team-messaging-v1-adaptive-cards-cardId
+      path: /team-messaging/v1/adaptive-cards/{cardId}
+      operations:
+      - name: getglipadaptivecardnew
+        method: GET
+        description: Get Adaptive Card
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: cardId
+          in: path
+          type: array
+          description: Internal identifier of an adaptive card, or comma separated list of adaptive cards IDs.
+          required: true
+      - name: updateglipadaptivecardnew
+        method: PUT
+        description: Update Adaptive Card
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: cardId
+          in: path
+          type: string
+          description: Internal identifier of an adaptive card
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deleteglipadaptivecardnew
+        method: DELETE
+        description: Delete Adaptive Card
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: cardId
+          in: path
+          type: string
+          description: Adaptive Card ID to be deleted.
+          required: true
+    - name: team-messaging-v1-chats-chatId-adaptive-cards
+      path: /team-messaging/v1/chats/{chatId}/adaptive-cards
+      operations:
+      - name: createglipadaptivecardnew
+        method: POST
+        description: Create Adaptive Card
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a chat
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-adaptive-cards-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Adaptive Cards. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/team-messaging/v1/adaptive-cards/{cardid}
+      name: team-messaging-v1-adaptive-cards-cardid
+      description: REST surface for team-messaging-v1-adaptive-cards-cardId.
+      operations:
+      - method: GET
+        name: getglipadaptivecardnew
+        description: Get Adaptive Card
+        call: platform-adaptive-cards.getglipadaptivecardnew
+        with:
+          cardId: rest.cardId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updateglipadaptivecardnew
+        description: Update Adaptive Card
+        call: platform-adaptive-cards.updateglipadaptivecardnew
+        with:
+          cardId: rest.cardId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteglipadaptivecardnew
+        description: Delete Adaptive Card
+        call: platform-adaptive-cards.deleteglipadaptivecardnew
+        with:
+          cardId: rest.cardId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/chats/{chatid}/adaptive-cards
+      name: team-messaging-v1-chats-chatid-adaptive-cards
+      description: REST surface for team-messaging-v1-chats-chatId-adaptive-cards.
+      operations:
+      - method: POST
+        name: createglipadaptivecardnew
+        description: Create Adaptive Card
+        call: platform-adaptive-cards.createglipadaptivecardnew
+        with:
+          chatId: rest.chatId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-adaptive-cards-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Adaptive Cards. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: get-adaptive-card
+      description: Get Adaptive Card
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-adaptive-cards.getglipadaptivecardnew
+      with:
+        cardId: tools.cardId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-adaptive-card
+      description: Update Adaptive Card
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-adaptive-cards.updateglipadaptivecardnew
+      with:
+        cardId: tools.cardId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-adaptive-card
+      description: Delete Adaptive Card
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-adaptive-cards.deleteglipadaptivecardnew
+      with:
+        cardId: tools.cardId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-adaptive-card
+      description: Create Adaptive Card
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-adaptive-cards.createglipadaptivecardnew
+      with:
+        chatId: tools.chatId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

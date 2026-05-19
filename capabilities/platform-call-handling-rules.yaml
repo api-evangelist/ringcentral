@@ -1,0 +1,452 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Call Handling Rules
+  description: 'RingCentral API — Call Handling Rules. 12 operations. Lead operation: List Company Call Handling Rules. Self-contained
+    Naftiko capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Call Handling Rules
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-call-handling-rules
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Call Handling Rules business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-answering-rule
+      path: /restapi/v1.0/account/{accountId}/answering-rule
+      operations:
+      - name: listcompanyansweringrules
+        method: GET
+        description: List Company Call Handling Rules
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: createcompanyansweringrule
+        method: POST
+        description: Create Company Call Handling Rule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-answering-rule-ruleId
+      path: /restapi/v1.0/account/{accountId}/answering-rule/{ruleId}
+      operations:
+      - name: readcompanyansweringrule
+        method: GET
+        description: Get Company Call Handling Rule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updatecompanyansweringrule
+        method: PUT
+        description: Update Company Call Handling Rule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deletecompanyansweringrule
+        method: DELETE
+        description: Delete Company Call Handling Rule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-extension-extensionId-answering-rule
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/answering-rule
+      operations:
+      - name: listansweringrules
+        method: GET
+        description: List Call Handling Rules
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: type
+          in: query
+          type: string
+          description: Filters custom call handling rules of the extension
+        - name: view
+          in: query
+          type: string
+        - name: enabledOnly
+          in: query
+          type: boolean
+          description: If true, then only active call handling rules are returned
+      - name: createansweringrule
+        method: POST
+        description: Create Call Handling Rule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-extensionId-answering-rule-ruleId
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/answering-rule/{ruleId}
+      operations:
+      - name: readansweringrule
+        method: GET
+        description: Get Call Handling Rule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: showInactiveNumbers
+          in: query
+          type: boolean
+          description: Indicates whether inactive numbers should be returned or not
+      - name: updateansweringrule
+        method: PUT
+        description: Update Call Handling Rule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deleteansweringrule
+        method: DELETE
+        description: Delete Call Handling Rule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-forward-all-calls
+      path: /restapi/v1.0/account/{accountId}/forward-all-calls
+      operations:
+      - name: getforwardallcompanycalls
+        method: GET
+        description: Get Forward All Company Calls
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updateforwardallcompanycalls
+        method: PATCH
+        description: Update Forward All Company Calls
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-call-handling-rules-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Call Handling Rules. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/answering-rule
+      name: restapi-v1-0-account-accountid-answering-rule
+      description: REST surface for restapi-v1.0-account-accountId-answering-rule.
+      operations:
+      - method: GET
+        name: listcompanyansweringrules
+        description: List Company Call Handling Rules
+        call: platform-call-handling-rules.listcompanyansweringrules
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createcompanyansweringrule
+        description: Create Company Call Handling Rule
+        call: platform-call-handling-rules.createcompanyansweringrule
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/answering-rule/{ruleid}
+      name: restapi-v1-0-account-accountid-answering-rule-ruleid
+      description: REST surface for restapi-v1.0-account-accountId-answering-rule-ruleId.
+      operations:
+      - method: GET
+        name: readcompanyansweringrule
+        description: Get Company Call Handling Rule
+        call: platform-call-handling-rules.readcompanyansweringrule
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updatecompanyansweringrule
+        description: Update Company Call Handling Rule
+        call: platform-call-handling-rules.updatecompanyansweringrule
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletecompanyansweringrule
+        description: Delete Company Call Handling Rule
+        call: platform-call-handling-rules.deletecompanyansweringrule
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/answering-rule
+      name: restapi-v1-0-account-accountid-extension-extensionid-answering-rule
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-answering-rule.
+      operations:
+      - method: GET
+        name: listansweringrules
+        description: List Call Handling Rules
+        call: platform-call-handling-rules.listansweringrules
+        with:
+          type: rest.type
+          view: rest.view
+          enabledOnly: rest.enabledOnly
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createansweringrule
+        description: Create Call Handling Rule
+        call: platform-call-handling-rules.createansweringrule
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/answering-rule/{ruleid}
+      name: restapi-v1-0-account-accountid-extension-extensionid-answering-rule-ruleid
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-answering-rule-ruleId.
+      operations:
+      - method: GET
+        name: readansweringrule
+        description: Get Call Handling Rule
+        call: platform-call-handling-rules.readansweringrule
+        with:
+          showInactiveNumbers: rest.showInactiveNumbers
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updateansweringrule
+        description: Update Call Handling Rule
+        call: platform-call-handling-rules.updateansweringrule
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteansweringrule
+        description: Delete Call Handling Rule
+        call: platform-call-handling-rules.deleteansweringrule
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/forward-all-calls
+      name: restapi-v1-0-account-accountid-forward-all-calls
+      description: REST surface for restapi-v1.0-account-accountId-forward-all-calls.
+      operations:
+      - method: GET
+        name: getforwardallcompanycalls
+        description: Get Forward All Company Calls
+        call: platform-call-handling-rules.getforwardallcompanycalls
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: updateforwardallcompanycalls
+        description: Update Forward All Company Calls
+        call: platform-call-handling-rules.updateforwardallcompanycalls
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-call-handling-rules-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Call Handling Rules. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: list-company-call-handling-rules
+      description: List Company Call Handling Rules
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-call-handling-rules.listcompanyansweringrules
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-company-call-handling-rule
+      description: Create Company Call Handling Rule
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-handling-rules.createcompanyansweringrule
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-company-call-handling-rule
+      description: Get Company Call Handling Rule
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-call-handling-rules.readcompanyansweringrule
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-company-call-handling-rule
+      description: Update Company Call Handling Rule
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-call-handling-rules.updatecompanyansweringrule
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-company-call-handling-rule
+      description: Delete Company Call Handling Rule
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-call-handling-rules.deletecompanyansweringrule
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-call-handling-rules
+      description: List Call Handling Rules
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-call-handling-rules.listansweringrules
+      with:
+        type: tools.type
+        view: tools.view
+        enabledOnly: tools.enabledOnly
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-call-handling-rule
+      description: Create Call Handling Rule
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-handling-rules.createansweringrule
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-call-handling-rule
+      description: Get Call Handling Rule
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-call-handling-rules.readansweringrule
+      with:
+        showInactiveNumbers: tools.showInactiveNumbers
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-call-handling-rule
+      description: Update Call Handling Rule
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-call-handling-rules.updateansweringrule
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-call-handling-rule
+      description: Delete Call Handling Rule
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-call-handling-rules.deleteansweringrule
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-forward-all-company-calls
+      description: Get Forward All Company Calls
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-call-handling-rules.getforwardallcompanycalls
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-forward-all-company-calls
+      description: Update Forward All Company Calls
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-call-handling-rules.updateforwardallcompanycalls
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

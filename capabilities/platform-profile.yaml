@@ -1,0 +1,123 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Profile
+  description: 'RingCentral API — Profile. 2 operations. Lead operation: Get Company Info. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Profile
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-profile
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Profile business capability. Self-contained, no shared references.
+    resources:
+    - name: team-messaging-v1-companies-companyId
+      path: /team-messaging/v1/companies/{companyId}
+      operations:
+      - name: readtmcompanyinfonew
+        method: GET
+        description: Get Company Info
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: companyId
+          in: path
+          type: string
+          description: Internal identifier of an RC account/Glip company, or tilde (~) to indicate a company the current user
+            belongs to.
+          required: true
+    - name: team-messaging-v1-persons-personId
+      path: /team-messaging/v1/persons/{personId}
+      operations:
+      - name: readglippersonnew
+        method: GET
+        description: Get Person
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: personId
+          in: path
+          type: string
+          description: Internal identifier of a user to be returned, the maximum number of IDs is 30
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-profile-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Profile. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/team-messaging/v1/companies/{companyid}
+      name: team-messaging-v1-companies-companyid
+      description: REST surface for team-messaging-v1-companies-companyId.
+      operations:
+      - method: GET
+        name: readtmcompanyinfonew
+        description: Get Company Info
+        call: platform-profile.readtmcompanyinfonew
+        with:
+          companyId: rest.companyId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/persons/{personid}
+      name: team-messaging-v1-persons-personid
+      description: REST surface for team-messaging-v1-persons-personId.
+      operations:
+      - method: GET
+        name: readglippersonnew
+        description: Get Person
+        call: platform-profile.readglippersonnew
+        with:
+          personId: rest.personId
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-profile-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Profile. One tool per consumed operation, routed inline through this capability's
+      consumes block.
+    tools:
+    - name: get-company-info
+      description: Get Company Info
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-profile.readtmcompanyinfonew
+      with:
+        companyId: tools.companyId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-person
+      description: Get Person
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-profile.readglippersonnew
+      with:
+        personId: tools.personId
+      outputParameters:
+      - type: object
+        mapping: $.

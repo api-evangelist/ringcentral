@@ -1,0 +1,232 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Call Forwarding
+  description: 'RingCentral API — Call Forwarding. 6 operations. Lead operation: List Forwarding Numbers. Self-contained Naftiko
+    capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Call Forwarding
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-call-forwarding
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Call Forwarding business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-extension-extensionId-forwarding-number
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/forwarding-number
+      operations:
+      - name: listforwardingnumbers
+        method: GET
+        description: List Forwarding Numbers
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: createforwardingnumber
+        method: POST
+        description: Create Forwarding Number
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deleteforwardingnumbers
+        method: DELETE
+        description: Delete Forwarding Numbers
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-extensionId-forwarding-number-forwardin
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/forwarding-number/{forwardingNumberId}
+      operations:
+      - name: readforwardingnumber
+        method: GET
+        description: Get Forwarding Number
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updateforwardingnumber
+        method: PUT
+        description: Update Forwarding Number
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deleteforwardingnumber
+        method: DELETE
+        description: Delete Forwarding Number
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-call-forwarding-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Call Forwarding. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/forwarding-number
+      name: restapi-v1-0-account-accountid-extension-extensionid-forwarding-number
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-forwarding-number.
+      operations:
+      - method: GET
+        name: listforwardingnumbers
+        description: List Forwarding Numbers
+        call: platform-call-forwarding.listforwardingnumbers
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createforwardingnumber
+        description: Create Forwarding Number
+        call: platform-call-forwarding.createforwardingnumber
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteforwardingnumbers
+        description: Delete Forwarding Numbers
+        call: platform-call-forwarding.deleteforwardingnumbers
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/forwarding-number/{forwardingnumberid}
+      name: restapi-v1-0-account-accountid-extension-extensionid-forwarding-number-forwardin
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-forwarding-number-forwardin.
+      operations:
+      - method: GET
+        name: readforwardingnumber
+        description: Get Forwarding Number
+        call: platform-call-forwarding.readforwardingnumber
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updateforwardingnumber
+        description: Update Forwarding Number
+        call: platform-call-forwarding.updateforwardingnumber
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteforwardingnumber
+        description: Delete Forwarding Number
+        call: platform-call-forwarding.deleteforwardingnumber
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-call-forwarding-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Call Forwarding. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: list-forwarding-numbers
+      description: List Forwarding Numbers
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-call-forwarding.listforwardingnumbers
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-forwarding-number
+      description: Create Forwarding Number
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-forwarding.createforwardingnumber
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-forwarding-numbers
+      description: Delete Forwarding Numbers
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-call-forwarding.deleteforwardingnumbers
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-forwarding-number
+      description: Get Forwarding Number
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-call-forwarding.readforwardingnumber
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-forwarding-number
+      description: Update Forwarding Number
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-call-forwarding.updateforwardingnumber
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-forwarding-number
+      description: Delete Forwarding Number
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-call-forwarding.deleteforwardingnumber
+      outputParameters:
+      - type: object
+        mapping: $.

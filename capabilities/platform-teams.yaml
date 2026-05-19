@@ -1,0 +1,572 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Teams
+  description: 'RingCentral API — Teams. 13 operations. Lead operation: Get Everyone Chat. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Teams
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-teams
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Teams business capability. Self-contained, no shared references.
+    resources:
+    - name: team-messaging-v1-everyone
+      path: /team-messaging/v1/everyone
+      operations:
+      - name: readglipeveryonenew
+        method: GET
+        description: Get Everyone Chat
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: patchglipeveryonenew
+        method: PATCH
+        description: Update Everyone Chat
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: team-messaging-v1-teams
+      path: /team-messaging/v1/teams
+      operations:
+      - name: listglipteamsnew
+        method: GET
+        description: List Teams
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: recordCount
+          in: query
+          type: integer
+          description: Number of teams to be fetched by one request. The maximum value is 250, by default - 30
+        - name: pageToken
+          in: query
+          type: string
+          description: Pagination token.
+      - name: createglipteamnew
+        method: POST
+        description: Create Team
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: team-messaging-v1-teams-chatId
+      path: /team-messaging/v1/teams/{chatId}
+      operations:
+      - name: readglipteamnew
+        method: GET
+        description: Get Team
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a team to be returned.
+          required: true
+      - name: deleteglipteamnew
+        method: DELETE
+        description: Delete Team
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a team.
+          required: true
+      - name: patchglipteamnew
+        method: PATCH
+        description: Update Team
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a team to be updated.
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: team-messaging-v1-teams-chatId-add
+      path: /team-messaging/v1/teams/{chatId}/add
+      operations:
+      - name: addglipteammembersnew
+        method: POST
+        description: Add Team Members
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a team to add members to.
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: team-messaging-v1-teams-chatId-archive
+      path: /team-messaging/v1/teams/{chatId}/archive
+      operations:
+      - name: archiveglipteamnew
+        method: POST
+        description: Archive Team
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a team to be archived.
+          required: true
+    - name: team-messaging-v1-teams-chatId-join
+      path: /team-messaging/v1/teams/{chatId}/join
+      operations:
+      - name: joinglipteamnew
+        method: POST
+        description: Join Team
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a team to be joined.
+          required: true
+    - name: team-messaging-v1-teams-chatId-leave
+      path: /team-messaging/v1/teams/{chatId}/leave
+      operations:
+      - name: leaveglipteamnew
+        method: POST
+        description: Leave Team
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a team to be left.
+          required: true
+    - name: team-messaging-v1-teams-chatId-remove
+      path: /team-messaging/v1/teams/{chatId}/remove
+      operations:
+      - name: removeglipteammembersnew
+        method: POST
+        description: Remove Team Members
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a team to remove members from.
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: team-messaging-v1-teams-chatId-unarchive
+      path: /team-messaging/v1/teams/{chatId}/unarchive
+      operations:
+      - name: unarchiveglipteamnew
+        method: POST
+        description: Unarchive Team
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a team to be made active.
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-teams-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Teams. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/team-messaging/v1/everyone
+      name: team-messaging-v1-everyone
+      description: REST surface for team-messaging-v1-everyone.
+      operations:
+      - method: GET
+        name: readglipeveryonenew
+        description: Get Everyone Chat
+        call: platform-teams.readglipeveryonenew
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: patchglipeveryonenew
+        description: Update Everyone Chat
+        call: platform-teams.patchglipeveryonenew
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/teams
+      name: team-messaging-v1-teams
+      description: REST surface for team-messaging-v1-teams.
+      operations:
+      - method: GET
+        name: listglipteamsnew
+        description: List Teams
+        call: platform-teams.listglipteamsnew
+        with:
+          recordCount: rest.recordCount
+          pageToken: rest.pageToken
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createglipteamnew
+        description: Create Team
+        call: platform-teams.createglipteamnew
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/teams/{chatid}
+      name: team-messaging-v1-teams-chatid
+      description: REST surface for team-messaging-v1-teams-chatId.
+      operations:
+      - method: GET
+        name: readglipteamnew
+        description: Get Team
+        call: platform-teams.readglipteamnew
+        with:
+          chatId: rest.chatId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteglipteamnew
+        description: Delete Team
+        call: platform-teams.deleteglipteamnew
+        with:
+          chatId: rest.chatId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: patchglipteamnew
+        description: Update Team
+        call: platform-teams.patchglipteamnew
+        with:
+          chatId: rest.chatId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/teams/{chatid}/add
+      name: team-messaging-v1-teams-chatid-add
+      description: REST surface for team-messaging-v1-teams-chatId-add.
+      operations:
+      - method: POST
+        name: addglipteammembersnew
+        description: Add Team Members
+        call: platform-teams.addglipteammembersnew
+        with:
+          chatId: rest.chatId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/teams/{chatid}/archive
+      name: team-messaging-v1-teams-chatid-archive
+      description: REST surface for team-messaging-v1-teams-chatId-archive.
+      operations:
+      - method: POST
+        name: archiveglipteamnew
+        description: Archive Team
+        call: platform-teams.archiveglipteamnew
+        with:
+          chatId: rest.chatId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/teams/{chatid}/join
+      name: team-messaging-v1-teams-chatid-join
+      description: REST surface for team-messaging-v1-teams-chatId-join.
+      operations:
+      - method: POST
+        name: joinglipteamnew
+        description: Join Team
+        call: platform-teams.joinglipteamnew
+        with:
+          chatId: rest.chatId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/teams/{chatid}/leave
+      name: team-messaging-v1-teams-chatid-leave
+      description: REST surface for team-messaging-v1-teams-chatId-leave.
+      operations:
+      - method: POST
+        name: leaveglipteamnew
+        description: Leave Team
+        call: platform-teams.leaveglipteamnew
+        with:
+          chatId: rest.chatId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/teams/{chatid}/remove
+      name: team-messaging-v1-teams-chatid-remove
+      description: REST surface for team-messaging-v1-teams-chatId-remove.
+      operations:
+      - method: POST
+        name: removeglipteammembersnew
+        description: Remove Team Members
+        call: platform-teams.removeglipteammembersnew
+        with:
+          chatId: rest.chatId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/teams/{chatid}/unarchive
+      name: team-messaging-v1-teams-chatid-unarchive
+      description: REST surface for team-messaging-v1-teams-chatId-unarchive.
+      operations:
+      - method: POST
+        name: unarchiveglipteamnew
+        description: Unarchive Team
+        call: platform-teams.unarchiveglipteamnew
+        with:
+          chatId: rest.chatId
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-teams-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Teams. One tool per consumed operation, routed inline through this capability's
+      consumes block.
+    tools:
+    - name: get-everyone-chat
+      description: Get Everyone Chat
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-teams.readglipeveryonenew
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-everyone-chat
+      description: Update Everyone Chat
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-teams.patchglipeveryonenew
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-teams
+      description: List Teams
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-teams.listglipteamsnew
+      with:
+        recordCount: tools.recordCount
+        pageToken: tools.pageToken
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-team
+      description: Create Team
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-teams.createglipteamnew
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-team
+      description: Get Team
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-teams.readglipteamnew
+      with:
+        chatId: tools.chatId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-team
+      description: Delete Team
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-teams.deleteglipteamnew
+      with:
+        chatId: tools.chatId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-team
+      description: Update Team
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-teams.patchglipteamnew
+      with:
+        chatId: tools.chatId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: add-team-members
+      description: Add Team Members
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-teams.addglipteammembersnew
+      with:
+        chatId: tools.chatId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: archive-team
+      description: Archive Team
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-teams.archiveglipteamnew
+      with:
+        chatId: tools.chatId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: join-team
+      description: Join Team
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-teams.joinglipteamnew
+      with:
+        chatId: tools.chatId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: leave-team
+      description: Leave Team
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-teams.leaveglipteamnew
+      with:
+        chatId: tools.chatId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: remove-team-members
+      description: Remove Team Members
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-teams.removeglipteammembersnew
+      with:
+        chatId: tools.chatId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: unarchive-team
+      description: Unarchive Team
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-teams.unarchiveglipteamnew
+      with:
+        chatId: tools.chatId
+      outputParameters:
+      - type: object
+        mapping: $.

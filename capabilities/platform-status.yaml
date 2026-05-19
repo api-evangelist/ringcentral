@@ -1,0 +1,70 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Status
+  description: 'RingCentral API — Status. 1 operations. Lead operation: Get Async Task Status. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Status
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-status
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Status business capability. Self-contained, no shared references.
+    resources:
+    - name: ai-status-v1-jobs-jobId
+      path: /ai/status/v1/jobs/{jobId}
+      operations:
+      - name: caijobstatusget
+        method: GET
+        description: Get Async Task Status
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-status-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Status. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/ai/status/v1/jobs/{jobid}
+      name: ai-status-v1-jobs-jobid
+      description: REST surface for ai-status-v1-jobs-jobId.
+      operations:
+      - method: GET
+        name: caijobstatusget
+        description: Get Async Task Status
+        call: platform-status.caijobstatusget
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-status-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Status. One tool per consumed operation, routed inline through this capability's
+      consumes block.
+    tools:
+    - name: get-async-task-status
+      description: Get Async Task Status
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-status.caijobstatusget
+      outputParameters:
+      - type: object
+        mapping: $.

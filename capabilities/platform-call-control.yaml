@@ -1,0 +1,964 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Call Control
+  description: 'RingCentral API — Call Control. 24 operations. Lead operation: Make CallOut. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Call Control
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-call-control
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Call Control business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-telephony-call-out
+      path: /restapi/v1.0/account/{accountId}/telephony/call-out
+      operations:
+      - name: createcalloutcallsession
+        method: POST
+        description: Make CallOut
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-conference
+      path: /restapi/v1.0/account/{accountId}/telephony/conference
+      operations:
+      - name: createconferencecallsession
+        method: POST
+        description: Start Conference Call Session
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}
+      operations:
+      - name: readcallsessionstatus
+        method: GET
+        description: Get Call Session Status
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: timestamp
+          in: query
+          type: string
+          description: The date and time of a call session latest change
+        - name: timeout
+          in: query
+          type: string
+          description: The time frame of awaiting for a status change before sending
+      - name: deletecallsession
+        method: DELETE
+        description: Drop Call Session
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-bri
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/bring-in
+      operations:
+      - name: createcallpartywithbringin
+        method: POST
+        description: Bring-In Call Party
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}
+      operations:
+      - name: readcallpartystatus
+        method: GET
+        description: Get Call Party Status
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: deletecallparty
+        method: DELETE
+        description: Delete Call Party
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updatecallparty
+        method: PATCH
+        description: Update Call Party
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/answer
+      operations:
+      - name: answercallparty
+        method: POST
+        description: Answer Call Party
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/bridge
+      operations:
+      - name: bridgecallparty
+        method: POST
+        description: Bridge Call Party
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/flip
+      operations:
+      - name: callflipparty
+        method: POST
+        description: Call Flip on Party
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/forward
+      operations:
+      - name: forwardcallparty
+        method: POST
+        description: Forward Call Party
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/hold
+      operations:
+      - name: holdcallparty
+        method: POST
+        description: Hold Call Party
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/ignore
+      operations:
+      - name: ignorecallinqueue
+        method: POST
+        description: Ignore Call in Queue
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/park
+      operations:
+      - name: callparkparty
+        method: POST
+        description: Call Park
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/pickup
+      operations:
+      - name: pickupcallparty
+        method: POST
+        description: Pickup Call
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/recordings
+      operations:
+      - name: startcallrecording
+        method: POST
+        description: Create Recording
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/recordings/{recordingId}
+      operations:
+      - name: pauseresumecallrecording
+        method: PATCH
+        description: Pause/Resume Recording
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: brandId
+          in: query
+          type: string
+          description: Identifies a brand of a logged-in user or a brand of a sign-up session
+          required: true
+        - name: recordingId
+          in: path
+          type: string
+          description: Internal identifier of a recording
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/reject
+      operations:
+      - name: rejectparty
+        method: POST
+        description: Reject Call Party
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/reply
+      operations:
+      - name: replyparty
+        method: POST
+        description: Reply with Text
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/supervise
+      operations:
+      - name: supervisecallparty
+        method: POST
+        description: Supervise Call Party
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/transfer
+      operations:
+      - name: transfercallparty
+        method: POST
+        description: Transfer Call Party
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/parties/{partyId}/unhold
+      operations:
+      - name: unholdcallparty
+        method: POST
+        description: Un-hold Call Party
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-supervise
+      path: /restapi/v1.0/account/{accountId}/telephony/sessions/{telephonySessionId}/supervise
+      operations:
+      - name: supervisecallsession
+        method: POST
+        description: Supervise Call Session
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-call-control-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Call Control. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/call-out
+      name: restapi-v1-0-account-accountid-telephony-call-out
+      description: REST surface for restapi-v1.0-account-accountId-telephony-call-out.
+      operations:
+      - method: POST
+        name: createcalloutcallsession
+        description: Make CallOut
+        call: platform-call-control.createcalloutcallsession
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/conference
+      name: restapi-v1-0-account-accountid-telephony-conference
+      description: REST surface for restapi-v1.0-account-accountId-telephony-conference.
+      operations:
+      - method: POST
+        name: createconferencecallsession
+        description: Start Conference Call Session
+        call: platform-call-control.createconferencecallsession
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId.
+      operations:
+      - method: GET
+        name: readcallsessionstatus
+        description: Get Call Session Status
+        call: platform-call-control.readcallsessionstatus
+        with:
+          timestamp: rest.timestamp
+          timeout: rest.timeout
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletecallsession
+        description: Drop Call Session
+        call: platform-call-control.deletecallsession
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/bring-in
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-bri
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-bri.
+      operations:
+      - method: POST
+        name: createcallpartywithbringin
+        description: Bring-In Call Party
+        call: platform-call-control.createcallpartywithbringin
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: GET
+        name: readcallpartystatus
+        description: Get Call Party Status
+        call: platform-call-control.readcallpartystatus
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletecallparty
+        description: Delete Call Party
+        call: platform-call-control.deletecallparty
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: updatecallparty
+        description: Update Call Party
+        call: platform-call-control.updatecallparty
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/answer
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: answercallparty
+        description: Answer Call Party
+        call: platform-call-control.answercallparty
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/bridge
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: bridgecallparty
+        description: Bridge Call Party
+        call: platform-call-control.bridgecallparty
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/flip
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: callflipparty
+        description: Call Flip on Party
+        call: platform-call-control.callflipparty
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/forward
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: forwardcallparty
+        description: Forward Call Party
+        call: platform-call-control.forwardcallparty
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/hold
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: holdcallparty
+        description: Hold Call Party
+        call: platform-call-control.holdcallparty
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/ignore
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: ignorecallinqueue
+        description: Ignore Call in Queue
+        call: platform-call-control.ignorecallinqueue
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/park
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: callparkparty
+        description: Call Park
+        call: platform-call-control.callparkparty
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/pickup
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: pickupcallparty
+        description: Pickup Call
+        call: platform-call-control.pickupcallparty
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/recordings
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: startcallrecording
+        description: Create Recording
+        call: platform-call-control.startcallrecording
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/recordings/{recordingid}
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: PATCH
+        name: pauseresumecallrecording
+        description: Pause/Resume Recording
+        call: platform-call-control.pauseresumecallrecording
+        with:
+          brandId: rest.brandId
+          recordingId: rest.recordingId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/reject
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: rejectparty
+        description: Reject Call Party
+        call: platform-call-control.rejectparty
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/reply
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: replyparty
+        description: Reply with Text
+        call: platform-call-control.replyparty
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/supervise
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: supervisecallparty
+        description: Supervise Call Party
+        call: platform-call-control.supervisecallparty
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/transfer
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: transfercallparty
+        description: Transfer Call Party
+        call: platform-call-control.transfercallparty
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/parties/{partyid}/unhold
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-parties-par
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-parties-par.
+      operations:
+      - method: POST
+        name: unholdcallparty
+        description: Un-hold Call Party
+        call: platform-call-control.unholdcallparty
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/telephony/sessions/{telephonysessionid}/supervise
+      name: restapi-v1-0-account-accountid-telephony-sessions-telephonysessionid-supervise
+      description: REST surface for restapi-v1.0-account-accountId-telephony-sessions-telephonySessionId-supervise.
+      operations:
+      - method: POST
+        name: supervisecallsession
+        description: Supervise Call Session
+        call: platform-call-control.supervisecallsession
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-call-control-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Call Control. One tool per consumed operation, routed inline through this
+      capability's consumes block.
+    tools:
+    - name: make-callout
+      description: Make CallOut
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.createcalloutcallsession
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: start-conference-call-session
+      description: Start Conference Call Session
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.createconferencecallsession
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-call-session-status
+      description: Get Call Session Status
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-call-control.readcallsessionstatus
+      with:
+        timestamp: tools.timestamp
+        timeout: tools.timeout
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: drop-call-session
+      description: Drop Call Session
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-call-control.deletecallsession
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: bring-call-party
+      description: Bring-In Call Party
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.createcallpartywithbringin
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-call-party-status
+      description: Get Call Party Status
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-call-control.readcallpartystatus
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-call-party
+      description: Delete Call Party
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-call-control.deletecallparty
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-call-party
+      description: Update Call Party
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-call-control.updatecallparty
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: answer-call-party
+      description: Answer Call Party
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.answercallparty
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: bridge-call-party
+      description: Bridge Call Party
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.bridgecallparty
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: call-flip-party
+      description: Call Flip on Party
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.callflipparty
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: forward-call-party
+      description: Forward Call Party
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.forwardcallparty
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: hold-call-party
+      description: Hold Call Party
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.holdcallparty
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: ignore-call-queue
+      description: Ignore Call in Queue
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.ignorecallinqueue
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: call-park
+      description: Call Park
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.callparkparty
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: pickup-call
+      description: Pickup Call
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.pickupcallparty
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-recording
+      description: Create Recording
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.startcallrecording
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: pause-resume-recording
+      description: Pause/Resume Recording
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-call-control.pauseresumecallrecording
+      with:
+        brandId: tools.brandId
+        recordingId: tools.recordingId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: reject-call-party
+      description: Reject Call Party
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.rejectparty
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: reply-text
+      description: Reply with Text
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.replyparty
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: supervise-call-party
+      description: Supervise Call Party
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.supervisecallparty
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: transfer-call-party
+      description: Transfer Call Party
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.transfercallparty
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: un-hold-call-party
+      description: Un-hold Call Party
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.unholdcallparty
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: supervise-call-session
+      description: Supervise Call Session
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-call-control.supervisecallsession
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

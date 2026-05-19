@@ -1,0 +1,323 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Extensions
+  description: 'RingCentral API — Extensions. 6 operations. Lead operation: List Extensions. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Extensions
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-extensions
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Extensions business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-extension
+      path: /restapi/v1.0/account/{accountId}/extension
+      operations:
+      - name: listextensions
+        method: GET
+        description: List Extensions
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: extensionNumber
+          in: query
+          type: string
+          description: Extension short number to filter records
+        - name: email
+          in: query
+          type: string
+          description: Extension email address. Multiple values are accepted
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive number values
+        - name: perPage
+          in: query
+          type: integer
+          description: Indicates a page size (number of items)
+        - name: status
+          in: query
+          type: array
+          description: Extension current state. Multiple values are supported. If 'Unassigned'
+        - name: type
+          in: query
+          type: array
+          description: Extension type. Multiple values are supported. Please note
+      - name: createextension
+        method: POST
+        description: Create Extension
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-bulk-update
+      path: /restapi/v1.0/account/{accountId}/extension-bulk-update
+      operations:
+      - name: extensionbulkupdate
+        method: POST
+        description: Update Multiple Extensions
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-bulk-update-tasks-taskId
+      path: /restapi/v1.0/account/{accountId}/extension-bulk-update/tasks/{taskId}
+      operations:
+      - name: getextensionbulkupdatetask
+        method: GET
+        description: Get Extension Update Task Status
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: taskId
+          in: path
+          type: string
+          description: Internal identifier of a task
+          required: true
+    - name: restapi-v1.0-account-accountId-templates
+      path: /restapi/v1.0/account/{accountId}/templates
+      operations:
+      - name: listusertemplates
+        method: GET
+        description: List User Templates
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: type
+          in: query
+          type: string
+          description: Type of template
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive number values
+        - name: perPage
+          in: query
+          type: integer
+          description: Indicates a page size (number of items). If not specified, the value is '100' by default
+    - name: restapi-v1.0-account-accountId-templates-templateId
+      path: /restapi/v1.0/account/{accountId}/templates/{templateId}
+      operations:
+      - name: readusertemplate
+        method: GET
+        description: Get User Template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: templateId
+          in: path
+          type: string
+          description: Internal identifier of a template
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-extensions-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Extensions. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/extension
+      name: restapi-v1-0-account-accountid-extension
+      description: REST surface for restapi-v1.0-account-accountId-extension.
+      operations:
+      - method: GET
+        name: listextensions
+        description: List Extensions
+        call: platform-extensions.listextensions
+        with:
+          extensionNumber: rest.extensionNumber
+          email: rest.email
+          page: rest.page
+          perPage: rest.perPage
+          status: rest.status
+          type: rest.type
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createextension
+        description: Create Extension
+        call: platform-extensions.createextension
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension-bulk-update
+      name: restapi-v1-0-account-accountid-extension-bulk-update
+      description: REST surface for restapi-v1.0-account-accountId-extension-bulk-update.
+      operations:
+      - method: POST
+        name: extensionbulkupdate
+        description: Update Multiple Extensions
+        call: platform-extensions.extensionbulkupdate
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension-bulk-update/tasks/{taskid}
+      name: restapi-v1-0-account-accountid-extension-bulk-update-tasks-taskid
+      description: REST surface for restapi-v1.0-account-accountId-extension-bulk-update-tasks-taskId.
+      operations:
+      - method: GET
+        name: getextensionbulkupdatetask
+        description: Get Extension Update Task Status
+        call: platform-extensions.getextensionbulkupdatetask
+        with:
+          taskId: rest.taskId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/templates
+      name: restapi-v1-0-account-accountid-templates
+      description: REST surface for restapi-v1.0-account-accountId-templates.
+      operations:
+      - method: GET
+        name: listusertemplates
+        description: List User Templates
+        call: platform-extensions.listusertemplates
+        with:
+          type: rest.type
+          page: rest.page
+          perPage: rest.perPage
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/templates/{templateid}
+      name: restapi-v1-0-account-accountid-templates-templateid
+      description: REST surface for restapi-v1.0-account-accountId-templates-templateId.
+      operations:
+      - method: GET
+        name: readusertemplate
+        description: Get User Template
+        call: platform-extensions.readusertemplate
+        with:
+          templateId: rest.templateId
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-extensions-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Extensions. One tool per consumed operation, routed inline through this
+      capability's consumes block.
+    tools:
+    - name: list-extensions
+      description: List Extensions
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-extensions.listextensions
+      with:
+        extensionNumber: tools.extensionNumber
+        email: tools.email
+        page: tools.page
+        perPage: tools.perPage
+        status: tools.status
+        type: tools.type
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-extension
+      description: Create Extension
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-extensions.createextension
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-multiple-extensions
+      description: Update Multiple Extensions
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-extensions.extensionbulkupdate
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-extension-update-task-status
+      description: Get Extension Update Task Status
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-extensions.getextensionbulkupdatetask
+      with:
+        taskId: tools.taskId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-user-templates
+      description: List User Templates
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-extensions.listusertemplates
+      with:
+        type: tools.type
+        page: tools.page
+        perPage: tools.perPage
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-user-template
+      description: Get User Template
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-extensions.readusertemplate
+      with:
+        templateId: tools.templateId
+      outputParameters:
+      - type: object
+        mapping: $.

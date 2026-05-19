@@ -1,0 +1,482 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — External Contacts
+  description: 'RingCentral API — External Contacts. 11 operations. Lead operation: Upload Multiple User Contacts. Self-contained
+    Naftiko capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - External Contacts
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-external-contacts
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — External Contacts business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-address-book-bulk-upload
+      path: /restapi/v1.0/account/{accountId}/address-book-bulk-upload
+      operations:
+      - name: addressbookbulkupload
+        method: POST
+        description: Upload Multiple User Contacts
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-address-book-bulk-upload-tasks-taskId
+      path: /restapi/v1.0/account/{accountId}/address-book-bulk-upload/tasks/{taskId}
+      operations:
+      - name: getaddressbookbulkuploadtask
+        method: GET
+        description: Get Contacts Upload Task
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: taskId
+          in: path
+          type: string
+          description: Internal identifier of a task
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-extensionId-address-book-sync
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/address-book-sync
+      operations:
+      - name: syncaddressbook
+        method: GET
+        description: Address Book Synchronization
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: syncType
+          in: query
+          type: string
+          description: Type of synchronization
+        - name: syncToken
+          in: query
+          type: string
+          description: Value of syncToken property of the last sync request response
+        - name: perPage
+          in: query
+          type: integer
+          description: Number of records per page to be returned. Max number of
+        - name: pageId
+          in: query
+          type: integer
+          description: Internal identifier of a page. It can be obtained from the 'nextPageId'
+    - name: restapi-v1.0-account-accountId-extension-extensionId-address-book-contact
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/address-book/contact
+      operations:
+      - name: listcontacts
+        method: GET
+        description: List Contacts
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: startsWith
+          in: query
+          type: string
+          description: If specified, only contacts which 'First name' or 'Last name' start
+        - name: sortBy
+          in: query
+          type: array
+          description: Sorts results by the specified property
+        - name: phoneNumber
+          in: query
+          type: array
+          description: Phone number in e.164 format
+      - name: createcontact
+        method: POST
+        description: Create User Contact
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: dialingPlan
+          in: query
+          type: string
+          description: Country code value complying with the [ISO 3166-1 alpha-2](https://ru.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-extension-extensionId-address-book-contact-contac
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/address-book/contact/{contactId}
+      operations:
+      - name: readcontact
+        method: GET
+        description: Get User Contact(s)
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updatecontact
+        method: PUT
+        description: Update User Contact(s)
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: dialingPlan
+          in: query
+          type: string
+          description: 'Country code value complying with the [ISO 3166-1 alpha-2](https://ru.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+            format. '
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: patchcontact
+        method: PATCH
+        description: Update Contact Attributes
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: dialingPlan
+          in: query
+          type: string
+          description: Country code value complying with the [ISO 3166-1 alpha-2](https://ru.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deletecontact
+        method: DELETE
+        description: Delete User Contact(s)
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-extension-extensionId-favorite
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/favorite
+      operations:
+      - name: listfavoritecontacts
+        method: GET
+        description: List Favorite Contacts
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updatefavoritecontactlist
+        method: PUT
+        description: Update Favorite Contact List
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-external-contacts-rest
+    port: 8080
+    description: REST adapter for RingCentral API — External Contacts. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/address-book-bulk-upload
+      name: restapi-v1-0-account-accountid-address-book-bulk-upload
+      description: REST surface for restapi-v1.0-account-accountId-address-book-bulk-upload.
+      operations:
+      - method: POST
+        name: addressbookbulkupload
+        description: Upload Multiple User Contacts
+        call: platform-external-contacts.addressbookbulkupload
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/address-book-bulk-upload/tasks/{taskid}
+      name: restapi-v1-0-account-accountid-address-book-bulk-upload-tasks-taskid
+      description: REST surface for restapi-v1.0-account-accountId-address-book-bulk-upload-tasks-taskId.
+      operations:
+      - method: GET
+        name: getaddressbookbulkuploadtask
+        description: Get Contacts Upload Task
+        call: platform-external-contacts.getaddressbookbulkuploadtask
+        with:
+          taskId: rest.taskId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/address-book-sync
+      name: restapi-v1-0-account-accountid-extension-extensionid-address-book-sync
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-address-book-sync.
+      operations:
+      - method: GET
+        name: syncaddressbook
+        description: Address Book Synchronization
+        call: platform-external-contacts.syncaddressbook
+        with:
+          syncType: rest.syncType
+          syncToken: rest.syncToken
+          perPage: rest.perPage
+          pageId: rest.pageId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/address-book/contact
+      name: restapi-v1-0-account-accountid-extension-extensionid-address-book-contact
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-address-book-contact.
+      operations:
+      - method: GET
+        name: listcontacts
+        description: List Contacts
+        call: platform-external-contacts.listcontacts
+        with:
+          startsWith: rest.startsWith
+          sortBy: rest.sortBy
+          phoneNumber: rest.phoneNumber
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createcontact
+        description: Create User Contact
+        call: platform-external-contacts.createcontact
+        with:
+          dialingPlan: rest.dialingPlan
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/address-book/contact/{contactid}
+      name: restapi-v1-0-account-accountid-extension-extensionid-address-book-contact-contac
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-address-book-contact-contac.
+      operations:
+      - method: GET
+        name: readcontact
+        description: Get User Contact(s)
+        call: platform-external-contacts.readcontact
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updatecontact
+        description: Update User Contact(s)
+        call: platform-external-contacts.updatecontact
+        with:
+          dialingPlan: rest.dialingPlan
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: patchcontact
+        description: Update Contact Attributes
+        call: platform-external-contacts.patchcontact
+        with:
+          dialingPlan: rest.dialingPlan
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletecontact
+        description: Delete User Contact(s)
+        call: platform-external-contacts.deletecontact
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/favorite
+      name: restapi-v1-0-account-accountid-extension-extensionid-favorite
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-favorite.
+      operations:
+      - method: GET
+        name: listfavoritecontacts
+        description: List Favorite Contacts
+        call: platform-external-contacts.listfavoritecontacts
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updatefavoritecontactlist
+        description: Update Favorite Contact List
+        call: platform-external-contacts.updatefavoritecontactlist
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-external-contacts-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — External Contacts. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: upload-multiple-user-contacts
+      description: Upload Multiple User Contacts
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-external-contacts.addressbookbulkupload
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-contacts-upload-task
+      description: Get Contacts Upload Task
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-external-contacts.getaddressbookbulkuploadtask
+      with:
+        taskId: tools.taskId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: address-book-synchronization
+      description: Address Book Synchronization
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-external-contacts.syncaddressbook
+      with:
+        syncType: tools.syncType
+        syncToken: tools.syncToken
+        perPage: tools.perPage
+        pageId: tools.pageId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-contacts
+      description: List Contacts
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-external-contacts.listcontacts
+      with:
+        startsWith: tools.startsWith
+        sortBy: tools.sortBy
+        phoneNumber: tools.phoneNumber
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-user-contact
+      description: Create User Contact
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-external-contacts.createcontact
+      with:
+        dialingPlan: tools.dialingPlan
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-user-contact-s
+      description: Get User Contact(s)
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-external-contacts.readcontact
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-user-contact-s
+      description: Update User Contact(s)
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-external-contacts.updatecontact
+      with:
+        dialingPlan: tools.dialingPlan
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-contact-attributes
+      description: Update Contact Attributes
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-external-contacts.patchcontact
+      with:
+        dialingPlan: tools.dialingPlan
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-user-contact-s
+      description: Delete User Contact(s)
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-external-contacts.deletecontact
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-favorite-contacts
+      description: List Favorite Contacts
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-external-contacts.listfavoritecontacts
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-favorite-contact-list
+      description: Update Favorite Contact List
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-external-contacts.updatefavoritecontactlist
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

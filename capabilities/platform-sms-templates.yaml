@@ -1,0 +1,381 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — SMS Templates
+  description: 'RingCentral API — SMS Templates. 10 operations. Lead operation: Create User Message Template. Self-contained
+    Naftiko capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - SMS Templates
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-sms-templates
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — SMS Templates business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-extension-extensionId-message-store-templates
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/message-store-templates
+      operations:
+      - name: createusermessagetemplate
+        method: POST
+        description: Create User Message Template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: listusermessagetemplates
+        method: GET
+        description: List User Message Templates
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: siteIds
+          in: query
+          type: array
+          description: Site ID(s) to filter user message templates, associated with particular sites.
+        - name: scope
+          in: query
+          type: string
+          description: Message templates scope. By default the value is all - both Personal and Company templates will be
+            returned
+    - name: restapi-v1.0-account-accountId-extension-extensionId-message-store-templates-tem
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/message-store-templates/{templateId}
+      operations:
+      - name: updateusermessagetemplate
+        method: PUT
+        description: Update User Message Template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: readusermessagetemplate
+        method: GET
+        description: Get User Message Template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: deleteusermessagetemplate
+        method: DELETE
+        description: Delete User Message Template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-v1.0-account-accountId-message-store-templates
+      path: /restapi/v1.0/account/{accountId}/message-store-templates
+      operations:
+      - name: createcompanymessagetemplate
+        method: POST
+        description: Create Company Message Template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: listcompanymessagetemplates
+        method: GET
+        description: List Company Message Templates
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: siteIds
+          in: query
+          type: array
+          description: Site ID(s) to filter company message templates, associated with particular sites
+    - name: restapi-v1.0-account-accountId-message-store-templates-templateId
+      path: /restapi/v1.0/account/{accountId}/message-store-templates/{templateId}
+      operations:
+      - name: updatecompanymessagetemplate
+        method: PUT
+        description: Update Company Message Template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: readcompanymessagetemplate
+        method: GET
+        description: Get Company Message Template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: deletecompanymessagetemplate
+        method: DELETE
+        description: Delete Company Message Template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-sms-templates-rest
+    port: 8080
+    description: REST adapter for RingCentral API — SMS Templates. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/message-store-templates
+      name: restapi-v1-0-account-accountid-extension-extensionid-message-store-templates
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-message-store-templates.
+      operations:
+      - method: POST
+        name: createusermessagetemplate
+        description: Create User Message Template
+        call: platform-sms-templates.createusermessagetemplate
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: GET
+        name: listusermessagetemplates
+        description: List User Message Templates
+        call: platform-sms-templates.listusermessagetemplates
+        with:
+          siteIds: rest.siteIds
+          scope: rest.scope
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/message-store-templates/{templateid}
+      name: restapi-v1-0-account-accountid-extension-extensionid-message-store-templates-tem
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-message-store-templates-tem.
+      operations:
+      - method: PUT
+        name: updateusermessagetemplate
+        description: Update User Message Template
+        call: platform-sms-templates.updateusermessagetemplate
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: GET
+        name: readusermessagetemplate
+        description: Get User Message Template
+        call: platform-sms-templates.readusermessagetemplate
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteusermessagetemplate
+        description: Delete User Message Template
+        call: platform-sms-templates.deleteusermessagetemplate
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/message-store-templates
+      name: restapi-v1-0-account-accountid-message-store-templates
+      description: REST surface for restapi-v1.0-account-accountId-message-store-templates.
+      operations:
+      - method: POST
+        name: createcompanymessagetemplate
+        description: Create Company Message Template
+        call: platform-sms-templates.createcompanymessagetemplate
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: GET
+        name: listcompanymessagetemplates
+        description: List Company Message Templates
+        call: platform-sms-templates.listcompanymessagetemplates
+        with:
+          siteIds: rest.siteIds
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/message-store-templates/{templateid}
+      name: restapi-v1-0-account-accountid-message-store-templates-templateid
+      description: REST surface for restapi-v1.0-account-accountId-message-store-templates-templateId.
+      operations:
+      - method: PUT
+        name: updatecompanymessagetemplate
+        description: Update Company Message Template
+        call: platform-sms-templates.updatecompanymessagetemplate
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: GET
+        name: readcompanymessagetemplate
+        description: Get Company Message Template
+        call: platform-sms-templates.readcompanymessagetemplate
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletecompanymessagetemplate
+        description: Delete Company Message Template
+        call: platform-sms-templates.deletecompanymessagetemplate
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-sms-templates-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — SMS Templates. One tool per consumed operation, routed inline through this
+      capability's consumes block.
+    tools:
+    - name: create-user-message-template
+      description: Create User Message Template
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-sms-templates.createusermessagetemplate
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-user-message-templates
+      description: List User Message Templates
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-sms-templates.listusermessagetemplates
+      with:
+        siteIds: tools.siteIds
+        scope: tools.scope
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-user-message-template
+      description: Update User Message Template
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-sms-templates.updateusermessagetemplate
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-user-message-template
+      description: Get User Message Template
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-sms-templates.readusermessagetemplate
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-user-message-template
+      description: Delete User Message Template
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-sms-templates.deleteusermessagetemplate
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-company-message-template
+      description: Create Company Message Template
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-sms-templates.createcompanymessagetemplate
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-company-message-templates
+      description: List Company Message Templates
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-sms-templates.listcompanymessagetemplates
+      with:
+        siteIds: tools.siteIds
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-company-message-template
+      description: Update Company Message Template
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-sms-templates.updatecompanymessagetemplate
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-company-message-template
+      description: Get Company Message Template
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-sms-templates.readcompanymessagetemplate
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-company-message-template
+      description: Delete Company Message Template
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-sms-templates.deletecompanymessagetemplate
+      outputParameters:
+      - type: object
+        mapping: $.

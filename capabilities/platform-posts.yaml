@@ -1,0 +1,328 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Posts
+  description: 'RingCentral API — Posts. 6 operations. Lead operation: List Posts. Self-contained Naftiko capability covering
+    one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Posts
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-posts
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Posts business capability. Self-contained, no shared references.
+    resources:
+    - name: team-messaging-v1-chats-chatId-posts
+      path: /team-messaging/v1/chats/{chatId}/posts
+      operations:
+      - name: readglippostsnew
+        method: GET
+        description: List Posts
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a chat
+          required: true
+        - name: recordCount
+          in: query
+          type: integer
+          description: Max number of posts to be fetched by one request (not more than 250)
+        - name: pageToken
+          in: query
+          type: string
+          description: Pagination token.
+      - name: createglippostnew
+        method: POST
+        description: Create Post
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a chat.
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: team-messaging-v1-chats-chatId-posts-postId
+      path: /team-messaging/v1/chats/{chatId}/posts/{postId}
+      operations:
+      - name: readglippostnew
+        method: GET
+        description: Get Post
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a chat
+          required: true
+        - name: postId
+          in: path
+          type: string
+          description: Internal identifier of a post
+          required: true
+      - name: deleteglippostnew
+        method: DELETE
+        description: Delete Post
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a chat
+          required: true
+        - name: postId
+          in: path
+          type: string
+          description: Internal identifier of a post to be deleted
+          required: true
+      - name: patchglippostnew
+        method: PATCH
+        description: Update Post
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a chat
+          required: true
+        - name: postId
+          in: path
+          type: string
+          description: Internal identifier of a post to be updated
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: team-messaging-v1-files
+      path: /team-messaging/v1/files
+      operations:
+      - name: createglipfilenew
+        method: POST
+        description: Upload File
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: groupId
+          in: query
+          type: integer
+          description: Internal identifier of a group to which the post with attachment will be added to
+        - name: name
+          in: query
+          type: string
+          description: Name of a file attached
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-posts-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Posts. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/team-messaging/v1/chats/{chatid}/posts
+      name: team-messaging-v1-chats-chatid-posts
+      description: REST surface for team-messaging-v1-chats-chatId-posts.
+      operations:
+      - method: GET
+        name: readglippostsnew
+        description: List Posts
+        call: platform-posts.readglippostsnew
+        with:
+          chatId: rest.chatId
+          recordCount: rest.recordCount
+          pageToken: rest.pageToken
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createglippostnew
+        description: Create Post
+        call: platform-posts.createglippostnew
+        with:
+          chatId: rest.chatId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/chats/{chatid}/posts/{postid}
+      name: team-messaging-v1-chats-chatid-posts-postid
+      description: REST surface for team-messaging-v1-chats-chatId-posts-postId.
+      operations:
+      - method: GET
+        name: readglippostnew
+        description: Get Post
+        call: platform-posts.readglippostnew
+        with:
+          chatId: rest.chatId
+          postId: rest.postId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteglippostnew
+        description: Delete Post
+        call: platform-posts.deleteglippostnew
+        with:
+          chatId: rest.chatId
+          postId: rest.postId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: patchglippostnew
+        description: Update Post
+        call: platform-posts.patchglippostnew
+        with:
+          chatId: rest.chatId
+          postId: rest.postId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/files
+      name: team-messaging-v1-files
+      description: REST surface for team-messaging-v1-files.
+      operations:
+      - method: POST
+        name: createglipfilenew
+        description: Upload File
+        call: platform-posts.createglipfilenew
+        with:
+          groupId: rest.groupId
+          name: rest.name
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-posts-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Posts. One tool per consumed operation, routed inline through this capability's
+      consumes block.
+    tools:
+    - name: list-posts
+      description: List Posts
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-posts.readglippostsnew
+      with:
+        chatId: tools.chatId
+        recordCount: tools.recordCount
+        pageToken: tools.pageToken
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-post
+      description: Create Post
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-posts.createglippostnew
+      with:
+        chatId: tools.chatId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-post
+      description: Get Post
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-posts.readglippostnew
+      with:
+        chatId: tools.chatId
+        postId: tools.postId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-post
+      description: Delete Post
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-posts.deleteglippostnew
+      with:
+        chatId: tools.chatId
+        postId: tools.postId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-post
+      description: Update Post
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-posts.patchglippostnew
+      with:
+        chatId: tools.chatId
+        postId: tools.postId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: upload-file
+      description: Upload File
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-posts.createglipfilenew
+      with:
+        groupId: tools.groupId
+        name: tools.name
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

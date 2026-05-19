@@ -1,0 +1,162 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Conversations
+  description: 'RingCentral API — Conversations. 3 operations. Lead operation: List Conversations. Self-contained Naftiko
+    capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Conversations
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-conversations
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Conversations business capability. Self-contained, no shared references.
+    resources:
+    - name: team-messaging-v1-conversations
+      path: /team-messaging/v1/conversations
+      operations:
+      - name: listglipconversationsnew
+        method: GET
+        description: List Conversations
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: recordCount
+          in: query
+          type: integer
+          description: Number of conversations to be fetched by one request. The maximum value is 250, by default - 30
+        - name: pageToken
+          in: query
+          type: string
+          description: Pagination token.
+      - name: createglipconversationnew
+        method: POST
+        description: Create/Open Conversation
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: team-messaging-v1-conversations-chatId
+      path: /team-messaging/v1/conversations/{chatId}
+      operations:
+      - name: readglipconversationnew
+        method: GET
+        description: Get Conversation
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a conversation to be returned.
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-conversations-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Conversations. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/team-messaging/v1/conversations
+      name: team-messaging-v1-conversations
+      description: REST surface for team-messaging-v1-conversations.
+      operations:
+      - method: GET
+        name: listglipconversationsnew
+        description: List Conversations
+        call: platform-conversations.listglipconversationsnew
+        with:
+          recordCount: rest.recordCount
+          pageToken: rest.pageToken
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createglipconversationnew
+        description: Create/Open Conversation
+        call: platform-conversations.createglipconversationnew
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/conversations/{chatid}
+      name: team-messaging-v1-conversations-chatid
+      description: REST surface for team-messaging-v1-conversations-chatId.
+      operations:
+      - method: GET
+        name: readglipconversationnew
+        description: Get Conversation
+        call: platform-conversations.readglipconversationnew
+        with:
+          chatId: rest.chatId
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-conversations-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Conversations. One tool per consumed operation, routed inline through this
+      capability's consumes block.
+    tools:
+    - name: list-conversations
+      description: List Conversations
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-conversations.listglipconversationsnew
+      with:
+        recordCount: tools.recordCount
+        pageToken: tools.pageToken
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-open-conversation
+      description: Create/Open Conversation
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-conversations.createglipconversationnew
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-conversation
+      description: Get Conversation
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-conversations.readglipconversationnew
+      with:
+        chatId: tools.chatId
+      outputParameters:
+      - type: object
+        mapping: $.

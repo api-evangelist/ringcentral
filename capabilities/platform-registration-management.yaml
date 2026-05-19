@@ -1,0 +1,105 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Registration Management
+  description: 'RingCentral API — Registration Management. 2 operations. Lead operation: Get Registration Session Info. Self-contained
+    Naftiko capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Registration Management
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-registration-management
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Registration Management business capability. Self-contained, no shared references.
+    resources:
+    - name: webinar-registration-v1-sessions-sessionId
+      path: /webinar/registration/v1/sessions/{sessionId}
+      operations:
+      - name: rcwreggetsession
+        method: GET
+        description: Get Registration Session Info
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: rcwregupdatesession
+        method: PATCH
+        description: Update Registration Session
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-registration-management-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Registration Management. One Spectral-compliant resource per consumed
+      operation, prefixed with /v1.
+    resources:
+    - path: /v1/webinar/registration/v1/sessions/{sessionid}
+      name: webinar-registration-v1-sessions-sessionid
+      description: REST surface for webinar-registration-v1-sessions-sessionId.
+      operations:
+      - method: GET
+        name: rcwreggetsession
+        description: Get Registration Session Info
+        call: platform-registration-management.rcwreggetsession
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: rcwregupdatesession
+        description: Update Registration Session
+        call: platform-registration-management.rcwregupdatesession
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-registration-management-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Registration Management. One tool per consumed operation, routed inline
+      through this capability's consumes block.
+    tools:
+    - name: get-registration-session-info
+      description: Get Registration Session Info
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-registration-management.rcwreggetsession
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-registration-session
+      description: Update Registration Session
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-registration-management.rcwregupdatesession
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

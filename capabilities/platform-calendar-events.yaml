@@ -1,0 +1,323 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Calendar Events
+  description: 'RingCentral API — Calendar Events. 7 operations. Lead operation: List User Events. Self-contained Naftiko
+    capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Calendar Events
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-calendar-events
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Calendar Events business capability. Self-contained, no shared references.
+    resources:
+    - name: team-messaging-v1-events
+      path: /team-messaging/v1/events
+      operations:
+      - name: readglipeventsnew
+        method: GET
+        description: List User Events
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: recordCount
+          in: query
+          type: integer
+          description: Number of groups to be fetched by one request. The maximum value is 250, by default - 30.
+        - name: pageToken
+          in: query
+          type: string
+          description: Token of a page to be returned
+      - name: createeventnew
+        method: POST
+        description: Create Event
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: team-messaging-v1-events-eventId
+      path: /team-messaging/v1/events/{eventId}
+      operations:
+      - name: readeventnew
+        method: GET
+        description: Get Event
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: eventId
+          in: path
+          type: array
+          description: Event id or comma separated list of event ids.
+          required: true
+      - name: updateeventnew
+        method: PUT
+        description: Update Event
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: eventId
+          in: path
+          type: string
+          description: Internal identifier of an event
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deleteeventnew
+        method: DELETE
+        description: Delete Event
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: eventId
+          in: path
+          type: string
+          description: Internal identifier of an event to be deleted
+          required: true
+    - name: team-messaging-v1-groups-groupId-events
+      path: /team-messaging/v1/groups/{groupId}/events
+      operations:
+      - name: listgroupeventsnew
+        method: GET
+        description: List Group Events
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: groupId
+          in: path
+          type: string
+          description: Internal identifier of a group
+          required: true
+      - name: createeventbygroupidnew
+        method: POST
+        description: Create Event by Group ID
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: groupId
+          in: path
+          type: string
+          description: Internal identifier of a group
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-calendar-events-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Calendar Events. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/team-messaging/v1/events
+      name: team-messaging-v1-events
+      description: REST surface for team-messaging-v1-events.
+      operations:
+      - method: GET
+        name: readglipeventsnew
+        description: List User Events
+        call: platform-calendar-events.readglipeventsnew
+        with:
+          recordCount: rest.recordCount
+          pageToken: rest.pageToken
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createeventnew
+        description: Create Event
+        call: platform-calendar-events.createeventnew
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/events/{eventid}
+      name: team-messaging-v1-events-eventid
+      description: REST surface for team-messaging-v1-events-eventId.
+      operations:
+      - method: GET
+        name: readeventnew
+        description: Get Event
+        call: platform-calendar-events.readeventnew
+        with:
+          eventId: rest.eventId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updateeventnew
+        description: Update Event
+        call: platform-calendar-events.updateeventnew
+        with:
+          eventId: rest.eventId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteeventnew
+        description: Delete Event
+        call: platform-calendar-events.deleteeventnew
+        with:
+          eventId: rest.eventId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/groups/{groupid}/events
+      name: team-messaging-v1-groups-groupid-events
+      description: REST surface for team-messaging-v1-groups-groupId-events.
+      operations:
+      - method: GET
+        name: listgroupeventsnew
+        description: List Group Events
+        call: platform-calendar-events.listgroupeventsnew
+        with:
+          groupId: rest.groupId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createeventbygroupidnew
+        description: Create Event by Group ID
+        call: platform-calendar-events.createeventbygroupidnew
+        with:
+          groupId: rest.groupId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-calendar-events-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Calendar Events. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: list-user-events
+      description: List User Events
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-calendar-events.readglipeventsnew
+      with:
+        recordCount: tools.recordCount
+        pageToken: tools.pageToken
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-event
+      description: Create Event
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-calendar-events.createeventnew
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-event
+      description: Get Event
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-calendar-events.readeventnew
+      with:
+        eventId: tools.eventId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-event
+      description: Update Event
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-calendar-events.updateeventnew
+      with:
+        eventId: tools.eventId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-event
+      description: Delete Event
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-calendar-events.deleteeventnew
+      with:
+        eventId: tools.eventId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-group-events
+      description: List Group Events
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-calendar-events.listgroupeventsnew
+      with:
+        groupId: tools.groupId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-event-group-id
+      description: Create Event by Group ID
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-calendar-events.createeventbygroupidnew
+      with:
+        groupId: tools.groupId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

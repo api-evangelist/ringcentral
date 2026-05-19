@@ -1,0 +1,229 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Webinar Subscriptions
+  description: 'RingCentral API — Webinar Subscriptions. 6 operations. Lead operation: List Webinar Subscriptions. Self-contained
+    Naftiko capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Webinar Subscriptions
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-webinar-subscriptions
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Webinar Subscriptions business capability. Self-contained, no shared references.
+    resources:
+    - name: webinar-notifications-v1-subscriptions
+      path: /webinar/notifications/v1/subscriptions
+      operations:
+      - name: rcwn11slistsubscriptions
+        method: GET
+        description: List Webinar Subscriptions
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: rcwn11screatesubscription
+        method: POST
+        description: Create Webinar Subscription
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: webinar-notifications-v1-subscriptions-subscriptionId
+      path: /webinar/notifications/v1/subscriptions/{subscriptionId}
+      operations:
+      - name: rcwn11sgetsubscription
+        method: GET
+        description: Get Webinar Subscription
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: rcwn11supdatesubscription
+        method: PUT
+        description: Update Webinar Subscription
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: rcwn11sdeletesubscription
+        method: DELETE
+        description: Cancel Webinar Subscription
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: webinar-notifications-v1-subscriptions-subscriptionId-renew
+      path: /webinar/notifications/v1/subscriptions/{subscriptionId}/renew
+      operations:
+      - name: rcwn11srenewsubscription
+        method: POST
+        description: Renew Webinar Subscription
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-webinar-subscriptions-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Webinar Subscriptions. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/webinar/notifications/v1/subscriptions
+      name: webinar-notifications-v1-subscriptions
+      description: REST surface for webinar-notifications-v1-subscriptions.
+      operations:
+      - method: GET
+        name: rcwn11slistsubscriptions
+        description: List Webinar Subscriptions
+        call: platform-webinar-subscriptions.rcwn11slistsubscriptions
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: rcwn11screatesubscription
+        description: Create Webinar Subscription
+        call: platform-webinar-subscriptions.rcwn11screatesubscription
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/webinar/notifications/v1/subscriptions/{subscriptionid}
+      name: webinar-notifications-v1-subscriptions-subscriptionid
+      description: REST surface for webinar-notifications-v1-subscriptions-subscriptionId.
+      operations:
+      - method: GET
+        name: rcwn11sgetsubscription
+        description: Get Webinar Subscription
+        call: platform-webinar-subscriptions.rcwn11sgetsubscription
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: rcwn11supdatesubscription
+        description: Update Webinar Subscription
+        call: platform-webinar-subscriptions.rcwn11supdatesubscription
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: rcwn11sdeletesubscription
+        description: Cancel Webinar Subscription
+        call: platform-webinar-subscriptions.rcwn11sdeletesubscription
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/webinar/notifications/v1/subscriptions/{subscriptionid}/renew
+      name: webinar-notifications-v1-subscriptions-subscriptionid-renew
+      description: REST surface for webinar-notifications-v1-subscriptions-subscriptionId-renew.
+      operations:
+      - method: POST
+        name: rcwn11srenewsubscription
+        description: Renew Webinar Subscription
+        call: platform-webinar-subscriptions.rcwn11srenewsubscription
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-webinar-subscriptions-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Webinar Subscriptions. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: list-webinar-subscriptions
+      description: List Webinar Subscriptions
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-webinar-subscriptions.rcwn11slistsubscriptions
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-webinar-subscription
+      description: Create Webinar Subscription
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-webinar-subscriptions.rcwn11screatesubscription
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-webinar-subscription
+      description: Get Webinar Subscription
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-webinar-subscriptions.rcwn11sgetsubscription
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-webinar-subscription
+      description: Update Webinar Subscription
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-webinar-subscriptions.rcwn11supdatesubscription
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: cancel-webinar-subscription
+      description: Cancel Webinar Subscription
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-webinar-subscriptions.rcwn11sdeletesubscription
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: renew-webinar-subscription
+      description: Renew Webinar Subscription
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-webinar-subscriptions.rcwn11srenewsubscription
+      outputParameters:
+      - type: object
+        mapping: $.

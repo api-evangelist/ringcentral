@@ -1,0 +1,102 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Identities
+  description: 'RingCentral API — Identities. 2 operations. Lead operation: List All Identities. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Identities
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-identities
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Identities business capability. Self-contained, no shared references.
+    resources:
+    - name: cx-social-messaging-v1-identities
+      path: /cx/social-messaging/v1/identities
+      operations:
+      - name: socmsglistidentities
+        method: GET
+        description: List All Identities
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: cx-social-messaging-v1-identities-identityId
+      path: /cx/social-messaging/v1/identities/{identityId}
+      operations:
+      - name: socmsggetidentity
+        method: GET
+        description: Get Identity
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-identities-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Identities. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/cx/social-messaging/v1/identities
+      name: cx-social-messaging-v1-identities
+      description: REST surface for cx-social-messaging-v1-identities.
+      operations:
+      - method: GET
+        name: socmsglistidentities
+        description: List All Identities
+        call: platform-identities.socmsglistidentities
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/cx/social-messaging/v1/identities/{identityid}
+      name: cx-social-messaging-v1-identities-identityid
+      description: REST surface for cx-social-messaging-v1-identities-identityId.
+      operations:
+      - method: GET
+        name: socmsggetidentity
+        description: Get Identity
+        call: platform-identities.socmsggetidentity
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-identities-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Identities. One tool per consumed operation, routed inline through this
+      capability's consumes block.
+    tools:
+    - name: list-all-identities
+      description: List All Identities
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-identities.socmsglistidentities
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-identity
+      description: Get Identity
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-identities.socmsggetidentity
+      outputParameters:
+      - type: object
+        mapping: $.

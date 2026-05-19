@@ -1,0 +1,105 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Site Administration
+  description: 'RingCentral API — Site Administration. 2 operations. Lead operation: List User Administered Sites. Self-contained
+    Naftiko capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Site Administration
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-site-administration
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Site Administration business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-extension-extensionId-administered-sites
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/administered-sites
+      operations:
+      - name: listadministeredsites
+        method: GET
+        description: List User Administered Sites
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updateuseradministeredsites
+        method: PUT
+        description: Update User Administered Sites
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-site-administration-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Site Administration. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/administered-sites
+      name: restapi-v1-0-account-accountid-extension-extensionid-administered-sites
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-administered-sites.
+      operations:
+      - method: GET
+        name: listadministeredsites
+        description: List User Administered Sites
+        call: platform-site-administration.listadministeredsites
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updateuseradministeredsites
+        description: Update User Administered Sites
+        call: platform-site-administration.updateuseradministeredsites
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-site-administration-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Site Administration. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: list-user-administered-sites
+      description: List User Administered Sites
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-site-administration.listadministeredsites
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-user-administered-sites
+      description: Update User Administered Sites
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-site-administration.updateuseradministeredsites
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

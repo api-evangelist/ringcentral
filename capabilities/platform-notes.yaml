@@ -1,0 +1,409 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Notes
+  description: 'RingCentral API — Notes. 8 operations. Lead operation: List Notes. Self-contained Naftiko capability covering
+    one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Notes
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-notes
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Notes business capability. Self-contained, no shared references.
+    resources:
+    - name: team-messaging-v1-chats-chatId-notes
+      path: /team-messaging/v1/chats/{chatId}/notes
+      operations:
+      - name: listchatnotesnew
+        method: GET
+        description: List Notes
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a chat to fetch notes from.
+          required: true
+        - name: creationTimeTo
+          in: query
+          type: string
+          description: The end datetime for resulting records in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+        - name: creationTimeFrom
+          in: query
+          type: string
+          description: The start datetime for resulting records in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+        - name: creatorId
+          in: query
+          type: string
+          description: Internal identifier of the user that created the note. Multiple
+        - name: status
+          in: query
+          type: string
+          description: Status of notes to be fetched; if not specified all notes are
+        - name: pageToken
+          in: query
+          type: string
+          description: Pagination token
+        - name: recordCount
+          in: query
+          type: integer
+          description: Max number of notes to be fetched by one request; the value range is 1-250.
+      - name: createchatnotenew
+        method: POST
+        description: Create Note
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a chat to create a note in
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: team-messaging-v1-notes-noteId
+      path: /team-messaging/v1/notes/{noteId}
+      operations:
+      - name: readusernotenew
+        method: GET
+        description: Get Note
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: noteId
+          in: path
+          type: string
+          description: Internal identifier of a note to be fetched
+          required: true
+      - name: deletenotenew
+        method: DELETE
+        description: Delete Note
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: noteId
+          in: path
+          type: string
+          description: Internal identifier of a note to be deleted
+          required: true
+      - name: patchnotenew
+        method: PATCH
+        description: Update Note
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: noteId
+          in: path
+          type: string
+          description: Internal identifier of a note to be updated
+          required: true
+        - name: releaseLock
+          in: query
+          type: boolean
+          description: If true then note lock (if any) will be released upon request
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: team-messaging-v1-notes-noteId-lock
+      path: /team-messaging/v1/notes/{noteId}/lock
+      operations:
+      - name: locknotenew
+        method: POST
+        description: Lock Note
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: noteId
+          in: path
+          type: string
+          description: Internal identifier of a note to be locked
+          required: true
+    - name: team-messaging-v1-notes-noteId-publish
+      path: /team-messaging/v1/notes/{noteId}/publish
+      operations:
+      - name: publishnotenew
+        method: POST
+        description: Publish Note
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: noteId
+          in: path
+          type: string
+          description: Internal identifier of a note to be published
+          required: true
+    - name: team-messaging-v1-notes-noteId-unlock
+      path: /team-messaging/v1/notes/{noteId}/unlock
+      operations:
+      - name: unlocknotenew
+        method: POST
+        description: Unlock Note
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: noteId
+          in: path
+          type: string
+          description: Internal identifier of a note to be unlocked
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-notes-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Notes. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/team-messaging/v1/chats/{chatid}/notes
+      name: team-messaging-v1-chats-chatid-notes
+      description: REST surface for team-messaging-v1-chats-chatId-notes.
+      operations:
+      - method: GET
+        name: listchatnotesnew
+        description: List Notes
+        call: platform-notes.listchatnotesnew
+        with:
+          chatId: rest.chatId
+          creationTimeTo: rest.creationTimeTo
+          creationTimeFrom: rest.creationTimeFrom
+          creatorId: rest.creatorId
+          status: rest.status
+          pageToken: rest.pageToken
+          recordCount: rest.recordCount
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createchatnotenew
+        description: Create Note
+        call: platform-notes.createchatnotenew
+        with:
+          chatId: rest.chatId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/notes/{noteid}
+      name: team-messaging-v1-notes-noteid
+      description: REST surface for team-messaging-v1-notes-noteId.
+      operations:
+      - method: GET
+        name: readusernotenew
+        description: Get Note
+        call: platform-notes.readusernotenew
+        with:
+          noteId: rest.noteId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletenotenew
+        description: Delete Note
+        call: platform-notes.deletenotenew
+        with:
+          noteId: rest.noteId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: patchnotenew
+        description: Update Note
+        call: platform-notes.patchnotenew
+        with:
+          noteId: rest.noteId
+          releaseLock: rest.releaseLock
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/notes/{noteid}/lock
+      name: team-messaging-v1-notes-noteid-lock
+      description: REST surface for team-messaging-v1-notes-noteId-lock.
+      operations:
+      - method: POST
+        name: locknotenew
+        description: Lock Note
+        call: platform-notes.locknotenew
+        with:
+          noteId: rest.noteId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/notes/{noteid}/publish
+      name: team-messaging-v1-notes-noteid-publish
+      description: REST surface for team-messaging-v1-notes-noteId-publish.
+      operations:
+      - method: POST
+        name: publishnotenew
+        description: Publish Note
+        call: platform-notes.publishnotenew
+        with:
+          noteId: rest.noteId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/notes/{noteid}/unlock
+      name: team-messaging-v1-notes-noteid-unlock
+      description: REST surface for team-messaging-v1-notes-noteId-unlock.
+      operations:
+      - method: POST
+        name: unlocknotenew
+        description: Unlock Note
+        call: platform-notes.unlocknotenew
+        with:
+          noteId: rest.noteId
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-notes-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Notes. One tool per consumed operation, routed inline through this capability's
+      consumes block.
+    tools:
+    - name: list-notes
+      description: List Notes
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-notes.listchatnotesnew
+      with:
+        chatId: tools.chatId
+        creationTimeTo: tools.creationTimeTo
+        creationTimeFrom: tools.creationTimeFrom
+        creatorId: tools.creatorId
+        status: tools.status
+        pageToken: tools.pageToken
+        recordCount: tools.recordCount
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-note
+      description: Create Note
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-notes.createchatnotenew
+      with:
+        chatId: tools.chatId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-note
+      description: Get Note
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-notes.readusernotenew
+      with:
+        noteId: tools.noteId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-note
+      description: Delete Note
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-notes.deletenotenew
+      with:
+        noteId: tools.noteId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-note
+      description: Update Note
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-notes.patchnotenew
+      with:
+        noteId: tools.noteId
+        releaseLock: tools.releaseLock
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: lock-note
+      description: Lock Note
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-notes.locknotenew
+      with:
+        noteId: tools.noteId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: publish-note
+      description: Publish Note
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-notes.publishnotenew
+      with:
+        noteId: tools.noteId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: unlock-note
+      description: Unlock Note
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-notes.unlocknotenew
+      with:
+        noteId: tools.noteId
+      outputParameters:
+      - type: object
+        mapping: $.

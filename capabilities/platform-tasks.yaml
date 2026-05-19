@@ -1,0 +1,344 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Tasks
+  description: 'RingCentral API — Tasks. 6 operations. Lead operation: List Chat Tasks. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Tasks
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-tasks
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Tasks business capability. Self-contained, no shared references.
+    resources:
+    - name: team-messaging-v1-chats-chatId-tasks
+      path: /team-messaging/v1/chats/{chatId}/tasks
+      operations:
+      - name: listchattasksnew
+        method: GET
+        description: List Chat Tasks
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a chat
+          required: true
+        - name: creationTimeTo
+          in: query
+          type: string
+          description: The end datetime for resulting records in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+        - name: creationTimeFrom
+          in: query
+          type: string
+          description: The start datetime for resulting records in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+        - name: creatorId
+          in: query
+          type: array
+          description: Internal identifier of a task creator
+        - name: status
+          in: query
+          type: array
+          description: Task execution status
+        - name: assignmentStatus
+          in: query
+          type: string
+          description: Task assignment status
+        - name: assigneeId
+          in: query
+          type: array
+          description: Internal identifier of a task assignee
+        - name: assigneeStatus
+          in: query
+          type: string
+          description: Task execution status by assignee(-s) specified in assigneeId
+        - name: pageToken
+          in: query
+          type: string
+          description: Token of the current page. If token is omitted then the first
+        - name: recordCount
+          in: query
+          type: integer
+          description: Number of records to be returned per screen
+      - name: createtasknew
+        method: POST
+        description: Create Task
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: chatId
+          in: path
+          type: string
+          description: Internal identifier of a chat
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: team-messaging-v1-tasks-taskId
+      path: /team-messaging/v1/tasks/{taskId}
+      operations:
+      - name: readtasknew
+        method: GET
+        description: Get Task
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: taskId
+          in: path
+          type: string
+          description: Task identifier or comma separated list of task IDs
+          required: true
+      - name: deletetasknew
+        method: DELETE
+        description: Delete Task
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: taskId
+          in: path
+          type: string
+          description: Internal identifier of a task
+          required: true
+      - name: patchtasknew
+        method: PATCH
+        description: Update Task
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: taskId
+          in: path
+          type: string
+          description: Internal identifier of a task
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: team-messaging-v1-tasks-taskId-complete
+      path: /team-messaging/v1/tasks/{taskId}/complete
+      operations:
+      - name: completetasknew
+        method: POST
+        description: Complete Task
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: taskId
+          in: path
+          type: string
+          description: Internal identifier of a task
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-tasks-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Tasks. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/team-messaging/v1/chats/{chatid}/tasks
+      name: team-messaging-v1-chats-chatid-tasks
+      description: REST surface for team-messaging-v1-chats-chatId-tasks.
+      operations:
+      - method: GET
+        name: listchattasksnew
+        description: List Chat Tasks
+        call: platform-tasks.listchattasksnew
+        with:
+          chatId: rest.chatId
+          creationTimeTo: rest.creationTimeTo
+          creationTimeFrom: rest.creationTimeFrom
+          creatorId: rest.creatorId
+          status: rest.status
+          assignmentStatus: rest.assignmentStatus
+          assigneeId: rest.assigneeId
+          assigneeStatus: rest.assigneeStatus
+          pageToken: rest.pageToken
+          recordCount: rest.recordCount
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createtasknew
+        description: Create Task
+        call: platform-tasks.createtasknew
+        with:
+          chatId: rest.chatId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/tasks/{taskid}
+      name: team-messaging-v1-tasks-taskid
+      description: REST surface for team-messaging-v1-tasks-taskId.
+      operations:
+      - method: GET
+        name: readtasknew
+        description: Get Task
+        call: platform-tasks.readtasknew
+        with:
+          taskId: rest.taskId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletetasknew
+        description: Delete Task
+        call: platform-tasks.deletetasknew
+        with:
+          taskId: rest.taskId
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: patchtasknew
+        description: Update Task
+        call: platform-tasks.patchtasknew
+        with:
+          taskId: rest.taskId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/team-messaging/v1/tasks/{taskid}/complete
+      name: team-messaging-v1-tasks-taskid-complete
+      description: REST surface for team-messaging-v1-tasks-taskId-complete.
+      operations:
+      - method: POST
+        name: completetasknew
+        description: Complete Task
+        call: platform-tasks.completetasknew
+        with:
+          taskId: rest.taskId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-tasks-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Tasks. One tool per consumed operation, routed inline through this capability's
+      consumes block.
+    tools:
+    - name: list-chat-tasks
+      description: List Chat Tasks
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-tasks.listchattasksnew
+      with:
+        chatId: tools.chatId
+        creationTimeTo: tools.creationTimeTo
+        creationTimeFrom: tools.creationTimeFrom
+        creatorId: tools.creatorId
+        status: tools.status
+        assignmentStatus: tools.assignmentStatus
+        assigneeId: tools.assigneeId
+        assigneeStatus: tools.assigneeStatus
+        pageToken: tools.pageToken
+        recordCount: tools.recordCount
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-task
+      description: Create Task
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-tasks.createtasknew
+      with:
+        chatId: tools.chatId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-task
+      description: Get Task
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-tasks.readtasknew
+      with:
+        taskId: tools.taskId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-task
+      description: Delete Task
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-tasks.deletetasknew
+      with:
+        taskId: tools.taskId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-task
+      description: Update Task
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-tasks.patchtasknew
+      with:
+        taskId: tools.taskId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: complete-task
+      description: Complete Task
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-tasks.completetasknew
+      with:
+        taskId: tools.taskId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

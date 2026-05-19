@@ -1,0 +1,80 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Pager Messages
+  description: 'RingCentral API — Pager Messages. 1 operations. Lead operation: Create Internal Text Message. Self-contained
+    Naftiko capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Pager Messages
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-pager-messages
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Pager Messages business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-extension-extensionId-company-pager
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/company-pager
+      operations:
+      - name: createinternaltextmessage
+        method: POST
+        description: Create Internal Text Message
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-pager-messages-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Pager Messages. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/company-pager
+      name: restapi-v1-0-account-accountid-extension-extensionid-company-pager
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-company-pager.
+      operations:
+      - method: POST
+        name: createinternaltextmessage
+        description: Create Internal Text Message
+        call: platform-pager-messages.createinternaltextmessage
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-pager-messages-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Pager Messages. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: create-internal-text-message
+      description: Create Internal Text Message
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-pager-messages.createinternaltextmessage
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.

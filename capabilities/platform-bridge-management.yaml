@@ -1,0 +1,371 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Bridge Management
+  description: 'RingCentral API — Bridge Management. 7 operations. Lead operation: Create Bridge. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Bridge Management
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-bridge-management
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Bridge Management business capability. Self-contained, no shared references.
+    resources:
+    - name: rcvideo-v2-account-accountId-extension-extensionId-bridges
+      path: /rcvideo/v2/account/{accountId}/extension/{extensionId}/bridges
+      operations:
+      - name: createbridge
+        method: POST
+        description: Create Bridge
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: accountId
+          in: path
+          type: string
+          description: Account identifier
+          required: true
+        - name: extensionId
+          in: path
+          type: string
+          description: Extension identifier
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: rcvideo-v2-account-accountId-extension-extensionId-bridges-default
+      path: /rcvideo/v2/account/{accountId}/extension/{extensionId}/bridges/default
+      operations:
+      - name: getdefaultbridge
+        method: GET
+        description: Get User's Default Bridge
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: accountId
+          in: path
+          type: string
+          description: Account identifier
+          required: true
+        - name: extensionId
+          in: path
+          type: string
+          description: Extension identifier
+          required: true
+    - name: rcvideo-v2-bridges-pin-pstn-pin
+      path: /rcvideo/v2/bridges/pin/pstn/{pin}
+      operations:
+      - name: getbridgebypstnpin
+        method: GET
+        description: Search Bridge by PSTN PIN
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: pin
+          in: path
+          type: string
+          description: Host or Participant PSTN PIN
+          required: true
+        - name: phoneNumber
+          in: query
+          type: string
+          description: Phone number to find a phone group for PSTN PIN. If it is not specified, then the default phone group
+            will be used.
+        - name: pw
+          in: query
+          type: string
+          description: Bridge hash password
+    - name: rcvideo-v2-bridges-pin-web-pin
+      path: /rcvideo/v2/bridges/pin/web/{pin}
+      operations:
+      - name: getbridgebywebpin
+        method: GET
+        description: Search Bridge by Web PIN
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: pin
+          in: path
+          type: string
+          description: Bridge short identifier (Web PIN) or alias (personal meeting name)
+          required: true
+        - name: pw
+          in: query
+          type: string
+          description: Bridge hash password
+    - name: rcvideo-v2-bridges-bridgeId
+      path: /rcvideo/v2/bridges/{bridgeId}
+      operations:
+      - name: getbridge
+        method: GET
+        description: Get Bridge
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: bridgeId
+          in: path
+          type: string
+          description: Bridge identifier
+          required: true
+        - name: pw
+          in: query
+          type: string
+          description: Bridge hash password
+      - name: updatebridge
+        method: PATCH
+        description: Update Bridge
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: bridgeId
+          in: path
+          type: string
+          description: Bridge identifier
+          required: true
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deletebridge
+        method: DELETE
+        description: Delete Bridge
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: bridgeId
+          in: path
+          type: string
+          description: Bridge identifier
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-bridge-management-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Bridge Management. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/rcvideo/v2/account/{accountid}/extension/{extensionid}/bridges
+      name: rcvideo-v2-account-accountid-extension-extensionid-bridges
+      description: REST surface for rcvideo-v2-account-accountId-extension-extensionId-bridges.
+      operations:
+      - method: POST
+        name: createbridge
+        description: Create Bridge
+        call: platform-bridge-management.createbridge
+        with:
+          accountId: rest.accountId
+          extensionId: rest.extensionId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/rcvideo/v2/account/{accountid}/extension/{extensionid}/bridges/default
+      name: rcvideo-v2-account-accountid-extension-extensionid-bridges-default
+      description: REST surface for rcvideo-v2-account-accountId-extension-extensionId-bridges-default.
+      operations:
+      - method: GET
+        name: getdefaultbridge
+        description: Get User's Default Bridge
+        call: platform-bridge-management.getdefaultbridge
+        with:
+          accountId: rest.accountId
+          extensionId: rest.extensionId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/rcvideo/v2/bridges/pin/pstn/{pin}
+      name: rcvideo-v2-bridges-pin-pstn-pin
+      description: REST surface for rcvideo-v2-bridges-pin-pstn-pin.
+      operations:
+      - method: GET
+        name: getbridgebypstnpin
+        description: Search Bridge by PSTN PIN
+        call: platform-bridge-management.getbridgebypstnpin
+        with:
+          pin: rest.pin
+          phoneNumber: rest.phoneNumber
+          pw: rest.pw
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/rcvideo/v2/bridges/pin/web/{pin}
+      name: rcvideo-v2-bridges-pin-web-pin
+      description: REST surface for rcvideo-v2-bridges-pin-web-pin.
+      operations:
+      - method: GET
+        name: getbridgebywebpin
+        description: Search Bridge by Web PIN
+        call: platform-bridge-management.getbridgebywebpin
+        with:
+          pin: rest.pin
+          pw: rest.pw
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/rcvideo/v2/bridges/{bridgeid}
+      name: rcvideo-v2-bridges-bridgeid
+      description: REST surface for rcvideo-v2-bridges-bridgeId.
+      operations:
+      - method: GET
+        name: getbridge
+        description: Get Bridge
+        call: platform-bridge-management.getbridge
+        with:
+          bridgeId: rest.bridgeId
+          pw: rest.pw
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: updatebridge
+        description: Update Bridge
+        call: platform-bridge-management.updatebridge
+        with:
+          bridgeId: rest.bridgeId
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletebridge
+        description: Delete Bridge
+        call: platform-bridge-management.deletebridge
+        with:
+          bridgeId: rest.bridgeId
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-bridge-management-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Bridge Management. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: create-bridge
+      description: Create Bridge
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-bridge-management.createbridge
+      with:
+        accountId: tools.accountId
+        extensionId: tools.extensionId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-user-s-default-bridge
+      description: Get User's Default Bridge
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-bridge-management.getdefaultbridge
+      with:
+        accountId: tools.accountId
+        extensionId: tools.extensionId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: search-bridge-pstn-pin
+      description: Search Bridge by PSTN PIN
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-bridge-management.getbridgebypstnpin
+      with:
+        pin: tools.pin
+        phoneNumber: tools.phoneNumber
+        pw: tools.pw
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: search-bridge-web-pin
+      description: Search Bridge by Web PIN
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-bridge-management.getbridgebywebpin
+      with:
+        pin: tools.pin
+        pw: tools.pw
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-bridge
+      description: Get Bridge
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-bridge-management.getbridge
+      with:
+        bridgeId: tools.bridgeId
+        pw: tools.pw
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-bridge
+      description: Update Bridge
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-bridge-management.updatebridge
+      with:
+        bridgeId: tools.bridgeId
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-bridge
+      description: Delete Bridge
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-bridge-management.deletebridge
+      with:
+        bridgeId: tools.bridgeId
+      outputParameters:
+      - type: object
+        mapping: $.

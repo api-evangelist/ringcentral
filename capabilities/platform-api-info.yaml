@@ -1,0 +1,112 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — API Info
+  description: 'RingCentral API — API Info. 2 operations. Lead operation: Get API Versions. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - API Info
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-api-info
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — API Info business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi
+      path: /restapi
+      operations:
+      - name: readapiversions
+        method: GET
+        description: Get API Versions
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: restapi-apiVersion
+      path: /restapi/{apiVersion}
+      operations:
+      - name: readapiversion
+        method: GET
+        description: Get Version Info
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: apiVersion
+          in: path
+          type: string
+          description: API version to be requested, for example 'v1.0'
+          required: true
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-api-info-rest
+    port: 8080
+    description: REST adapter for RingCentral API — API Info. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/restapi
+      name: restapi
+      description: REST surface for restapi.
+      operations:
+      - method: GET
+        name: readapiversions
+        description: Get API Versions
+        call: platform-api-info.readapiversions
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/{apiversion}
+      name: restapi-apiversion
+      description: REST surface for restapi-apiVersion.
+      operations:
+      - method: GET
+        name: readapiversion
+        description: Get Version Info
+        call: platform-api-info.readapiversion
+        with:
+          apiVersion: rest.apiVersion
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-api-info-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — API Info. One tool per consumed operation, routed inline through this capability's
+      consumes block.
+    tools:
+    - name: get-api-versions
+      description: Get API Versions
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-api-info.readapiversions
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-version-info
+      description: Get Version Info
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-api-info.readapiversion
+      with:
+        apiVersion: tools.apiVersion
+      outputParameters:
+      - type: object
+        mapping: $.

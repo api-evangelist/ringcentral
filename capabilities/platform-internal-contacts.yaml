@@ -1,0 +1,273 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Internal Contacts
+  description: 'RingCentral API — Internal Contacts. 4 operations. Lead operation: Get Company Directory Entries. Self-contained
+    Naftiko capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Internal Contacts
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-internal-contacts
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Internal Contacts business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-directory-entries
+      path: /restapi/v1.0/account/{accountId}/directory/entries
+      operations:
+      - name: listdirectoryentries
+        method: GET
+        description: Get Company Directory Entries
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: showFederated
+          in: query
+          type: boolean
+          description: If `true` then contacts of all accounts in federation are returned. If `false` then only contacts of
+            the current account are returned, and account section is el
+        - name: type
+          in: query
+          type: string
+          description: Type of an extension. Please note that legacy 'Department' extension type corresponds to 'Call Queue'
+            extensions in modern RingCentral product terminology
+        - name: typeGroup
+          in: query
+          type: string
+          description: Type of extension group
+        - name: page
+          in: query
+          type: integer
+          description: Page number
+        - name: perPage
+          in: query
+          type: string
+          description: 'Records count to be returned per one page. It can be either integer or string with the specific keyword
+            values:'
+        - name: siteId
+          in: query
+          type: string
+          description: Internal identifier of the business site to which extensions belong
+    - name: restapi-v1.0-account-accountId-directory-entries-search
+      path: /restapi/v1.0/account/{accountId}/directory/entries/search
+      operations:
+      - name: searchdirectoryentries
+        method: POST
+        description: Search Company Directory Entries
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: accountId
+          in: query
+          type: string
+          description: A list of Account IDs
+        - name: department
+          in: query
+          type: string
+          description: A list of department names
+        - name: siteId
+          in: query
+          type: string
+          description: A list of Site IDs
+        - name: extensionStatus
+          in: query
+          type: string
+          description: Extension current state
+        - name: extensionType
+          in: query
+          type: string
+          description: Extension types
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-account-accountId-directory-entries-entryId
+      path: /restapi/v1.0/account/{accountId}/directory/entries/{entryId}
+      operations:
+      - name: readdirectoryentry
+        method: GET
+        description: Get Corporate Directory Entry
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: entryId
+          in: path
+          type: string
+          description: Internal identifier of extension to read information for
+          required: true
+    - name: restapi-v1.0-account-accountId-directory-federation
+      path: /restapi/v1.0/account/{accountId}/directory/federation
+      operations:
+      - name: readdirectoryfederation
+        method: GET
+        description: Get Account Federation
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: types
+          in: query
+          type: string
+          description: Filter by federation types. Default is Regular
+        - name: RCExtensionId
+          in: header
+          type: string
+          description: RingCentral extension id
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-internal-contacts-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Internal Contacts. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/directory/entries
+      name: restapi-v1-0-account-accountid-directory-entries
+      description: REST surface for restapi-v1.0-account-accountId-directory-entries.
+      operations:
+      - method: GET
+        name: listdirectoryentries
+        description: Get Company Directory Entries
+        call: platform-internal-contacts.listdirectoryentries
+        with:
+          showFederated: rest.showFederated
+          type: rest.type
+          typeGroup: rest.typeGroup
+          page: rest.page
+          perPage: rest.perPage
+          siteId: rest.siteId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/directory/entries/search
+      name: restapi-v1-0-account-accountid-directory-entries-search
+      description: REST surface for restapi-v1.0-account-accountId-directory-entries-search.
+      operations:
+      - method: POST
+        name: searchdirectoryentries
+        description: Search Company Directory Entries
+        call: platform-internal-contacts.searchdirectoryentries
+        with:
+          accountId: rest.accountId
+          department: rest.department
+          siteId: rest.siteId
+          extensionStatus: rest.extensionStatus
+          extensionType: rest.extensionType
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/directory/entries/{entryid}
+      name: restapi-v1-0-account-accountid-directory-entries-entryid
+      description: REST surface for restapi-v1.0-account-accountId-directory-entries-entryId.
+      operations:
+      - method: GET
+        name: readdirectoryentry
+        description: Get Corporate Directory Entry
+        call: platform-internal-contacts.readdirectoryentry
+        with:
+          entryId: rest.entryId
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/account/{accountid}/directory/federation
+      name: restapi-v1-0-account-accountid-directory-federation
+      description: REST surface for restapi-v1.0-account-accountId-directory-federation.
+      operations:
+      - method: GET
+        name: readdirectoryfederation
+        description: Get Account Federation
+        call: platform-internal-contacts.readdirectoryfederation
+        with:
+          types: rest.types
+          RCExtensionId: rest.RCExtensionId
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-internal-contacts-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Internal Contacts. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: get-company-directory-entries
+      description: Get Company Directory Entries
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-internal-contacts.listdirectoryentries
+      with:
+        showFederated: tools.showFederated
+        type: tools.type
+        typeGroup: tools.typeGroup
+        page: tools.page
+        perPage: tools.perPage
+        siteId: tools.siteId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: search-company-directory-entries
+      description: Search Company Directory Entries
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: false
+      call: platform-internal-contacts.searchdirectoryentries
+      with:
+        accountId: tools.accountId
+        department: tools.department
+        siteId: tools.siteId
+        extensionStatus: tools.extensionStatus
+        extensionType: tools.extensionType
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-corporate-directory-entry
+      description: Get Corporate Directory Entry
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-internal-contacts.readdirectoryentry
+      with:
+        entryId: tools.entryId
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-account-federation
+      description: Get Account Federation
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-internal-contacts.readdirectoryfederation
+      with:
+        types: tools.types
+        RCExtensionId: tools.RCExtensionId
+      outputParameters:
+      - type: object
+        mapping: $.

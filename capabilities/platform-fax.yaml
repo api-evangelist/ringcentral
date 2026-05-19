@@ -1,0 +1,127 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Fax
+  description: 'RingCentral API — Fax. 2 operations. Lead operation: Create Fax Message. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Fax
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-fax
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Fax business capability. Self-contained, no shared references.
+    resources:
+    - name: restapi-v1.0-account-accountId-extension-extensionId-fax
+      path: /restapi/v1.0/account/{accountId}/extension/{extensionId}/fax
+      operations:
+      - name: createfaxmessage
+        method: POST
+        description: Create Fax Message
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: restapi-v1.0-dictionary-fax-cover-page
+      path: /restapi/v1.0/dictionary/fax-cover-page
+      operations:
+      - name: listfaxcoverpages
+        method: GET
+        description: List Fax Cover Pages
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: page
+          in: query
+          type: integer
+          description: Indicates a page number to retrieve. Only positive number values
+        - name: perPage
+          in: query
+          type: integer
+          description: Indicates a page size (number of items)
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-fax-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Fax. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/restapi/v1-0/account/{accountid}/extension/{extensionid}/fax
+      name: restapi-v1-0-account-accountid-extension-extensionid-fax
+      description: REST surface for restapi-v1.0-account-accountId-extension-extensionId-fax.
+      operations:
+      - method: POST
+        name: createfaxmessage
+        description: Create Fax Message
+        call: platform-fax.createfaxmessage
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/restapi/v1-0/dictionary/fax-cover-page
+      name: restapi-v1-0-dictionary-fax-cover-page
+      description: REST surface for restapi-v1.0-dictionary-fax-cover-page.
+      operations:
+      - method: GET
+        name: listfaxcoverpages
+        description: List Fax Cover Pages
+        call: platform-fax.listfaxcoverpages
+        with:
+          page: rest.page
+          perPage: rest.perPage
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-fax-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Fax. One tool per consumed operation, routed inline through this capability's
+      consumes block.
+    tools:
+    - name: create-fax-message
+      description: Create Fax Message
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-fax.createfaxmessage
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-fax-cover-pages
+      description: List Fax Cover Pages
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-fax.listfaxcoverpages
+      with:
+        page: tools.page
+        perPage: tools.perPage
+      outputParameters:
+      - type: object
+        mapping: $.

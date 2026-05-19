@@ -1,0 +1,419 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Webinars and Sessions
+  description: 'RingCentral API — Webinars and Sessions. 11 operations. Lead operation: List Sessions across Multiple Webinars/Hosts.
+    Self-contained Naftiko capability covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Webinars and Sessions
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-webinars-and-sessions
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Webinars and Sessions business capability. Self-contained, no shared references.
+    resources:
+    - name: webinar-configuration-v1-company-sessions
+      path: /webinar/configuration/v1/company/sessions
+      operations:
+      - name: rcwconfiglistallcompanysessions
+        method: GET
+        description: List Sessions across Multiple Webinars/Hosts
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: status
+          in: query
+          type: string
+          description: Filter to return only webinar sessions in certain status. Multiple values are supported.
+    - name: webinar-configuration-v1-sessions
+      path: /webinar/configuration/v1/sessions
+      operations:
+      - name: rcwconfiglistallsessions
+        method: GET
+        description: List Sessions across Multiple Webinars
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: nameFragment
+          in: query
+          type: string
+          description: Filter to return only webinar sessions containing particular substring within their names
+        - name: status
+          in: query
+          type: string
+          description: Filter to return only webinar sessions in certain status. Multiple values are supported.
+    - name: webinar-configuration-v1-webinars
+      path: /webinar/configuration/v1/webinars
+      operations:
+      - name: rcwconfigcreatewebinar
+        method: POST
+        description: Create Webinar
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: rcwconfiglistwebinars
+        method: GET
+        description: List User's Webinars
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: webinar-configuration-v1-webinars-webinarId
+      path: /webinar/configuration/v1/webinars/{webinarId}
+      operations:
+      - name: rcwconfiggetwebinar
+        method: GET
+        description: Get Webinar
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: rcwconfigupdatewebinar
+        method: PATCH
+        description: Update Webinar
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: rcwconfigdeletewebinar
+        method: DELETE
+        description: Delete Webinar
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: webinar-configuration-v1-webinars-webinarId-sessions
+      path: /webinar/configuration/v1/webinars/{webinarId}/sessions
+      operations:
+      - name: rcwconfigcreatesession
+        method: POST
+        description: Create Webinar Session
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: webinar-configuration-v1-webinars-webinarId-sessions-sessionId
+      path: /webinar/configuration/v1/webinars/{webinarId}/sessions/{sessionId}
+      operations:
+      - name: rcwconfigupdatesession
+        method: PATCH
+        description: Update Webinar Session
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: rcwconfiggetsession
+        method: GET
+        description: Get Webinar Session
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: rcwconfigdeletesession
+        method: DELETE
+        description: Delete Webinar Session
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-webinars-and-sessions-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Webinars and Sessions. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/webinar/configuration/v1/company/sessions
+      name: webinar-configuration-v1-company-sessions
+      description: REST surface for webinar-configuration-v1-company-sessions.
+      operations:
+      - method: GET
+        name: rcwconfiglistallcompanysessions
+        description: List Sessions across Multiple Webinars/Hosts
+        call: platform-webinars-and-sessions.rcwconfiglistallcompanysessions
+        with:
+          status: rest.status
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/webinar/configuration/v1/sessions
+      name: webinar-configuration-v1-sessions
+      description: REST surface for webinar-configuration-v1-sessions.
+      operations:
+      - method: GET
+        name: rcwconfiglistallsessions
+        description: List Sessions across Multiple Webinars
+        call: platform-webinars-and-sessions.rcwconfiglistallsessions
+        with:
+          nameFragment: rest.nameFragment
+          status: rest.status
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/webinar/configuration/v1/webinars
+      name: webinar-configuration-v1-webinars
+      description: REST surface for webinar-configuration-v1-webinars.
+      operations:
+      - method: POST
+        name: rcwconfigcreatewebinar
+        description: Create Webinar
+        call: platform-webinars-and-sessions.rcwconfigcreatewebinar
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: GET
+        name: rcwconfiglistwebinars
+        description: List User's Webinars
+        call: platform-webinars-and-sessions.rcwconfiglistwebinars
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/webinar/configuration/v1/webinars/{webinarid}
+      name: webinar-configuration-v1-webinars-webinarid
+      description: REST surface for webinar-configuration-v1-webinars-webinarId.
+      operations:
+      - method: GET
+        name: rcwconfiggetwebinar
+        description: Get Webinar
+        call: platform-webinars-and-sessions.rcwconfiggetwebinar
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: rcwconfigupdatewebinar
+        description: Update Webinar
+        call: platform-webinars-and-sessions.rcwconfigupdatewebinar
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: rcwconfigdeletewebinar
+        description: Delete Webinar
+        call: platform-webinars-and-sessions.rcwconfigdeletewebinar
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/webinar/configuration/v1/webinars/{webinarid}/sessions
+      name: webinar-configuration-v1-webinars-webinarid-sessions
+      description: REST surface for webinar-configuration-v1-webinars-webinarId-sessions.
+      operations:
+      - method: POST
+        name: rcwconfigcreatesession
+        description: Create Webinar Session
+        call: platform-webinars-and-sessions.rcwconfigcreatesession
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/webinar/configuration/v1/webinars/{webinarid}/sessions/{sessionid}
+      name: webinar-configuration-v1-webinars-webinarid-sessions-sessionid
+      description: REST surface for webinar-configuration-v1-webinars-webinarId-sessions-sessionId.
+      operations:
+      - method: PATCH
+        name: rcwconfigupdatesession
+        description: Update Webinar Session
+        call: platform-webinars-and-sessions.rcwconfigupdatesession
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: GET
+        name: rcwconfiggetsession
+        description: Get Webinar Session
+        call: platform-webinars-and-sessions.rcwconfiggetsession
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: rcwconfigdeletesession
+        description: Delete Webinar Session
+        call: platform-webinars-and-sessions.rcwconfigdeletesession
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-webinars-and-sessions-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Webinars and Sessions. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: list-sessions-across-multiple-webinars
+      description: List Sessions across Multiple Webinars/Hosts
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-webinars-and-sessions.rcwconfiglistallcompanysessions
+      with:
+        status: tools.status
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-sessions-across-multiple-webinars-2
+      description: List Sessions across Multiple Webinars
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-webinars-and-sessions.rcwconfiglistallsessions
+      with:
+        nameFragment: tools.nameFragment
+        status: tools.status
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-webinar
+      description: Create Webinar
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-webinars-and-sessions.rcwconfigcreatewebinar
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-user-s-webinars
+      description: List User's Webinars
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-webinars-and-sessions.rcwconfiglistwebinars
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-webinar
+      description: Get Webinar
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-webinars-and-sessions.rcwconfiggetwebinar
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-webinar
+      description: Update Webinar
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-webinars-and-sessions.rcwconfigupdatewebinar
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-webinar
+      description: Delete Webinar
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-webinars-and-sessions.rcwconfigdeletewebinar
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-webinar-session
+      description: Create Webinar Session
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-webinars-and-sessions.rcwconfigcreatesession
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-webinar-session
+      description: Update Webinar Session
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-webinars-and-sessions.rcwconfigupdatesession
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-webinar-session
+      description: Get Webinar Session
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-webinars-and-sessions.rcwconfiggetsession
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-webinar-session
+      description: Delete Webinar Session
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-webinars-and-sessions.rcwconfigdeletesession
+      outputParameters:
+      - type: object
+        mapping: $.

@@ -1,0 +1,347 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: RingCentral API — Audio
+  description: 'RingCentral API — Audio. 8 operations. Lead operation: Speaker Diarization. Self-contained Naftiko capability
+    covering one Ringcentral business surface.'
+  tags:
+  - Ringcentral
+  - Audio
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    RINGCENTRAL_API_KEY: RINGCENTRAL_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: platform-audio
+    baseUri: https://platform.ringcentral.com
+    description: RingCentral API — Audio business capability. Self-contained, no shared references.
+    resources:
+    - name: ai-audio-v1-async-speaker-diarize
+      path: /ai/audio/v1/async/speaker-diarize
+      operations:
+      - name: caispeakerdiarize
+        method: POST
+        description: Speaker Diarization
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: ai-audio-v1-async-speaker-identify
+      path: /ai/audio/v1/async/speaker-identify
+      operations:
+      - name: caispeakeridentify
+        method: POST
+        description: Speaker Identification
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: ai-audio-v1-async-speech-to-text
+      path: /ai/audio/v1/async/speech-to-text
+      operations:
+      - name: caispeechtotext
+        method: POST
+        description: Speech to Text Conversion
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: ai-audio-v1-enrollments
+      path: /ai/audio/v1/enrollments
+      operations:
+      - name: caienrollmentslist
+        method: GET
+        description: List Enrolled Speakers
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: partial
+          in: query
+          type: boolean
+          description: Indicates if partially enrolled speakers should be returned
+          required: true
+        - name: perPage
+          in: query
+          type: integer
+          description: Number of enrollments to be returned per page
+          required: true
+        - name: page
+          in: query
+          type: integer
+          description: Page number to be returned
+          required: true
+      - name: caienrollmentscreate
+        method: POST
+        description: Create Speaker Enrollment
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    - name: ai-audio-v1-enrollments-speakerId
+      path: /ai/audio/v1/enrollments/{speakerId}
+      operations:
+      - name: caienrollmentsget
+        method: GET
+        description: Get Speaker Enrollment Status
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: caienrollmentsdelete
+        method: DELETE
+        description: Delete Speaker Enrollment
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: caienrollmentsupdate
+        method: PATCH
+        description: Update Speaker Enrollment
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: false
+    authentication:
+      type: bearer
+      token: '{{env.RINGCENTRAL_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: platform-audio-rest
+    port: 8080
+    description: REST adapter for RingCentral API — Audio. One Spectral-compliant resource per consumed operation, prefixed
+      with /v1.
+    resources:
+    - path: /v1/ai/audio/v1/async/speaker-diarize
+      name: ai-audio-v1-async-speaker-diarize
+      description: REST surface for ai-audio-v1-async-speaker-diarize.
+      operations:
+      - method: POST
+        name: caispeakerdiarize
+        description: Speaker Diarization
+        call: platform-audio.caispeakerdiarize
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/ai/audio/v1/async/speaker-identify
+      name: ai-audio-v1-async-speaker-identify
+      description: REST surface for ai-audio-v1-async-speaker-identify.
+      operations:
+      - method: POST
+        name: caispeakeridentify
+        description: Speaker Identification
+        call: platform-audio.caispeakeridentify
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/ai/audio/v1/async/speech-to-text
+      name: ai-audio-v1-async-speech-to-text
+      description: REST surface for ai-audio-v1-async-speech-to-text.
+      operations:
+      - method: POST
+        name: caispeechtotext
+        description: Speech to Text Conversion
+        call: platform-audio.caispeechtotext
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/ai/audio/v1/enrollments
+      name: ai-audio-v1-enrollments
+      description: REST surface for ai-audio-v1-enrollments.
+      operations:
+      - method: GET
+        name: caienrollmentslist
+        description: List Enrolled Speakers
+        call: platform-audio.caienrollmentslist
+        with:
+          partial: rest.partial
+          perPage: rest.perPage
+          page: rest.page
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: caienrollmentscreate
+        description: Create Speaker Enrollment
+        call: platform-audio.caienrollmentscreate
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/ai/audio/v1/enrollments/{speakerid}
+      name: ai-audio-v1-enrollments-speakerid
+      description: REST surface for ai-audio-v1-enrollments-speakerId.
+      operations:
+      - method: GET
+        name: caienrollmentsget
+        description: Get Speaker Enrollment Status
+        call: platform-audio.caienrollmentsget
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: caienrollmentsdelete
+        description: Delete Speaker Enrollment
+        call: platform-audio.caienrollmentsdelete
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PATCH
+        name: caienrollmentsupdate
+        description: Update Speaker Enrollment
+        call: platform-audio.caienrollmentsupdate
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: platform-audio-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for RingCentral API — Audio. One tool per consumed operation, routed inline through this capability's
+      consumes block.
+    tools:
+    - name: speaker-diarization
+      description: Speaker Diarization
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-audio.caispeakerdiarize
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: speaker-identification
+      description: Speaker Identification
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-audio.caispeakeridentify
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: speech-text-conversion
+      description: Speech to Text Conversion
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-audio.caispeechtotext
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: list-enrolled-speakers
+      description: List Enrolled Speakers
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-audio.caienrollmentslist
+      with:
+        partial: tools.partial
+        perPage: tools.perPage
+        page: tools.page
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: create-speaker-enrollment
+      description: Create Speaker Enrollment
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: platform-audio.caienrollmentscreate
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: get-speaker-enrollment-status
+      description: Get Speaker Enrollment Status
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: platform-audio.caienrollmentsget
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: delete-speaker-enrollment
+      description: Delete Speaker Enrollment
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: platform-audio.caienrollmentsdelete
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: update-speaker-enrollment
+      description: Update Speaker Enrollment
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: platform-audio.caienrollmentsupdate
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
