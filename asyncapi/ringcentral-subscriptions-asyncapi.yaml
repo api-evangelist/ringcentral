@@ -1,0 +1,1605 @@
+asyncapi: 2.6.0
+info:
+  title: RingCentral Subscriptions and Event Notifications
+  version: 1.0.0
+  description: |
+    AsyncAPI 2.6 description of the asynchronous event surface exposed by the
+    RingCentral Subscription API. RingCentral delivers events from the
+    RingCentral platform to subscribers via two documented transports:
+
+      1. WebHook - server-to-server HTTPS deliveries. The subscriber registers
+         an HTTPS callback URL on a subscription (deliveryMode.transportType =
+         "WebHook"). RingCentral POSTs notification payloads to that URL.
+         Webhook URLs are validated at subscription creation via a
+         Validation-Token header echo.
+      2. PubNub - mobile/client deliveries via a PubNub channel
+         (deliveryMode.transportType = "PubNub"). The subscriber receives a
+         PubNub subscription channel and an encryption key on the subscription
+         response and subscribes to the PubNub channel directly.
+
+    The specific events a subscriber wants to receive are configured via the
+    subscription's `eventFilters` array. Each filter is a documented URI on the
+    RingCentral REST surface (e.g. `/restapi/v1.0/account/~/extension/~/
+    message-store`, `/restapi/v1.0/account/~/telephony/sessions`,
+    `/restapi/v1.0/account/~/presence`). When an event matching a filter
+    occurs, RingCentral emits a notification on the chosen delivery channel.
+
+    Every event payload shares a common envelope: `uuid`, `event` (the filter
+    URI), `ownerId`, `subscriptionId`, `timestamp`, and `body`. The shape of
+    `body` is determined by the filter URI.
+
+    All event filter URIs, payload fields, query-parameter modifiers, and the
+    create-subscription request shape are taken verbatim from the public
+    RingCentral developer documentation:
+
+      - https://developers.ringcentral.com/api-reference/Subscriptions
+      - https://developers.ringcentral.com/guide/notifications
+      - https://github.com/ringcentral/ringcentral-api-docs (docs/notifications)
+
+    No event types, URIs, or schema fields are invented.
+  contact:
+    name: RingCentral Developer Platform
+    url: https://developers.ringcentral.com/
+  license:
+    name: RingCentral Developer Terms of Use
+    url: https://developers.ringcentral.com/help/terms-of-use.html
+  externalDocs:
+    description: RingCentral notifications and subscriptions guide
+    url: https://developers.ringcentral.com/guide/notifications
+  tags:
+    - name: ringcentral
+    - name: subscriptions
+    - name: webhooks
+    - name: pubnub
+    - name: notifications
+
+defaultContentType: application/json
+
+servers:
+  webhookSubscriber:
+    url: '{webhookUrl}'
+    protocol: https
+    description: |
+      Subscriber-owned HTTPS endpoint registered as
+      `deliveryMode.address` on a RingCentral subscription whose
+      `deliveryMode.transportType` is `WebHook`. RingCentral POSTs event
+      notifications to this URL. The endpoint must terminate TLS 1.2 or
+      higher in production, respond within 3000 ms, return HTTP 200, and
+      echo any `Validation-Token` header sent by RingCentral. Responses
+      larger than 1024 bytes (headers + body) are rejected with SUB-525.
+    variables:
+      webhookUrl:
+        default: https://app.example.com/ringcentral/webhook
+        description: HTTPS URL configured on the subscription.
+  pubnubChannel:
+    url: 'pubsub.pubnub.com'
+    protocol: secure-mqtt
+    description: |
+      PubNub message-bus endpoint. When `deliveryMode.transportType` is
+      `PubNub`, the subscription response returns
+      `deliveryMode.subscriberKey`, `deliveryMode.address` (the PubNub
+      channel name), and `deliveryMode.encryption` /
+      `deliveryMode.encryptionKey`. The subscriber consumes events from
+      that PubNub channel using a PubNub SDK. (The `secure-mqtt` protocol
+      token here is used because AsyncAPI 2.6 has no first-class `pubnub`
+      protocol; PubNub itself is a managed pub/sub service.)
+
+channels:
+  # ------------------------------------------------------------------
+  # Subscription lifecycle reminder
+  # ------------------------------------------------------------------
+  '/restapi/v1.0/subscription/~':
+    description: |
+      Subscription expiration reminder event. Subscribers can include this
+      filter in their `eventFilters` array to receive notifications before a
+      subscription expires. The filter accepts `threshold` (seconds before
+      expiration to start reminding) and `interval` (seconds between
+      reminders), e.g.
+      `/restapi/v1.0/subscription/~?threshold=300&interval=60`.
+    parameters:
+      threshold:
+        description: Seconds before expiration when reminders start.
+        schema:
+          type: integer
+      interval:
+        description: Seconds between reminder deliveries.
+        schema:
+          type: integer
+    subscribe:
+      operationId: receiveSubscriptionRenewalReminder
+      summary: Subscription renewal reminder
+      message:
+        $ref: '#/components/messages/SubscriptionRenewalReminderEvent'
+
+  # ------------------------------------------------------------------
+  # SMS events
+  # ------------------------------------------------------------------
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}/message-store/instant':
+    description: |
+      Inbound SMS event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}/message-store/instant?type=SMS`.
+      Fires on receipt of a new inbound SMS message.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveInstantMessage
+      summary: Inbound SMS Event
+      message:
+        $ref: '#/components/messages/InstantMessageEvent'
+
+  '/restapi/v1.0/account/{accountId}/a2p-sms/batches':
+    description: |
+      High Volume SMS message batch event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/a2p-sms/batches`. Fires on creation
+      or change of an A2P SMS message batch.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+    subscribe:
+      operationId: receiveMessageBatch
+      summary: Message Batch Event
+      message:
+        $ref: '#/components/messages/MessageBatchEvent'
+
+  '/restapi/v1.0/account/{accountId}/a2p-sms/batches/{batchId}':
+    description: |
+      High Volume SMS specific message batch event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/a2p-sms/batches/{batchId}`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      batchId:
+        description: Internal identifier of an A2P SMS batch.
+        schema:
+          type: string
+    subscribe:
+      operationId: receiveSpecificMessageBatch
+      summary: Specific Message Batch Event
+      message:
+        $ref: '#/components/messages/MessageBatchEvent'
+
+  '/restapi/v1.0/account/{accountId}/a2p-sms/messages':
+    description: |
+      High Volume SMS batch messages event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/a2p-sms/messages`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+    subscribe:
+      operationId: receiveBatchMessages
+      summary: Batch Messages Event
+      message:
+        $ref: '#/components/messages/BatchMessagesEvent'
+
+  '/restapi/v1.0/account/~/a2p-sms/opt-outs':
+    description: |
+      High Volume SMS batch message opt-out event. Documented filter:
+      `/restapi/v1.0/account/~/a2p-sms/opt-outs`.
+    subscribe:
+      operationId: receiveBatchMessageOptOut
+      summary: Batch Message Opt-Out Event
+      message:
+        $ref: '#/components/messages/BatchMessageOptOutEvent'
+
+  # ------------------------------------------------------------------
+  # Fax / voicemail / generic message-store events
+  # ------------------------------------------------------------------
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}/fax':
+    description: |
+      Inbound fax event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}/fax?direction=Inbound`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveFaxMessage
+      summary: Inbound Fax Event
+      message:
+        $ref: '#/components/messages/FaxMessageEvent'
+
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}/message-store':
+    description: |
+      Generic message-store event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}/message-store`.
+      Fires on any new message creation or any change in the extension's
+      message store. Can be narrowed with the query parameters `type`
+      (Fax, Voicemail, Pager, SMS) and `direction` (Inbound, Outbound).
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveMessage
+      summary: Message Event
+      message:
+        $ref: '#/components/messages/MessageEvent'
+
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}/voicemail':
+    description: |
+      Voicemail message event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}/voicemail`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveVoicemailMessage
+      summary: Voicemail Message Event
+      message:
+        $ref: '#/components/messages/VoicemailMessageEvent'
+
+  # ------------------------------------------------------------------
+  # Contact Center events
+  # ------------------------------------------------------------------
+  '/restapi/v1.0/account/{accountId}/phone-number':
+    description: |
+      Contact Center phone number event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/phone-number?usageType=ContactCenterNumber`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+    subscribe:
+      operationId: receiveContactCenterPhoneNumber
+      summary: Contact Center Phone Number Event
+      message:
+        $ref: '#/components/messages/ContactCenterPhoneNumberEvent'
+
+  # ------------------------------------------------------------------
+  # Telephony events
+  # ------------------------------------------------------------------
+  '/restapi/v1.0/account/{accountId}/telephony/sessions':
+    description: |
+      Account-wide telephony sessions event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/telephony/sessions`. Fires on
+      changes to any call session for any extension on the account. Supports
+      query-parameter filters `direction`, `missedCall`, `phoneNumber`,
+      `sipData`, `statusCode`, and `withRecordings`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+    subscribe:
+      operationId: receiveAccountTelephonySessions
+      summary: Account Telephony Sessions Event
+      message:
+        $ref: '#/components/messages/TelephonySessionsEvent'
+
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}/telephony/sessions':
+    description: |
+      Extension telephony sessions event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}/telephony/sessions`.
+      Fires on changes to call sessions for one specific extension. Supports
+      the same query-parameter filters as the account-scoped variant.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveExtensionTelephonySessions
+      summary: Extension Telephony Sessions Event
+      message:
+        $ref: '#/components/messages/TelephonySessionsEvent'
+
+  # ------------------------------------------------------------------
+  # Presence events
+  # ------------------------------------------------------------------
+  '/restapi/v1.0/account/{accountId}/presence':
+    description: |
+      Account presence event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/presence`. Fires when any
+      extension's presence state changes.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+    subscribe:
+      operationId: receiveAccountPresence
+      summary: Account Presence Event
+      message:
+        $ref: '#/components/messages/PresenceEvent'
+
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}/presence':
+    description: |
+      Extension presence event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}/presence`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveExtensionPresence
+      summary: Extension Presence Event
+      message:
+        $ref: '#/components/messages/PresenceEvent'
+
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}/presence/dnd':
+    description: |
+      Extension DND status event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}/presence/dnd`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveExtensionDndStatus
+      summary: Extension DND Status Event
+      message:
+        $ref: '#/components/messages/ExtensionDndStatusEvent'
+
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}/presence/line':
+    description: |
+      Extension presence line event (presence of monitored lines).
+      Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}/presence/line`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveExtensionPresenceLine
+      summary: Extension Presence Line Event
+      message:
+        $ref: '#/components/messages/PresenceEvent'
+
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}/presence/line/presence':
+    description: |
+      Extension presence line (presence-of-presence) event. Documented
+      filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}/presence/line/presence`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveExtensionPresenceLinePresence
+      summary: Extension Presence Line Presence Event
+      message:
+        $ref: '#/components/messages/PresenceEvent'
+
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}/favorite/presence':
+    description: |
+      Favorite-list presence event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}/favorite/presence`.
+      Fires when the presence status of any extension in the favorites list
+      of the current extension changes.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveFavoritePresence
+      summary: Favorite Presence Event
+      message:
+        $ref: '#/components/messages/PresenceEvent'
+
+  '/restapi/v1.0/account/{accountId}/call-queues/{groupId}/presence':
+    description: |
+      Call queue member presence event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/call-queues/{groupId}/presence`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      groupId:
+        description: Internal identifier of a call queue.
+        schema:
+          type: string
+    subscribe:
+      operationId: receiveCallQueueMemberPresence
+      summary: Call Queue Member Presence Event
+      message:
+        $ref: '#/components/messages/PresenceEvent'
+
+  # ------------------------------------------------------------------
+  # Team Messaging events
+  # ------------------------------------------------------------------
+  '/team-messaging/v1/posts':
+    description: |
+      Team Messaging post event. Documented filter:
+      `/team-messaging/v1/posts`. Fires on creation, update, or removal of a
+      team messaging post.
+    subscribe:
+      operationId: receiveTeamMessagingPost
+      summary: Team Messaging Post Event
+      message:
+        $ref: '#/components/messages/TeamMessagingPostEvent'
+
+  '/team-messaging/v1/groups':
+    description: |
+      Team Messaging groups event. Documented filter:
+      `/team-messaging/v1/groups`. Fires on changes to a team messaging
+      chat/group (creation, update, removal).
+    subscribe:
+      operationId: receiveTeamMessagingGroups
+      summary: Team Messaging Groups Event
+      message:
+        $ref: '#/components/messages/TeamMessagingChatEvent'
+
+  '/team-messaging/v1/chats':
+    description: |
+      Team Messaging chats event. Documented filter:
+      `/team-messaging/v1/chats`. Fires on creation, update, or removal of a
+      team messaging chat.
+    subscribe:
+      operationId: receiveTeamMessagingChats
+      summary: Team Messaging Chats Event
+      message:
+        $ref: '#/components/messages/TeamMessagingChatEvent'
+
+  # ------------------------------------------------------------------
+  # Account / directory events
+  # ------------------------------------------------------------------
+  '/restapi/v1.0/account/{accountId}/directory/entries':
+    description: |
+      Company directory event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/directory/entries`. Fires on
+      changes to the company directory.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+    subscribe:
+      operationId: receiveCompanyDirectory
+      summary: Company Directory Event
+      message:
+        $ref: '#/components/messages/CompanyDirectoryEvent'
+
+  '/restapi/v1.0/account/{accountId}/device/{deviceId}/emergency-address':
+    description: |
+      Emergency address event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/device/{deviceId}/emergency-address`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      deviceId:
+        description: Internal identifier of a device.
+        schema:
+          type: string
+    subscribe:
+      operationId: receiveEmergencyAddress
+      summary: Emergency Address Event
+      message:
+        $ref: '#/components/messages/EmergencyAddressEvent'
+
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}/favorite':
+    description: |
+      Extension favorites event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}/favorite`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveExtensionFavorites
+      summary: Extension Favorites Event
+      message:
+        $ref: '#/components/messages/ExtensionFavoritesEvent'
+
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}/grant':
+    description: |
+      Extension grant list event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}/grant`.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveExtensionGrantList
+      summary: Extension Grant List Event
+      message:
+        $ref: '#/components/messages/ExtensionGrantListEvent'
+
+  '/restapi/v1.0/account/{accountId}/extension/{extensionId}':
+    description: |
+      Extension info event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension/{extensionId}`. Fires on
+      changes to the extension's metadata.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+      extensionId:
+        $ref: '#/components/parameters/extensionId'
+    subscribe:
+      operationId: receiveExtensionInfo
+      summary: Extension Info Event
+      message:
+        $ref: '#/components/messages/ExtensionInfoEvent'
+
+  '/restapi/v1.0/account/{accountId}/extension':
+    description: |
+      Extension list event. Documented filter:
+      `/restapi/v1.0/account/{accountId}/extension`. Fires when extensions
+      are added, removed, or updated on the account.
+    parameters:
+      accountId:
+        $ref: '#/components/parameters/accountId'
+    subscribe:
+      operationId: receiveExtensionList
+      summary: Extension List Event
+      message:
+        $ref: '#/components/messages/ExtensionListEvent'
+
+  # ------------------------------------------------------------------
+  # Webinar events (distinct subscription surface)
+  # ------------------------------------------------------------------
+  '/webinar/configuration/v1/company/sessions':
+    description: |
+      Webinar session configuration event. Documented filter:
+      `/webinar/configuration/v1/company/sessions`. Fires when a webinar
+      session is created or modified.
+    subscribe:
+      operationId: receiveWebinarConfigurationSessions
+      summary: Webinar Session Configuration Event
+      message:
+        $ref: '#/components/messages/WebinarEvent'
+
+  '/webinar/runtime/v1/company/sessions/state':
+    description: |
+      Webinar session runtime state event. Documented filter:
+      `/webinar/runtime/v1/company/sessions/state`. Fires on webinar session
+      state transitions, e.g. start/end.
+    subscribe:
+      operationId: receiveWebinarRuntimeSessionState
+      summary: Webinar Session State Event
+      message:
+        $ref: '#/components/messages/WebinarEvent'
+
+  '/webinar/registration/v1/company/sessions/state':
+    description: |
+      Webinar registration session-state event. Documented filter:
+      `/webinar/registration/v1/company/sessions/state`. Fires when a
+      session's registration settings change.
+    subscribe:
+      operationId: receiveWebinarRegistrationSessionState
+      summary: Webinar Registration Session State Event
+      message:
+        $ref: '#/components/messages/WebinarEvent'
+
+  '/webinar/registration/v1/company/sessions/registrants':
+    description: |
+      Webinar registrant event. Documented filter:
+      `/webinar/registration/v1/company/sessions/registrants`. Fires when a
+      registrant for a webinar session is created or modified.
+    subscribe:
+      operationId: receiveWebinarRegistrants
+      summary: Webinar Registrants Event
+      message:
+        $ref: '#/components/messages/WebinarEvent'
+
+components:
+  parameters:
+    accountId:
+      description: |
+        Internal identifier of an account, or `~` to denote the current
+        authenticated account.
+      schema:
+        type: string
+    extensionId:
+      description: |
+        Internal identifier of an extension, or `~` to denote the current
+        authenticated extension.
+      schema:
+        type: string
+
+  messageTraits:
+    EventEnvelope:
+      headers:
+        type: object
+        properties:
+          Validation-Token:
+            type: string
+            description: |
+              Echo of the developer-supplied `deliveryMode.validationToken`
+              from subscription creation. Only present on WebHook deliveries.
+          User-Agent:
+            type: string
+            description: RingCentral webhook user agent (e.g. `RingCentral-Webhook/8.3`).
+          Content-Type:
+            type: string
+            description: Always `application/json; charset=UTF-8` for WebHook deliveries.
+
+  messages:
+    SubscriptionRenewalReminderEvent:
+      name: SubscriptionRenewalReminderEvent
+      title: Subscription renewal reminder
+      summary: Reminder delivered before a subscription's TTL elapses.
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+    InstantMessageEvent:
+      name: InstantMessageEvent
+      title: Inbound SMS Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              body:
+                $ref: '#/components/schemas/InstantMessageBody'
+
+    MessageEvent:
+      name: MessageEvent
+      title: Message Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              body:
+                $ref: '#/components/schemas/MessageStoreBody'
+
+    VoicemailMessageEvent:
+      name: VoicemailMessageEvent
+      title: Voicemail Message Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              body:
+                $ref: '#/components/schemas/VoicemailMessageBody'
+
+    FaxMessageEvent:
+      name: FaxMessageEvent
+      title: Inbound Fax Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              body:
+                $ref: '#/components/schemas/FaxMessageBody'
+
+    MessageBatchEvent:
+      name: MessageBatchEvent
+      title: A2P SMS Message Batch Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+    BatchMessagesEvent:
+      name: BatchMessagesEvent
+      title: A2P SMS Batch Messages Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+    BatchMessageOptOutEvent:
+      name: BatchMessageOptOutEvent
+      title: A2P SMS Batch Message Opt-Out Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+    ContactCenterPhoneNumberEvent:
+      name: ContactCenterPhoneNumberEvent
+      title: Contact Center Phone Number Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+    TelephonySessionsEvent:
+      name: TelephonySessionsEvent
+      title: Telephony Sessions Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              body:
+                $ref: '#/components/schemas/TelephonySessionBody'
+
+    PresenceEvent:
+      name: PresenceEvent
+      title: Presence Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              body:
+                $ref: '#/components/schemas/PresenceBody'
+
+    ExtensionDndStatusEvent:
+      name: ExtensionDndStatusEvent
+      title: Extension DND Status Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+    TeamMessagingPostEvent:
+      name: TeamMessagingPostEvent
+      title: Team Messaging Post Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              body:
+                $ref: '#/components/schemas/TeamMessagingPostBody'
+
+    TeamMessagingChatEvent:
+      name: TeamMessagingChatEvent
+      title: Team Messaging Chat Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/EventEnvelope'
+          - type: object
+            properties:
+              body:
+                $ref: '#/components/schemas/TeamMessagingChatBody'
+
+    CompanyDirectoryEvent:
+      name: CompanyDirectoryEvent
+      title: Company Directory Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+    EmergencyAddressEvent:
+      name: EmergencyAddressEvent
+      title: Emergency Address Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+    ExtensionFavoritesEvent:
+      name: ExtensionFavoritesEvent
+      title: Extension Favorites Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+    ExtensionGrantListEvent:
+      name: ExtensionGrantListEvent
+      title: Extension Grant List Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+    ExtensionInfoEvent:
+      name: ExtensionInfoEvent
+      title: Extension Info Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+    ExtensionListEvent:
+      name: ExtensionListEvent
+      title: Extension List Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+    WebinarEvent:
+      name: WebinarEvent
+      title: Webinar Event
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/EventEnvelope'
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+
+  schemas:
+    # ----- common envelope -----
+    EventEnvelope:
+      type: object
+      description: |
+        Common envelope wrapping every notification regardless of transport.
+        Field set is documented at
+        https://github.com/ringcentral/ringcentral-api-docs/blob/main/docs/notifications/event-filters/index.md
+      required:
+        - uuid
+        - event
+        - timestamp
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification.
+        event:
+          type: string
+          description: Event filter URI that triggered this notification.
+        ownerId:
+          type: string
+          description: Internal identifier of the subscription owner extension.
+        subscriptionId:
+          type: string
+          description: Internal identifier of the subscription.
+        timestamp:
+          type: string
+          format: date-time
+          description: |
+            Datetime the notification was sent, ISO 8601 with timezone, e.g.
+            `2018-03-10T18:07:52.534Z`.
+        body:
+          description: |
+            Event-specific payload body. Shape is determined by `event`.
+          oneOf:
+            - type: object
+            - type: array
+
+    # ----- subscription request / response (control plane) -----
+    CreateSubscriptionRequest:
+      type: object
+      required:
+        - eventFilters
+        - deliveryMode
+      description: |
+        Request body for `POST /restapi/v1.0/subscription`. Verbatim shape
+        from the RingCentral docs sample
+        `code-samples/webhooks/create-webhook-request.json`.
+      properties:
+        eventFilters:
+          type: array
+          description: One or more event filter URIs to subscribe to.
+          items:
+            type: string
+        deliveryMode:
+          $ref: '#/components/schemas/DeliveryMode'
+        expiresIn:
+          type: integer
+          description: Subscription TTL in seconds.
+
+    DeliveryMode:
+      type: object
+      required:
+        - transportType
+      description: |
+        Delivery mode for a subscription. RingCentral documents `WebHook`
+        and `PubNub` as the supported transport types on the public
+        Subscriptions API.
+      properties:
+        transportType:
+          type: string
+          enum:
+            - WebHook
+            - PubNub
+          description: |
+            `WebHook` for HTTPS push to a developer-controlled URL; `PubNub`
+            for delivery through a PubNub channel.
+        address:
+          type: string
+          description: |
+            For `WebHook`: the HTTPS URL RingCentral will POST events to.
+            For `PubNub`: the PubNub channel name returned by RingCentral.
+        validationToken:
+          type: string
+          description: |
+            Optional opaque token. When set, RingCentral echoes it back in
+            the `Validation-Token` header on every webhook delivery so the
+            subscriber can verify origin.
+        verificationToken:
+          type: string
+          description: |
+            Optional token included on subscription creation as part of the
+            webhook handshake. Documented in
+            `docs/notifications/webhooks/creating-webhooks.md`.
+        encryption:
+          type: boolean
+          description: |
+            For `PubNub` only. Indicates whether payloads on the PubNub
+            channel are AES-encrypted.
+        subscriberKey:
+          type: string
+          description: PubNub subscriber key returned on subscription create.
+        encryptionKey:
+          type: string
+          description: AES key (base64) used to decrypt PubNub payloads.
+        secretKey:
+          type: string
+          description: PubNub secret key returned on subscription create.
+
+    SubscriptionResource:
+      type: object
+      description: |
+        Subscription resource returned by `POST /restapi/v1.0/subscription`,
+        `GET /restapi/v1.0/subscription/{id}`,
+        `PUT /restapi/v1.0/subscription/{id}`, and
+        `POST /restapi/v1.0/subscription/{id}/renew`.
+      properties:
+        id:
+          type: string
+          description: Internal subscription identifier.
+        uri:
+          type: string
+        eventFilters:
+          type: array
+          items:
+            type: string
+        expirationTime:
+          type: string
+          format: date-time
+        expiresIn:
+          type: integer
+        status:
+          type: string
+          description: e.g. `Active`, `Suspended`, `Blacklisted`.
+        creationTime:
+          type: string
+          format: date-time
+        deliveryMode:
+          $ref: '#/components/schemas/DeliveryMode'
+
+    # ----- SMS / instant message -----
+    InstantMessageBody:
+      type: object
+      description: |
+        Body of an Inbound SMS event delivered on filter
+        `/restapi/v1.0/account/{accountId}/extension/{extensionId}/message-store/instant?type=SMS`.
+      properties:
+        id:
+          type: string
+        to:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipientInfo'
+        from:
+          $ref: '#/components/schemas/SenderInfo'
+        type:
+          type: string
+          description: Type of a message. Default `SMS`.
+        creationTime:
+          type: string
+          format: date-time
+        lastModifiedTime:
+          type: string
+          format: date-time
+        readStatus:
+          type: string
+          description: Default `Unread`.
+        priority:
+          type: string
+          description: Default `Normal`.
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstantMessageAttachmentInfo'
+        direction:
+          type: string
+          description: Default `Inbound`.
+        availability:
+          type: string
+          description: Default `Alive`.
+        subject:
+          type: string
+        messageStatus:
+          type: string
+          description: Default `Received`.
+        conversationId:
+          type: string
+
+    RecipientInfo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: E.164 with leading `+`.
+        extensionNumber:
+          type: string
+        target:
+          type: boolean
+        location:
+          type: string
+        name:
+          type: string
+
+    SenderInfo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: E.164 with leading `+`.
+        extensionNumber:
+          type: string
+        location:
+          type: string
+        name:
+          type: string
+
+    InstantMessageAttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        uri:
+          type: string
+        size:
+          type: integer
+        type:
+          type: string
+          enum:
+            - AudioRecording
+            - AudioTranscription
+            - RenderedDocument
+            - Text
+            - MmsAttachment
+        contentType:
+          type: string
+          description: Default `text/plain`.
+
+    # ----- generic message store -----
+    MessageStoreBody:
+      type: object
+      description: |
+        Body of a message-store change event delivered on filter
+        `/restapi/v1.0/account/{accountId}/extension/{extensionId}/message-store`.
+      properties:
+        accountId:
+          type: string
+        extensionId:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageChange'
+
+    MessageChange:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - Voicemail
+            - SMS
+            - Fax
+            - Pager
+        newCount:
+          type: integer
+        updatedCount:
+          type: integer
+
+    # ----- voicemail -----
+    VoicemailMessageBody:
+      type: object
+      description: |
+        Body of a voicemail event delivered on filter
+        `/restapi/v1.0/account/{accountId}/extension/{extensionId}/voicemail`.
+      properties:
+        id:
+          type: string
+        to:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipientInfo'
+        from:
+          $ref: '#/components/schemas/SenderInfo'
+        type:
+          type: string
+          description: Value is `Voicemail`.
+        creationTime:
+          type: string
+          format: date-time
+        lastModifiedTime:
+          type: string
+          format: date-time
+        readStatus:
+          type: string
+        priority:
+          type: string
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/VoicemailAttachmentInfo'
+        direction:
+          type: string
+        availability:
+          type: string
+        subject:
+          type: string
+        messageStatus:
+          type: string
+        conversationId:
+          type: string
+        vmTranscriptionStatus:
+          type: string
+
+    VoicemailAttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        uri:
+          type: string
+        size:
+          type: integer
+        type:
+          type: string
+          enum:
+            - AudioRecording
+            - AudioTranscription
+        contentType:
+          type: string
+        vmDuration:
+          type: integer
+
+    # ----- fax -----
+    FaxMessageBody:
+      type: object
+      description: |
+        Body of an inbound-fax event delivered on filter
+        `/restapi/v1.0/account/{accountId}/extension/{extensionId}/fax?direction=Inbound`.
+      properties:
+        id:
+          type: string
+        to:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipientInfo'
+        from:
+          $ref: '#/components/schemas/SenderInfo'
+        type:
+          type: string
+          description: Value is `Fax`.
+        creationTime:
+          type: string
+          format: date-time
+        lastModifiedTime:
+          type: string
+          format: date-time
+        readStatus:
+          type: string
+        priority:
+          type: string
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/FaxAttachmentInfo'
+        direction:
+          type: string
+        availability:
+          type: string
+        subject:
+          type: string
+        messageStatus:
+          type: string
+        conversationId:
+          type: string
+        faxResolution:
+          type: string
+          enum:
+            - High
+            - Low
+        faxPageCount:
+          type: integer
+
+    FaxAttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        uri:
+          type: string
+        size:
+          type: integer
+        type:
+          type: string
+          enum:
+            - AudioRecording
+            - AudioTranscription
+        contentType:
+          type: string
+
+    # ----- telephony sessions -----
+    TelephonySessionBody:
+      type: object
+      description: |
+        Body of a telephony-sessions event delivered on filters
+        `/restapi/v1.0/account/{accountId}/telephony/sessions` and
+        `/restapi/v1.0/account/{accountId}/extension/{extensionId}/telephony/sessions`.
+      properties:
+        sequence:
+          type: integer
+        sessionId:
+          type: string
+          description: Legacy call session identifier.
+        telephonySessionId:
+          type: string
+          description: Call session identifier required by the Telephony API.
+        serverId:
+          type: string
+        eventTime:
+          type: string
+          format: date-time
+        origin:
+          $ref: '#/components/schemas/SessionOriginDetails'
+        parties:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionPartyDetails'
+
+    SessionOriginDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - Call
+            - RingOut
+            - RingMe
+            - Conference
+            - GreetingsRecording
+            - VerificationCall
+            - TestCall
+
+    SessionPartyDetails:
+      type: object
+      properties:
+        accountId:
+          type: string
+        extensionId:
+          type: string
+        id:
+          type: string
+        direction:
+          type: string
+          enum:
+            - Inbound
+            - Outbound
+        queueCall:
+          type: boolean
+        to:
+          $ref: '#/components/schemas/CalleeInfo'
+        from:
+          $ref: '#/components/schemas/CallerInfo'
+        status:
+          $ref: '#/components/schemas/SessionStatusInfo'
+        missedCall:
+          type: boolean
+        standAlone:
+          type: boolean
+        muted:
+          type: boolean
+        conferenceRole:
+          type: string
+          enum:
+            - Host
+            - Participant
+        sipData:
+          $ref: '#/components/schemas/SipInfo'
+
+    CalleeInfo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+        name:
+          type: string
+        extensionId:
+          type: string
+        deviceId:
+          type: string
+
+    CallerInfo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+        name:
+          type: string
+        extensionId:
+          type: string
+        deviceId:
+          type: string
+
+    SessionStatusInfo:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - Setup
+            - Proceeding
+            - Answered
+            - Disconnected
+            - Gone
+            - Parked
+            - Hold
+            - VoiceMail
+            - FaxReceive
+            - VoiceMailScreening
+        reason:
+          type: string
+          enum:
+            - Pickup
+            - Supervising
+            - TakeOver
+            - Timeout
+            - BlindTransfer
+            - RccTransfer
+            - AttendedTransfer
+            - CallerInputRedirect
+            - CallFlip
+            - ParkLocation
+            - DtmfTransfer
+            - AgentAnswered
+            - AgentDropped
+            - Rejected
+            - Cancelled
+            - InternalError
+            - NoAnswer
+            - TargetBusy
+            - InvalidNumber
+            - InternationalDisabled
+            - DestinationBlocked
+            - NotEnoughFunds
+            - NoSuchUser
+            - CallRedirected
+            - CallReplied
+            - CallFinished
+            - CallDropped
+            - Voicemail
+        parkData:
+          type: string
+        peerId:
+          $ref: '#/components/schemas/LinkedSessionDetails'
+        mobilePickupData:
+          $ref: '#/components/schemas/MobilePickupData'
+
+    SipInfo:
+      type: object
+      properties:
+        toTag:
+          type: string
+        fromTag:
+          type: string
+        callId:
+          type: string
+
+    LinkedSessionDetails:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        telephonySessionId:
+          type: string
+        partyId:
+          type: string
+
+    MobilePickupData:
+      type: object
+      properties:
+        ccMailboxes:
+          type: string
+        to:
+          type: string
+        sid:
+          type: string
+        srvLvl:
+          type: string
+        srvLvlExt:
+          type: string
+
+    # ----- presence -----
+    PresenceBody:
+      type: object
+      description: |
+        Body of an account/extension presence event delivered on filters such
+        as `/restapi/v1.0/account/{accountId}/presence` and
+        `/restapi/v1.0/account/{accountId}/extension/{extensionId}/presence`.
+      properties:
+        extensionId:
+          type: string
+        telephonyStatus:
+          type: string
+          enum:
+            - NoCall
+            - CallConnected
+            - Ringing
+            - OnHold
+            - ParkedCall
+        sequence:
+          type: integer
+        presenceStatus:
+          type: string
+          enum:
+            - Offline
+            - Busy
+            - Available
+        userStatus:
+          type: string
+          enum:
+            - Offline
+            - Busy
+            - Available
+        meetingStatus:
+          type: string
+          enum:
+            - Connected
+            - Disconnected
+        dndStatus:
+          type: string
+          enum:
+            - TakeAllCalls
+            - DoNotAcceptAnyCalls
+            - DoNotAcceptDepartmentCalls
+        allowSeeMyPresence:
+          type: boolean
+        ringOnMonitoredCall:
+          type: boolean
+        pickUpCallsOnHold:
+          type: boolean
+
+    # ----- team messaging -----
+    TeamMessagingPostBody:
+      type: object
+      description: |
+        Body of a team messaging post event delivered on filter
+        `/team-messaging/v1/posts`.
+      properties:
+        id:
+          type: string
+        groupId:
+          type: string
+        type:
+          type: string
+          enum:
+            - TextMessage
+            - PersonJoined
+            - PersonsAdded
+            - Card
+        text:
+          type: string
+        creatorId:
+          type: string
+        addedPersonsIds:
+          type: array
+          items:
+            type: string
+        removedPersonsIds:
+          type: array
+          items:
+            type: string
+        creationTime:
+          type: string
+          format: date-time
+        lastModifiedTime:
+          type: string
+          format: date-time
+        eventType:
+          type: string
+          enum:
+            - PostAdded
+            - PostChanged
+            - PostRemoved
+        mentions:
+          type: array
+          items:
+            $ref: '#/components/schemas/MentionInfo'
+        attachments:
+          type: array
+          items:
+            type: object
+        title:
+          type: string
+        iconUri:
+          type: string
+        iconEmoji:
+          type: string
+        activity:
+          type: string
+
+    MentionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+            - Person
+            - Team
+            - File
+            - Link
+            - Event
+            - Task
+            - Note
+            - Card
+        name:
+          type: string
+
+    TeamMessagingChatBody:
+      type: object
+      description: |
+        Body of a team messaging chat event delivered on filters
+        `/team-messaging/v1/groups` and `/team-messaging/v1/chats`.
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum:
+            - PrivateChat
+            - Group
+            - Team
+            - PersonalChat
+        status:
+          type: string
+          enum:
+            - Active
+            - Archived
+        members:
+          type: array
+          items:
+            type: string
+        isPublic:
+          type: boolean
+        creationTime:
+          type: string
+          format: date-time
+        lastModifiedTime:
+          type: string
+          format: date-time
+        eventType:
+          type: string
+          enum:
+            - GroupRenamed
+            - GroupJoined
+            - GroupLeft
+            - GroupChanged
