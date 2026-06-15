@@ -2,81 +2,312 @@
 
 RingCentral provides unified cloud communications for businesses including voice, video, messaging, contact center, and events. The RingCentral API exposes call control, SMS, faxing, voicemail, presence, team messaging, video, and analytics.
 
-**URL:** [Visit APIs.json URL](https://raw.githubusercontent.com/api-evangelist/ringcentral/refs/heads/main/apis.yml)
-
-**Run:** [Capabilities Using Naftiko](https://github.com/naftiko/fleet?utm_source=api-evangelist&utm_medium=readme&utm_campaign=ringcentral-api-evangelist&utm_content=repo)
-
-## Type
-
-- **x-type:** company
+**APIs.json:** [https://raw.githubusercontent.com/api-evangelist/ringcentral/refs/heads/main/apis.yml](https://raw.githubusercontent.com/api-evangelist/ringcentral/refs/heads/main/apis.yml)
 
 ## Tags
 
- - Communications, UCaaS, Voice, Video, Contact Center, SMS, Messaging, Fax
+- Communications
+- UCaaS
+- Voice
+- Video
+- Contact Center
+- SMS
+- Messaging
+- Fax
 
 ## Timestamps
 
 - **Created:** 2026-05-08
-- **Modified:** 2026-05-08
+- **Modified:** 2026-05-30
 
 ## APIs
 
-| API | Description |
-|---|---|
-| RingCentral Voice API | Voice / call control / RingOut, telephony sessions, monitoring, conferencing, call routing |
-| RingCentral SMS API | Targeted and bulk SMS/MMS with A2P 10DLC compliance |
-| RingCentral Team Messaging API | Chatbots, notifications, and add-ins inside RingCentral Team Messaging |
-| RingCentral Video API | Browser-based video meetings with embedding and recording |
-| RingCentral Fax API | Programmatic fax send/receive |
-| RingCentral Data API | Compliance exports of call, message, and video data |
-| RingCentral Audio and Video AI API | Speech-to-text, summarization, and conversational analytics |
-| RingCentral Call Log API | Historical call data and recording sync |
-| RingCentral Call Analytics API | Aggregated KPI and reporting endpoints |
-| RingCentral Presence API | Real-time and historical presence/availability |
-| RingCentral Voicemail API | Voicemail retrieval, playback, and management |
-| RingCentral Provisioning API | Account / extension / phone-number / device lifecycle |
-| RingCentral Webhooks and Subscriptions API | Webhook + PubNub event delivery |
-| RingCentral Contact Center API | RingCX omnichannel agents, queues, routing, reporting |
-| RingCentral Events API | Large-scale virtual and hybrid event lifecycle |
+### RingCentral Voice API
+
+The RingCentral Voice API enables developers to incorporate voice and phone functionality into applications. It supports placing calls (RingOut, WebRTC, URI scheme), call control (active call manipulation, transfer, hold, recording), call routing rules, monitoring, supervision, conferencing, and call log retrieval.
+
+#### Tags
+
+- Voice
+- Telephony
+- Call Control
+- RingOut
+
+#### Properties
+
+- [Documentation](https://developers.ringcentral.com/voice-api)
+- [API Reference](https://developers.ringcentral.com/api-reference/Call-Control)
+- [OpenAPI](openapi/ringcentral-platform-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral SMS API
+
+The RingCentral SMS API supports targeted and bulk SMS and MMS with deep insights and regulatory compliance built in. It supports sending and receiving messages, A2P 10DLC registration, message status reporting, and message store retrieval.
+
+#### Tags
+
+- SMS
+- Messaging
+- A2P
+- Compliance
+
+#### Properties
+
+- [Documentation](https://developers.ringcentral.com/sms-api)
+- [API Reference](https://developers.ringcentral.com/api-reference/SMS)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Team Messaging API
+
+The RingCentral Team Messaging API enables developers to build chatbots, send notifications, and create add-ins within RingCentral Team Messaging (formerly Glip). It supports posting messages, managing chats, file attachments, persons/groups, events, webhooks, and adaptive cards.
+
+#### Tags
+
+- Team Messaging
+- Chat
+- Bots
+- Add-ins
+
+#### Properties
+
+- [Documentation](https://developers.ringcentral.com/team-messaging-api)
+- [API Reference](https://developers.ringcentral.com/api-reference/Team-Messaging)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Video API
+
+The RingCentral Video API powers high-quality, secure video meetings in the browser without requiring a downloaded app. It exposes endpoints for scheduling meetings, joining/embedding video sessions, managing recordings, and webhook events for meeting lifecycle.
+
+#### Tags
+
+- Video
+- Meetings
+- Webinars
+- Conferencing
+
+#### Properties
+
+- [Documentation](https://developers.ringcentral.com/video-api)
+- [API Reference](https://developers.ringcentral.com/api-reference/Video)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Fax API
+
+The RingCentral Fax API enables developers to add programmable and customizable fax sending and receiving capabilities to applications, including multi-attachment support, scheduled delivery, and inbound fax retrieval.
+
+#### Tags
+
+- Fax
+- Documents
+
+#### Properties
+
+- [Documentation](https://developers.ringcentral.com/fax-api)
+- [API Reference](https://developers.ringcentral.com/api-reference/Fax)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Data API
+
+The RingCentral Data API helps customers manage and ensure regulatory compliance with call data, message data, and video recordings, supporting bulk export, archival, and supervisory retrieval workflows.
+
+#### Tags
+
+- Compliance
+- Data
+- Recordings
+- Exports
+
+#### Properties
+
+- [Documentation](https://developers.ringcentral.com/data-api)
+- [API Reference](https://developers.ringcentral.com/api-reference/Compliance-Exports)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Audio and Video AI API
+
+The RingCentral Audio and Video AI API exposes speech-to-text, summarization, and conversational analytics on call and meeting media, enabling developers to extract transcripts, action items, and insights from RingCentral communications.
+
+#### Tags
+
+- AI
+- Transcription
+- Summarization
+- Speech-to-Text
+
+#### Properties
+
+- [Documentation](https://developers.ringcentral.com/ai-api)
+- [API Reference](https://developers.ringcentral.com/api-reference/AI)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Call Log API
+
+The RingCentral Call Log API provides historical call data, recordings, and synchronization endpoints used to power analytics, billing, and compliance retention systems.
+
+#### Tags
+
+- Call Log
+- Analytics
+- History
+
+#### Properties
+
+- [API Reference](https://developers.ringcentral.com/api-reference/Call-Log)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Call Analytics API
+
+The RingCentral Call Analytics API exposes aggregated metrics, KPIs, and reporting endpoints for inbound and outbound calling activity at the user, queue, department, and account levels.
+
+#### Tags
+
+- Analytics
+- KPIs
+- Reporting
+
+#### Properties
+
+- [API Reference](https://developers.ringcentral.com/api-reference/Analytics)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Presence API
+
+The RingCentral Presence API exposes real-time and historical presence/availability state for users and call queues, including DND, telephony state, and meeting status, with subscription-based change notifications.
+
+#### Tags
+
+- Presence
+- Status
+- Real-Time
+
+#### Properties
+
+- [API Reference](https://developers.ringcentral.com/api-reference/Presence)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Voicemail API
+
+The RingCentral Voicemail API enables retrieval, playback, and management of voicemail messages, including transcripts, attachments, and read/unread state.
+
+#### Tags
+
+- Voicemail
+- Messaging
+
+#### Properties
+
+- [API Reference](https://developers.ringcentral.com/api-reference/Voicemail)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Provisioning API
+
+The RingCentral Provisioning API supports account, extension, user, phone-number, device, and role lifecycle operations needed to programmatically onboard, configure, and manage RingCentral tenants.
+
+#### Tags
+
+- Provisioning
+- Account
+- Extensions
+- Phone Numbers
+
+#### Properties
+
+- [API Reference](https://developers.ringcentral.com/api-reference/Account-Provisioning)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Webhooks and Subscriptions API
+
+The RingCentral Webhooks and Subscriptions API delivers event notifications (telephony, messaging, presence, account, etc.) to subscriber endpoints via webhooks or PubNub channels.
+
+#### Tags
+
+- Webhooks
+- Events
+- Subscriptions
+- PubNub
+
+#### Properties
+
+- [API Reference](https://developers.ringcentral.com/api-reference/Subscriptions)
+- [Documentation](https://developers.ringcentral.com/guide/notifications)
+- [AsyncAPI](asyncapi/ringcentral-subscriptions-asyncapi.yaml) — [AsyncAPI Specification](https://www.asyncapi.com/docs/reference/specification/latest)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Contact Center API
+
+The RingCentral Contact Center (RingCX) API provides programmatic access to omnichannel contact-center capabilities including agent state, queues, routing, real-time and historical reporting, and skills-based agent assignment.
+
+#### Tags
+
+- Contact Center
+- CCaaS
+- Agents
+- Routing
+
+#### Properties
+
+- [API Reference](https://developers.ringcentral.com/api-reference/Contact-Center)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+
+### RingCentral Events API
+
+The RingCentral Events API supports the lifecycle of large-scale virtual and hybrid events including event creation, registration, sessions, sponsors, attendees, and reporting.
+
+#### Tags
+
+- Events
+- Webinars
+- Hub
+
+#### Properties
+
+- [API Reference](https://developers.ringcentral.com/api-reference/Events)
+- [Postman Collection](collections/ringcentral-platform.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
+- [Open Collection](collections/ringcentral-platform.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
 
 ## Common Properties
 
+- [LinkedIn](https://www.linkedin.com/company/ringcentral)
 - [Website](https://www.ringcentral.com/)
-- [Developer Portal](https://developers.ringcentral.com/)
+- [Developer  Portal](https://developers.ringcentral.com/)
+- [Documentation](https://developers.ringcentral.com/api-products)
 - [API Reference](https://developers.ringcentral.com/api-reference)
+- [Getting Started](https://developers.ringcentral.com/guide/getting-started)
+- [Authentication](https://developers.ringcentral.com/guide/authentication)
+- [Rate Limits](https://developers.ringcentral.com/guide/basics/rate-limits)
+- [Errors](https://developers.ringcentral.com/guide/basics/errors)
+- [S D Ks](https://developers.ringcentral.com/sdks-tools)
+- [Status Page](https://status.ringcentral.com/)
 - [Pricing](https://www.ringcentral.com/office/plansandpricing.html)
+- [Sign Up](https://developers.ringcentral.com/login.html#/register)
+- [Login](https://developers.ringcentral.com/login.html)
 - [GitHub Organization](https://github.com/ringcentral)
-- [Plans](plans/ringcentral-plans-pricing.yml) — API Commons Plans 0.1 (reconciled)
-- [RateLimits](rate-limits/ringcentral-rate-limits.yml) — API Commons Rate Limits 0.1 (reconciled)
-- [FinOps](finops/ringcentral-finops.yml) — FOCUS-aligned FinOps Framework 1.0 (reconciled)
-
-## Plans Summary
-
-- **RingEX Core** — $30/user/month (annual) — entry tier
-- **RingEX Advanced** — $35/user/month (annual) — mid tier
-- **RingEX Ultra** — $45/user/month (annual) — top tier
-- **RingCX (Voice agent)** — starts at $65/agent/month — contact center
-- **Developer Platform** — Free (REST API, sandbox, SDKs)
-
-## Rate Limits Summary
-
-| Category | Limit |
-|---|---|
-| Light | 50 requests/user/minute |
-| Medium | 40 requests/user/minute |
-| Heavy | 10 requests/user/minute |
-| Auth | 5 requests/user/minute |
-
-## Artifacts
-
-| Artifact | Path |
-|---|---|
-| Plans | `plans/ringcentral-plans-pricing.yml` |
-| Rate Limits | `rate-limits/ringcentral-rate-limits.yml` |
-| FinOps | `finops/ringcentral-finops.yml` |
+- [Blog](https://www.ringcentral.com/blog/)
+- [Changelog](https://developers.ringcentral.com/api-reference/release-notes)
+- [Webhooks](https://developers.ringcentral.com/api-reference/Subscriptions)
+- [Postman  Workspace](https://www.postman.com/ringcentral)
+- [X ( Twitter)](https://x.com/RingCentralDevs)
+- [YouTube](https://www.youtube.com/@RingCentralDevelopers)
+- [Plans](plans/ringcentral-plans-pricing.yml)
+- [Rate Limits](rate-limits/ringcentral-rate-limits.yml)
+- [Fin Ops](finops/ringcentral-finops.yml)
+- [Integrations](https://www.ringcentral.com/apps/)
 
 ## Maintainers
 
 **FN:** Kin Lane
-
 **Email:** kin@apievangelist.com
