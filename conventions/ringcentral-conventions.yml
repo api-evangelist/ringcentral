@@ -1,0 +1,57 @@
+generated: '2026-06-20'
+method: searched
+source: https://developers.ringcentral.com/guide/basics
+derived_from: openapi/ringcentral-platform-openapi.yml
+authentication:
+  style: "OAuth 2.0 bearer token (Authorization: Bearer)"
+  flows: [authorizationCode+PKCE, jwt-bearer, clientCredentials]
+  token_ttl_seconds: 3600
+  ref: authentication/ringcentral-authentication.yml
+base_url:
+  production: https://platform.ringcentral.com
+  sandbox: https://platform.devtest.ringcentral.com
+  path_prefix: /restapi/v1.0
+  account_alias: "~ resolves to the authenticated account; extension ~ to the authenticated user"
+pagination:
+  style: page-number
+  request_params: [page, perPage]
+  response_fields: [paging, navigation]
+  paging_fields: [page, perPage, pageStart, pageEnd, totalPages, totalElements]
+  sync_variant:
+    note: Call log and message store support incremental sync via syncType (FSync/ISync) + syncToken instead of page numbers.
+    endpoints_example: [syncUserCallLog, syncAccountCallLog]
+rate_limiting:
+  groups:
+    - {name: Light, limit_per_user_min: 50, window_seconds: 60}
+    - {name: Medium, limit_per_user_min: 40, window_seconds: 60}
+    - {name: Heavy, limit_per_user_min: 10, window_seconds: 60}
+    - {name: Auth, limit_per_user_min: 5, window_seconds: 60}
+  scope: per user-application pair; requests in the same group share the quota.
+  response_headers:
+    - X-Rate-Limit-Group
+    - X-Rate-Limit-Limit
+    - X-Rate-Limit-Remaining
+    - X-Rate-Limit-Window
+  throttled_status: 429
+  retry_after_header: Retry-After
+  ref: rate-limits/ringcentral-rate-limits.yml
+error_envelope:
+  format: ringcentral-error-envelope
+  primary_field: errorCode
+  fields: [errorCode, message, "errors[]", parameterName]
+  problem_json: false
+  ref: errors/ringcentral-error-codes.yml
+versioning:
+  scheme: uri-path
+  current: v1.0
+  ref: lifecycle/ringcentral-lifecycle.yml
+events:
+  transports: [WebHook (HTTPS), PubNub]
+  validation: Validation-Token header echo on webhook subscription creation.
+  envelope_fields: [uuid, event, ownerId, subscriptionId, timestamp, body]
+  ref: asyncapi/ringcentral-subscriptions-asyncapi.yaml
+idempotency:
+  documented: false
+  note: No dedicated idempotency-key header is documented; write safety relies on resource semantics.
+media:
+  note: Binary content (recordings, fax, voicemail, message attachments) served from media.ringcentral.com; requires the bearer token.

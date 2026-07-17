@@ -1,0 +1,101 @@
+generated: '2026-06-20'
+method: searched
+source: https://developers.ringcentral.com/guide/basics/errors
+derived_from: openapi/ringcentral-platform-openapi.yml
+format: ringcentral-error-envelope
+notes: >-
+  RingCentral does not use RFC 9457 application/problem+json (0 problem+json
+  responses across the OpenAPI). Errors are returned in a custom envelope with an
+  errors[] array; clients are instructed to branch on errorCode (a dotted PREFIX-NNN
+  string), not the human message. HTTP status codes observed across 487 operations:
+  400 (190), 401 (16), 403 (131), 404 (225), 406, 409 (27), 410, 415, 422, 429 (20),
+  500 (187), 503 (123), 504.
+envelope:
+  content_type: application/json
+  shape: |
+    {
+      "errorCode": "CMN-101",
+      "message": "Parameter [xxx] value is invalid",
+      "errors": [
+        { "errorCode": "CMN-101", "message": "...", "parameterName": "xxx" }
+      ]
+    }
+  primary_field: errorCode
+  guidance: Branch on errorCode (and parameterName where present), never on message text.
+error_code_prefixes:
+  - prefix: CMN
+    area: Common / platform-wide
+  - prefix: OAU
+    area: OAuth / authentication
+  - prefix: MSG
+    area: Messaging (SMS/MMS/pager)
+  - prefix: TPS
+    area: Throttling / rate policy service
+codes:
+  - code: OAU-101
+    http: 400
+    title: Invalid parameter
+    area: auth
+  - code: OAU-120
+    http: 400
+    title: Wrong Application ID
+    area: auth
+  - code: OAU-128
+    http: 401
+    title: Access token expired
+    area: auth
+    remediation: Refresh the access token using the refresh token.
+  - code: OAU-140
+    http: 400
+    title: Invalid resource owner credentials
+    area: auth
+  - code: OAU-168
+    http: 400
+    title: Password grant not allowed due to MFA requirement
+    area: auth
+  - code: CMN-101
+    http: 400
+    title: Invalid parameter value
+    area: common
+  - code: CMN-102
+    http: 404
+    title: Resource not found
+    area: common
+  - code: CMN-109
+    http: 403
+    title: Feature not available
+    area: common
+  - code: CMN-301
+    http: 429
+    title: Request rate exceeded (per-app/user)
+    area: rate-limit
+    remediation: Honor Retry-After; apply exponential backoff.
+  - code: CMN-302
+    http: 429
+    title: Request rate exceeded
+    area: rate-limit
+  - code: CMN-304
+    http: 429
+    title: Duplicate concurrent request
+    area: rate-limit
+  - code: CMN-310
+    http: 429
+    title: Global request rate exceeded
+    area: rate-limit
+  - code: CMN-401
+    http: 403
+    title: Application permission required
+    area: authz
+    remediation: Add the required OAuth scope to the application registration.
+  - code: MSG-240
+    http: 400
+    title: Non-US phone number
+    area: messaging
+  - code: MSG-305
+    http: 429
+    title: Request rate exceeded
+    area: messaging
+  - code: MSG-337
+    http: 400
+    title: Attachment size limit exceeded
+    area: messaging

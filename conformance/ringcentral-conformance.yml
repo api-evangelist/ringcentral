@@ -1,0 +1,39 @@
+generated: '2026-06-20'
+method: derived
+source: openapi/ringcentral-platform-openapi.yml
+standards:
+  - id: oauth2
+    conforms: true
+    evidence: OpenAPI securitySchemes declares oauth2 authorizationCode; docs document Authorization Code + JWT + Client Credentials flows.
+  - id: oidc
+    conforms: true
+    evidence: platform.ringcentral.com/.well-known/openid-configuration returns 200 (issuer, authorization/token/jwks/revocation endpoints).
+  - id: pkce
+    conforms: true
+    evidence: openid-configuration advertises code_challenge_methods_supported; docs require PKCE for auth-code apps.
+  - id: rfc7523-jwt-bearer
+    conforms: true
+    evidence: JWT auth credential flow (urn:ietf:params:oauth:grant-type:jwt-bearer) for server-only apps.
+  - id: rfc9457-problem-details
+    conforms: false
+    evidence: 0 responses use application/problem+json; errors use a custom errorCode envelope.
+  - id: rfc8594-sunset-header
+    conforms: false
+    evidence: No documented Sunset/Deprecation header policy; deprecated operations flagged in-spec only.
+  - id: webhooks
+    conforms: true
+    evidence: Subscription API delivers events via WebHook (HTTPS) and PubNub; AsyncAPI 2.6 captured.
+  - id: asyncapi
+    conforms: true
+    evidence: asyncapi/ringcentral-subscriptions-asyncapi.yaml (2.6.0) describes the event surface.
+  - id: pagination
+    conforms: true
+    evidence: List endpoints use page/perPage + navigation (paging/navigation) objects; call log uses sync tokens.
+  - id: fhir-r4
+    conforms: false
+  - id: scim2
+    conforms: false
+  - id: odata
+    conforms: false
+  - id: fapi
+    conforms: false

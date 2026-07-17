@@ -1,0 +1,36 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for RingCentral API
+  version: 1.0.0
+extends: openapi/ringcentral-platform-openapi.yml
+actions:
+  - target: $.info
+    update:
+      x-apievangelist-provider: ringcentral
+      x-apievangelist-artifacts:
+        authentication: authentication/ringcentral-authentication.yml
+        scopes: scopes/ringcentral-scopes.yml
+        errors: errors/ringcentral-error-codes.yml
+        conventions: conventions/ringcentral-conventions.yml
+        lifecycle: lifecycle/ringcentral-lifecycle.yml
+        data_model: data-model/ringcentral-data-model.yml
+        conformance: conformance/ringcentral-conformance.yml
+        sandbox: sandbox/ringcentral-sandbox.yml
+        packages: packages/ringcentral-packages.yml
+  - target: $.info
+    update:
+      x-apievangelist-auth:
+        model: oauth2
+        flows: [authorizationCode+PKCE, jwt-bearer, clientCredentials]
+        scopes_docs: https://developers.ringcentral.com/guide/basics/permissions
+  - target: $.info
+    update:
+      x-apievangelist-rate-limits:
+        groups: [Light, Medium, Heavy, Auth]
+        headers: [X-Rate-Limit-Group, X-Rate-Limit-Limit, X-Rate-Limit-Remaining, X-Rate-Limit-Window, Retry-After]
+        docs: https://developers.ringcentral.com/guide/basics/rate-limits
+  - target: $.info
+    update:
+      x-apievangelist-events:
+        transports: [WebHook, PubNub]
+        asyncapi: asyncapi/ringcentral-subscriptions-asyncapi.yaml

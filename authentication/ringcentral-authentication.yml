@@ -1,11 +1,20 @@
-generated: '2026-07-11'
-method: derived
+generated: '2026-06-20'
+method: searched
 source: openapi/ringcentral-platform-openapi.yml
+docs: https://developers.ringcentral.com/guide/authentication
 summary:
   types:
   - oauth2
   oauth2_flows:
   - authorizationCode
+  - clientCredentials
+  - jwt
+  notes: >-
+    RingCentral standardized on OAuth 2.0 (all password/ROPC flows retired). Access
+    tokens are bearer tokens with a ~1 hour TTL; refresh tokens rotate. Documented
+    grant types: Authorization Code (with PKCE) for user apps, JWT assertion (RFC
+    7523) for server-only/no-UI apps, and Client Credentials for app-context calls.
+    The public OpenAPI only encodes the authorizationCode scheme.
 schemes:
 - name: OAuth2
   type: oauth2
@@ -13,6 +22,19 @@ schemes:
   - flow: authorizationCode
     authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
     tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
-    scopes: 0
+    scopes: 37
+    pkce: true
+  - flow: jwt
+    tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+    grant: urn:ietf:params:oauth:grant-type:jwt-bearer
+    notes: JWT auth credential flow for server-only apps.
+  - flow: clientCredentials
+    tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
   sources:
   - openapi/ringcentral-platform-openapi.yml
+  docs: https://developers.ringcentral.com/guide/authentication/auth-code-flow
+token:
+  type: bearer
+  ttl_seconds: 3600
+  refresh: true
+  revocation_endpoint: https://platform.ringcentral.com/restapi/oauth/revoke

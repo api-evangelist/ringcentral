@@ -1,0 +1,77 @@
+generated: '2026-06-20'
+method: derived
+source: openapi/ringcentral-platform-openapi.yml
+notes: >-
+  Entity graph derived from the RingCentral REST path hierarchy
+  (/restapi/v1.0/account/{accountId}/extension/{extensionId}/...) and the schema
+  set (1,292 components). Relationships reflect path nesting and id-reference fields;
+  cardinalities are the documented resource structure. The "~" alias substitutes the
+  authenticated account / extension.
+entities:
+  - name: Account
+    id: accountId
+    root: /restapi/v1.0/account/{accountId}
+    relationships:
+      - {type: has_many, target: Extension, via: extensionId}
+      - {type: has_many, target: PhoneNumber, via: phoneNumberId}
+      - {type: has_many, target: Department}
+      - {type: has_many, target: CallQueue}
+      - {type: has_many, target: CallLogRecord}
+  - name: Extension
+    id: extensionId
+    belongs_to: Account
+    relationships:
+      - {type: belongs_to, target: Account, via: accountId}
+      - {type: has_many, target: PhoneNumber, via: phoneNumberId}
+      - {type: has_many, target: Device, via: deviceId}
+      - {type: has_many, target: Message, via: messageId}
+      - {type: has_many, target: CallLogRecord}
+      - {type: has_one, target: PresenceStatus}
+      - {type: has_many, target: Contact, via: contactId}
+      - {type: has_many, target: Meeting, via: meetingId}
+  - name: PhoneNumber
+    id: phoneNumberId
+    belongs_to: [Account, Extension]
+  - name: Device
+    id: deviceId
+    belongs_to: Extension
+  - name: Message
+    id: messageId
+    belongs_to: Extension
+    note: Message store record (SMS, MMS, Fax, Pager, Voicemail) discriminated by type.
+    relationships:
+      - {type: has_many, target: Attachment, via: attachmentId}
+  - name: CallLogRecord
+    id: callRecordId
+    belongs_to: [Account, Extension]
+    relationships:
+      - {type: has_one, target: CallRecording, via: recordingId}
+  - name: CallRecording
+    id: recordingId
+    belongs_to: CallLogRecord
+  - name: TelephonySession
+    id: telephonySessionId
+    root: /restapi/v1.0/account/{accountId}/telephony/sessions
+    relationships:
+      - {type: has_many, target: CallParty, via: partyId}
+  - name: CallParty
+    id: partyId
+    belongs_to: TelephonySession
+  - name: PresenceStatus
+    belongs_to: Extension
+  - name: Contact
+    id: contactId
+    belongs_to: Extension
+  - name: Meeting
+    id: meetingId
+    belongs_to: Extension
+    note: Deprecated (RingCentral Meetings); superseded by RingCentral Video.
+  - name: Subscription
+    id: subscriptionId
+    root: /restapi/v1.0/subscription
+    note: Webhook/PubNub event subscription; eventFilters reference other resource URIs.
+  - name: Department
+    id: departmentId
+    belongs_to: Account
+  - name: CallQueue
+    belongs_to: Account
