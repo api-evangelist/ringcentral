@@ -1,0 +1,151 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Send an SMS and Track Its Delivery
+  summary: Send an SMS from an extension and poll the message store until it reaches a terminal delivery state.
+  description: >-
+    The most common RingCentral messaging integration. An SMS is created from a
+    RingCentral phone number belonging to an extension, and the returned message
+    id is then read back from the message store to follow the message through its
+    delivery lifecycle. RingCentral returns `Queued` immediately, so the flow
+    branches on the polled status: it ends on `Delivered`, retries while the
+    message is still `Queued` or `Sent`, and surfaces the failure detail when the
+    carrier reports `DeliveryFailed` or `SendingFailed`. Every step spells out its
+    request inline so the flow can be read and executed without opening the
+    underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: send-sms-track-delivery
+  summary: Send a single SMS message and confirm the carrier delivered it.
+  description: >-
+    Creates an outbound SMS from an extension's RingCentral number and then polls
+    the message store record for that message until the aggregated message status
+    settles into a terminal value.
+  inputs:
+    type: object
+    required:
+    - fromPhoneNumber
+    - toPhoneNumber
+    - text
+    properties:
+      accountId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the RingCentral account. Use "~" for the account
+          associated with the current authorization session.
+      extensionId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the extension sending the message. Use "~" for the
+          extension associated with the current authorization session.
+      fromPhoneNumber:
+        type: string
+        description: >-
+          A RingCentral phone number in E.164 format that is SMS-enabled and
+          assigned to the sending extension (e.g. +15551234567).
+      toPhoneNumber:
+        type: string
+        description: The recipient phone number in E.164 format.
+      text:
+        type: string
+        description: The message body to send.
+  steps:
+  - stepId: sendSms
+    description: >-
+      Create the outbound SMS. RingCentral accepts the message and returns a
+      message store record whose status normally starts as "Queued".
+    operationId: createSMSMessage
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    requestBody:
+      contentType: application/json
+      payload:
+        from:
+          phoneNumber: $inputs.fromPhoneNumber
+        to:
+        - phoneNumber: $inputs.toPhoneNumber
+        text: $inputs.text
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      messageId: $response.body#/id
+      conversationId: $response.body#/conversationId
+      initialStatus: $response.body#/messageStatus
+      creationTime: $response.body#/creationTime
+  - stepId: checkDeliveryStatus
+    description: >-
+      Read the message back from the message store to inspect its aggregated
+      delivery status. Repeat this step while the status is still in flight.
+    operationId: readMessage
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: messageId
+      in: path
+      value: $steps.sendSms.outputs.messageId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      messageStatus: $response.body#/messageStatus
+      lastModifiedTime: $response.body#/lastModifiedTime
+      toRecipients: $response.body#/to
+    onSuccess:
+    - name: delivered
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.messageStatus == 'Delivered'
+        type: jsonpath
+    - name: stillInFlight
+      type: goto
+      stepId: checkDeliveryStatus
+      criteria:
+      - context: $response.body
+        condition: $.messageStatus in ['Queued', 'Sent']
+        type: jsonpath
+    - name: deliveryFailed
+      type: goto
+      stepId: readFailureDetail
+      criteria:
+      - context: $response.body
+        condition: $.messageStatus in ['DeliveryFailed', 'SendingFailed']
+        type: jsonpath
+  - stepId: readFailureDetail
+    description: >-
+      Re-read the failed message so the per-recipient error detail is captured for
+      logging, alerting, or retry against an alternate number.
+    operationId: readMessage
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: messageId
+      in: path
+      value: $steps.sendSms.outputs.messageId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      failedStatus: $response.body#/messageStatus
+      failureRecipients: $response.body#/to
+  outputs:
+    messageId: $steps.sendSms.outputs.messageId
+    conversationId: $steps.sendSms.outputs.conversationId
+    finalStatus: $steps.checkDeliveryStatus.outputs.messageStatus
+    failureRecipients: $steps.readFailureDetail.outputs.failureRecipients

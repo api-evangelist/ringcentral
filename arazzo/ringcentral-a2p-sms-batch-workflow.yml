@@ -1,0 +1,155 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Send an A2P SMS Batch and Reconcile Statuses
+  summary: Send a high-volume A2P 10DLC SMS batch, poll it to completion, and aggregate delivery status counts.
+  description: >-
+    The A2P (application-to-person) SMS API is how RingCentral customers send
+    campaign and notification traffic at volume over registered 10DLC numbers. A
+    batch is submitted with one sender number and many recipients, RingCentral
+    accepts it asynchronously with a `Processing` status, and the flow then polls
+    the batch until it reports `Completed` before aggregating delivery status
+    counts (queued, sent, delivered, deliveryFailed, sendingFailed) for the batch.
+    Rejected recipients are captured at submission time so invalid numbers can be
+    scrubbed from the list. Every step spells out its request inline so the flow
+    can be read and executed without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: send-a2p-batch-reconcile
+  summary: Submit an A2P SMS batch, wait for it to finish processing, and aggregate delivery statuses.
+  description: >-
+    Creates a batch of A2P SMS messages from a registered sender number, polls the
+    batch resource until processing completes, and then aggregates the delivery
+    status counts across the batch for campaign reporting.
+  inputs:
+    type: object
+    required:
+    - fromPhoneNumber
+    - text
+    - recipients
+    properties:
+      accountId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the RingCentral account. Use "~" for the account
+          associated with the current authorization session.
+      fromPhoneNumber:
+        type: string
+        description: >-
+          The registered A2P sender phone number in E.164 format (e.g. +15551234567).
+      text:
+        type: string
+        description: >-
+          Default message text applied to every message in the batch. Individual
+          messages may override it.
+      recipients:
+        type: array
+        items:
+          type: string
+        description: >-
+          Recipient phone numbers in E.164 format. Each becomes one message in the
+          batch.
+      dateFrom:
+        type: string
+        format: date-time
+        description: >-
+          Start of the reporting window used when aggregating batch statuses
+          (ISO 8601).
+  steps:
+  - stepId: createBatch
+    description: >-
+      Submit the A2P SMS batch. RingCentral validates the sender registration,
+      accepts the batch, and returns the batch id, the accepted batch size, and the
+      list of rejected/invalid recipients.
+    operationId: createA2PSMS
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    requestBody:
+      contentType: application/json
+      payload:
+        from: $inputs.fromPhoneNumber
+        text: $inputs.text
+        messages:
+        - to: $inputs.recipients
+    successCriteria:
+    - condition: $statusCode == 201
+    outputs:
+      batchId: $response.body#/id
+      batchSize: $response.body#/batchSize
+      batchStatus: $response.body#/status
+      rejected: $response.body#/rejected
+  - stepId: pollBatch
+    description: >-
+      Read the batch back until RingCentral reports it as "Completed". While the
+      batch is still "Processing" the delivery counts are not yet final, so this
+      step repeats before the statuses are aggregated.
+    operationId: readA2PBatch
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: batchId
+      in: path
+      value: $steps.createBatch.outputs.batchId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      status: $response.body#/status
+      processedCount: $response.body#/processedCount
+      cost: $response.body#/cost
+      lastModifiedTime: $response.body#/lastModifiedTime
+    onSuccess:
+    - name: batchStillProcessing
+      type: goto
+      stepId: pollBatch
+      criteria:
+      - context: $response.body
+        condition: $.status == 'Processing'
+        type: jsonpath
+    - name: batchCompleted
+      type: goto
+      stepId: aggregateStatuses
+      criteria:
+      - context: $response.body
+        condition: $.status == 'Completed'
+        type: jsonpath
+  - stepId: aggregateStatuses
+    description: >-
+      Aggregate the delivery status counts for the batch. This is the reporting
+      call an integrator runs to track how much of a campaign was delivered versus
+      queued or failed.
+    operationId: aggregateA2PSMSStatuses
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: batchId
+      in: query
+      value: $steps.createBatch.outputs.batchId
+    - name: direction
+      in: query
+      value: Outbound
+    - name: dateFrom
+      in: query
+      value: $inputs.dateFrom
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      queued: $response.body#/queued
+      sent: $response.body#/sent
+      delivered: $response.body#/delivered
+      deliveryFailed: $response.body#/deliveryFailed
+      sendingFailed: $response.body#/sendingFailed
+  outputs:
+    batchId: $steps.createBatch.outputs.batchId
+    batchSize: $steps.createBatch.outputs.batchSize
+    rejected: $steps.createBatch.outputs.rejected
+    cost: $steps.pollBatch.outputs.cost
+    delivered: $steps.aggregateStatuses.outputs.delivered
+    deliveryFailed: $steps.aggregateStatuses.outputs.deliveryFailed

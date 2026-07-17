@@ -1,0 +1,140 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Create a Team, Add Members, and Post a Message
+  summary: Stand up a Team Messaging team, add people to it, post a message into the chat, and read the post back.
+  description: >-
+    This is the standard bot and notification onboarding path in RingCentral Team
+    Messaging: create a team for an incident, project, or account, pull the right
+    people into it, and post the opening message. The flow is worth wiring as one
+    unit because the team id returned at creation is the chat id used to post into
+    it — teams and chats share an identifier space, which is the detail that trips
+    up first-time integrators. The post is read back afterwards to confirm it
+    landed and to capture the rendered attachment ids. Every step spells out its
+    request inline so the flow can be read and executed without opening the
+    underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: create-team-add-members-post
+  summary: Create a team, add members, post a message, and read the post back.
+  description: >-
+    Creates a Team Messaging team, adds additional members by id or email, posts a
+    message into the team's chat, and reads the created post back for
+    confirmation.
+  inputs:
+    type: object
+    required:
+    - teamName
+    - text
+    properties:
+      teamName:
+        type: string
+        description: Name of the team to create (e.g. "Incident 4821").
+      description:
+        type: string
+        description: User-friendly description of the team's purpose.
+      public:
+        type: boolean
+        default: false
+        description: >-
+          Whether the team is public (discoverable and joinable by anyone in the
+          company) or private.
+      members:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Internal identifier of a person.
+            email:
+              type: string
+              format: email
+              description: Email address of a person.
+        description: >-
+          People to add to the team after creation. Each entry identifies a person
+          by internal id or by email.
+      text:
+        type: string
+        description: >-
+          The message body to post. Supports RingCentral's markdown-style
+          formatting.
+  steps:
+  - stepId: createTeam
+    description: >-
+      Create the team. The returned id is both the team id and the chat id used for
+      posting, so it is captured once and reused by the later steps.
+    operationId: createGlipTeamNew
+    requestBody:
+      contentType: application/json
+      payload:
+        name: $inputs.teamName
+        description: $inputs.description
+        public: $inputs.public
+    successCriteria:
+    - condition: $statusCode == 201
+    outputs:
+      teamId: $response.body#/id
+      teamName: $response.body#/name
+      teamType: $response.body#/type
+      creationTime: $response.body#/creationTime
+  - stepId: addMembers
+    description: >-
+      Add the requested people to the team. Members may be identified by internal
+      person id or by email address. This returns 204 with no body.
+    operationId: addGlipTeamMembersNew
+    parameters:
+    - name: chatId
+      in: path
+      value: $steps.createTeam.outputs.teamId
+    requestBody:
+      contentType: application/json
+      payload:
+        members: $inputs.members
+    successCriteria:
+    - condition: $statusCode == 204
+  - stepId: postMessage
+    description: >-
+      Post the opening message into the team's chat using the team id as the chat
+      id.
+    operationId: createGlipPostNew
+    parameters:
+    - name: chatId
+      in: path
+      value: $steps.createTeam.outputs.teamId
+    requestBody:
+      contentType: application/json
+      payload:
+        text: $inputs.text
+    successCriteria:
+    - condition: $statusCode == 201
+    outputs:
+      postId: $response.body#/id
+      creatorId: $response.body#/creatorId
+      postCreationTime: $response.body#/creationTime
+  - stepId: readPost
+    description: >-
+      Read the post back to confirm it was persisted to the chat and to capture the
+      rendered attachment ids for any follow-up edit.
+    operationId: readGlipPostNew
+    parameters:
+    - name: chatId
+      in: path
+      value: $steps.createTeam.outputs.teamId
+    - name: postId
+      in: path
+      value: $steps.postMessage.outputs.postId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      text: $response.body#/text
+      attachments: $response.body#/attachments
+      lastModifiedTime: $response.body#/lastModifiedTime
+  outputs:
+    teamId: $steps.createTeam.outputs.teamId
+    teamName: $steps.createTeam.outputs.teamName
+    postId: $steps.postMessage.outputs.postId
+    postText: $steps.readPost.outputs.text

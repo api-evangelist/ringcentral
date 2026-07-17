@@ -1,0 +1,174 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Send a Fax and Retrieve the Sent Document
+  summary: Send a fax with an attachment, poll the message store until it is delivered, and download the transmitted document.
+  description: >-
+    Programmatic fax remains a core RingCentral use case in regulated industries
+    where a fax transmission is the record of delivery. This workflow posts a fax
+    as multipart/form-data with a cover page and an attachment, then polls the
+    resulting message store record until the aggregated fax status settles, and
+    finally downloads the transmitted document content for archival. Outbound fax
+    status aggregates across recipients: RingCentral reports `Queued` while any
+    recipient is pending and `SendingFailed` if any recipient fails. Every step
+    spells out its request inline so the flow can be read and executed without
+    opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: send-fax-confirm-delivery
+  summary: Send a fax, confirm transmission, and archive the sent document.
+  description: >-
+    Creates an outbound fax with an attached document, polls the message store for
+    the transmission result, and downloads the stored fax content once the fax has
+    been sent so it can be retained as proof of delivery.
+  inputs:
+    type: object
+    required:
+    - toPhoneNumber
+    - attachment
+    properties:
+      accountId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the RingCentral account. Use "~" for the account
+          associated with the current authorization session.
+      extensionId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the sending extension. Use "~" for the extension
+          associated with the current authorization session.
+      toPhoneNumber:
+        type: string
+        description: Recipient fax number in E.164 format (e.g. +15551234567).
+      attachment:
+        type: string
+        format: binary
+        description: >-
+          The document to fax (PDF, DOC, TIFF, etc.), sent as a multipart file part.
+      faxResolution:
+        type: string
+        default: High
+        description: Fax resolution, either "High" or "Low".
+      coverIndex:
+        type: integer
+        description: >-
+          Index of the cover page template to use. Omit or set to 0 for no cover
+          page.
+      coverPageText:
+        type: string
+        description: Text rendered onto the cover page.
+      sendTime:
+        type: string
+        format: date-time
+        description: >-
+          Optional scheduled send time (ISO 8601). When omitted the fax is sent
+          immediately.
+  steps:
+  - stepId: sendFax
+    description: >-
+      Create the outbound fax. The attachment and cover page fields are submitted
+      as multipart/form-data, which is the only content type this operation
+      accepts.
+    operationId: createFaxMessage
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    requestBody:
+      contentType: multipart/form-data
+      payload:
+        to: $inputs.toPhoneNumber
+        attachment: $inputs.attachment
+        faxResolution: $inputs.faxResolution
+        coverIndex: $inputs.coverIndex
+        coverPageText: $inputs.coverPageText
+        sendTime: $inputs.sendTime
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      messageId: $response.body#/id
+      initialStatus: $response.body#/messageStatus
+      attachmentId: $response.body#/attachments/0/id
+      faxPageCount: $response.body#/faxPageCount
+  - stepId: checkFaxStatus
+    description: >-
+      Read the fax back from the message store to inspect the aggregated
+      transmission status. Repeat this step while the fax is still queued.
+    operationId: readMessage
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: messageId
+      in: path
+      value: $steps.sendFax.outputs.messageId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      messageStatus: $response.body#/messageStatus
+      attachmentId: $response.body#/attachments/0/id
+      transmissionRecipients: $response.body#/to
+      lastModifiedTime: $response.body#/lastModifiedTime
+    onSuccess:
+    - name: faxStillQueued
+      type: goto
+      stepId: checkFaxStatus
+      criteria:
+      - context: $response.body
+        condition: $.messageStatus == 'Queued'
+        type: jsonpath
+    - name: faxSent
+      type: goto
+      stepId: downloadFaxContent
+      criteria:
+      - context: $response.body
+        condition: $.messageStatus in ['Sent', 'Delivered']
+        type: jsonpath
+    - name: faxFailed
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.messageStatus in ['SendingFailed', 'DeliveryFailed']
+        type: jsonpath
+  - stepId: downloadFaxContent
+    description: >-
+      Download the transmitted fax document from the message store so it can be
+      archived alongside the transmission record.
+    operationId: readMessageContent
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: messageId
+      in: path
+      value: $steps.sendFax.outputs.messageId
+    - name: attachmentId
+      in: path
+      value: $steps.checkFaxStatus.outputs.attachmentId
+    - name: contentDisposition
+      in: query
+      value: Attachment
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      faxDocument: $response.body
+  outputs:
+    messageId: $steps.sendFax.outputs.messageId
+    faxPageCount: $steps.sendFax.outputs.faxPageCount
+    finalStatus: $steps.checkFaxStatus.outputs.messageStatus
+    transmissionRecipients: $steps.checkFaxStatus.outputs.transmissionRecipients
+    faxDocument: $steps.downloadFaxContent.outputs.faxDocument

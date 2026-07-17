@@ -1,0 +1,184 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Triage Unread Voicemail
+  summary: List unread voicemail for an extension, read the message detail and transcript, download the audio, and mark it read.
+  description: >-
+    This is the read side of the message store that voicemail-to-ticket and
+    voicemail-to-CRM integrations are built on. Unread voicemail is listed for an
+    extension, the individual message is read to pick up the transcription and the
+    attachment ids, the audio attachment is downloaded for archival or downstream
+    AI processing, and the message is finally flipped to `Read` so the same
+    voicemail is not processed twice on the next poll. That last step is what makes
+    the flow idempotent and is the piece most often left out. Every step spells out
+    its request inline so the flow can be read and executed without opening the
+    underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: triage-unread-voicemail
+  summary: Pull unread voicemail, capture its transcript and audio, and mark it read.
+  description: >-
+    Lists unread inbound voicemail for an extension, reads the oldest message in
+    full, downloads its audio attachment, and marks the message as read so it is
+    not picked up again.
+  inputs:
+    type: object
+    properties:
+      accountId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the RingCentral account. Use "~" for the account
+          associated with the current authorization session.
+      extensionId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the extension whose voicemail is being triaged.
+          Use "~" for the extension associated with the current authorization
+          session.
+      dateFrom:
+        type: string
+        format: date-time
+        description: >-
+          Only consider voicemail received on or after this time (ISO 8601). Use
+          the previous poll's watermark here.
+      perPage:
+        type: integer
+        default: 25
+        description: Number of voicemail records to pull per page.
+  steps:
+  - stepId: listUnreadVoicemail
+    description: >-
+      List unread inbound voicemail for the extension. Filtering on messageType,
+      direction, and readStatus at the API keeps the client from paging through the
+      entire message store.
+    operationId: listMessages
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: messageType
+      in: query
+      value:
+      - VoiceMail
+    - name: direction
+      in: query
+      value:
+      - Inbound
+    - name: readStatus
+      in: query
+      value:
+      - Unread
+    - name: dateFrom
+      in: query
+      value: $inputs.dateFrom
+    - name: perPage
+      in: query
+      value: $inputs.perPage
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      records: $response.body#/records
+      oldestMessageId: $response.body#/records/0/id
+      paging: $response.body#/paging
+    onSuccess:
+    - name: voicemailWaiting
+      type: goto
+      stepId: readVoicemail
+      criteria:
+      - context: $response.body
+        condition: $.records.length > 0
+        type: jsonpath
+    - name: inboxClear
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.records.length == 0
+        type: jsonpath
+  - stepId: readVoicemail
+    description: >-
+      Read the individual voicemail record to pick up the caller information, the
+      RingCentral voicemail transcription (when available), and the id of the audio
+      attachment.
+    operationId: readMessage
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: messageId
+      in: path
+      value: $steps.listUnreadVoicemail.outputs.oldestMessageId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      fromCaller: $response.body#/from
+      creationTime: $response.body#/creationTime
+      vmDuration: $response.body#/vmDuration
+      attachmentId: $response.body#/attachments/0/id
+      attachmentContentType: $response.body#/attachments/0/contentType
+  - stepId: downloadVoicemailAudio
+    description: >-
+      Download the voicemail audio attachment so it can be archived or handed to
+      the RingCentral AI speech-to-text operations for transcription.
+    operationId: readMessageContent
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: messageId
+      in: path
+      value: $steps.listUnreadVoicemail.outputs.oldestMessageId
+    - name: attachmentId
+      in: path
+      value: $steps.readVoicemail.outputs.attachmentId
+    - name: contentDisposition
+      in: query
+      value: Attachment
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      audio: $response.body
+  - stepId: markVoicemailRead
+    description: >-
+      Flip the message to "Read" so the next poll does not return it again. This is
+      what keeps a scheduled voicemail integration from reprocessing the same
+      message on every run.
+    operationId: updateMessage
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: messageId
+      in: path
+      value: $steps.listUnreadVoicemail.outputs.oldestMessageId
+    requestBody:
+      contentType: application/json
+      payload:
+        readStatus: Read
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      readStatus: $response.body#/readStatus
+      lastModifiedTime: $response.body#/lastModifiedTime
+  outputs:
+    messageId: $steps.listUnreadVoicemail.outputs.oldestMessageId
+    fromCaller: $steps.readVoicemail.outputs.fromCaller
+    vmDuration: $steps.readVoicemail.outputs.vmDuration
+    audio: $steps.downloadVoicemailAudio.outputs.audio
+    readStatus: $steps.markVoicemailRead.outputs.readStatus

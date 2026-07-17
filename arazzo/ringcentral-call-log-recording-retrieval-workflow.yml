@@ -1,0 +1,154 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Sync the Call Log and Retrieve Recordings
+  summary: Full-sync a user's recorded calls, keep the sync token for incremental runs, and download a call recording.
+  description: >-
+    Call log synchronization is how analytics, billing, and compliance systems keep
+    a local copy of RingCentral call history without re-reading it all every time.
+    The pattern is deliberate: the first run is an `FSync` (full sync) over a date
+    range which returns a `syncToken`, and every run afterwards is an `ISync`
+    (incremental sync) that passes that token back and receives only what changed.
+    This workflow performs the full sync filtered to recorded calls only, then
+    downloads the recording media for a call, then demonstrates the incremental
+    sync that a scheduled job would actually run. Every step spells out its request
+    inline so the flow can be read and executed without opening the underlying
+    OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: sync-call-log-retrieve-recording
+  summary: Full-sync recorded calls, download a recording, then incrementally sync with the returned token.
+  description: >-
+    Runs a full call log sync for an extension restricted to calls that have
+    recordings, downloads the recording content for the first such call, and then
+    runs an incremental sync using the sync token returned by the full sync.
+  inputs:
+    type: object
+    properties:
+      accountId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the RingCentral account. Use "~" for the account
+          associated with the current authorization session.
+      extensionId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the extension whose call log is being synced. Use
+          "~" for the extension associated with the current authorization session.
+      dateFrom:
+        type: string
+        format: date-time
+        description: >-
+          Start of the full sync window (ISO 8601). Only used by the initial FSync.
+      recordCount:
+        type: integer
+        default: 250
+        description: Number of call records to return in the full sync.
+  steps:
+  - stepId: fullSyncCallLog
+    description: >-
+      Run the initial full sync (FSync) over the date window, restricted to calls
+      that have a recording and rendered in the Detailed view so recording ids are
+      present. The response carries a syncToken that must be persisted for
+      incremental runs.
+    operationId: syncUserCallLog
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: syncType
+      in: query
+      value: FSync
+    - name: dateFrom
+      in: query
+      value: $inputs.dateFrom
+    - name: recordCount
+      in: query
+      value: $inputs.recordCount
+    - name: view
+      in: query
+      value: Detailed
+    - name: recordingType
+      in: query
+      value: All
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      records: $response.body#/records
+      syncToken: $response.body#/syncInfo/syncToken
+      syncTime: $response.body#/syncInfo/syncTime
+      firstRecordingId: $response.body#/records/0/recording/id
+    onSuccess:
+    - name: recordedCallsFound
+      type: goto
+      stepId: downloadRecording
+      criteria:
+      - context: $response.body
+        condition: $.records.length > 0
+        type: jsonpath
+    - name: noRecordedCalls
+      type: goto
+      stepId: incrementalSyncCallLog
+      criteria:
+      - context: $response.body
+        condition: $.records.length == 0
+        type: jsonpath
+  - stepId: downloadRecording
+    description: >-
+      Download the call recording media using the recording id carried on the call
+      log record. Note this operation is account-scoped rather than
+      extension-scoped.
+    operationId: readCallRecordingContent
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: recordingId
+      in: path
+      value: $steps.fullSyncCallLog.outputs.firstRecordingId
+    - name: contentDisposition
+      in: query
+      value: Attachment
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      recordingAudio: $response.body
+  - stepId: incrementalSyncCallLog
+    description: >-
+      Run the incremental sync (ISync) with the token from the full sync. This is
+      the call a scheduled job repeats, returning only records created or changed
+      since the last sync and issuing a fresh token each time.
+    operationId: syncUserCallLog
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: syncType
+      in: query
+      value: ISync
+    - name: syncToken
+      in: query
+      value: $steps.fullSyncCallLog.outputs.syncToken
+    - name: view
+      in: query
+      value: Detailed
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      changedRecords: $response.body#/records
+      nextSyncToken: $response.body#/syncInfo/syncToken
+  outputs:
+    records: $steps.fullSyncCallLog.outputs.records
+    recordingAudio: $steps.downloadRecording.outputs.recordingAudio
+    nextSyncToken: $steps.incrementalSyncCallLog.outputs.nextSyncToken

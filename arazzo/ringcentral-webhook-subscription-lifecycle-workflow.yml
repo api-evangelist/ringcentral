@@ -1,0 +1,128 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Webhook Subscription Lifecycle
+  summary: Create a webhook subscription for platform events, verify it, renew it before expiry, and tear it down.
+  description: >-
+    Nearly every real RingCentral integration is event-driven, and RingCentral
+    subscriptions are not fire-and-forget: they carry an `expiresIn` lifetime and
+    must be renewed or they silently stop delivering. This workflow creates a
+    WebHook-transport subscription against a set of event filters, reads it back to
+    confirm the platform marked it `Active` and accepted the delivery address,
+    renews it to extend the lifetime, and deletes it when the integration is torn
+    down. Every step spells out its request inline so the flow can be read and
+    executed without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: webhook-subscription-lifecycle
+  summary: Create, verify, renew, and delete a RingCentral webhook subscription.
+  description: >-
+    Establishes a webhook subscription for one or more event filters, confirms it
+    is active, renews it to push out the expiry, and finally removes it.
+  inputs:
+    type: object
+    required:
+    - eventFilters
+    - deliveryAddress
+    properties:
+      eventFilters:
+        type: array
+        items:
+          type: string
+        description: >-
+          Event filter URIs to subscribe to, for example
+          "/restapi/v1.0/account/~/extension/~/message-store" or
+          "/restapi/v1.0/account/~/extension/~/presence".
+      deliveryAddress:
+        type: string
+        format: uri
+        description: >-
+          The HTTPS URL RingCentral delivers notifications to. Must be publicly
+          reachable and respond to RingCentral's validation handshake.
+      verificationToken:
+        type: string
+        description: >-
+          Optional token echoed back in the Verification-Token header so the
+          receiver can authenticate inbound notifications.
+      expiresIn:
+        type: integer
+        default: 604800
+        description: >-
+          Requested subscription lifetime in seconds. WebHook transport permits up
+          to 315360000 seconds (10 years).
+  steps:
+  - stepId: createSubscription
+    description: >-
+      Create the subscription with WebHook delivery. RingCentral immediately calls
+      the delivery address with a validation request, so the endpoint must already
+      be live before this step runs.
+    operationId: createSubscription
+    requestBody:
+      contentType: application/json
+      payload:
+        eventFilters: $inputs.eventFilters
+        expiresIn: $inputs.expiresIn
+        deliveryMode:
+          transportType: WebHook
+          address: $inputs.deliveryAddress
+          verificationToken: $inputs.verificationToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      subscriptionId: $response.body#/id
+      status: $response.body#/status
+      expirationTime: $response.body#/expirationTime
+      creationTime: $response.body#/creationTime
+  - stepId: verifySubscription
+    description: >-
+      Read the subscription back to confirm the platform accepted the delivery
+      address and moved the subscription into the "Active" state. A subscription
+      left in "Blacklisted" means RingCentral could not validate the endpoint.
+    operationId: readSubscription
+    parameters:
+    - name: subscriptionId
+      in: path
+      value: $steps.createSubscription.outputs.subscriptionId
+    successCriteria:
+    - condition: $statusCode == 200
+    - context: $response.body
+      condition: $.status == 'Active'
+      type: jsonpath
+    outputs:
+      status: $response.body#/status
+      eventFilters: $response.body#/eventFilters
+      deliveryMode: $response.body#/deliveryMode
+      expirationTime: $response.body#/expirationTime
+  - stepId: renewSubscription
+    description: >-
+      Renew the subscription to push the expiry out by another full lifetime. This
+      is the call an integration schedules well ahead of `expirationTime` to keep
+      notifications flowing.
+    operationId: renewSubscription
+    parameters:
+    - name: subscriptionId
+      in: path
+      value: $steps.createSubscription.outputs.subscriptionId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      renewedExpirationTime: $response.body#/expirationTime
+      status: $response.body#/status
+  - stepId: deleteSubscription
+    description: >-
+      Remove the subscription when the integration is decommissioned so RingCentral
+      stops delivering notifications to a retired endpoint.
+    operationId: deleteSubscription
+    parameters:
+    - name: subscriptionId
+      in: path
+      value: $steps.createSubscription.outputs.subscriptionId
+    successCriteria:
+    - condition: $statusCode == 204
+  outputs:
+    subscriptionId: $steps.createSubscription.outputs.subscriptionId
+    eventFilters: $steps.verifySubscription.outputs.eventFilters
+    renewedExpirationTime: $steps.renewSubscription.outputs.renewedExpirationTime

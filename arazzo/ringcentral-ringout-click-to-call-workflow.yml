@@ -1,0 +1,157 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral RingOut Click-to-Call with Status Tracking
+  summary: Place a two-legged RingOut call, poll both call legs to connected, and cancel the call if a leg never answers.
+  description: >-
+    RingOut is RingCentral's click-to-call primitive: the platform calls the agent
+    first, and once that leg is answered it dials the customer and bridges the two.
+    This is the flow behind every "call this lead" button in a CRM. The workflow
+    creates the RingOut, polls the call status resource to watch both legs move
+    through their call states, and cancels the RingOut when a leg cannot be
+    connected so a stuck call is not left ringing. Every step spells out its
+    request inline so the flow can be read and executed without opening the
+    underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: ringout-click-to-call
+  summary: Place a RingOut call, track it to connected, and cancel it if it fails to connect.
+  description: >-
+    Initiates a RingOut from an agent's number to a destination number, polls the
+    RingOut status until both legs report a terminal call state, and cancels the
+    RingOut when the call cannot be completed.
+  inputs:
+    type: object
+    required:
+    - fromPhoneNumber
+    - toPhoneNumber
+    properties:
+      accountId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the RingCentral account. Use "~" for the account
+          associated with the current authorization session.
+      extensionId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the extension placing the call. Use "~" for the
+          extension associated with the current authorization session.
+      fromPhoneNumber:
+        type: string
+        description: >-
+          The agent's phone number in E.164 format. This leg is called first.
+      toPhoneNumber:
+        type: string
+        description: >-
+          The destination phone number in E.164 format. This leg is dialed once the
+          agent's leg answers.
+      callerIdPhoneNumber:
+        type: string
+        description: >-
+          The RingCentral number presented as caller ID to the destination party.
+      playPrompt:
+        type: boolean
+        default: true
+        description: >-
+          Whether to play the "press 1 to connect" prompt to the agent's leg before
+          bridging.
+  steps:
+  - stepId: placeRingOut
+    description: >-
+      Create the RingOut. RingCentral immediately returns a RingOut resource with
+      an id and an initial status for the overall call and for each leg.
+    operationId: createRingOutCall
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    requestBody:
+      contentType: application/json
+      payload:
+        from:
+          phoneNumber: $inputs.fromPhoneNumber
+        to:
+          phoneNumber: $inputs.toPhoneNumber
+        callerId:
+          phoneNumber: $inputs.callerIdPhoneNumber
+        playPrompt: $inputs.playPrompt
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      ringoutId: $response.body#/id
+      callStatus: $response.body#/status/callStatus
+      callerStatus: $response.body#/status/callerStatus
+      calleeStatus: $response.body#/status/calleeStatus
+  - stepId: pollRingOutStatus
+    description: >-
+      Poll the RingOut status resource. `callStatus` reports "InProgress" while the
+      legs are being connected, "Success" once both parties are bridged, and a
+      failure value when the call cannot be completed.
+    operationId: readRingOutCallStatus
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: ringoutId
+      in: path
+      value: $steps.placeRingOut.outputs.ringoutId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      callStatus: $response.body#/status/callStatus
+      callerStatus: $response.body#/status/callerStatus
+      calleeStatus: $response.body#/status/calleeStatus
+    onSuccess:
+    - name: callConnecting
+      type: goto
+      stepId: pollRingOutStatus
+      criteria:
+      - context: $response.body
+        condition: $.status.callStatus == 'InProgress'
+        type: jsonpath
+    - name: callConnected
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.status.callStatus == 'Success'
+        type: jsonpath
+    - name: callDidNotConnect
+      type: goto
+      stepId: cancelRingOut
+      criteria:
+      - context: $response.body
+        condition: $.status.callStatus != 'Success' && $.status.callStatus != 'InProgress'
+        type: jsonpath
+  - stepId: cancelRingOut
+    description: >-
+      Cancel the RingOut so no leg is left ringing after the call failed to
+      connect. This is the cleanup an integrator must run to avoid orphaned calls.
+    operationId: deleteRingOutCall
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: ringoutId
+      in: path
+      value: $steps.placeRingOut.outputs.ringoutId
+    successCriteria:
+    - condition: $statusCode == 204
+  outputs:
+    ringoutId: $steps.placeRingOut.outputs.ringoutId
+    finalCallStatus: $steps.pollRingOutStatus.outputs.callStatus
+    callerStatus: $steps.pollRingOutStatus.outputs.callerStatus
+    calleeStatus: $steps.pollRingOutStatus.outputs.calleeStatus

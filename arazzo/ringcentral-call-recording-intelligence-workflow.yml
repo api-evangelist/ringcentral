@@ -1,0 +1,166 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Transcribe and Summarize a Call Recording
+  summary: Run speech-to-text with speaker diarization on a recording, poll the async job, then summarize the resulting utterances.
+  description: >-
+    RingCentral's AI API is asynchronous: audio and text operations return `202`
+    with a `jobId`, and results are collected either from a webhook callback or by
+    polling the shared job status endpoint. This workflow chains the two AI
+    operations an integrator actually needs to turn a call recording into
+    reviewable intelligence. Speech-to-text runs with speaker diarization enabled
+    so the transcript comes back segmented into per-speaker utterances, the job is
+    polled to completion, and those utterances are fed directly into conversational
+    summarization, which is polled in turn. Every step spells out its request
+    inline so the flow can be read and executed without opening the underlying
+    OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: transcribe-and-summarize-recording
+  summary: Transcribe a call recording with diarization and produce a conversational summary.
+  description: >-
+    Submits a publicly reachable audio file for asynchronous speech-to-text with
+    speaker diarization, polls until the transcription job succeeds, submits the
+    per-speaker utterances for summarization, and polls until the summary is ready.
+  inputs:
+    type: object
+    required:
+    - contentUri
+    properties:
+      contentUri:
+        type: string
+        format: uri
+        description: >-
+          Publicly facing URI of the audio to analyze. The RingCentral AI service
+          fetches the media from this location.
+      encoding:
+        type: string
+        default: Mp3
+        description: >-
+          Encoding of the source audio. One of Mpeg, Mp4, Wav, Webm, Webp, Aac,
+          Avi, Ogg.
+      languageCode:
+        type: string
+        default: en-US
+        description: Language spoken in the audio (e.g. "en-US").
+      speakerCount:
+        type: integer
+        description: >-
+          Number of speakers in the recording. Omit when unknown and let the
+          service detect it.
+      summaryType:
+        type: string
+        default: AbstractiveShort
+        description: >-
+          Type of summary to compute. One of Extractive, AbstractiveShort,
+          AbstractiveLong, AbstractiveAll, All.
+  steps:
+  - stepId: submitTranscription
+    description: >-
+      Submit the recording for asynchronous speech-to-text. Diarization and
+      punctuation are enabled so the transcript is returned as clean, per-speaker
+      utterances rather than an undifferentiated word stream. RingCentral responds
+      202 with the job id.
+    operationId: caiSpeechToText
+    requestBody:
+      contentType: application/json
+      payload:
+        contentUri: $inputs.contentUri
+        encoding: $inputs.encoding
+        languageCode: $inputs.languageCode
+        source: RingCentral
+        speakerCount: $inputs.speakerCount
+        enableSpeakerDiarization: true
+        enablePunctuation: true
+    successCriteria:
+    - condition: $statusCode == 202
+    outputs:
+      transcriptionJobId: $response.body#/jobId
+  - stepId: pollTranscription
+    description: >-
+      Poll the shared AI job status endpoint until the transcription job reports a
+      terminal status. On success the response carries the transcript, the
+      per-speaker utterances, and an overall confidence score.
+    operationId: caiJobStatusGet
+    parameters:
+    - name: jobId
+      in: path
+      value: $steps.submitTranscription.outputs.transcriptionJobId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      status: $response.body#/status
+      transcript: $response.body#/response/transcript
+      utterances: $response.body#/response/utterances
+      speakerCount: $response.body#/response/speakerCount
+      confidence: $response.body#/response/confidence
+      completionTime: $response.body#/completionTime
+    onSuccess:
+    - name: transcriptionStillRunning
+      type: goto
+      stepId: pollTranscription
+      criteria:
+      - context: $response.body
+        condition: $.completionTime == null
+        type: jsonpath
+    - name: transcriptionSucceeded
+      type: goto
+      stepId: submitSummary
+      criteria:
+      - context: $response.body
+        condition: $.status == 'Success'
+        type: jsonpath
+    - name: transcriptionFailed
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.status == 'Fail'
+        type: jsonpath
+  - stepId: submitSummary
+    description: >-
+      Feed the diarized utterances straight into conversational summarization. The
+      utterance objects returned by speech-to-text already carry the speakerId,
+      text, start, and end fields this operation requires.
+    operationId: caiSummarize
+    requestBody:
+      contentType: application/json
+      payload:
+        summaryType: $inputs.summaryType
+        utterances: $steps.pollTranscription.outputs.utterances
+    successCriteria:
+    - condition: $statusCode == 202
+    outputs:
+      summaryJobId: $response.body#/jobId
+  - stepId: pollSummary
+    description: >-
+      Poll the same job status endpoint for the summarization job and collect the
+      finished summary.
+    operationId: caiJobStatusGet
+    parameters:
+    - name: jobId
+      in: path
+      value: $steps.submitSummary.outputs.summaryJobId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      status: $response.body#/status
+      summaries: $response.body#/response
+      completionTime: $response.body#/completionTime
+    onSuccess:
+    - name: summaryStillRunning
+      type: goto
+      stepId: pollSummary
+      criteria:
+      - context: $response.body
+        condition: $.completionTime == null
+        type: jsonpath
+  outputs:
+    transcriptionJobId: $steps.submitTranscription.outputs.transcriptionJobId
+    transcript: $steps.pollTranscription.outputs.transcript
+    utterances: $steps.pollTranscription.outputs.utterances
+    confidence: $steps.pollTranscription.outputs.confidence
+    summaryJobId: $steps.submitSummary.outputs.summaryJobId
+    summaries: $steps.pollSummary.outputs.summaries

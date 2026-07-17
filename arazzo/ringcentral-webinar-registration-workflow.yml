@@ -1,0 +1,189 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Create a Webinar, Schedule a Session, and Register an Attendee
+  summary: Create a webinar, add a scheduled session to it, register an attendee, and read the registrant back for their join link.
+  description: >-
+    RingCentral Webinars splits what most platforms conflate: a *webinar* is the
+    configuration container (title, host, settings), while a *session* is a
+    scheduled occurrence of it, and registration always attaches to a session
+    rather than to the webinar. That split is the single most important thing for an
+    integrator to get right, and it is why this flow is worth wiring end to end. The
+    workflow spans two RingCentral Webinar services — Configuration for the webinar
+    and session, Registration for the registrant — creates a session with a start
+    time, duration, and IANA timezone, registers an attendee, and reads them back
+    to capture the personalized `joinUri` and `cancellationUri` that get emailed
+    out. Every step spells out its request inline so the flow can be read and
+    executed without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: create-webinar-register-attendee
+  summary: Create a webinar with a scheduled session and register an attendee for it.
+  description: >-
+    Creates a webinar in the Configuration service, adds a scheduled session to it,
+    registers an attendee against that session in the Registration service, and
+    reads the registrant back for their personalized join and cancellation links.
+  inputs:
+    type: object
+    required:
+    - title
+    - scheduledStartTime
+    - firstName
+    - lastName
+    - email
+    properties:
+      title:
+        type: string
+        description: Webinar title (e.g. "Q3 Product Launch").
+      description:
+        type: string
+        description: User-friendly description of the webinar.
+      hostUserId:
+        type: string
+        description: >-
+          User ID of the RingCentral user hosting the webinar. Omit to host as the
+          authorized user.
+      hostAccountId:
+        type: string
+        description: Account ID of the host user.
+      hostDomain:
+        type: string
+        default: pbx
+        description: >-
+          Identity domain the host user belongs to. One of "pbx" or "ilm".
+      scheduledStartTime:
+        type: string
+        format: date-time
+        description: Session scheduled start time (ISO 8601).
+      scheduledDuration:
+        type: integer
+        default: 3600
+        description: >-
+          Session duration in seconds. Must be between 30 and 43200.
+      timeZone:
+        type: string
+        default: America/New_York
+        description: >-
+          IANA-compatible timezone name for the session (see
+          https://www.iana.org/time-zones).
+      localeCode:
+        type: string
+        default: en-US
+        description: Session locale code.
+      firstName:
+        type: string
+        description: Registrant's first (given) name.
+      lastName:
+        type: string
+        description: Registrant's last (family) name.
+      email:
+        type: string
+        format: email
+        description: Registrant's email address.
+      externalId:
+        type: string
+        description: >-
+          Your system's identifier for this registrant, echoed back on reads so the
+          registration can be reconciled against a CRM record.
+  steps:
+  - stepId: createWebinar
+    description: >-
+      Create the webinar configuration container. This does not schedule anything on
+      its own — a webinar has no time until a session is added to it.
+    operationId: rcwConfigCreateWebinar
+    requestBody:
+      contentType: application/json
+      payload:
+        title: $inputs.title
+        description: $inputs.description
+        host:
+          linkedUser:
+            userId: $inputs.hostUserId
+            accountId: $inputs.hostAccountId
+            domain: $inputs.hostDomain
+    successCriteria:
+    - condition: $statusCode == 201
+    outputs:
+      webinarId: $response.body#/id
+      title: $response.body#/title
+      creationTime: $response.body#/creationTime
+  - stepId: createSession
+    description: >-
+      Add a scheduled session to the webinar. The session carries the actual start
+      time, duration, and timezone, and its id is what registration attaches to.
+    operationId: rcwConfigCreateSession
+    parameters:
+    - name: webinarId
+      in: path
+      value: $steps.createWebinar.outputs.webinarId
+    requestBody:
+      contentType: application/json
+      payload:
+        scheduledStartTime: $inputs.scheduledStartTime
+        scheduledDuration: $inputs.scheduledDuration
+        timeZone: $inputs.timeZone
+        localeCode: $inputs.localeCode
+    successCriteria:
+    - condition: $statusCode == 201
+    outputs:
+      sessionId: $response.body#/id
+      scheduledStartTime: $response.body#/scheduledStartTime
+      videoBridgeId: $response.body#/videoBridgeId
+      attendeeJoinUri: $response.body#/attendeeJoinUri
+  - stepId: registerAttendee
+    description: >-
+      Register the attendee against the session. This call is served by the Webinar
+      Registration service, and a 409 here means the email is already registered for
+      this session.
+    operationId: rcwRegCreateRegistrant
+    parameters:
+    - name: sessionId
+      in: path
+      value: $steps.createSession.outputs.sessionId
+    requestBody:
+      contentType: application/json
+      payload:
+        firstName: $inputs.firstName
+        lastName: $inputs.lastName
+        email: $inputs.email
+        externalId: $inputs.externalId
+    successCriteria:
+    - condition: $statusCode == 201
+    outputs:
+      registrantId: $response.body#/id
+      joinUri: $response.body#/joinUri
+      cancellationUri: $response.body#/cancellationUri
+      registrationTime: $response.body#/registrationTime
+  - stepId: readRegistrant
+    description: >-
+      Read the registrant back with their questionnaire answers included, confirming
+      the registration persisted and capturing the personalized join and
+      cancellation links to send in the confirmation email.
+    operationId: rcwRegGetRegistrant
+    parameters:
+    - name: sessionId
+      in: path
+      value: $steps.createSession.outputs.sessionId
+    - name: registrantId
+      in: path
+      value: $steps.registerAttendee.outputs.registrantId
+    - name: includeQuestionnaire
+      in: query
+      value: true
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      joinUri: $response.body#/joinUri
+      cancellationUri: $response.body#/cancellationUri
+      email: $response.body#/email
+      externalId: $response.body#/externalId
+      questionnaire: $response.body#/questionnaire
+  outputs:
+    webinarId: $steps.createWebinar.outputs.webinarId
+    sessionId: $steps.createSession.outputs.sessionId
+    registrantId: $steps.registerAttendee.outputs.registrantId
+    joinUri: $steps.readRegistrant.outputs.joinUri
+    cancellationUri: $steps.readRegistrant.outputs.cancellationUri

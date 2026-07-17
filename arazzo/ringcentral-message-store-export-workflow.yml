@@ -1,0 +1,139 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Export the Message Store for Compliance
+  summary: Request a bulk message store export for a date range, poll the async task to completion, and download the archive.
+  description: >-
+    Regulated RingCentral customers must be able to produce message history on
+    demand for retention, eDiscovery, and supervisory review. The message store
+    export is a long-running task, not a synchronous read: a report is requested
+    for a date range and message types, RingCentral responds `202` with a task id,
+    and the archive only becomes downloadable once the task reaches `Completed`.
+    This workflow requests the export, polls the task through its `Accepted` and
+    `InProgress` states, and downloads the archive when it is ready. Every step
+    spells out its request inline so the flow can be read and executed without
+    opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: export-message-store
+  summary: Request, poll, and download a bulk message store export.
+  description: >-
+    Creates a message store report for an account over a date range, polls the
+    resulting task until the export finishes, and retrieves the archive for
+    retention.
+  inputs:
+    type: object
+    required:
+    - dateFrom
+    - dateTo
+    properties:
+      accountId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the RingCentral account. Use "~" for the account
+          associated with the current authorization session.
+      dateFrom:
+        type: string
+        format: date-time
+        description: Start of the export window (ISO 8601).
+      dateTo:
+        type: string
+        format: date-time
+        description: End of the export window (ISO 8601).
+      messageTypes:
+        type: array
+        items:
+          type: string
+        description: >-
+          Message types to include in the export, for example SMS, Fax, VoiceMail,
+          Pager. Omit to include all types.
+  steps:
+  - stepId: requestExport
+    description: >-
+      Request the message store report for the date range. RingCentral accepts the
+      request asynchronously and returns a task resource whose id drives the rest
+      of the flow.
+    operationId: createMessageStoreReport
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    requestBody:
+      contentType: application/json
+      payload:
+        dateFrom: $inputs.dateFrom
+        dateTo: $inputs.dateTo
+        messageTypes: $inputs.messageTypes
+    successCriteria:
+    - condition: $statusCode == 202
+    outputs:
+      taskId: $response.body#/id
+      status: $response.body#/status
+      creationTime: $response.body#/creationTime
+  - stepId: pollExportTask
+    description: >-
+      Poll the export task until it completes. The archive is not retrievable while
+      the task is still Accepted or InProgress, so this step repeats until the task
+      reports a terminal status.
+    operationId: readMessageStoreReportTask
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: taskId
+      in: path
+      value: $steps.requestExport.outputs.taskId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      status: $response.body#/status
+      creationTime: $response.body#/creationTime
+      lastModifiedTime: $response.body#/lastModifiedTime
+    onSuccess:
+    - name: exportStillRunning
+      type: goto
+      stepId: pollExportTask
+      criteria:
+      - context: $response.body
+        condition: $.status in ['Accepted', 'Pending', 'InProgress', 'AttemptFailed']
+        type: jsonpath
+    - name: exportReady
+      type: goto
+      stepId: downloadArchive
+      criteria:
+      - context: $response.body
+        condition: $.status == 'Completed'
+        type: jsonpath
+    - name: exportFailed
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.status in ['Failed', 'Cancelled']
+        type: jsonpath
+  - stepId: downloadArchive
+    description: >-
+      Retrieve the finished export archive so the message history can be handed to
+      a retention or eDiscovery system.
+    operationId: readMessageStoreReportArchive
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: taskId
+      in: path
+      value: $steps.requestExport.outputs.taskId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      archive: $response.body#/records
+      archiveUri: $response.body#/records/0/uri
+      archiveSize: $response.body#/records/0/size
+  outputs:
+    taskId: $steps.requestExport.outputs.taskId
+    finalStatus: $steps.pollExportTask.outputs.status
+    archive: $steps.downloadArchive.outputs.archive
+    archiveUri: $steps.downloadArchive.outputs.archiveUri

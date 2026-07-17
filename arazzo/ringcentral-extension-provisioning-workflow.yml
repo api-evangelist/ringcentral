@@ -1,0 +1,143 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Provision a User Extension and Send the Welcome Email
+  summary: Create a user extension, read it back to confirm provisioning state, and trigger the activation welcome email.
+  description: >-
+    This is the RingCentral half of an HR or identity-provider onboarding
+    integration: when a person is hired, an extension is created for them, its
+    provisioning state is verified, and RingCentral sends them the welcome email
+    that carries their activation link. The read-back matters because a newly
+    created extension lands in `NotActivated` and only moves to `Enabled` once the
+    user completes activation — an integration that assumes creation means active
+    will mis-report onboarding status. Note the welcome email operation is on the
+    v2 provisioning surface while extension creation is v1. Every step spells out
+    its request inline so the flow can be read and executed without opening the
+    underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: provision-extension-send-welcome
+  summary: Create a user extension, verify its state, and send the activation welcome email.
+  description: >-
+    Creates a new user extension with contact details and an extension number,
+    reads the created extension back to confirm its status and captured ids, and
+    sends the welcome email that lets the user activate the account.
+  inputs:
+    type: object
+    required:
+    - firstName
+    - lastName
+    - email
+    properties:
+      accountId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the RingCentral account. Use "~" for the account
+          associated with the current authorization session.
+      firstName:
+        type: string
+        description: First (given) name of the user.
+      lastName:
+        type: string
+        description: Last (family) name of the user.
+      email:
+        type: string
+        format: email
+        description: >-
+          The user's email address. Activation and welcome mail is delivered here.
+      extensionNumber:
+        type: string
+        description: >-
+          The extension number to assign. Omit to let RingCentral allocate the next
+          available number.
+      jobTitle:
+        type: string
+        description: Job title recorded on the extension's contact record.
+      department:
+        type: string
+        description: Department recorded on the extension's contact record.
+      emailAsLoginName:
+        type: boolean
+        default: true
+        description: >-
+          Whether the user's email address doubles as their login name.
+      extensionType:
+        type: string
+        default: User
+        description: >-
+          The type of extension to create (e.g. User, Department, Announcement).
+  steps:
+  - stepId: createExtension
+    description: >-
+      Create the extension with the user's contact record. The extension is created
+      in the NotActivated state until the user completes activation.
+    operationId: createExtension
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    requestBody:
+      contentType: application/json
+      payload:
+        contact:
+          firstName: $inputs.firstName
+          lastName: $inputs.lastName
+          email: $inputs.email
+          jobTitle: $inputs.jobTitle
+          department: $inputs.department
+          emailAsLoginName: $inputs.emailAsLoginName
+        extensionNumber: $inputs.extensionNumber
+        type: $inputs.extensionType
+        status: NotActivated
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      extensionId: $response.body#/id
+      assignedExtensionNumber: $response.body#/extensionNumber
+      status: $response.body#/status
+      extensionType: $response.body#/type
+  - stepId: verifyExtension
+    description: >-
+      Read the extension back to confirm what RingCentral actually provisioned —
+      the allocated extension number, the contact record, and the activation state
+      the user is currently in.
+    operationId: readExtension
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $steps.createExtension.outputs.extensionId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      status: $response.body#/status
+      extensionNumber: $response.body#/extensionNumber
+      contact: $response.body#/contact
+      permissions: $response.body#/permissions
+  - stepId: sendWelcomeEmail
+    description: >-
+      Send the welcome/activation email to the new user. This operation lives on
+      the v2 provisioning surface and is account-scoped, taking the target address
+      in the body rather than an extension id in the path.
+    operationId: sendWelcomeEmailV2
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    requestBody:
+      contentType: application/json
+      payload:
+        email: $inputs.email
+    successCriteria:
+    - condition: $statusCode == 200
+  outputs:
+    extensionId: $steps.createExtension.outputs.extensionId
+    extensionNumber: $steps.verifyExtension.outputs.extensionNumber
+    status: $steps.verifyExtension.outputs.status
+    contact: $steps.verifyExtension.outputs.contact

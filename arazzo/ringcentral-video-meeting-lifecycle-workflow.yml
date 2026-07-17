@@ -1,0 +1,169 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Create a Video Bridge and Manage Its Lifecycle
+  summary: Create a RingCentral Video bridge, read its join URI and Web PIN, resolve it by PIN, update its security, and delete it.
+  description: >-
+    Bridges are the current RingCentral Video meeting primitive, and this flow is
+    what a scheduling or booking integration actually wires up. A `Scheduled`
+    bridge is created with password protection and waiting-room preferences, read
+    back to capture the generated Web PIN and the `discovery.web` join URI — the
+    URI is only returned with its password parameter to the bridge owner or a
+    delegate, which is exactly why the read-back cannot be skipped — then resolved
+    by Web PIN the way a join-by-code screen does, updated to rotate the meeting
+    password, and finally deleted. This flow deliberately uses the `/rcvideo/v2`
+    bridge operations rather than the older `createMeeting` surface, which the spec
+    marks deprecated. Every step spells out its request inline so the flow can be
+    read and executed without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: video-bridge-lifecycle
+  summary: Create a video bridge, capture its join details, resolve it by PIN, rotate its password, and delete it.
+  description: >-
+    Creates a scheduled RingCentral Video bridge for an extension, reads it back
+    for the Web PIN and join URI, looks the bridge up by its Web PIN, updates the
+    meeting password, and removes the bridge.
+  inputs:
+    type: object
+    required:
+    - bridgeName
+    properties:
+      accountId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the RingCentral account. Use "~" for the account
+          associated with the current authorization session.
+      extensionId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the extension that owns the bridge. Use "~" for
+          the extension associated with the current authorization session.
+      bridgeName:
+        type: string
+        description: Custom name of the bridge (e.g. "Weekly Design Review").
+      password:
+        type: string
+        description: >-
+          Meeting password. When passwordProtected is true and this is omitted,
+          RingCentral generates one.
+      rotatedPassword:
+        type: string
+        description: The replacement meeting password applied by the update step.
+      waitingRoomRequired:
+        type: string
+        default: Everybody
+        description: >-
+          Waiting room policy before the host starts the meeting. One of Nobody,
+          Everybody, GuestsOnly, OtherAccount.
+  steps:
+  - stepId: createBridge
+    description: >-
+      Create a Scheduled bridge for the extension. Scheduled bridges survive across
+      multiple meetings, unlike Instant bridges which are deleted right after their
+      single use. RingCentral generates the Web PIN when one is not supplied.
+    operationId: createBridge
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    requestBody:
+      contentType: application/json
+      payload:
+        name: $inputs.bridgeName
+        type: Scheduled
+        security:
+          passwordProtected: true
+          password: $inputs.password
+        preferences:
+          join:
+            audioMuted: true
+            videoMuted: true
+            waitingRoomRequired: $inputs.waitingRoomRequired
+          playTones: EnterOnly
+    successCriteria:
+    - condition: $statusCode == 201
+    outputs:
+      bridgeId: $response.body#/id
+      webPin: $response.body#/pins/web
+      bridgeType: $response.body#/type
+      host: $response.body#/host
+  - stepId: readBridge
+    description: >-
+      Read the bridge back to capture the join URI. discovery.web only carries the
+      embedded password parameter when the caller is the bridge owner, a delegate,
+      or a Super Admin, so this read is what produces a distributable join link.
+    operationId: getBridge
+    parameters:
+    - name: bridgeId
+      in: path
+      value: $steps.createBridge.outputs.bridgeId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      joinUri: $response.body#/discovery/web
+      webPin: $response.body#/pins/web
+      pstnPins: $response.body#/pins/pstn
+      security: $response.body#/security
+      preferences: $response.body#/preferences
+  - stepId: resolveBridgeByPin
+    description: >-
+      Look the bridge up by its Web PIN. This is the lookup behind a join-by-code
+      screen, where a participant supplies only the meeting code.
+    operationId: getBridgeByWebPin
+    parameters:
+    - name: pin
+      in: path
+      value: $steps.readBridge.outputs.webPin
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      resolvedBridgeId: $response.body#/id
+      resolvedName: $response.body#/name
+      passwordProtected: $response.body#/security/passwordProtected
+  - stepId: rotatePassword
+    description: >-
+      Update the bridge to rotate the meeting password. Note the update operation is
+      a PATCH and cannot change the Web PIN — the spec routes PIN changes to a
+      dedicated endpoint instead.
+    operationId: updateBridge
+    parameters:
+    - name: bridgeId
+      in: path
+      value: $steps.createBridge.outputs.bridgeId
+    requestBody:
+      contentType: application/json
+      payload:
+        name: $inputs.bridgeName
+        security:
+          passwordProtected: true
+          password: $inputs.rotatedPassword
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      updatedSecurity: $response.body#/security
+      updatedName: $response.body#/name
+  - stepId: deleteBridge
+    description: >-
+      Delete the bridge when the recurring meeting series ends so the Web PIN and
+      join URI stop resolving.
+    operationId: deleteBridge
+    parameters:
+    - name: bridgeId
+      in: path
+      value: $steps.createBridge.outputs.bridgeId
+    successCriteria:
+    - condition: $statusCode == 204
+  outputs:
+    bridgeId: $steps.createBridge.outputs.bridgeId
+    webPin: $steps.readBridge.outputs.webPin
+    joinUri: $steps.readBridge.outputs.joinUri
+    pstnPins: $steps.readBridge.outputs.pstnPins
+    updatedSecurity: $steps.rotatePassword.outputs.updatedSecurity

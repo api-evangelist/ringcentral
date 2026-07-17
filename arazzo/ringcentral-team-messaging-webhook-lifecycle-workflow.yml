@@ -1,0 +1,108 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Team Messaging Incoming Webhook Lifecycle
+  summary: Create an incoming webhook for a team, read its address, suspend and reactivate it, and delete it when retired.
+  description: >-
+    Team Messaging incoming webhooks are how external systems — CI pipelines,
+    monitoring, ticketing — push notifications into a RingCentral chat without an
+    OAuth-authenticated bot. Creating one for a group returns a generated webhook
+    URI that the external system posts to. Unlike most resources these webhooks
+    have a suspend/activate pair rather than only create/delete, which lets an
+    integrator mute a noisy source without destroying the URI and forcing every
+    downstream system to be reconfigured. This workflow walks the full lifecycle.
+    Every step spells out its request inline so the flow can be read and executed
+    without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: team-messaging-webhook-lifecycle
+  summary: Create, inspect, suspend, reactivate, and delete a Team Messaging incoming webhook.
+  description: >-
+    Creates an incoming webhook against a group/team, reads it back to capture the
+    generated posting URI and status, suspends it to mute delivery, reactivates it,
+    and finally deletes it.
+  inputs:
+    type: object
+    required:
+    - groupId
+    properties:
+      groupId:
+        type: string
+        description: >-
+          Internal identifier of the group or team the webhook posts into. This is
+          the same id returned when a team is created.
+  steps:
+  - stepId: createWebhook
+    description: >-
+      Create the incoming webhook for the group. This operation takes no request
+      body — RingCentral generates the webhook and returns its resource, including
+      the URI external systems will post to.
+    operationId: createGlipGroupWebhookNew
+    parameters:
+    - name: groupId
+      in: path
+      value: $inputs.groupId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      webhookId: $response.body#/id
+      webhookUri: $response.body#/uri
+      status: $response.body#/status
+      creatorId: $response.body#/creatorId
+      creationTime: $response.body#/creationTime
+  - stepId: readWebhook
+    description: >-
+      Read the webhook back to confirm it is active and to capture the posting URI
+      that gets handed to the external system.
+    operationId: readGlipWebhookNew
+    parameters:
+    - name: webhookId
+      in: path
+      value: $steps.createWebhook.outputs.webhookId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      status: $response.body#/status
+      webhookUri: $response.body#/uri
+      groupIds: $response.body#/groupIds
+  - stepId: suspendWebhook
+    description: >-
+      Suspend the webhook to stop delivery without destroying it. Posts to the URI
+      are rejected while suspended, but the URI survives so the external system does
+      not have to be reconfigured to resume.
+    operationId: suspendGlipWebhookNew
+    parameters:
+    - name: webhookId
+      in: path
+      value: $steps.createWebhook.outputs.webhookId
+    successCriteria:
+    - condition: $statusCode == 200
+  - stepId: activateWebhook
+    description: >-
+      Reactivate the suspended webhook so the original URI resumes delivering into
+      the chat.
+    operationId: activateGlipWebhookNew
+    parameters:
+    - name: webhookId
+      in: path
+      value: $steps.createWebhook.outputs.webhookId
+    successCriteria:
+    - condition: $statusCode == 200
+  - stepId: deleteWebhook
+    description: >-
+      Permanently delete the webhook when the integration is retired. The URI stops
+      working immediately and cannot be recovered.
+    operationId: deleteGlipWebhookNew
+    parameters:
+    - name: webhookId
+      in: path
+      value: $steps.createWebhook.outputs.webhookId
+    successCriteria:
+    - condition: $statusCode == 200
+  outputs:
+    webhookId: $steps.createWebhook.outputs.webhookId
+    webhookUri: $steps.readWebhook.outputs.webhookUri
+    groupIds: $steps.readWebhook.outputs.groupIds

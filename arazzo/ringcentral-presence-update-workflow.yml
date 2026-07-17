@@ -1,0 +1,115 @@
+arazzo: 1.0.1
+info:
+  title: RingCentral Read and Update User Presence
+  summary: Read an extension's current presence and telephony state, then set the user status and do-not-disturb policy.
+  description: >-
+    Presence is the bridge between RingCentral and every calendar, CRM, or status
+    integration that wants "on a call" or "in a meeting" to be visible to
+    colleagues. The read comes first for a real reason: `detailedTelephonyState`
+    tells the caller whether the user is currently on a live call, and the
+    presence update carries `dndStatus`, so an integration that blindly writes
+    "Available" risks routing department calls to someone mid-call. This workflow
+    reads presence with the detailed telephony and SIP data included, then applies
+    the new user status and DND policy. Every step spells out its request inline so
+    the flow can be read and executed without opening the underlying OpenAPI
+    description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ringcentralPlatform
+  url: ../openapi/ringcentral-platform-openapi.yml
+  type: openapi
+workflows:
+- workflowId: read-and-update-presence
+  summary: Inspect an extension's presence and telephony state, then set status and DND.
+  description: >-
+    Reads the current presence of an extension including detailed telephony state,
+    then updates the user status, do-not-disturb policy, and status message.
+  inputs:
+    type: object
+    properties:
+      accountId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the RingCentral account. Use "~" for the account
+          associated with the current authorization session.
+      extensionId:
+        type: string
+        default: '~'
+        description: >-
+          Internal identifier of the extension whose presence is being managed. Use
+          "~" for the extension associated with the current authorization session.
+      userStatus:
+        type: string
+        default: Available
+        description: >-
+          The presence status to set. One of Offline, Busy, Available.
+      dndStatus:
+        type: string
+        description: >-
+          Do-not-disturb policy to set. One of TakeAllCalls,
+          DoNotAcceptDepartmentCalls, TakeDepartmentCallsOnly,
+          DoNotAcceptAnyCalls, Unknown.
+      message:
+        type: string
+        description: Free-text status message shown alongside the presence status.
+  steps:
+  - stepId: readPresence
+    description: >-
+      Read the extension's current presence. detailedTelephonyState and sipData are
+      requested so the caller can see whether the user is actually on a call before
+      overwriting their status.
+    operationId: readUserPresenceStatus
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    - name: detailedTelephonyState
+      in: query
+      value: true
+    - name: sipData
+      in: query
+      value: true
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      currentUserStatus: $response.body#/userStatus
+      currentDndStatus: $response.body#/dndStatus
+      telephonyStatus: $response.body#/telephonyStatus
+      detailedTelephonyState: $response.body#/detailedTelephonyState
+      presenceStatus: $response.body#/presenceStatus
+      activeCalls: $response.body#/activeCalls
+  - stepId: updatePresence
+    description: >-
+      Apply the new presence. userStatus drives what colleagues see, while
+      dndStatus controls whether the extension keeps receiving direct and
+      department calls.
+    operationId: updateUserPresenceStatus
+    parameters:
+    - name: accountId
+      in: path
+      value: $inputs.accountId
+    - name: extensionId
+      in: path
+      value: $inputs.extensionId
+    requestBody:
+      contentType: application/json
+      payload:
+        userStatus: $inputs.userStatus
+        dndStatus: $inputs.dndStatus
+        message: $inputs.message
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      userStatus: $response.body#/userStatus
+      dndStatus: $response.body#/dndStatus
+      message: $response.body#/message
+  outputs:
+    previousUserStatus: $steps.readPresence.outputs.currentUserStatus
+    previousDndStatus: $steps.readPresence.outputs.currentDndStatus
+    telephonyStatus: $steps.readPresence.outputs.telephonyStatus
+    userStatus: $steps.updatePresence.outputs.userStatus
+    dndStatus: $steps.updatePresence.outputs.dndStatus
