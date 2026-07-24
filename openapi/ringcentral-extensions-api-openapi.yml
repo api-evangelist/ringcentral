@@ -1,0 +1,2071 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Extensions API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Extensions
+paths:
+  /restapi/v1.0/account/{accountId}/extension-bulk-update:
+    post:
+      tags:
+      - Extensions
+      summary: Update Multiple Extensions
+      description: 'Updates multiple extensions at once. Maximum 500 extensions can be updated per request.
+
+        '
+      operationId: extensionBulkUpdate
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtensionBulkUpdateRequest'
+        required: true
+      responses:
+        '200':
+          description: Updated extensions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionBulkUpdateTaskResource'
+      x-feature: EditExtensionInfo
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditExtensions
+      x-user-permission: EditExtensionInfo
+  /restapi/v1.0/account/{accountId}/extension-bulk-update/tasks/{taskId}:
+    get:
+      tags:
+      - Extensions
+      summary: Get Extension Update Task Status
+      description: 'Returns a status of a task to update multiple extensions.
+
+        '
+      operationId: getExtensionBulkUpdateTask
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: taskId
+        in: path
+        description: 'Internal identifier of a task
+
+          '
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Bulk update task status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionBulkUpdateTaskResource'
+      x-feature: EditExtensionInfo
+      x-availability: Limited
+      x-throttling-group: Light
+      x-app-permission: EditExtensions
+      x-user-permission: EditExtensionInfo
+  /restapi/v1.0/account/{accountId}/templates:
+    get:
+      tags:
+      - Extensions
+      summary: List User Templates
+      description: 'Returns the list of user templates for the current account.
+
+        '
+      operationId: listUserTemplates
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: type
+        description: Type of template
+        in: query
+        schema:
+          type: string
+          enum:
+          - UserSettings
+          - CallHandling
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are allowed. Default value is ''1''
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items). If not specified, the value is '100' by default
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: User templates information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTemplates'
+      x-feature: ReadCompanyInfo
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadCompanyInfo
+  /restapi/v1.0/account/{accountId}/templates/{templateId}:
+    get:
+      tags:
+      - Extensions
+      summary: Get User Template
+      description: 'Returns the user template by ID.
+
+        '
+      operationId: readUserTemplate
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: templateId
+        in: path
+        required: true
+        description: Internal identifier of a template
+        schema:
+          type: string
+      responses:
+        '200':
+          description: User template information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateInfo'
+      x-feature: ReadCompanyInfo
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadCompanyInfo
+  /restapi/v1.0/account/{accountId}/extension:
+    get:
+      tags:
+      - Extensions
+      summary: List Extensions
+      description: 'Returns the list of extensions created for a particular account.
+
+        All types of extensions are included in this list.
+
+        '
+      operationId: listExtensions
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: extensionNumber
+        in: query
+        description: Extension short number to filter records
+        schema:
+          type: string
+      - name: email
+        in: query
+        description: 'Extension email address. Multiple values are accepted
+
+          '
+        example: alice.smith@example.com&email=bob.johnson@example.com
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are allowed
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items)
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      - name: status
+        in: query
+        description: 'Extension current state. Multiple values are supported. If ''Unassigned''
+
+          is specified, then extensions without `extensionNumber` attribute are returned.
+
+          If not specified, then all extensions are returned
+
+          '
+        allowEmptyValue: true
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - Enabled
+            - Disabled
+            - NotActivated
+            - Unassigned
+      - name: type
+        in: query
+        description: 'Extension type. Multiple values are supported. Please note
+
+          that legacy ''Department'' extension type corresponds to ''Call Queue''
+
+          extensions in modern RingCentral product terminology
+
+          '
+        allowEmptyValue: true
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - User
+            - FaxUser
+            - FlexibleUser
+            - VirtualUser
+            - DigitalUser
+            - Department
+            - Announcement
+            - Voicemail
+            - SharedLinesGroup
+            - PagingOnly
+            - IvrMenu
+            - ApplicationExtension
+            - ParkLocation
+            - Limited
+            - Bot
+            - ProxyAdmin
+            - DelegatedLinesGroup
+            - Site
+      responses:
+        '200':
+          description: Extension list information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetExtensionListResponse'
+      x-feature: ReadExtensions
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadExtensions
+      x-notifications:
+      - $ref: '#/components/schemas/ExtensionListEvent'
+    post:
+      tags:
+      - Extensions
+      summary: Create Extension
+      description: 'Creates an extension.
+
+        '
+      operationId: createExtension
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtensionCreationRequest'
+        required: true
+      responses:
+        '200':
+          description: Created extension information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionCreationResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+      x-feature: EditUsers
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+      x-user-permission: AddRemoveUsers
+components:
+  schemas:
+    ExtensionServiceFeatureInfo:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Feature status; shows feature availability for an extension
+        featureName:
+          type: string
+          description: Feature name
+          enum:
+          - AccountFederation
+          - Archiver
+          - AutomaticCallRecordingMute
+          - AutomaticInboundCallRecording
+          - AutomaticOutboundCallRecording
+          - BlockedMessageForwarding
+          - Calendar
+          - CallerIdControl
+          - CallForwarding
+          - CallPark
+          - CallParkLocations
+          - CallSupervision
+          - CallSwitch
+          - CallQualitySurvey
+          - Conferencing
+          - ConferencingNumber
+          - ConfigureDelegates
+          - DeveloperPortal
+          - DND
+          - DynamicConference
+          - EmergencyAddressAutoUpdate
+          - EmergencyCalling
+          - EncryptionAtRest
+          - ExternalDirectoryIntegration
+          - Fax
+          - FaxReceiving
+          - FreeSoftPhoneLines
+          - HDVoice
+          - HipaaCompliance
+          - Intercom
+          - InternationalCalling
+          - InternationalSMS
+          - LinkedSoftphoneLines
+          - MMS
+          - MobileVoipEmergencyCalling
+          - OnDemandCallRecording
+          - Pager
+          - PagerReceiving
+          - Paging
+          - PasswordAuth
+          - PromoMessage
+          - Reports
+          - Presence
+          - RCTeams
+          - RingOut
+          - SalesForce
+          - SharedLines
+          - SingleExtensionUI
+          - SiteCodes
+          - SMS
+          - SMSReceiving
+          - SoftPhoneUpdate
+          - TelephonySessions
+          - UserManagement
+          - VideoConferencing
+          - VoipCalling
+          - VoipCallingOnMobile
+          - Voicemail
+          - VoicemailToText
+          - WebPhone
+        reason:
+          type: string
+          description: 'Reason for limitation of a particular service feature. Returned
+
+            only if the enabled parameter value is `false`, see Service Feature
+
+            Limitations and Reasons. When retrieving service features for an extension,
+
+            the reasons for limitations, if any, are returned in response
+
+            '
+    CustomFieldInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a custom field
+        value:
+          type: string
+          description: Custom field value
+        displayName:
+          type: string
+    SetupWizardStateForUpdateEnum:
+      type: string
+      description: Initial configuration wizard state
+      enum:
+      - NotStarted
+      - Incomplete
+      - Completed
+      default: NotStarted
+    ExtensionBulkUpdateRequest:
+      required:
+      - records
+      description: List of extensions to be updated
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtensionBulkUpdateInfo'
+    SiteInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a site extension
+        uri:
+          type: string
+          format: uri
+          description: Link to a site resource
+        name:
+          type: string
+          description: Extension user first name
+        extensionNumber:
+          type: string
+          description: Extension number
+        callerIdName:
+          type: string
+          description: 'Custom name of a caller. Max number of characters is 15 (only
+
+            alphabetical symbols, numbers and commas are supported)
+
+            '
+        email:
+          type: string
+          format: email
+          description: Site extension contact email
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        regionalSettings:
+          $ref: '#/components/schemas/RegionalSettings'
+        operator:
+          $ref: '#/components/schemas/OperatorInfo'
+        code:
+          type: string
+          description: 'Site code value. Returned only if specified
+
+            '
+    ProfileImageInfoURI:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+    RegionalSettings:
+      type: object
+      properties:
+        homeCountry:
+          $ref: '#/components/schemas/CountryInfoShortModel'
+        timezone:
+          $ref: '#/components/schemas/TimezoneInfo'
+        language:
+          $ref: '#/components/schemas/RegionalLanguageInfo'
+        greetingLanguage:
+          $ref: '#/components/schemas/GreetingLanguageInfo'
+        formattingLocale:
+          $ref: '#/components/schemas/FormattingLocaleInfo'
+        timeFormat:
+          type: string
+          description: Time format setting. The default value is '12h' = ['12h', '24h']
+          enum:
+          - 12h
+          - 24h
+      description: 'Regional data (timezone, home country, language) of an extension/account.
+
+        The default is Company (Auto-Receptionist) settings
+
+        '
+    GetExtensionListResponse:
+      required:
+      - records
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to an extension list resource
+        records:
+          type: array
+          description: List of extensions with extension information
+          items:
+            $ref: '#/components/schemas/GetExtensionListInfoResponse'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    ExtensionUpdateShortResult:
+      type: object
+      properties:
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        status:
+          type: string
+          description: Extension update status
+          enum:
+          - Fail
+          - Success
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorEntity'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    ReferenceInfo:
+      type: object
+      properties:
+        ref:
+          type: string
+          description: Non-RC identifier of an extension
+        type:
+          type: string
+          description: Type of external identifier
+          enum:
+          - PartnerId
+          - CustomerDirectoryId
+        refAccId:
+          type: string
+          description: Primary federation admin account identifier
+    ExtensionCreationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Internal identifier of an extension
+          format: int64
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        contact:
+          $ref: '#/components/schemas/ContactInfo'
+        costCenter:
+          $ref: '#/components/schemas/CostCenterInfo'
+        customFields:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomFieldInfo'
+        extensionNumber:
+          type: string
+          description: Extension number
+        name:
+          type: string
+          description: 'Extension name. For user extension types the value is a combination
+
+            of the specified first name and last name
+
+            '
+        partnerId:
+          type: string
+          description: 'For Partner Applications Internal identifier of an extension
+
+            created by partner. The RingCentral supports the mapping of accounts and
+
+            stores the corresponding account ID/extension ID for each partner ID of
+
+            a client application. In request URIs partner IDs are accepted instead
+
+            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
+
+            Though in response URIs contain the corresponding account IDs and extension
+
+            IDs. In all request and response bodies these values are reflected via
+
+            partnerId attributes of account and extension
+
+            '
+        permissions:
+          $ref: '#/components/schemas/ExtensionPermissions'
+        profileImage:
+          $ref: '#/components/schemas/ProfileImageInfo'
+        references:
+          type: array
+          description: 'List of non-RC internal identifiers assigned to an extension
+
+            '
+          items:
+            $ref: '#/components/schemas/ReferenceInfo'
+        regionalSettings:
+          $ref: '#/components/schemas/RegionalSettings'
+        serviceFeatures:
+          type: array
+          description: 'Extension service features returned in response only when the
+
+            logged-in user requests his/her own extension info, see also Extension
+
+            Service Features
+
+            '
+          items:
+            $ref: '#/components/schemas/ExtensionServiceFeatureInfo'
+        setupWizardState:
+          $ref: '#/components/schemas/SetupWizardStateForUpdateEnum'
+        site:
+          $ref: '#/components/schemas/ProvisioningSiteInfo'
+        status:
+          type: string
+          description: 'Extension current state. If ''Unassigned'' is specified, then
+
+            extensions without `extensionNumber` are returned. If not specified, then
+
+            all extensions are returned
+
+            '
+          enum:
+          - Enabled
+          - Disabled
+          - Frozen
+          - NotActivated
+          - Unassigned
+        statusInfo:
+          $ref: '#/components/schemas/ExtensionStatusInfo'
+        type:
+          type: string
+          description: 'Extension type. Please note that legacy ''Department'' extension type
+
+            corresponds to ''Call Queue'' extensions in modern RingCentral product terminology
+
+            '
+          enum:
+          - User
+          - VirtualUser
+          - DigitalUser
+          - FlexibleUser
+          - Department
+          - Announcement
+          - Voicemail
+          - SharedLinesGroup
+          - PagingOnly
+          - ParkLocation
+          - Limited
+        hidden:
+          type: boolean
+          description: 'Hides an extension from showing in company directory. Supported
+
+            for extensions of ''User'' type only
+
+            '
+        assignedCountry:
+          $ref: '#/components/schemas/AssignedCountryInfo'
+    ContactBusinessAddressInfo:
+      type: object
+      properties:
+        country:
+          type: string
+          description: Country name of a user's company
+        state:
+          type: string
+          description: 'State/province name of a user''s company. Mandatory
+
+            for the USA, UK and Canada
+
+            '
+        city:
+          type: string
+          description: City name of a user's company
+        street:
+          type: string
+          description: Street address of a user's company
+        zip:
+          type: string
+          description: Zip code of a user's company
+      description: 'User''s business address. The default is
+
+        Company (Auto-Receptionist) settings
+
+        '
+    CountryInfoMinimalModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a country
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a country resource
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    ExtensionBulkUpdateTaskResult:
+      type: object
+      description: Result record on multiple extension update task
+      properties:
+        affectedItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtensionUpdateShortResult'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorEntity'
+    ExtensionLanguageInfoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a language
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    FormattingLocaleInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a formatting language
+        localeCode:
+          type: string
+          description: Localization code of a formatting language
+        name:
+          type: string
+          description: Official name of a formatting language
+      description: 'Formatting language preferences for numbers, dates and currencies
+
+        '
+    GreetingLanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a greeting language
+        localeCode:
+          type: string
+          description: Localization code of a greeting language
+        name:
+          type: string
+          description: Official name of a greeting language
+      description: 'Information on language used for telephony greetings
+
+        '
+    CostCenterInfo:
+      type: object
+      description: Cost center information. Applicable if Cost Center feature is enabled. The default is `root` cost center value
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a cost center
+        name:
+          type: string
+          description: Name of a cost center
+    ExtensionGreetingLanguageInfoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a greeting language
+    UserTransitionInfo:
+      type: object
+      properties:
+        sendWelcomeEmailsToUsers:
+          type: boolean
+          description: 'Specifies if a welcome/activation email is sent to the existing
+
+            users during account confirmation
+
+            '
+        sendWelcomeEmail:
+          type: boolean
+          description: 'Specifies if a welcome/activation email is sent to the new users (within extension status changing from
+
+            ''Unassigned'' to ''NotActivated/Disabled'')
+
+            '
+      description: 'For NotActivated extensions only. Welcome email settings
+
+        '
+    OperatorInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an operator
+        uri:
+          type: string
+          format: uri
+          description: Link to an operator resource
+        extensionNumber:
+          type: string
+          description: Extension number (pin)
+        name:
+          type: string
+          description: Operator extension user full name
+      description: 'Site Fax/SMS recipient (operator) reference. Multi-level IVR should
+
+        be enabled
+
+        '
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    TemplateInfo:
+      type: object
+      description: Text message template information
+      required:
+      - text
+      properties:
+        text:
+          type: string
+          description: "Text of the message template. Maximum length is 1000 symbols (2-byte UTF-16 encoded). \nIf a character is encoded in 4 bytes in UTF-16 it is treated as 2 characters, \nthus limiting the maximum message length up to 500 symbols\n"
+    ContactInfo:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: 'User''s first name (for extensions of `User` type only)
+
+            '
+        lastName:
+          type: string
+          description: 'For User extension type only. User''s last name (for extensions of `User` type only)
+
+            '
+        name:
+          type: string
+          description: 'Extension name (for extensions of `User` type - concatenation of first and last name)
+
+            '
+        company:
+          type: string
+          description: User's company name
+        jobTitle:
+          type: string
+          description: User's job title
+        email:
+          type: string
+          format: email
+          description: User's contact email
+        businessPhone:
+          type: string
+          description: 'User''s contact phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            (with ''+'' sign) format
+
+            '
+        mobilePhone:
+          type: string
+          description: 'User''s mobile (**non** Toll Free) phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            (with ''+'' sign) format
+
+            '
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        emailAsLoginName:
+          type: boolean
+          description: 'Indicates that the contact email is enabled as a login name for this
+
+            user. Please note that the email must be unique in this case.
+
+            '
+          default: false
+        pronouncedName:
+          $ref: '#/components/schemas/PronouncedNameInfo'
+        department:
+          type: string
+          description: 'User''s department name
+
+            '
+      description: Detailed contact information
+    ExtensionTimezoneInfoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a timezone
+    ExtensionCurrencyInfoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal Identifier of a currency
+    PronouncedNameInfo:
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'The method used to pronounce the user''s name:
+
+            - `Default` - default extension name; first and last name specified in user''s profile are pronounced using text-to-speech;
+
+            - `TextToSpeech` - custom text specified by a user  pronounced using text-to-speech;
+
+            - `Recorded` - custom audio uploaded by a user, the name recorded in user''s own voice (supported only for extension retrieval).
+
+            '
+          enum:
+          - Default
+          - TextToSpeech
+          - Recorded
+        text:
+          type: string
+          description: Custom text (for `TextToSpeech` type only)
+        prompt:
+          $ref: '#/components/schemas/PronouncedNamePromptInfo'
+    CallQueueExtensionInfo:
+      type: object
+      properties:
+        slaGoal:
+          type: integer
+          format: int32
+          description: 'Target percentage of calls that must be answered by agents
+
+            within the service level time threshold
+
+            '
+        slaThresholdSeconds:
+          type: integer
+          format: int32
+          description: 'Period of time in seconds that is considered to be an acceptable
+
+            service level
+
+            '
+        includeAbandonedCalls:
+          type: boolean
+          description: 'If `true` abandoned calls (hanged up prior to being served)
+
+            are included into service level calculation
+
+            '
+        abandonedThresholdSeconds:
+          type: integer
+          format: int32
+          description: 'Period of time in seconds specifying abandoned calls duration
+
+            - calls that are shorter will not be included into the calculation of
+
+            service level.; zero value means that abandoned calls of any duration
+
+            will be included into calculation
+
+            '
+      description: 'For Call Queue extension type only. Please note that legacy
+
+        ''Department'' extension type corresponds to ''Call Queue'' extensions
+
+        in modern RingCentral product terminology
+
+        '
+    ProvisioningSiteInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uri
+          description: Internal identifier of a site
+        uri:
+          type: string
+          format: uri
+          description: Link to a site resource
+        name:
+          type: string
+          description: Name of a site
+        code:
+          type: string
+          description: Site code value. Returned only if specified
+      description: 'Site data. If multi-site feature is turned on for an account,
+
+        then ID of a site must be specified. In order to assign a wireless
+
+        point to the main site (company) the site ID should be set to `main-site`
+
+        '
+    ExtensionStatusInfo:
+      type: object
+      properties:
+        comment:
+          type: string
+          description: A free-form user comment, describing the status change reason
+        reason:
+          type: string
+          description: Type of suspension
+          enum:
+          - SuspendedVoluntarily
+          - SuspendedInvoluntarily
+          - CancelledVoluntarily
+          - CancelledInvoluntarily
+        till:
+          type: string
+          format: date-time
+          description: 'Date until which an account will get deleted. The default
+
+            value is 30 days since the current date
+
+            '
+      description: 'Status information (reason, comment). Returned for ''Disabled''
+
+        status only
+
+        '
+    ExtensionListEventBody:
+      type: object
+      properties:
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        eventType:
+          type: string
+          description: Type of extension info change
+          enum:
+          - Create
+          - Update
+          - Delete
+        ownerId:
+          type: string
+          description: 'Internal identifier of a subscription owner extension
+
+            '
+      description: Notification payload body
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    ExtensionListEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: 'Universally unique identifier of a notification
+
+            '
+        event:
+          type: string
+          description: Event filter URI
+        timestamp:
+          type: string
+          description: 'Date/time of sending a notification in
+
+            [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+            format including timezone, for example *2016-03-10T18:07:52.534Z*
+
+            '
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        body:
+          $ref: '#/components/schemas/ExtensionListEventBody'
+    CallQueueInfoRequest:
+      type: object
+      properties:
+        slaGoal:
+          type: integer
+          format: int32
+          description: 'Target percentage of calls that must be answered by agents
+
+            within the service level time threshold
+
+            '
+        slaThresholdSeconds:
+          type: integer
+          format: int32
+        includeAbandonedCalls:
+          type: boolean
+        abandonedThresholdSeconds:
+          type: integer
+          format: int32
+      description: 'For Call Queue extension type only. Please note that legacy ''Department''
+
+        extension type corresponds to ''Call Queue'' extensions in modern RingCentral
+
+        product terminology
+
+        '
+    GetExtensionListInfoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Internal identifier of an extension
+          format: int64
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        contact:
+          $ref: '#/components/schemas/ContactInfo'
+        extensionNumber:
+          type: string
+          description: Extension short number
+        name:
+          type: string
+          description: 'Extension name. For user extension types the value is a combination
+
+            of the specified first name and last name
+
+            '
+        permissions:
+          $ref: '#/components/schemas/ExtensionPermissions'
+        profileImage:
+          $ref: '#/components/schemas/ProfileImageInfo'
+        status:
+          type: string
+          description: 'Extension current state. If ''Unassigned'' is specified, then
+
+            extensions without `extensionNumber` are returned. If not specified,
+
+            then all extensions are returned
+
+            '
+          enum:
+          - Enabled
+          - Disabled
+          - Frozen
+          - NotActivated
+          - Unassigned
+        type:
+          type: string
+          description: 'Extension type. Please note that legacy ''Department'' extension type
+
+            corresponds to ''Call Queue'' extensions in modern RingCentral product
+
+            terminology
+
+            '
+          enum:
+          - User
+          - FaxUser
+          - FlexibleUser
+          - VirtualUser
+          - DigitalUser
+          - Department
+          - Announcement
+          - Voicemail
+          - SharedLinesGroup
+          - PagingOnly
+          - IvrMenu
+          - ApplicationExtension
+          - ParkLocation
+          - Bot
+          - Room
+          - Limited
+          - Site
+          - ProxyAdmin
+          - DelegatedLinesGroup
+          - GroupCallPickup
+        subType:
+          type: string
+          description: 'Extension subtype, if applicable. For any unsupported subtypes the
+
+            `Unknown` value will be returned
+
+            '
+          enum:
+          - VideoPro
+          - VideoProPlus
+          - DigitalSignage
+          - Unknown
+          - Emergency
+        callQueueInfo:
+          $ref: '#/components/schemas/CallQueueExtensionInfo'
+        hidden:
+          type: boolean
+          description: 'Hides extension from showing in company directory.
+
+            Supported for extensions of User type only
+
+            '
+        site:
+          $ref: '#/components/schemas/ProvisioningSiteInfo'
+        assignedCountry:
+          $ref: '#/components/schemas/AssignedCountryInfo'
+        costCenter:
+          $ref: '#/components/schemas/CostCenterInfo'
+    PronouncedNamePromptInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        contentUri:
+          type: string
+          format: uri
+          description: Link to a prompt resource
+        contentType:
+          type: string
+          description: Content media type
+          enum:
+          - audio/mpeg
+          - audio/wav
+    PermissionInfoAdmin:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specifies if a permission is enabled or not
+      description: Admin permission
+    CountryInfoBasicModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoMinimalModel'
+      - type: object
+        properties:
+          name:
+            type: string
+            description: The official name of a country
+    AssignedCountryInfo:
+      type: object
+      description: Information on a country assigned to an extension user. Returned for the User extension type only
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an assigned country
+        uri:
+          type: string
+          description: Canonical URI of an assigned country resource
+        isoCode:
+          type: string
+          description: Country code according to the ISO standard, see [ISO 3166](https://www.iso.org/iso-3166-country-codes.html)
+        name:
+          type: string
+          description: Official name of a country
+    ExtensionCountryInfoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a country
+    TimezoneInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a timezone
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a timezone
+        name:
+          type: string
+          description: Short name of a timezone
+        description:
+          type: string
+          description: Meaningful description of the timezone
+        bias:
+          type: string
+      description: Extension timezone information
+    ContactInfoCreationRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: 'For User extension type only. Extension user first name
+
+            '
+        lastName:
+          type: string
+          description: 'For User extension type only. Extension user last name
+
+            '
+        company:
+          type: string
+          description: Extension user company name
+        jobTitle:
+          type: string
+        email:
+          type: string
+          format: email
+          description: Email of extension user
+        businessPhone:
+          type: string
+          description: 'Extension user contact phone number in
+
+            [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            format
+
+            '
+        mobilePhone:
+          type: string
+          description: 'Extension user mobile (**non** Toll Free) phone number in
+
+            [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            (with ''+'' sign) format
+
+            '
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        emailAsLoginName:
+          type: boolean
+          description: 'If `true` then contact email is enabled as login name for
+
+            this user. Please note that email should be unique in this case.
+
+            The default value is `false`
+
+            '
+        pronouncedName:
+          $ref: '#/components/schemas/PronouncedNameInfo'
+        department:
+          type: string
+          description: Extension user department, if any
+      description: Contact Information
+    RegionalLanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a language set as regional
+        localeCode:
+          type: string
+          description: Localization code of a language set as regional
+        name:
+          type: string
+          description: Official name of a language set as regional
+      description: Information on a language set as regional
+    ContactInfoUpdateRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: 'For User extension type only. Extension user first name
+
+            '
+        lastName:
+          type: string
+          description: 'For User extension type only. Extension user last name
+
+            '
+        company:
+          type: string
+          description: Extension user company name
+        jobTitle:
+          type: string
+        email:
+          type: string
+          format: email
+          description: Email of extension user
+        businessPhone:
+          type: string
+          description: 'Extension user contact phone number in
+
+            [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            format
+
+            '
+        mobilePhone:
+          type: string
+          description: 'Extension user mobile (**non** Toll Free) phone number in
+
+            [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            (with ''+'' sign) format
+
+            '
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        emailAsLoginName:
+          type: boolean
+          description: 'If `true` then contact email is enabled as login name for
+
+            this user. Please note that email should be unique in this case.
+
+            The default value is `false`
+
+            '
+        pronouncedName:
+          $ref: '#/components/schemas/PronouncedNameInfo'
+        department:
+          type: string
+          description: Extension user department, if any
+    ExtensionFormattingLocaleInfoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal Identifier of a formatting language
+    ExtensionPermissions:
+      type: object
+      properties:
+        admin:
+          $ref: '#/components/schemas/PermissionInfoAdmin'
+        internationalCalling:
+          $ref: '#/components/schemas/PermissionInfoInt'
+      description: 'Extension permissions, corresponding to the Service Web permissions
+
+        ''Admin'' and ''InternationalCalling''
+
+        '
+    PermissionInfoInt:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specifies if a permission is enabled or not
+      description: International Calling permission
+    ExtensionBulkUpdateTaskResource:
+      required:
+      - creationTime
+      - id
+      - lastModifiedTime
+      - status
+      - uri
+      type: object
+      description: 'Information on a task for updating multiple extensions
+
+        '
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a task resource
+        id:
+          type: string
+          description: Internal identifier of a task
+        status:
+          type: string
+          description: Task status
+          enum:
+          - Accepted
+          - InProgress
+          - Completed
+          - Failed
+        creationTime:
+          type: string
+          format: date-time
+          description: Task creation date/time
+        lastModifiedTime:
+          type: string
+          format: date-time
+          description: Task latest update date/time
+        result:
+          $ref: '#/components/schemas/ExtensionBulkUpdateTaskResult'
+    ExtensionRegionalSettingRequest:
+      type: object
+      properties:
+        homeCountry:
+          $ref: '#/components/schemas/ExtensionCountryInfoRequest'
+        timezone:
+          $ref: '#/components/schemas/ExtensionTimezoneInfoRequest'
+        language:
+          $ref: '#/components/schemas/ExtensionLanguageInfoRequest'
+        greetingLanguage:
+          $ref: '#/components/schemas/ExtensionGreetingLanguageInfoRequest'
+        formattingLocale:
+          $ref: '#/components/schemas/ExtensionFormattingLocaleInfoRequest'
+        currency:
+          $ref: '#/components/schemas/ExtensionCurrencyInfoRequest'
+        timeFormat:
+          type: string
+          description: Time format setting
+          default: 12h
+          enum:
+          - 12h
+          - 24h
+    ProfileImageInfo:
+      required:
+      - uri
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: 'Link to a profile image. If an image is not uploaded for an
+
+            extension, only `uri` is returned
+
+            '
+        etag:
+          type: string
+          description: Identifier of an image
+        lastModified:
+          type: string
+          description: 'Date/time when an image was last updated, in ISO 8601 format,
+
+            for example 2016-03-10T18:07:52.534Z
+
+            '
+          format: date-time
+        contentType:
+          type: string
+          description: The type of image
+        scales:
+          type: array
+          description: 'List of URIs to profile images in different dimensions
+
+            '
+          items:
+            $ref: '#/components/schemas/ProfileImageInfoURI'
+      description: Information on profile image
+    CountryInfoShortModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoBasicModel'
+      - type: object
+        properties:
+          isoCode:
+            type: string
+            description: 'A ISO country code value complying with the
+
+              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+
+              format.
+
+              '
+          callingCode:
+            type: string
+            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
+
+              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
+
+              [E.164](http://en.wikipedia.org/wiki/E.164),
+
+              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
+
+              '
+    ExtensionCreationRequest:
+      type: object
+      properties:
+        contact:
+          $ref: '#/components/schemas/ContactInfoCreationRequest'
+        extensionNumber:
+          type: string
+          description: Extension short number
+        costCenter:
+          $ref: '#/components/schemas/CostCenterInfo'
+        customFields:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomFieldInfo'
+        password:
+          type: string
+          description: Password for extension. If not specified, the password is auto-generated
+        references:
+          type: array
+          description: List of non-RC internal identifiers assigned to an extension
+          items:
+            $ref: '#/components/schemas/ReferenceInfo'
+        regionalSettings:
+          $ref: '#/components/schemas/RegionalSettings'
+        partnerId:
+          type: string
+          description: 'Additional extension identifier, created by partner application
+
+            and applied on client side
+
+            '
+        ivrPin:
+          type: string
+          description: IVR PIN
+        setupWizardState:
+          $ref: '#/components/schemas/SetupWizardStateForUpdateEnum'
+        site:
+          $ref: '#/components/schemas/SiteInfo'
+        status:
+          type: string
+          description: Extension current state
+          enum:
+          - Enabled
+          - Disabled
+          - NotActivated
+          - Unassigned
+          - Frozen
+        statusInfo:
+          $ref: '#/components/schemas/ExtensionStatusInfo'
+        type:
+          type: string
+          description: 'Extension type. Please note that legacy ''Department'' extension type
+
+            corresponds to ''Call Queue'' extensions in modern RingCentral product
+
+            terminology
+
+            '
+          enum:
+          - User
+          - VirtualUser
+          - DigitalUser
+          - FlexibleUser
+          - Department
+          - Announcement
+          - Voicemail
+          - SharedLinesGroup
+          - PagingOnly
+          - ParkLocation
+          - Limited
+        hidden:
+          type: boolean
+          description: 'Hides extension from showing in company directory. Supported
+
+            for extensions of ''User'' type only. For unassigned extensions the value
+
+            is set to `true` by default. For assigned extensions the value is set
+
+            to `false` by default
+
+            '
+    UserTemplates:
+      required:
+      - navigation
+      - paging
+      - records
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to user templates resource
+        records:
+          type: array
+          description: List of user templates
+          items:
+            $ref: '#/components/schemas/TemplateInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    ExtensionBulkUpdateInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension
+        status:
+          type: string
+          enum:
+          - Disabled
+          - Enabled
+          - NotActivated
+          - Frozen
+        statusInfo:
+          $ref: '#/components/schemas/ExtensionStatusInfo'
+        reason:
+          type: string
+          description: Type of suspension
+        comment:
+          type: string
+          description: Free form user comment
+        extensionNumber:
+          type: string
+          description: Extension number available
+        contact:
+          $ref: '#/components/schemas/ContactInfoUpdateRequest'
+        regionalSettings:
+          $ref: '#/components/schemas/ExtensionRegionalSettingRequest'
+        setupWizardState:
+          $ref: '#/components/schemas/SetupWizardStateForUpdateEnum'
+        partnerId:
+          type: string
+          description: 'Additional extension identifier created by partner application
+
+            and applied on client side
+
+            '
+        ivrPin:
+          type: string
+          description: IVR PIN
+        password:
+          type: string
+          description: Password for extension
+        callQueueInfo:
+          $ref: '#/components/schemas/CallQueueInfoRequest'
+        transition:
+          $ref: '#/components/schemas/UserTransitionInfo'
+        costCenter:
+          $ref: '#/components/schemas/CostCenterInfo'
+        customFields:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomFieldInfo'
+        hidden:
+          type: boolean
+          description: Hides extension from showing in company directory. Supported for extensions of User type only
+        site:
+          $ref: '#/components/schemas/ProvisioningSiteInfo'
+        type:
+          type: string
+          description: 'Extension type. Please note that legacy ''Department'' extension
+
+            type corresponds to ''Call Queue'' extensions in modern RingCentral
+
+            product terminology
+
+            '
+          enum:
+          - User
+          - FaxUser
+          - VirtualUser
+          - DigitalUser
+          - Department
+          - Announcement
+          - Voicemail
+          - SharedLinesGroup
+          - PagingOnly
+          - IvrMenu
+          - ApplicationExtension
+          - ParkLocation
+          - DelegatedLinesGroup
+        references:
+          type: array
+          description: 'List of non-RC internal identifiers assigned to an extension
+
+            '
+          items:
+            $ref: '#/components/schemas/ReferenceInfo'
+    ErrorEntity:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        parameterName:
+          type: string
+          description: Name of invalid parameter
+        parameterValue:
+          type: string
+          description: Value of invalid parameter
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  responses:
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

@@ -1,0 +1,1062 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Multi-Site API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Multi-Site
+paths:
+  /restapi/v1.0/account/{accountId}/sites:
+    get:
+      tags:
+      - Multi-Site
+      summary: List Sites
+      operationId: listSites
+      description: 'Returns a list of sites for the specified account.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Sites information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SitesList'
+      x-feature: ReadExtensions
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadExtensions
+    post:
+      tags:
+      - Multi-Site
+      summary: Create Site
+      operationId: createSite
+      description: 'Creates a site for the specified account.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSiteRequest'
+        required: true
+      responses:
+        '200':
+          description: Added site information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteInfo'
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+  /restapi/v1.0/account/{accountId}/sites/{siteId}:
+    get:
+      tags:
+      - Multi-Site
+      summary: Get Site
+      operationId: readSite
+      description: 'Returns a site by ID.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: siteId
+        in: path
+        description: Internal identifier of a site. *Please note* that `siteId` cannot take the 'main-site' value
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Site information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteInfo'
+      x-feature: ReadExtensions
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadExtensions
+    put:
+      tags:
+      - Multi-Site
+      summary: Update Site
+      operationId: updateSite
+      description: 'Updates a site specified in path.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: siteId
+        in: path
+        description: Internal identifier of a site. *Please note* that `siteId` cannot take the 'main-site' value
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SiteUpdateRequest'
+        required: false
+      responses:
+        '200':
+          description: Updated site information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteInfo'
+      x-feature: EditSites
+      x-availability: Limited
+      x-throttling-group: Light
+      x-app-permission: EditExtensions
+      x-user-permission: Sites
+    delete:
+      tags:
+      - Multi-Site
+      summary: Delete Site
+      operationId: deleteSite
+      description: 'Deletes a site specified in path.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: siteId
+        in: path
+        description: Internal identifier of a site. *Please note* that `siteId` cannot take the 'main-site' value
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+      x-feature: EditSites
+      x-availability: Limited
+      x-throttling-group: Light
+      x-app-permission: EditAccounts
+      x-user-permission: Sites
+  /restapi/v1.0/account/{accountId}/sites/{siteId}/bulk-assign:
+    post:
+      tags:
+      - Multi-Site
+      summary: Edit Sites
+      operationId: assignMultipleSites
+      description: 'Assigns multiple sites to an account specified in path.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: siteId
+        in: path
+        required: true
+        description: Internal identifier of a site. *Please note* that `siteId` cannot take the 'main-site' value
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SiteMembersBulkUpdate'
+        required: false
+      responses:
+        '204':
+          description: No Content
+      x-feature: EditSites
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditExtensions
+      x-user-permission: Sites
+  /restapi/v1.0/account/{accountId}/sites/{siteId}/members:
+    get:
+      tags:
+      - Multi-Site
+      summary: List Site Members
+      operationId: listSiteMembers
+      description: 'Returns members of a site specified in path.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: siteId
+        in: path
+        description: Internal identifier of a site. *Please note* that `siteId` cannot take the 'main-site' value
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Site members information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteMembersList'
+      x-feature: ReadExtensions
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadExtensions
+  /restapi/v1.0/account/{accountId}/sites/{siteId}/ivr:
+    get:
+      tags:
+      - Multi-Site
+      summary: Get Site IVR Settings
+      operationId: readSiteIvrSettings
+      description: 'Returns IVR settings for a site specified in path.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: siteId
+        in: path
+        required: true
+        description: Internal identifier of a site. *Please note* that `siteId` cannot take the 'main-site' value
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Site IVR settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteIVRSettings'
+      x-feature: ReadExtensions
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadExtensions
+    put:
+      tags:
+      - Multi-Site
+      summary: Update Site IVR Settings
+      operationId: updateSiteIvrSettings
+      description: 'Updates IVR settings for a site specified in path.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: siteId
+        in: path
+        required: true
+        description: Internal identifier of a site. *Please note* that `siteId` cannot take the 'main-site' value
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SiteIVRSettingsUpdate'
+        required: true
+      responses:
+        '200':
+          description: Updated IVR settings of a site
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteIVRSettings'
+      x-feature: EditSites
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+      x-user-permission: Sites
+components:
+  schemas:
+    SiteIVRActionsExtensionInfoUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension
+      description: Extension information
+    SiteInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a site extension
+        uri:
+          type: string
+          format: uri
+          description: Link to a site resource
+        name:
+          type: string
+          description: Extension user first name
+        extensionNumber:
+          type: string
+          description: Extension number
+        callerIdName:
+          type: string
+          description: 'Custom name of a caller. Max number of characters is 15 (only
+
+            alphabetical symbols, numbers and commas are supported)
+
+            '
+        email:
+          type: string
+          format: email
+          description: Site extension contact email
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        regionalSettings:
+          $ref: '#/components/schemas/RegionalSettings'
+        operator:
+          $ref: '#/components/schemas/OperatorInfo'
+        code:
+          type: string
+          description: 'Site code value. Returned only if specified
+
+            '
+    RegionalSettings:
+      type: object
+      properties:
+        homeCountry:
+          $ref: '#/components/schemas/CountryInfoShortModel'
+        timezone:
+          $ref: '#/components/schemas/TimezoneInfo'
+        language:
+          $ref: '#/components/schemas/RegionalLanguageInfo'
+        greetingLanguage:
+          $ref: '#/components/schemas/GreetingLanguageInfo'
+        formattingLocale:
+          $ref: '#/components/schemas/FormattingLocaleInfo'
+        timeFormat:
+          type: string
+          description: Time format setting. The default value is '12h' = ['12h', '24h']
+          enum:
+          - 12h
+          - 24h
+      description: 'Regional data (timezone, home country, language) of an extension/account.
+
+        The default is Company (Auto-Receptionist) settings
+
+        '
+    SiteMembersList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a site members list resource
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/SiteMemberInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    SiteIVRTopMenuUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Internal identifier of an IVR menu extension
+
+            '
+      description: Top IVR Menu extension
+    ContactBusinessAddressInfo:
+      type: object
+      properties:
+        country:
+          type: string
+          description: Country name of a user's company
+        state:
+          type: string
+          description: 'State/province name of a user''s company. Mandatory
+
+            for the USA, UK and Canada
+
+            '
+        city:
+          type: string
+          description: City name of a user's company
+        street:
+          type: string
+          description: Street address of a user's company
+        zip:
+          type: string
+          description: Zip code of a user's company
+      description: 'User''s business address. The default is
+
+        Company (Auto-Receptionist) settings
+
+        '
+    SiteUpdateRequest:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: Extension user first name
+        extensionNumber:
+          type: string
+          description: Extension number
+        callerIdName:
+          type: string
+          description: 'Custom name of a caller. Max number of characters is 15 (only
+
+            alphabetical symbols, numbers and commas are supported)
+
+            '
+        email:
+          type: string
+          format: email
+          description: Site extension contact email
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        regionalSettings:
+          $ref: '#/components/schemas/RegionalSettings'
+        operator:
+          $ref: '#/components/schemas/OperatorInfo'
+    SiteIVRTopMenu:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an IVR menu extension
+        uri:
+          type: string
+          format: uri
+          description: Link to an IVR menu extension resource
+        name:
+          type: string
+          description: Full name of an IVR menu extension user
+      description: 'Top IVR Menu extension. Mandatory for MultiLevel mode
+
+        '
+    SiteOperatorReference:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an operator extension
+      description: 'Site Fax/SMS recipient (operator) reference. Multi-level IVR should
+
+        be enabled
+
+        '
+    CountryInfoMinimalModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a country
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a country resource
+    SiteMemberInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        uri:
+          type: string
+          format: uri
+        extensionNumber:
+          type: string
+        type:
+          type: string
+        name:
+          type: string
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    FormattingLocaleInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a formatting language
+        localeCode:
+          type: string
+          description: Localization code of a formatting language
+        name:
+          type: string
+          description: Official name of a formatting language
+      description: 'Formatting language preferences for numbers, dates and currencies
+
+        '
+    GreetingLanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a greeting language
+        localeCode:
+          type: string
+          description: Localization code of a greeting language
+        name:
+          type: string
+          description: Official name of a greeting language
+      description: 'Information on language used for telephony greetings
+
+        '
+    OperatorInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an operator
+        uri:
+          type: string
+          format: uri
+          description: Link to an operator resource
+        extensionNumber:
+          type: string
+          description: Extension number (pin)
+        name:
+          type: string
+          description: Operator extension user full name
+      description: 'Site Fax/SMS recipient (operator) reference. Multi-level IVR should
+
+        be enabled
+
+        '
+    SiteIVRSettingsUpdate:
+      type: object
+      properties:
+        topMenu:
+          $ref: '#/components/schemas/SiteIVRTopMenuUpdate'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SiteIvrActionsUpdate'
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    SitesList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a sites resource
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/SiteInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CreateSiteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Extension user first name
+        extensionNumber:
+          type: string
+          description: Extension number
+        callerIdName:
+          type: string
+          description: 'Custom name of a caller. Max number of characters is 15 (only
+
+            alphabetical symbols, numbers and commas are supported)
+
+            '
+        email:
+          type: string
+          format: email
+          description: Extension user email
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        regionalSettings:
+          $ref: '#/components/schemas/RegionalSettings'
+        operator:
+          $ref: '#/components/schemas/SiteOperatorReference'
+        code:
+          type: string
+          description: Site code value
+    CountryInfoBasicModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoMinimalModel'
+      - type: object
+        properties:
+          name:
+            type: string
+            description: The official name of a country
+    SiteIVRSettings:
+      type: object
+      properties:
+        topMenu:
+          $ref: '#/components/schemas/SiteIVRTopMenu'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SiteIvrActions'
+    TimezoneInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a timezone
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a timezone
+        name:
+          type: string
+          description: Short name of a timezone
+        description:
+          type: string
+          description: Meaningful description of the timezone
+        bias:
+          type: string
+      description: Extension timezone information
+    RegionalLanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a language set as regional
+        localeCode:
+          type: string
+          description: Localization code of a language set as regional
+        name:
+          type: string
+          description: Official name of a language set as regional
+      description: Information on a language set as regional
+    SiteIvrActionsUpdate:
+      type: object
+      properties:
+        input:
+          type: string
+          enum:
+          - Star
+          - Hash
+          - NoInput
+          - '0'
+        action:
+          type: string
+          description: 'Key handling action:
+
+            - Repeat - repeat menu greeting, for Star and Hash only;
+
+            - ReturnToRoot - return to root IVR menu, for Star and Hash only;
+
+            - ReturnToPrevious - return to previous IVR menu, for Star and Hash only;
+
+            - Connect - connect to specific extension, for NoInput and "0" (zero) only;
+
+            - Disconnect - end call, for NoInput only.
+
+            '
+          enum:
+          - Repeat
+          - ReturnToRoot
+          - ReturnToPrevious
+          - ReturnToTopLevelMenu
+          - Connect
+          - ConnectToOperator
+          - Disconnect
+          - DoNothing
+        extension:
+          $ref: '#/components/schemas/SiteIVRActionsExtensionInfoUpdate'
+      description: Keys handling settings
+    SiteIvrActions:
+      type: object
+      properties:
+        input:
+          type: string
+          enum:
+          - Star
+          - Hash
+          - NoInput
+        action:
+          type: string
+          description: 'Key handling action:
+
+            - Repeat - repeat menu greeting, for Star and Hash only;
+
+            - ReturnToRoot - return to root IVR menu, for Star and Hash only;
+
+            - ReturnToPrevious - return to previous IVR menu, for Star and Hash only;
+
+            - Connect - connect to specific extension, for NoInput only;
+
+            - Disconnect - end call, for NoInput only.
+
+            '
+          enum:
+          - Repeat
+          - ReturnToRoot
+          - ReturnToPrevious
+          - ReturnToTopLevelMenu
+          - Connect
+          - Disconnect
+          - DoNothing
+        extension:
+          $ref: '#/components/schemas/SiteIVRActionsExtensionInfo'
+      description: Keys handling settings
+    SiteMembersBulkUpdate:
+      type: object
+      properties:
+        removedExtensionIds:
+          type: array
+          description: List of removed extensions
+          items:
+            type: string
+        addedExtensionIds:
+          type: array
+          description: List of added extensions
+          items:
+            type: string
+    CountryInfoShortModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoBasicModel'
+      - type: object
+        properties:
+          isoCode:
+            type: string
+            description: 'A ISO country code value complying with the
+
+              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+
+              format.
+
+              '
+          callingCode:
+            type: string
+            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
+
+              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
+
+              [E.164](http://en.wikipedia.org/wiki/E.164),
+
+              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
+
+              '
+    SiteIVRActionsExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        name:
+          type: string
+          description: Name of an extension user
+      description: Extension information
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

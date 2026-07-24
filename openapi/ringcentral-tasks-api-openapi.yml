@@ -1,0 +1,801 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Tasks API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Tasks
+paths:
+  /team-messaging/v1/tasks/{taskId}:
+    get:
+      tags:
+      - Tasks
+      summary: Get Task
+      description: Returns information about the specified task(s) by ID(s).
+      operationId: readTaskNew
+      parameters:
+      - name: taskId
+        in: path
+        description: Task identifier or comma separated list of task IDs
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMTaskInfo'
+        '400':
+          description: Invalid input parameter(-s)
+        '403':
+          description: Forbidden
+        '404':
+          description: Requested task ID does not exist
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    delete:
+      tags:
+      - Tasks
+      summary: Delete Task
+      description: Deletes the specified task.
+      operationId: deleteTaskNew
+      parameters:
+      - name: taskId
+        in: path
+        description: Internal identifier of a task
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '403':
+          description: Forbidden
+        '404':
+          description: Task with the specified ID does not exist
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    patch:
+      tags:
+      - Tasks
+      summary: Update Task
+      description: Updates the specified task by ID.
+      operationId: patchTaskNew
+      parameters:
+      - name: taskId
+        in: path
+        description: Internal identifier of a task
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMUpdateTaskRequest'
+        required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMTaskList'
+        '400':
+          description: Invalid input parameter(-s)
+        '403':
+          description: Forbidden
+        '404':
+          description: Task with the specified ID does not exist
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/tasks/{taskId}/complete:
+    post:
+      tags:
+      - Tasks
+      summary: Complete Task
+      description: Completes a task in the specified chat.
+      operationId: completeTaskNew
+      parameters:
+      - name: taskId
+        in: path
+        description: Internal identifier of a task
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMCompleteTaskRequest'
+        required: true
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Invalid input parameter(-s)
+        '403':
+          description: Forbidden
+        '404':
+          description: Requested task ID does not exist
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/chats/{chatId}/tasks:
+    get:
+      tags:
+      - Tasks
+      summary: List Chat Tasks
+      description: Returns the list of tasks of the specified chat.
+      operationId: listChatTasksNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat
+        required: true
+        schema:
+          type: string
+      - name: creationTimeTo
+        in: query
+        description: 'The end datetime for resulting records in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+          format including timezone, e.g. 2019-03-10T18:23:45Z
+
+          '
+        schema:
+          type: string
+          default: now
+      - name: creationTimeFrom
+        in: query
+        description: 'The start datetime for resulting records in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+          format including timezone, e.g. 2016-02-23T00:00:00
+
+          '
+        schema:
+          type: string
+      - name: creatorId
+        in: query
+        description: Internal identifier of a task creator
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: status
+        in: query
+        description: Task execution status
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - Pending
+            - InProgress
+            - Completed
+      - name: assignmentStatus
+        in: query
+        description: Task assignment status
+        schema:
+          type: string
+          enum:
+          - Unassigned
+          - Assigned
+      - name: assigneeId
+        in: query
+        description: Internal identifier of a task assignee
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: assigneeStatus
+        in: query
+        description: Task execution status by assignee(-s) specified in assigneeId
+        schema:
+          type: string
+          enum:
+          - Pending
+          - Completed
+      - name: pageToken
+        in: query
+        description: 'Token of the current page. If token is omitted then the first
+
+          page should be returned
+
+          '
+        schema:
+          type: string
+      - name: recordCount
+        in: query
+        description: Number of records to be returned per screen
+        schema:
+          maximum: 250
+          minimum: 1
+          type: integer
+          format: int32
+          default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMTaskList'
+        '400':
+          description: Invalid input parameter(-s)
+        '403':
+          description: Forbidden
+        '404':
+          description: Specified chat ID does not exist
+      x-feature: TeamMessaging
+      x-throttling-group: Heavy
+      x-app-permission: TeamMessaging
+    post:
+      tags:
+      - Tasks
+      summary: Create Task
+      description: Creates a task in the specified chat.
+      operationId: createTaskNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMCreateTaskRequest'
+        required: true
+      responses:
+        '201':
+          description: Task information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMTaskInfo'
+        '400':
+          description: Invalid input parameter(-s)
+        '403':
+          description: Forbidden
+        '404':
+          description: Specified chat ID does not exist
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+components:
+  schemas:
+    TMTaskInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a task
+        creationTime:
+          type: string
+          description: Task creation date/time in UTC time zone
+          format: date-time
+        lastModifiedTime:
+          type: string
+          description: Task the last modified time in UTC time zone
+          format: date-time
+        type:
+          type: string
+          description: Task type
+          enum:
+          - Task
+        creator:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Internal identifier of a task creator
+        chatIds:
+          type: array
+          description: Internal identifiers of the chats where the task is posted or shared
+          items:
+            type: string
+        status:
+          type: string
+          description: Task execution status
+          enum:
+          - Pending
+          - InProgress
+          - Completed
+        subject:
+          type: string
+          description: Task name/subject
+        assignees:
+          type: array
+          description: Task name/subject
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of an assignee
+              status:
+                type: string
+                description: Task execution status by assignee
+                enum:
+                - Pending
+                - Completed
+        completenessCondition:
+          type: string
+          description: How the task completeness should be determined
+          enum:
+          - Simple
+          - AllAssignees
+          - Percentage
+        completenessPercentage:
+          maximum: 100.0
+          minimum: 0
+          type: integer
+          format: int32
+          description: Current completeness percentage of the task with the specified percentage completeness condition
+        startDate:
+          type: string
+          description: Task start date
+          format: date-time
+        dueDate:
+          type: string
+          description: Task due date/time
+          format: date-time
+        color:
+          type: string
+          description: Font color of a post with the current task
+          enum:
+          - Black
+          - Red
+          - Orange
+          - Yellow
+          - Green
+          - Blue
+          - Purple
+          - Magenta
+        section:
+          type: string
+          description: Task section to group / search by
+        description:
+          type: string
+          description: Task details
+        recurrence:
+          $ref: '#/components/schemas/TaskRecurrenceInfo'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskAttachment'
+    TMCreateTaskRequest:
+      required:
+      - assignees
+      - subject
+      type: object
+      properties:
+        subject:
+          type: string
+          description: Task name/subject. Max allowed length is 250 characters
+        assignees:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of an assignee
+        completenessCondition:
+          type: string
+          default: Simple
+          enum:
+          - Simple
+          - AllAssignees
+          - Percentage
+        startDate:
+          type: string
+          description: Task start date in UTC time zone.
+          format: date-time
+        dueDate:
+          type: string
+          description: Task due date/time in UTC time zone.
+          format: date-time
+        color:
+          type: string
+          default: Black
+          enum:
+          - Black
+          - Red
+          - Orange
+          - Yellow
+          - Green
+          - Blue
+          - Purple
+          - Magenta
+        section:
+          type: string
+          description: Task section to group / search by. Max allowed length is 100 characters.
+        description:
+          type: string
+          description: Task details. Max allowed length is 102400 characters (100kB).
+        recurrence:
+          $ref: '#/components/schemas/TaskRecurrenceInfo'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMAttachmentInfo'
+    TMTaskList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMTaskInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+    TaskRecurrenceInfo:
+      type: object
+      description: Task information
+      properties:
+        schedule:
+          type: string
+          description: Recurrence settings of a task. None for non-periodic tasks
+          default: None
+          enum:
+          - None
+          - Daily
+          - Weekdays
+          - Weekly
+          - Monthly
+          - Yearly
+        endingCondition:
+          type: string
+          description: Ending condition of a task
+          default: None
+          enum:
+          - None
+          - Count
+          - Date
+        endingAfter:
+          maximum: 10.0
+          minimum: 1
+          type: integer
+          format: int32
+          description: Count of iterations of periodic tasks
+        endingOn:
+          type: string
+          description: "End date of a periodic task in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) \nformat, UTC time zone\n"
+          format: date-time
+    TaskAttachment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: File ID.
+        type:
+          type: string
+          description: Possible value - File. Attachment type (currently, only File is possible)
+          enum:
+          - File
+        name:
+          type: string
+          description: Name of the attached file (incl. extension name)
+        contentUri:
+          type: string
+          format: uri
+          description: URI
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+    TMCompleteTaskRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Completeness status
+          enum:
+          - Incomplete
+          - Complete
+        assignees:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of an assignee
+        completenessPercentage:
+          maximum: 100.0
+          minimum: 0
+          type: integer
+          format: int32
+    TMAttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an attachment
+        type:
+          type: string
+          description: Type of an attachment
+          enum:
+          - File
+          - Note
+          - Event
+          - Card
+    TMUpdateTaskRequest:
+      type: object
+      properties:
+        subject:
+          type: string
+          description: Task name/subject. Max allowed length is 250 characters.
+        assignees:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of an assignee
+        completenessCondition:
+          type: string
+          enum:
+          - Simple
+          - AllAssignees
+          - Percentage
+        startDate:
+          type: string
+          description: Task start date in UTC time zone
+          format: date-time
+        dueDate:
+          type: string
+          description: Task due date/time in UTC time zone
+          format: date-time
+        color:
+          type: string
+          enum:
+          - Black
+          - Red
+          - Orange
+          - Yellow
+          - Green
+          - Blue
+          - Purple
+          - Magenta
+        section:
+          type: string
+          description: Task section to group / search by. Max allowed length is 100 characters.
+        description:
+          type: string
+          description: Task details. Max allowed length is 102400 characters (100kB)
+        recurrence:
+          $ref: '#/components/schemas/TaskRecurrenceInfo'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMAttachmentInfo'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

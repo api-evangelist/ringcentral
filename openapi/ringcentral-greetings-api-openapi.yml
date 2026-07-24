@@ -1,0 +1,1061 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Greetings API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Greetings
+paths:
+  /restapi/v1.0/account/{accountId}/greeting/{greetingId}/content:
+    get:
+      tags:
+      - Greetings
+      summary: Get Account Greeting Media Content
+      description: 'Returns account-level greeting media contents.
+
+
+        **This API must be called via media API entry point, e.g. https://media.ringcentral.com**
+
+        '
+      operationId: readAccountGreetingContent
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/GreetingId'
+      - $ref: '#/components/parameters/ContentDisposition'
+      - $ref: '#/components/parameters/ContentDispositionFilename'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            audio/*:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-media-api: true
+      x-availability: High
+      x-throttling-group: Heavy
+      x-app-permission: ReadAccounts
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/greeting/{greetingId}/content:
+    get:
+      tags:
+      - Greetings
+      summary: Get Extension Greeting Media Content
+      description: 'Returns extension-level greeting media contents.
+
+
+        **This API must be called via media API entry point, e.g. https://media.ringcentral.com**
+
+        '
+      operationId: readGreetingContent
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/GreetingId'
+      - $ref: '#/components/parameters/ContentDisposition'
+      - $ref: '#/components/parameters/ContentDispositionFilename'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            audio/*:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-media-api: true
+      x-availability: High
+      x-throttling-group: Heavy
+      x-app-permission: ReadAccounts
+  /restapi/v1.0/account/{accountId}/greeting:
+    post:
+      tags:
+      - Greetings
+      summary: Create Company Greeting
+      description: Creates a custom company greeting.
+      operationId: createCompanyGreeting
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        content:
+          multipart/mixed:
+            schema:
+              type: object
+              required:
+              - binary
+              - type
+              properties:
+                type:
+                  type: string
+                  description: 'Type of greeting, specifying the case when the greeting
+
+                    is played.
+
+                    '
+                  enum:
+                  - Company
+                  - StartRecording
+                  - StopRecording
+                  - AutomaticRecording
+                  - TemplateGreeting
+                answeringRule:
+                  $ref: '#/components/schemas/AnsweringRuleQueryRequest'
+                languageId:
+                  type: string
+                  description: 'Internal identifier of a language. See Get Language
+
+                    List
+
+                    '
+                binary:
+                  type: string
+                  description: Media file to upload
+                  format: binary
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - binary
+              - type
+              properties:
+                type:
+                  type: string
+                  description: 'Type of greeting, specifying the case when the greeting
+
+                    is played.
+
+                    '
+                  enum:
+                  - Company
+                  - StartRecording
+                  - StopRecording
+                  - AutomaticRecording
+                  - TemplateGreeting
+                answeringRuleId:
+                  type: string
+                  description: Internal identifier of an answering rule
+                languageId:
+                  type: string
+                  description: 'Internal identifier of a language. See Get Language
+
+                    List
+
+                    '
+                binary:
+                  type: string
+                  description: Media file to upload
+                  format: binary
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomCompanyGreetingInfo'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: ReadExtensionInfo
+      x-request-max-body-size: 20m
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+      x-user-permission: ReadUserInfo
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/greeting:
+    post:
+      tags:
+      - Greetings
+      summary: Create Custom User Greeting
+      description: Creates custom greeting for an extension user.
+      operationId: createCustomUserGreeting
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - name: apply
+        in: query
+        description: 'Specifies whether to apply an answering rule or not. If set to
+
+          true then `answeringRule` parameter is mandatory. If set to false, then
+
+          the answering rule is not applied even if specified
+
+          '
+        schema:
+          type: boolean
+          default: true
+      requestBody:
+        content:
+          multipart/mixed:
+            schema:
+              type: object
+              required:
+              - answeringRule
+              - binary
+              - type
+              properties:
+                type:
+                  type: string
+                  description: Type of greeting, specifying the case when the greeting is played.
+                  enum:
+                  - Introductory
+                  - Announcement
+                  - ConnectingMessage
+                  - ConnectingAudio
+                  - Voicemail
+                  - Unavailable
+                  - HoldMusic
+                  - TemplateGreeting
+                answeringRule:
+                  $ref: '#/components/schemas/AnsweringRuleQueryRequest'
+                binary:
+                  type: string
+                  description: Media file to upload
+                  format: binary
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - answeringRuleId
+              - binary
+              - type
+              properties:
+                type:
+                  type: string
+                  description: Type of greeting, specifying the case when the greeting is played.
+                  enum:
+                  - Introductory
+                  - Announcement
+                  - ConnectingMessage
+                  - ConnectingAudio
+                  - Voicemail
+                  - Unavailable
+                  - HoldMusic
+                  - TemplateGreeting
+                answeringRuleId:
+                  type: string
+                  description: Internal identifier of an answering rule
+                binary:
+                  type: string
+                  description: Media file to upload
+                  format: binary
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUserGreetingInfo'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditExtensionAnsweringRules
+      x-request-max-body-size: 20m
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditExtensions
+      x-user-permission: EditUserAnsweringRules
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/greeting/{greetingId}:
+    get:
+      tags:
+      - Greetings
+      summary: Get Custom Greeting
+      description: Returns a custom user greeting by ID.
+      operationId: readCustomGreeting
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/GreetingId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUserGreetingInfo'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: ReadExtensionInfo
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadUserInfo
+  /restapi/v1.0/dictionary/greeting:
+    get:
+      tags:
+      - Greetings
+      summary: List Standard Greetings
+      description: 'Returns the list of predefined standard greetings. Custom greetings
+
+        recorded by user are not returned in response to this request. See Get Extension
+
+        Custom Greetings.
+
+        '
+      operationId: listStandardGreetings
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - name: type
+        in: query
+        description: Type of greeting, specifying the case when the greeting is played
+        schema:
+          type: string
+          enum:
+          - Introductory
+          - Announcement
+          - ConnectingMessage
+          - ConnectingAudio
+          - Voicemail
+          - Unavailable
+          - HoldMusic
+          - Company
+      - name: usageType
+        in: query
+        description: Usage type of greeting, specifying if the greeting is applied for user extension or department (call queue) extension
+        schema:
+          type: string
+          enum:
+          - UserExtensionAnsweringRule
+          - ExtensionAnsweringRule
+          - DepartmentExtensionAnsweringRule
+          - CompanyAnsweringRule
+          - CompanyAfterHoursAnsweringRule
+          - VoicemailExtensionAnsweringRule
+          - AnnouncementExtensionAnsweringRule
+          - SharedLinesGroupAnsweringRule
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DictionaryGreetingList'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: High
+      x-throttling-group: Medium
+  /restapi/v1.0/dictionary/greeting/{greetingId}:
+    get:
+      tags:
+      - Greetings
+      summary: Get Standard Greeting
+      description: Returns a standard greeting by ID.
+      operationId: readStandardGreeting
+      parameters:
+      - $ref: '#/components/parameters/GreetingId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DictionaryGreetingInfo'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: High
+      x-throttling-group: Medium
+components:
+  schemas:
+    CustomGreetingAnsweringRuleInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an answering rule
+        id:
+          type: string
+          description: Internal identifier of an answering rule
+      description: Information on an answering rule that the greeting is applied to
+    DictionaryGreetingInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a greeting
+        uri:
+          type: string
+          format: uri
+          description: Link to a greeting
+        name:
+          type: string
+          description: Name of a greeting
+        usageType:
+          type: string
+          description: Usage type of greeting, specifying if the greeting is applied for user extension or department (call queue) extension.
+          enum:
+          - UserExtensionAnsweringRule
+          - ExtensionAnsweringRule
+          - DepartmentExtensionAnsweringRule
+          - BlockedCalls
+          - CallRecording
+          - CompanyAnsweringRule
+          - CompanyAfterHoursAnsweringRule
+          - LimitedExtensionAnsweringRule
+          - VoicemailExtensionAnsweringRule
+          - AnnouncementExtensionAnsweringRule
+          - SharedLinesGroupAnsweringRule
+        text:
+          type: string
+          description: Text of a greeting, if any
+        contentUri:
+          type: string
+          format: uri
+          description: Link to a greeting content (audio file), if any
+        type:
+          $ref: '#/components/schemas/GreetingTypeEnum'
+        category:
+          type: string
+          description: Category of a greeting, specifying data form. The category value 'None' specifies that greetings of a certain type ('Introductory', 'ConnectingAudio', etc.) are switched off for an extension = ['Music', 'Message', 'RingTones', 'None']
+          enum:
+          - Music
+          - Message
+          - RingTones
+          - None
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    CustomCompanyGreetingLanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a greeting language
+        uri:
+          type: string
+          format: uri
+          description: Link to a greeting language
+        name:
+          type: string
+          description: Name of a greeting language
+        localeCode:
+          type: string
+          description: Locale code of a greeting language
+      description: Information on a greeting language. Supported for types 'StopRecording', 'StartRecording', 'AutomaticRecording'
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    DictionaryGreetingList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of greetings list resource
+        records:
+          type: array
+          description: List of greetings
+          items:
+            $ref: '#/components/schemas/DictionaryGreetingInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    GreetingTypeEnum:
+      type: string
+      description: Type of greeting, specifying the case when the greeting is played.
+      enum:
+      - Introductory
+      - Announcement
+      - AutomaticRecording
+      - BlockedCallersAll
+      - BlockedCallersSpecific
+      - BlockedNoCallerId
+      - BlockedPayPhones
+      - ConnectingMessage
+      - ConnectingAudio
+      - StartRecording
+      - StopRecording
+      - Voicemail
+      - Unavailable
+      - InterruptPrompt
+      - HoldMusic
+      - Company
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    AnsweringRuleQueryRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an answering rule
+    CustomCompanyGreetingInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to an extension custom greeting
+        id:
+          type: string
+          description: Internal identifier of an answering rule
+        type:
+          type: string
+          description: Type of company greeting
+          enum:
+          - Company
+          - StartRecording
+          - StopRecording
+          - AutomaticRecording
+          - TemplateGreeting
+        contentType:
+          type: string
+          description: Content media type
+          enum:
+          - audio/mpeg
+          - audio/wav
+        contentUri:
+          type: string
+          format: uri
+          description: Link to a greeting content (audio file)
+        answeringRule:
+          $ref: '#/components/schemas/CustomGreetingAnsweringRuleInfo'
+        language:
+          $ref: '#/components/schemas/CustomCompanyGreetingLanguageInfo'
+    CustomUserGreetingInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a custom user greeting
+        id:
+          type: string
+          description: Internal identifier of a custom user greeting
+        type:
+          type: string
+          description: Type of custom user greeting
+          enum:
+          - Introductory
+          - Announcement
+          - InterruptPrompt
+          - ConnectingAudio
+          - ConnectingMessage
+          - Voicemail
+          - Unavailable
+          - HoldMusic
+          - PronouncedName
+          - TemplateGreeting
+        contentType:
+          type: string
+          description: Content media type
+          enum:
+          - audio/mpeg
+          - audio/wav
+        contentUri:
+          type: string
+          format: uri
+          description: Link to a greeting content (audio file)
+        answeringRule:
+          $ref: '#/components/schemas/CustomGreetingAnsweringRuleInfo'
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: The result set page number (1-indexed) to return
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 1
+      example: 1
+    PerPage:
+      name: perPage
+      in: query
+      description: 'The number of items per page. If provided value in the request
+
+        is greater than a maximum, the maximum value is applied
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 100
+      example: 100
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    GreetingId:
+      name: greetingId
+      in: path
+      description: Internal identifier of a greeting
+      required: true
+      schema:
+        type: string
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ContentDispositionFilename:
+      name: contentDispositionFilename
+      in: query
+      description: The default filename of the file to be downloaded
+      required: false
+      schema:
+        type: string
+    ContentDisposition:
+      name: contentDisposition
+      in: query
+      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
+      required: false
+      schema:
+        type: string
+        enum:
+        - Inline
+        - Attachment
+  responses:
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

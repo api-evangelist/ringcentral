@@ -1,0 +1,963 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Regional Settings API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Regional Settings
+paths:
+  /restapi/v1.0/dictionary/state:
+    get:
+      tags:
+      - Regional Settings
+      summary: List States
+      description: 'Returns all states of a certain country.
+
+        '
+      operationId: listStates
+      parameters:
+      - name: allCountries
+        in: query
+        description: 'If set to `true` then states of all countries are returned and
+
+          `countryId` is ignored, even if specified. If the value is empty
+
+          then the parameter is ignored
+
+          '
+        schema:
+          type: boolean
+      - name: countryId
+        in: query
+        description: Internal identifier of a country
+        schema:
+          type: integer
+          format: int64
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are accepted
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items)
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      - name: withPhoneNumbers
+        in: query
+        description: 'If `true` the list of states with phone numbers available for
+
+          buying is returned
+
+          '
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: States list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetStateListResponse'
+      x-availability: High
+      x-throttling-group: Light
+  /restapi/v1.0/dictionary/state/{stateId}:
+    get:
+      tags:
+      - Regional Settings
+      summary: Get State
+      description: 'Returns information on a specific state by ID.
+
+        '
+      operationId: readState
+      parameters:
+      - name: stateId
+        in: path
+        description: Internal identifier of a state
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: State information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetStateInfoResponse'
+      x-availability: High
+      x-throttling-group: Light
+  /restapi/v1.0/dictionary/location:
+    get:
+      tags:
+      - Regional Settings
+      summary: List Locations
+      description: 'Returns all available locations for a certain state.
+
+        '
+      operationId: listLocations
+      parameters:
+      - name: orderBy
+        in: query
+        description: Sorts results by the property specified
+        schema:
+          type: string
+          default: City
+          enum:
+          - Npa
+          - City
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are accepted
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items)
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      - name: stateId
+        in: query
+        description: Internal identifier of a state
+        schema:
+          type: string
+      - name: withNxx
+        in: query
+        description: Specifies if `nxx` codes are returned
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Location list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetLocationListResponse'
+      x-availability: High
+      x-throttling-group: Light
+  /restapi/v1.0/dictionary/language:
+    get:
+      tags:
+      - Regional Settings
+      summary: List Languages
+      description: 'Returns information about the supported languages.
+
+        '
+      operationId: listLanguages
+      responses:
+        '200':
+          description: Language list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LanguageList'
+      x-availability: High
+      x-throttling-group: Light
+  /restapi/v1.0/dictionary/language/{languageId}:
+    get:
+      tags:
+      - Regional Settings
+      summary: Get Language
+      description: 'Returns a language by ID.
+
+        '
+      operationId: readLanguage
+      parameters:
+      - name: languageId
+        in: path
+        description: Internal identifier of a language
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Language information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LanguageInfo'
+      x-availability: High
+      x-throttling-group: Light
+  /restapi/v1.0/dictionary/timezone:
+    get:
+      tags:
+      - Regional Settings
+      summary: List Timezones
+      description: 'Returns all available timezones.
+
+        '
+      operationId: listTimezones
+      parameters:
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are allowed. Default value is ''1''
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items). If not specified, the value is '100' by default
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: Timezones list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTimezoneListResponse'
+      x-availability: High
+      x-throttling-group: Light
+  /restapi/v1.0/dictionary/timezone/{timezoneId}:
+    get:
+      tags:
+      - Regional Settings
+      summary: Get Timezone
+      description: 'Returns information on a certain timezone.
+
+        '
+      operationId: readTimezone
+      parameters:
+      - name: timezoneId
+        in: path
+        description: Internal identifier of a timezone
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Timezone information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTimezoneInfoResponse'
+      x-availability: High
+      x-throttling-group: Light
+  /restapi/v1.0/dictionary/country:
+    get:
+      tags:
+      - Regional Settings
+      summary: List Countries
+      description: 'Returns all countries available for calling.
+
+        '
+      operationId: listCountries
+      parameters:
+      - name: loginAllowed
+        in: query
+        description: 'Specifies whether the logging-in with the phone numbers of this country
+
+          is enabled or not
+
+          '
+        schema:
+          type: boolean
+      - name: signupAllowed
+        in: query
+        description: 'Indicates whether a signup/billing is allowed for a country. If
+
+          not specified all countries are returned (according to other
+
+          specified filters if any)
+
+          '
+        schema:
+          type: boolean
+      - name: numberSelling
+        in: query
+        description: 'Specifies if RingCentral sells phone numbers of this country
+
+          '
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are accepted
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: 'Indicates a page size (number of items)
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      - name: freeSoftphoneLine
+        in: query
+        description: 'Specifies if free phone line for softphone is available for a
+
+          country or not
+
+          '
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Country list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountryListDictionaryModel'
+      x-availability: High
+      x-throttling-group: Light
+  /restapi/v1.0/dictionary/country/{countryId}:
+    get:
+      tags:
+      - Regional Settings
+      summary: Get Country
+      description: 'Returns information on a specific country.
+
+        '
+      operationId: readCountry
+      parameters:
+      - name: countryId
+        in: path
+        description: Internal identifier of a country
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Country information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountryInfoDictionaryModel'
+      x-availability: High
+      x-throttling-group: Light
+components:
+  schemas:
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    CountryListDictionaryModel:
+      required:
+      - navigation
+      - paging
+      - records
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the list of countries supported
+        records:
+          type: array
+          description: List of countries with the country data
+          items:
+            $ref: '#/components/schemas/CountryInfoDictionaryModel'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    LanguageList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of the language list resource
+        records:
+          type: array
+          description: Language data
+          items:
+            $ref: '#/components/schemas/LanguageInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    GetLocationListResponse:
+      required:
+      - navigation
+      - paging
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the location list resource
+        records:
+          type: array
+          description: List of locations
+          items:
+            $ref: '#/components/schemas/LocationInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    GetStateListResponse:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a states list resource
+        records:
+          type: array
+          description: List of states
+          items:
+            $ref: '#/components/schemas/GetStateInfoResponse'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    LocationInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a location
+        areaCode:
+          type: string
+          description: Area code of the location
+        city:
+          type: string
+          description: 'Official name of the city, belonging to the certain state
+
+            '
+        npa:
+          type: string
+          description: 'Area code of the location (3-digit usually), according to the
+
+            NANP number format, that can be summarized as NPA-NXX-xxxx and covers
+
+            Canada, the United States, parts of the Caribbean Sea, and some Atlantic
+
+            and Pacific islands. See for details North American Numbering Plan
+
+            '
+        nxx:
+          type: string
+          description: 'Central office code of the location, according to the NANP
+
+            number format, that can be summarized as NPA-NXX-xxxx and covers Canada,
+
+            the United States, parts of the Caribbean Sea, and some Atlantic and Pacific
+
+            islands. See for details North American Numbering Plan
+
+            '
+        state:
+          $ref: '#/components/schemas/LocationStateInfo'
+    LocationStateInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a state
+        uri:
+          type: string
+          format: uri
+          description: Link to a state resource
+      description: Information on a state this location belongs to
+    CountryInfoShortModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoBasicModel'
+      - type: object
+        properties:
+          isoCode:
+            type: string
+            description: 'A ISO country code value complying with the
+
+              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+
+              format.
+
+              '
+          callingCode:
+            type: string
+            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
+
+              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
+
+              [E.164](http://en.wikipedia.org/wiki/E.164),
+
+              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
+
+              '
+    CountryInfoBasicModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoMinimalModel'
+      - type: object
+        properties:
+          name:
+            type: string
+            description: The official name of a country
+    GetTimezoneInfoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a timezone
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a timezone
+        name:
+          type: string
+          description: Short name of a timezone
+        description:
+          type: string
+          description: Description of a timezone
+        bias:
+          type: string
+    GetTimezoneListResponse:
+      required:
+      - navigation
+      - paging
+      - records
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the timezone list resource
+        records:
+          type: array
+          description: List of timezones
+          items:
+            $ref: '#/components/schemas/GetTimezoneInfoResponse'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CountryInfoDictionaryModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoShortModel'
+      - type: object
+        properties:
+          emergencyCalling:
+            type: boolean
+            description: 'Emergency calling feature availability/emergency address requirement indicator
+
+              '
+          isoCode:
+            type: string
+            description: 'Country code according to the ISO standard, see
+
+              [ISO 3166](https://www.iso.org/iso-3166-country-codes.html)
+
+              '
+          name:
+            type: string
+            description: The official name of a country
+          numberSelling:
+            type: boolean
+            description: Indicates that phone numbers are available for this country
+          loginAllowed:
+            type: boolean
+            description: Indicates that login with the phone number of this country is allowed
+          signupAllowed:
+            type: boolean
+            description: Indicates that signup/billing is allowed for this country
+          freeSoftphoneLine:
+            type: boolean
+            description: Indicates that free phone line for softphone is available for this country
+          localDialing:
+            type: boolean
+            description: Indicates that the local dialing is supported in this country and default area code can be set
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    LanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a language
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a language
+        greeting:
+          type: boolean
+          description: 'Indicates whether a language is available as
+
+            greeting language
+
+            '
+        formattingLocale:
+          type: boolean
+          description: 'Indicates whether a language is available as
+
+            formatting locale
+
+            '
+        localeCode:
+          type: string
+          description: Localization code of a language
+        isoCode:
+          type: string
+          description: Country code according to the ISO standard, see [ISO 3166](https://www.iso.org/iso-3166-country-codes.html)
+        name:
+          type: string
+          description: Official name of a language
+        ui:
+          type: boolean
+          description: 'Indicates whether a language is available as UI language
+
+            '
+        timeFormat:
+          type: string
+          description: Time format
+        dateFormat:
+          type: string
+          description: Date format
+      description: User interface language data
+    CountryInfoMinimalModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a country
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a country resource
+    GetStateInfoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a state
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a state
+        country:
+          $ref: '#/components/schemas/CountryInfoMinimalModel'
+        isoCode:
+          type: string
+          description: Short code for a state (2-letter usually)
+        name:
+          type: string
+          description: Official name of a state
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

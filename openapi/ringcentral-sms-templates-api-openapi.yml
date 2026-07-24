@@ -1,0 +1,678 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards SMS Templates API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: SMS Templates
+paths:
+  /restapi/v1.0/account/{accountId}/message-store-templates:
+    post:
+      tags:
+      - SMS Templates
+      summary: Create Company Message Template
+      description: Creates a new text message template on a company level. Maximum number of company templates is 50.
+      operationId: createCompanyMessageTemplate
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageTemplateRequest'
+        required: true
+      responses:
+        '201':
+          description: Created company text message template
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageTemplateResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+      x-feature: EditCompanySmsTemplates
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+    get:
+      tags:
+      - SMS Templates
+      summary: List Company Message Templates
+      description: Returns a list of company text message templates.
+      operationId: listCompanyMessageTemplates
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: siteIds
+        in: query
+        description: 'Site ID(s) to filter company message templates, associated with particular sites
+
+          By default the value is all - templates with all sites will be returned
+
+          '
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        '200':
+          description: List of company text message templates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageTemplatesListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-feature: ReadCompanySmsTemplates
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+  /restapi/v1.0/account/{accountId}/message-store-templates/{templateId}:
+    put:
+      tags:
+      - SMS Templates
+      summary: Update Company Message Template
+      description: Updates a company text message template.
+      operationId: updateCompanyMessageTemplate
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/TemplateId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageTemplateRequest'
+        required: true
+      responses:
+        '200':
+          description: Updated company text message template
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageTemplateResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-feature: EditCompanySmsTemplates
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+    get:
+      tags:
+      - SMS Templates
+      summary: Get Company Message Template
+      description: Returns a company text message template by ID.
+      operationId: readCompanyMessageTemplate
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/TemplateId'
+      responses:
+        '200':
+          description: Company text message template
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageTemplateResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-feature: ReadCompanySmsTemplates
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+    delete:
+      tags:
+      - SMS Templates
+      summary: Delete Company Message Template
+      description: Deletes a company text message template.
+      operationId: deleteCompanyMessageTemplate
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/TemplateId'
+      responses:
+        '204':
+          description: No content
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-feature: EditCompanySmsTemplates
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/message-store-templates:
+    post:
+      tags:
+      - SMS Templates
+      summary: Create User Message Template
+      description: "Creates a user personal text message template. \nMaximum number of personal templates is 25 per user. \nMax length of the `body` property is 1000 symbols (2-byte UTF-16 encoded).\n"
+      operationId: createUserMessageTemplate
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageTemplateRequest'
+        required: true
+      responses:
+        '201':
+          description: Created personal text message template
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageTemplateResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-feature: SMSSending
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: EditExtensions
+    get:
+      tags:
+      - SMS Templates
+      summary: List User Message Templates
+      description: Returns a list of user's personal text message templates.
+      operationId: listUserMessageTemplates
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - name: siteIds
+        in: query
+        description: 'Site ID(s) to filter user message templates, associated with particular sites.
+
+          By default the value is all - templates with all sites will be returned
+
+          '
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: scope
+        in: query
+        required: false
+        description: Message templates scope. By default the value is all - both Personal and Company templates will be returned
+        schema:
+          $ref: '#/components/schemas/VisibilityType'
+      responses:
+        '200':
+          description: List of user text message templates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageTemplatesListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-feature: SMSSending
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/message-store-templates/{templateId}:
+    put:
+      tags:
+      - SMS Templates
+      summary: Update User Message Template
+      description: Updates a user personal text message template.
+      operationId: updateUserMessageTemplate
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/TemplateId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageTemplateRequest'
+        required: true
+      responses:
+        '200':
+          description: Updated user personal text message template
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageTemplateResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-feature: SMSSending
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: EditExtensions
+    get:
+      tags:
+      - SMS Templates
+      summary: Get User Message Template
+      description: Returns a user personal text message template by ID.
+      operationId: readUserMessageTemplate
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/TemplateId'
+      responses:
+        '200':
+          description: User personal text message template
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageTemplateResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-feature: SMSSending
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+    delete:
+      tags:
+      - SMS Templates
+      summary: Delete User Message Template
+      description: Deletes a user personal text message template.
+      operationId: deleteUserMessageTemplate
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/TemplateId'
+      responses:
+        '204':
+          description: No content
+        '404':
+          $ref: '#/components/responses/NotFound'
+      x-feature: SMSSending
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: EditExtensions
+components:
+  schemas:
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    MessageTemplatesListResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of text message templates
+          items:
+            $ref: '#/components/schemas/MessageTemplateResponse'
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    TemplateInfo:
+      type: object
+      description: Text message template information
+      required:
+      - text
+      properties:
+        text:
+          type: string
+          description: "Text of the message template. Maximum length is 1000 symbols (2-byte UTF-16 encoded). \nIf a character is encoded in 4 bytes in UTF-16 it is treated as 2 characters, \nthus limiting the maximum message length up to 500 symbols\n"
+    VisibilityType:
+      type: string
+      description: Specifies if a template is available on a user (Personal) or a company (Company) level
+      enum:
+      - Company
+      - Personal
+    Site:
+      type: object
+      description: "Specifies a site that message template is associated with. Supported only if the Sites feature is enabled. \nThe default is `main-site` value.\n"
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a site
+        name:
+          type: string
+          description: Custom name of a site
+    MessageTemplateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a template
+        displayName:
+          type: string
+          description: Name of a template
+        body:
+          $ref: '#/components/schemas/TemplateInfo'
+        scope:
+          $ref: '#/components/schemas/VisibilityType'
+        site:
+          $ref: '#/components/schemas/Site'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    MessageTemplateRequest:
+      type: object
+      required:
+      - displayName
+      properties:
+        displayName:
+          type: string
+          description: Name of a template
+        body:
+          $ref: '#/components/schemas/TemplateInfo'
+        site:
+          $ref: '#/components/schemas/Site'
+  responses:
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+  parameters:
+    TemplateId:
+      name: templateId
+      in: path
+      description: Internal identifier of a text message template
+      required: true
+      schema:
+        type: string
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

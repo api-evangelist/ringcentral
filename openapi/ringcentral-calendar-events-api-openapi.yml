@@ -1,0 +1,565 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Calendar Events API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Calendar Events
+paths:
+  /team-messaging/v1/events:
+    get:
+      tags:
+      - Calendar Events
+      summary: List User Events
+      description: Returns all calendar events created by the current user.
+      operationId: readGlipEventsNew
+      parameters:
+      - name: recordCount
+        in: query
+        description: Number of groups to be fetched by one request. The maximum value is 250, by default - 30.
+        schema:
+          maximum: 250
+          type: integer
+          format: int32
+          default: 30
+      - name: pageToken
+        in: query
+        description: Token of a page to be returned
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMEventList'
+            multipart/mixed:
+              schema:
+                $ref: '#/components/schemas/TMEventList'
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    post:
+      tags:
+      - Calendar Events
+      summary: Create Event
+      description: Creates a new calendar event.
+      operationId: createEventNew
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMCreateEventRequest'
+        required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMEventInfo'
+        '400':
+          description: Some of the parameters are missing or have invalid format
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/events/{eventId}:
+    get:
+      tags:
+      - Calendar Events
+      summary: Get Event
+      description: Returns the specified calendar event(s) by ID(s).
+      operationId: readEventNew
+      parameters:
+      - name: eventId
+        in: path
+        description: Event id or comma separated list of event ids.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMEventInfo'
+            multipart/mixed:
+              schema:
+                $ref: '#/components/schemas/TMEventInfo'
+        '400':
+          description: Some of the parameters are missing or have invalid format
+        '404':
+          description: Event not found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    put:
+      tags:
+      - Calendar Events
+      summary: Update Event
+      description: Updates the specified calendar event.
+      operationId: updateEventNew
+      parameters:
+      - name: eventId
+        in: path
+        description: Internal identifier of an event
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMCreateEventRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMEventInfo'
+        '400':
+          description: Some of the parameters are missing or have invalid format
+        '404':
+          description: Event to update not exists.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    delete:
+      tags:
+      - Calendar Events
+      summary: Delete Event
+      description: Deletes the specified calendar event.
+      operationId: deleteEventNew
+      parameters:
+      - name: eventId
+        in: path
+        description: Internal identifier of an event to be deleted
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Some of the parameters are missing or have invalid format
+        '404':
+          description: Event not found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/groups/{groupId}/events:
+    get:
+      tags:
+      - Calendar Events
+      summary: List Group Events
+      description: Returns a list of calendar events available for the current user within the specified group. Users can only see their personal tasks and public tasks.
+      operationId: listGroupEventsNew
+      parameters:
+      - name: groupId
+        in: path
+        description: Internal identifier of a group
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMEventInfo'
+        '404':
+          description: Group with specified Id is not found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    post:
+      tags:
+      - Calendar Events
+      summary: Create Event by Group ID
+      description: Creates a new calendar event within the specified group.
+      operationId: createEventByGroupIdNew
+      parameters:
+      - name: groupId
+        in: path
+        description: Internal identifier of a group
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMCreateEventRequest'
+        required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMEventInfo'
+        '400':
+          description: Some of the parameters are missing or have invalid format
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+components:
+  schemas:
+    EventRecurrenceInfo:
+      type: object
+      properties:
+        schedule:
+          type: string
+          description: "Event recurrence settings. For non-periodic events the value \nis `None`. Must be greater or equal to event duration: 1- Day/Weekday; \n7 - Week; 28 - Month; 365 - Year\n"
+          enum:
+          - None
+          - Day
+          - Weekday
+          - Week
+          - Month
+          - Year
+        endingCondition:
+          type: string
+          description: Condition of ending an event
+          enum:
+          - None
+          - Count
+          - Date
+        endingAfter:
+          type: integer
+          format: int32
+          description: "Count of event iterations. For periodic events only. Value range is 1 - 10. \nMust be specified if `endingCondition` is `Count`\n"
+        endingOn:
+          type: string
+          description: "Iterations ending datetime for periodic events in \n[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format\n"
+          format: date-time
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+    TMEventInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an event
+        creatorId:
+          type: string
+          description: Internal identifier of a person created an event
+        title:
+          type: string
+          description: Event title
+        startTime:
+          type: string
+          format: date-time
+          description: Datetime of starting an event
+        endTime:
+          type: string
+          format: date-time
+          description: Datetime of ending an event
+        allDay:
+          type: boolean
+          description: Indicates whether an event has some specific time slot or lasts for the whole day(s)
+          default: false
+        recurrence:
+          $ref: '#/components/schemas/EventRecurrenceInfo'
+        color:
+          type: string
+          description: Color of Event title (including its presentation in Calendar)
+          default: Black
+          enum:
+          - Black
+          - Red
+          - Orange
+          - Yellow
+          - Green
+          - Blue
+          - Purple
+          - Magenta
+        location:
+          type: string
+          description: Event location
+        description:
+          type: string
+          description: Event details
+    TMEventList:
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of events created by the current user
+          items:
+            $ref: '#/components/schemas/TMEventInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+    TMCreateEventRequest:
+      required:
+      - endTime
+      - startTime
+      - title
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an event
+        creatorId:
+          type: string
+          description: Internal identifier of a person created an event
+        title:
+          type: string
+          description: Event title
+        startTime:
+          type: string
+          format: date-time
+          description: Datetime of starting an event
+        endTime:
+          type: string
+          format: date-time
+          description: Datetime of ending an event
+        allDay:
+          type: boolean
+          description: Indicates whether event has some specific time slot or lasts for whole day(s)
+          default: false
+        recurrence:
+          $ref: '#/components/schemas/EventRecurrenceInfo'
+        color:
+          type: string
+          description: Color of Event title (including its presentation in Calendar)
+          default: Black
+          enum:
+          - Black
+          - Red
+          - Orange
+          - Yellow
+          - Green
+          - Blue
+          - Purple
+          - Magenta
+        location:
+          type: string
+          description: Event location
+        description:
+          type: string
+          description: Event details
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

@@ -1,0 +1,1009 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Call Queues API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Call Queues
+paths:
+  /restapi/v1.0/account/{accountId}/call-queues:
+    get:
+      tags:
+      - Call Queues
+      summary: List Call Queues
+      description: Returns a call queue list.
+      operationId: listCallQueues
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: page
+        in: query
+        description: Indicates a page number to retrieve. Only positive number values are accepted
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items)
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      - name: memberExtensionId
+        in: query
+        description: Internal identifier of an extension that is a member of every group within the result
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallQueues'
+      x-feature: ReadExtensions
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadExtensions
+  /restapi/v1.0/account/{accountId}/call-queues/{groupId}:
+    get:
+      tags:
+      - Call Queues
+      summary: Get Call Queue
+      description: Returns basic information on a call queue group extension.
+      operationId: readCallQueueInfo
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Call queue information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallQueueDetails'
+      x-feature: ReadExtensions
+      x-availability: Limited
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadExtensions
+    put:
+      tags:
+      - Call Queues
+      summary: Update Call Queue
+      description: 'Updates information on a call queue group extension.
+
+        '
+      operationId: updateCallQueueInfo
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: groupId
+        in: path
+        required: true
+        description: Internal identifier of a call queue group
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallQueueDetails'
+        required: true
+      responses:
+        '200':
+          description: Updated call queue information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallQueueDetails'
+      x-feature: EditExtensionInfo
+      x-availability: Limited
+      x-throttling-group: Light
+      x-app-permission: EditExtensions
+      x-user-permission: EditUserInfo
+  /restapi/v1.0/account/{accountId}/call-queues/{groupId}/bulk-assign:
+    post:
+      tags:
+      - Call Queues
+      summary: Assign Multiple Call Queue Members
+      description: 'Assigns multiple call queue members to call queue group.
+
+        '
+      operationId: assignMultipleCallQueueMembers
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: groupId
+        in: path
+        required: true
+        description: Internal identifier of a call queue group
+        schema:
+          type: string
+      requestBody:
+        description: Changes for the given group
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallQueueBulkAssignResource'
+        required: true
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Extension of type [${extensionType}] cannot be included into call queue
+      x-feature: EditGroups
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditExtensions
+      x-user-permission: Groups
+  /restapi/v1.0/account/{accountId}/call-queues/{groupId}/members:
+    get:
+      tags:
+      - Call Queues
+      summary: List Call Queue Members
+      description: 'Returns a list of call queue group members.
+
+        '
+      operationId: listCallQueueMembers
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: groupId
+        in: path
+        required: true
+        description: Internal identifier of a call queue group
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are allowed
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items)
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: Call queue group members information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallQueueMembers'
+      x-feature: ReadExtensions
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadExtensions
+  /restapi/v1.0/account/{accountId}/department/{departmentId}/members:
+    get:
+      tags:
+      - Call Queues
+      summary: Get Department Member List
+      description: 'Viewing user account information (including name, business name, address
+
+        and phone number/account number). Please note, that this method is
+
+        deprecated and legacy ''Department'' entity corresponds to ''Call Queue''
+
+        in modern RingCentral product terminology. In order to retrieve call
+
+        queue members please use the following method
+
+        `GET/restapi/v1.0/account/{accountId}/call-queues/{groupId}/members`.
+
+        '
+      operationId: listDepartmentMembers
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: departmentId
+        in: path
+        description: 'Internal identifier of a Department extension (same as extensionId
+
+          but only the ID of a department extension is valid). Please note that
+
+          legacy ''Department'' extension type corresponds to ''Call Queue'' extensions
+
+          in modern RingCentral product terminology
+
+          '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are accepted
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items)
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: Department members information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartmentMemberList'
+      deprecated: true
+      x-feature: ReadExtensions
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadExtensions
+  /restapi/v1.0/account/{accountId}/department/bulk-assign:
+    post:
+      tags:
+      - Call Queues
+      summary: Assign Multiple Department Members
+      description: 'Adds and/or removes multiple call queue members. Please note,
+
+        that this method is deprecated and legacy ''Department'' entity
+
+        corresponds to ''Call Queue'' in modern RingCentral product terminology.
+
+        In order to assign multiple call queue members please use the following
+
+        method `POST/restapi/v1.0/account/{accountId}/call-queues/{groupId}/bulk-assign`.
+
+        '
+      operationId: assignMultipleDepartmentMembers
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartmentBulkAssignResource'
+        required: false
+      responses:
+        '204':
+          description: Successful response
+      deprecated: true
+      x-feature: EditUserGroups
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditAccounts
+      x-user-permission: UserGroups
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/call-queues:
+    put:
+      tags:
+      - Call Queues
+      summary: Update User Call Queues
+      description: 'Updates a list of call queues where the user is an agent. This
+
+        is a full update request, which means that if any call queue where the user is
+
+        an agent is not mentioned in request, then the user is automatically removed
+
+        from this queue.
+
+        '
+      operationId: updateUserCallQueues
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCallQueues'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCallQueues'
+      x-feature: EditCallQueuePresence
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-user-permission: EditCallQueuePresence
+      x-app-permission: EditAccounts
+  /restapi/v1.0/account/{accountId}/extension/{callQueueId}/overflow-settings:
+    get:
+      tags:
+      - Call Queues
+      summary: Get Call Queue Overflow Settings
+      description: Returns overflow settings for a call queue specified in path.
+      operationId: getCallQueueOverflowSettings
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: callQueueId
+        in: path
+        description: Internal identifier of a call queue
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Call queue overflow settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallQueueOverflowSettings'
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: ReadAccounts
+      x-user-permission: CallQueueToCallQueue
+    put:
+      tags:
+      - Call Queues
+      summary: Update Call Queue Overflow Settings
+      description: Updates overflow settings for a call queue specified in path.
+      operationId: updateCallQueueOverflowSettings
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: callQueueId
+        in: path
+        description: Internal identifier of a call queue
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallQueueOverflowSettingsRequestResource'
+        required: true
+      responses:
+        '200':
+          description: Updated call queue overflow settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallQueueOverflowSettings'
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditExtensions
+      x-user-permission: CallQueueToCallQueue
+components:
+  schemas:
+    QueueShortInfoResource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Call queue extension identifier
+        name:
+          type: string
+          description: Call queue name (read-only)
+    CallQueueInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call queue
+        id:
+          type: string
+          description: Internal identifier of a call queue
+        extensionNumber:
+          type: string
+          description: Extension number of a call queue
+        name:
+          type: string
+          description: Name of a call queue
+        status:
+          type: string
+          description: Call queue status
+          enum:
+          - Enabled
+          - Disabled
+          - NotActivated
+        subType:
+          type: string
+          description: Indicates whether it is an emergency call queue extension or not
+          enum:
+          - Emergency
+    BulkAssignItem:
+      type: object
+      properties:
+        departmentId:
+          type: string
+        addedExtensionIds:
+          type: array
+          items:
+            type: string
+        removedExtensionIds:
+          type: array
+          items:
+            type: string
+    DepartmentBulkAssignResource:
+      type: object
+      description: 'Please note that legacy ''Department'' extension type corresponds to
+
+        ''Call Queue'' extensions in modern RingCentral product terminology
+
+        '
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkAssignItem'
+    CallQueueServiceLevelSettings:
+      type: object
+      properties:
+        slaGoal:
+          type: integer
+          format: int32
+          description: 'Target percentage of calls that must be answered by agents
+
+            within the service level time threshold
+
+            '
+        slaThresholdSeconds:
+          type: integer
+          format: int32
+          description: 'The period of time in seconds that is considered to be an acceptable
+
+            service level
+
+            '
+        includeAbandonedCalls:
+          type: boolean
+          description: 'Includes abandoned calls (when callers hang up prior to being
+
+            served by an agent) into service-level calculation
+
+            '
+        abandonedThresholdSeconds:
+          type: integer
+          format: int32
+          description: 'Abandoned calls that are shorter than the defined period of
+
+            time in seconds will not be included into the calculation of Service Level
+
+            '
+      description: Call queue service level settings
+    CallQueueBulkAssignResource:
+      type: object
+      properties:
+        addedExtensionIds:
+          type: array
+          items:
+            type: string
+        removedExtensionIds:
+          type: array
+          items:
+            type: string
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    CallQueueIdResource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a call queue
+    CallQueueOverflowSettingsRequestResource:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Call queue overflow status
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallQueueIdResource'
+    CallQueueMemberInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call queue member
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of a call queue member
+        extensionNumber:
+          type: string
+          description: Extension number of a call queue member
+    CallQueueDetails:
+      allOf:
+      - $ref: '#/components/schemas/CallQueueInfo'
+      - type: object
+        properties:
+          serviceLevelSettings:
+            $ref: '#/components/schemas/CallQueueServiceLevelSettings'
+          editableMemberStatus:
+            type: boolean
+            description: Allows members to change their queue status
+          alertTimer:
+            type: integer
+            format: int32
+            description: 'Alert timer or pickup setting. Delay time in seconds before call queue group members are notified when calls are queued
+
+              '
+            enum:
+            - 5
+            - 10
+            - 15
+            - 20
+            - 30
+            - 45
+            - 60
+            - 120
+            - 180
+            - 240
+            - 300
+            - 360
+            - 420
+            - 480
+            - 540
+            - 600
+    CallQueueMembers:
+      required:
+      - navigation
+      - paging
+      - records
+      - uri
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call queue members resource
+        records:
+          type: array
+          description: List of call queue members
+          items:
+            $ref: '#/components/schemas/CallQueueMemberInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CallQueues:
+      required:
+      - navigation
+      - paging
+      - records
+      - uri
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call queues resource
+        records:
+          type: array
+          description: List of call queues
+          items:
+            $ref: '#/components/schemas/CallQueueInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    UserCallQueues:
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of queues where an extension is an agent
+          items:
+            $ref: '#/components/schemas/QueueShortInfoResource'
+    DepartmentMemberList:
+      type: object
+      description: 'Please note that legacy ''Department'' extension type corresponds to
+
+        ''Call Queue'' extensions in modern RingCentral product terminology
+
+        '
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URL of the resource
+        records:
+          type: array
+          description: List of call queue member extensions
+          items:
+            $ref: '#/components/schemas/ExtensionInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CallQueueOverflowSettings:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Call queue overflow status
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallQueueInfo'
+    ExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        name:
+          type: string
+          description: Extension name
+        extensionNumber:
+          type: string
+          description: Extension short number
+        partnerId:
+          type: string
+          description: 'For partner applications. Internal identifier of an extension
+
+            created by partner. The RingCentral supports the mapping of accounts and
+
+            stores the corresponding account ID/extension ID for each partner ID of
+
+            a client application. In request URIs partner IDs are accepted instead
+
+            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
+
+            Though in response URIs contain the corresponding account IDs and extension
+
+            IDs. In all request and response bodies these values are reflected via
+
+            partnerId attributes of account and extension
+
+            '
+      description: 'Information on the extension, to which the phone number is assigned.
+
+        Returned only for the request of Account phone number list
+
+        '
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

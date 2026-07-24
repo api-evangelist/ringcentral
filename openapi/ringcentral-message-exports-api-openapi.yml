@@ -1,0 +1,525 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Message Exports API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Message Exports
+  description: External interface to export user's messages
+paths:
+  /restapi/v1.0/account/{accountId}/message-store-report:
+    post:
+      tags:
+      - Message Exports
+      summary: Create Message Store Report
+      description: 'Creates a task to collect all account messages within the specified
+
+        time interval. Maximum number of simultaneous tasks per account is 2.
+
+        '
+      operationId: createMessageStoreReport
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMessageStoreReportRequest'
+        required: true
+      responses:
+        '202':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageStoreReport'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditUsers
+      x-throttling-group: Heavy
+      x-user-permission: Users
+      x-app-permission: ReadMessages
+  /restapi/v1.0/account/{accountId}/message-store-report/{taskId}:
+    get:
+      tags:
+      - Message Exports
+      summary: Get Message Store Report Task
+      description: Returns the current status of a task on report creation.
+      operationId: readMessageStoreReportTask
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/PicTaskId'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageStoreReport'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditUsers
+      x-throttling-group: Heavy
+      x-user-permission: Users
+      x-app-permission: ReadMessages
+  /restapi/v1.0/account/{accountId}/message-store-report/{taskId}/archive:
+    get:
+      tags:
+      - Message Exports
+      summary: Get Message Store Report Archive
+      description: Returns the created report with message data not including attachments.
+      operationId: readMessageStoreReportArchive
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/PicTaskId'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageStoreReportArchive'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditUsers
+      x-throttling-group: Heavy
+      x-user-permission: Users
+      x-app-permission: ReadMessages
+components:
+  schemas:
+    MessageStoreReportArchive:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArchiveInfo'
+    MessageStoreReport:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a message store report task
+          example: 400142200026-400142200026-bd162f24028442489385eb3f44c18354
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a task
+        status:
+          type: string
+          description: Status of a message store report task
+          enum:
+          - Accepted
+          - Pending
+          - InProgress
+          - AttemptFailed
+          - Failed
+          - Completed
+          - Cancelled
+        accountId:
+          type: string
+          description: Internal identifier of an account
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        dateTo:
+          type: string
+          format: date-time
+          description: The end of the time range to collect message records in ISO 8601 format including timezone
+        dateFrom:
+          type: string
+          format: date-time
+          description: The beginning of the time range to collect call log records in ISO 8601 format including timezone
+        startTime:
+          type: string
+          format: date-time
+          description: The time when this task was started
+        finishTime:
+          type: string
+          format: date-time
+          description: The time when this task was finished
+        messageTypes:
+          type: array
+          description: Type of messages to be collected.
+          items:
+            $ref: '#/components/schemas/PicMessageTypeEnum'
+          example:
+          - Fax
+          - VoiceMail
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    CreateMessageStoreReportRequest:
+      type: object
+      properties:
+        dateTo:
+          type: string
+          format: date-time
+          description: 'The end of the time range to collect message records in ISO 8601 format including timezone.
+
+            Default is the current time
+
+            '
+        dateFrom:
+          type: string
+          format: date-time
+          description: 'The beginning of the time range to collect call log records in ISO 8601 format including timezone.
+
+            Default is the current time minus 24 hours
+
+            '
+        messageTypes:
+          type: array
+          description: Types of messages to be collected. If not specified, all messages without message type filtering will be returned. Multiple values are accepted
+          items:
+            $ref: '#/components/schemas/PicMessageTypeEnum'
+          example:
+          - Fax
+          - VoiceMail
+    ArchiveInfo:
+      type: object
+      properties:
+        size:
+          type: integer
+          format: int64
+          description: Archive size in bytes
+          example: 201412
+        uri:
+          type: string
+          format: uri
+          description: Link for archive download
+    PicMessageTypeEnum:
+      type: string
+      description: Type of messages to be collected
+      enum:
+      - Fax
+      - SMS
+      - VoiceMail
+      - Pager
+      example: Fax
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    PicTaskId:
+      name: taskId
+      in: path
+      description: Internal identifier of a task
+      required: true
+      schema:
+        type: string
+      example: 400142200026-400142200026-bd162f24028442489385eb3f44c18354
+  responses:
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

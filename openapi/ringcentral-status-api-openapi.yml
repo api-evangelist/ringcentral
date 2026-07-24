@@ -1,0 +1,805 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Status API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Status
+  description: Conversational AI async job status
+paths:
+  /ai/status/v1/jobs/{jobId}:
+    get:
+      tags:
+      - Status
+      summary: Get Async Task Status
+      description: Returns async task status by Job ID
+      operationId: caiJobStatusGet
+      parameters:
+      - $ref: '#/components/parameters/JobId'
+      responses:
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+        '404':
+          description: The {jobId} doesn't exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatusResponse'
+      x-throttling-group: Heavy
+      x-app-permission: AI
+components:
+  schemas:
+    InteractionObject:
+      type: object
+      properties:
+        utteranceInsights:
+          type: array
+          items:
+            $ref: '#/components/schemas/UtteranceInsightsObject'
+        speakerInsights:
+          $ref: '#/components/schemas/SpeakerInsightsObject'
+        conversationalInsights:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationalInsightsUnit'
+    TranscribedObject:
+      required:
+      - transcript
+      - words
+      type: object
+      properties:
+        speakerCount:
+          type: integer
+          description: The number of speakers detected. Field is set only when enableSpeakerDiarization is true.
+          format: int32
+          example: 2
+        utterances:
+          type: array
+          description: Speaker wise utterances. Field is set only when enableSpeakerDiarization is true.
+          items:
+            $ref: '#/components/schemas/UtteranceObject'
+        words:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordSegment'
+        confidence:
+          type: number
+          description: Overall transcription confidence.
+          format: float
+        transcript:
+          type: string
+          description: The entire transcript with/without punctuations according to the input.
+    UtteranceInsightsUnit:
+      required:
+      - name
+      - value
+      type: object
+      properties:
+        name:
+          type: string
+          example: Emotion
+          enum:
+          - Emotion
+        value:
+          type: string
+          example: Neutral
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+      additionalProperties:
+        type: string
+    SummaryApiOutput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          $ref: '#/components/schemas/SummaryApiResponse'
+    SummaryApiResponse:
+      oneOf:
+      - $ref: '#/components/schemas/SummaryOutput'
+      - $ref: '#/components/schemas/CaiErrorResponse'
+    WordSegment:
+      required:
+      - end
+      - start
+      - word
+      type: object
+      properties:
+        speakerId:
+          type: string
+          example: JohnDoe
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        word:
+          type: string
+          example: hello
+    CaiErrorCodeResponse:
+      required:
+      - errorCode
+      - message
+      type: object
+      properties:
+        errorCode:
+          type: string
+          enum:
+          - CAI-101
+          - CAI-102
+          - CAI-103
+          - CAI-104
+          - CAI-105
+          - CAI-106
+          - CAI-107
+          - CAI-108
+          - CAI-109
+          - CAI-110
+        message:
+          type: string
+          description: Helpful description of the errorCode
+        parameterName:
+          type: string
+          description: Name of parameter if specified in the message
+    UtteranceInsightsObject:
+      required:
+      - end
+      - start
+      - text
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        text:
+          type: string
+          example: Hello! This is John.
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        speakerId:
+          type: string
+          example: JohnDoe
+        wordTimings:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordTimingsUnit'
+        insights:
+          type: array
+          items:
+            $ref: '#/components/schemas/UtteranceInsightsUnit'
+    SpeakerInsightsUnit:
+      required:
+      - name
+      - values
+      type: object
+      properties:
+        name:
+          type: string
+          example: TalkToListenRatio
+          enum:
+          - Energy
+          - Pace
+          - TalkToListenRatio
+          - QuestionsAsked
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpeakerInsightsValuesItems'
+    EmotionSegment:
+      required:
+      - emotion
+      - end
+      - start
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        emotion:
+          type: string
+          example: Neutral
+          enum:
+          - Anger
+          - Excitement
+          - Frustration
+          - Joy
+          - Sadness
+          - Neutral
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+    SpeakerInsightsValuesItems:
+      required:
+      - speakerId
+      - value
+      type: object
+      properties:
+        speakerId:
+          type: string
+          example: JohnDoe
+        value:
+          type: string
+          description: The value corresponding to the insight for the speaker
+          example: 20:80
+      additionalProperties:
+        type: string
+    DiarizedObject:
+      required:
+      - speakerCount
+      - utterances
+      type: object
+      properties:
+        speakerCount:
+          type: integer
+          format: int32
+          example: 2
+        utterances:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiarizeSegment'
+    CaiErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaiErrorCodeResponse'
+    WordTimingsUnit:
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        word:
+          type: string
+          example: Hello
+    SpeakerIdentificationObject:
+      required:
+      - utterances
+      type: object
+      properties:
+        utterances:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiarizeSegment'
+    SpeakerInsightsObject:
+      type: object
+      properties:
+        speakerCount:
+          type: integer
+          format: int32
+          example: 2
+        insights:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpeakerInsightsUnit'
+    EmotionApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/EmotionObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    SummaryOutputUnit:
+      type: object
+      properties:
+        name:
+          type: string
+          example: AbstractiveShort
+          enum:
+          - Extractive
+          - AbstractiveLong
+          - AbstractiveShort
+          - All
+        values:
+          type: array
+          description: Summary output units sorted by their occurrence in the conversation
+          items:
+            $ref: '#/components/schemas/SummaryTimingsUnit'
+    PunctuateApiResponse:
+      oneOf:
+      - $ref: '#/components/schemas/PunctuateOutput'
+      - $ref: '#/components/schemas/CaiErrorResponse'
+    DiarizeApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/DiarizedObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    AsrApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/TranscribedObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    ConversationalInsightsUnitValues:
+      required:
+      - end
+      - start
+      - value
+      type: object
+      properties:
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        value:
+          type: string
+          example: RingCentral
+        start:
+          type: number
+          format: float
+          example: 4.7
+        end:
+          type: number
+          format: float
+          example: 5.1
+        groupId:
+          type: string
+          example: '0'
+          description: Paragraph index of the long summary.
+        speakerId:
+          type: string
+          example: JohnDoe
+        assignee:
+          type: string
+          example: Speaker
+        category:
+          type: string
+          example: NextStep
+        text:
+          type: string
+          example: All right, now let us go down to a CD settings.
+        question:
+          type: string
+          example: So so you want me to add it to the B D as well?
+        answer:
+          type: string
+          example: Or or you can add another tab and have it resigned.
+      additionalProperties:
+        type: string
+    SummaryTimingsUnit:
+      required:
+      - value
+      type: object
+      properties:
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        value:
+          type: string
+          example: This meeting is focussed on rise of on demand marketplaces, online marketplaces and regulated services
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 3600.1
+    JobStatusResponse:
+      allOf:
+      - type: object
+        properties:
+          jobId:
+            type: string
+          creationTime:
+            type: string
+            format: date-time
+          completionTime:
+            type: string
+            format: date-time
+          expirationTime:
+            type: string
+            format: date-time
+      - oneOf:
+        - $ref: '#/components/schemas/SummaryApiOutput'
+        - $ref: '#/components/schemas/PunctuateApiOutput'
+        - $ref: '#/components/schemas/DiarizeApiResponse'
+        - $ref: '#/components/schemas/SpeakerIdentifyApiResponse'
+        - $ref: '#/components/schemas/AsrApiResponse'
+        - $ref: '#/components/schemas/EmotionApiResponse'
+        - $ref: '#/components/schemas/InteractionApiResponse'
+    ConversationalInsightsUnit:
+      required:
+      - name
+      - values
+      type: object
+      properties:
+        name:
+          type: string
+          example: KeyPhrases
+          enum:
+          - ExtractiveSummary
+          - AbstractiveSummaryLong
+          - AbstractiveSummaryShort
+          - KeyPhrases
+          - QuestionsAsked
+          - OverallSentiment
+          - Topics
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationalInsightsUnitValues'
+    EmotionObject:
+      type: array
+      items:
+        $ref: '#/components/schemas/EmotionSegment'
+    PunctuateApiOutput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          $ref: '#/components/schemas/PunctuateApiResponse'
+    UtteranceObject:
+      required:
+      - end
+      - start
+      - text
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        text:
+          type: string
+          example: Hello! This is John.
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        speakerId:
+          type: string
+          example: JohnDoe
+        wordTimings:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordTimingsUnit'
+    DiarizeSegment:
+      required:
+      - end
+      - speakerId
+      - start
+      type: object
+      properties:
+        speakerId:
+          type: string
+          example: JohnDoe
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+    PunctuateOutput:
+      required:
+      - texts
+      type: object
+      properties:
+        texts:
+          type: array
+          items:
+            type: string
+    SummaryOutput:
+      type: object
+      properties:
+        summaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/SummaryOutputUnit'
+    InteractionApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/InteractionObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    SpeakerIdentifyApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/SpeakerIdentificationObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+  parameters:
+    JobId:
+      name: jobId
+      in: path
+      description: The job id to which status will be fetched
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

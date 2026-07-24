@@ -1,0 +1,479 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Compliance Exports API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Compliance Exports
+paths:
+  /team-messaging/v1/data-export:
+    get:
+      tags:
+      - Compliance Exports
+      summary: List Data Export Tasks
+      description: Returns the list of Glip data export tasks.
+      operationId: listDataExportTasksNew
+      parameters:
+      - name: status
+        in: query
+        description: Status of the task(s) to be returned. Multiple values are supported
+        schema:
+          type: string
+          enum:
+          - Accepted
+          - InProgress
+          - Completed
+          - Failed
+          - Expired
+      - name: page
+        in: query
+        description: Page number to be retrieved; value range is > 0
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Number of records to be returned per page; value range is 1 - 250
+        schema:
+          type: integer
+          format: int32
+          default: 30
+      responses:
+        '200':
+          description: Data Export Task List
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataExportTaskList'
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+      x-user-permission: Glip
+    post:
+      tags:
+      - Compliance Exports
+      summary: Create Data Export Task
+      description: Creates a task for Glip data export and returns a link at which the exported data will be available in future once the task is implemented. The exported data can be downloaded by calling Get Data Export Task method with the specified task ID. Simultaneously no more than 2 tasks per company can be created.
+      operationId: createDataExportTaskNew
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDataExportTaskRequest'
+        required: false
+      responses:
+        '202':
+          description: The task is accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataExportTask'
+      x-throttling-group: Heavy
+      x-app-permission: TeamMessaging
+      x-user-permission: Glip
+  /team-messaging/v1/data-export/{taskId}:
+    get:
+      tags:
+      - Compliance Exports
+      summary: Get Data Export Task
+      description: Returns the links for downloading Glip data exported within the specified task. If the export task is still in progress, then only the task status will be returned. If the data is ready for downloading, then the list of URLs will be returned.
+      operationId: readDataExportTaskNew
+      parameters:
+      - name: taskId
+        in: path
+        description: Internal identifier of a task to be retrieved
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataExportTask'
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+      x-user-permission: Glip
+components:
+  schemas:
+    GlipDataExportPagingInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          description: The current page number. 1-indexed, so the first page is 1 by default. May be omitted if result is empty (because non-existent page was specified or perPage=0 was requested)
+        perPage:
+          type: integer
+          format: int32
+          description: Current page size, describes how many items are in each page. Default value is 100. Maximum value is 1000. If perPage value in the request is greater than 1000, the maximum value (1000) is applied
+        pageStart:
+          type: integer
+          format: int32
+          description: The zero-based number of the first element on the current page. Omitted if the page is omitted or result is empty
+        pageEnd:
+          type: integer
+          format: int32
+          description: The zero-based index of the last element on the current page. Omitted if the page is omitted or result is empty
+        totalPages:
+          type: integer
+          format: int32
+          description: The total number of pages in a dataset. May be omitted for some resources due to performance reasons
+        totalElements:
+          type: integer
+          format: int32
+          description: The total number of elements in a dataset. May be omitted for some resource due to performance reasons
+    ExportTaskResultInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a dataset
+        uri:
+          type: string
+          format: uri
+          description: Link for downloading a dataset
+        size:
+          type: integer
+          format: int64
+          description: Size of ta dataset in bytes
+    CreatorInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user
+        firstName:
+          type: string
+          description: First name of a user
+        lastName:
+          type: string
+          description: Last name of a user
+      description: Task creator information
+    CreateDataExportTaskRequest:
+      type: object
+      properties:
+        timeFrom:
+          type: string
+          format: date-time
+          description: Starting time for data collection. The default value is `timeTo` minus 24 hours. Max allowed time frame between `timeFrom` and `timeTo` is 6 months
+        timeTo:
+          type: string
+          format: date-time
+          description: Ending time for data collection. The default value is current time. Max allowed time frame between `timeFrom` and `timeTo` is 6 months
+        contacts:
+          type: array
+          description: 'List of contacts which data is collected. The following data will be exported: posts, tasks, events, etc. posted by the user(s); posts addressing the user(s) via direct and @Mentions; tasks assigned to the listed user(s). The list of 30 users per request is supported.'
+          items:
+            $ref: '#/components/schemas/DataExportTaskContactInfo'
+        chatIds:
+          type: array
+          description: List of chats from which the data (posts, files, tasks, events, notes, etc.) will be collected. Maximum number of chats supported is 10
+          items:
+            type: string
+    DataExportTaskList:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataExportTask'
+        navigation:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfo'
+        paging:
+          $ref: '#/components/schemas/GlipDataExportPagingInfo'
+    DataExportTask:
+      type: object
+      properties:
+        uri:
+          type: string
+          description: Canonical URI of a task
+        id:
+          type: string
+          description: Internal identifier of a task
+        creationTime:
+          type: string
+          format: date-time
+          description: Task creation timestamp
+        lastModifiedTime:
+          type: string
+          format: date-time
+          description: Task last modification timestamp
+        status:
+          type: string
+          description: Task status
+          enum:
+          - Accepted
+          - InProgress
+          - Completed
+          - Failed
+          - Expired
+        creator:
+          $ref: '#/components/schemas/CreatorInfo'
+        specific:
+          $ref: '#/components/schemas/SpecificInfo'
+        datasets:
+          type: array
+          description: Data collection archives. Returned by task ID
+          items:
+            $ref: '#/components/schemas/ExportTaskResultInfo'
+    SpecificInfo:
+      type: object
+      properties:
+        timeFrom:
+          type: string
+          format: date-time
+          description: Starting time for data collection
+        timeTo:
+          type: string
+          format: date-time
+          description: Ending time for data collection
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataExportTaskContactInfo'
+        chatIds:
+          type: array
+          description: List of chats from which the data (posts, files, tasks, events, notes, etc.) will be collected
+          items:
+            type: string
+      description: Information specified in request
+    GlipDataExportNavigationInfoUri:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI for the corresponding page of the list
+    GlipDataExportNavigationInfo:
+      type: object
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
+        nextPage:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
+        previousPage:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
+        lastPage:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
+    DataExportTaskContactInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a contact
+        email:
+          type: string
+          format: email
+          description: Email address of a contact
+      description: 'List of users whose data is collected. The following data will be exported: posts, tasks, events, etc. posted by the user(s); posts addressing the user(s) via direct and @Mentions; tasks assigned to the listed user(s). The list of 10 users per request is supported.'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

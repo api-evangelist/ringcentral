@@ -1,0 +1,608 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Notes API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Notes
+paths:
+  /team-messaging/v1/chats/{chatId}/notes:
+    get:
+      tags:
+      - Notes
+      summary: List Notes
+      description: Returns the list of chat notes.
+      operationId: listChatNotesNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat to fetch notes from.
+        required: true
+        schema:
+          type: string
+      - name: creationTimeTo
+        in: query
+        description: 'The end datetime for resulting records in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+          format including timezone, e.g. 2019-03-10T18:23:45. The default value is
+
+          Now.
+
+          '
+        schema:
+          type: string
+      - name: creationTimeFrom
+        in: query
+        description: 'The start datetime for resulting records in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+          format including timezone
+
+          '
+        schema:
+          type: string
+      - name: creatorId
+        in: query
+        description: 'Internal identifier of the user that created the note. Multiple
+
+          values are supported
+
+          '
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: 'Status of notes to be fetched; if not specified all notes are
+
+          fetched by default.
+
+          '
+        schema:
+          type: string
+          enum:
+          - Active
+          - Draft
+      - name: pageToken
+        in: query
+        description: Pagination token
+        schema:
+          type: string
+      - name: recordCount
+        in: query
+        description: Max number of notes to be fetched by one request; the value range is 1-250.
+        schema:
+          maximum: 250
+          type: integer
+          format: int32
+          default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMNoteList'
+        '400':
+          description: Some of the parameters are missing or have invalid format
+        '403':
+          description: You do not have permissions to get such kind of information.
+        '404':
+          description: Group Not Found.
+      x-feature: TeamMessaging
+      x-throttling-group: Heavy
+      x-app-permission: TeamMessaging
+    post:
+      tags:
+      - Notes
+      summary: Create Note
+      description: Creates a new note in the specified chat.
+      operationId: createChatNoteNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat to create a note in
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMCreateNoteRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMNoteInfo'
+        '400':
+          description: Some of the parameters are missing or have invalid format
+        '403':
+          description: You do not have permissions to create note in the specified group.
+        '404':
+          description: Group not found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/notes/{noteId}:
+    get:
+      tags:
+      - Notes
+      summary: Get Note
+      description: Returns the specified note(s). It is possible to fetch up to 50 notes per request.
+      operationId: readUserNoteNew
+      parameters:
+      - name: noteId
+        in: path
+        description: Internal identifier of a note to be fetched
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMNoteWithBodyInfo'
+        '404':
+          description: When note is not found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    delete:
+      tags:
+      - Notes
+      summary: Delete Note
+      description: Deletes the specified note.
+      operationId: deleteNoteNew
+      parameters:
+      - name: noteId
+        in: path
+        description: Internal identifier of a note to be deleted
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Note is locked by another user
+        '403':
+          description: You have no permissions to delete note
+        '404':
+          description: Note is not found
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    patch:
+      tags:
+      - Notes
+      summary: Update Note
+      description: Edits a note. Notes can be edited by any user if posted to a chat. the user belongs to.
+      operationId: patchNoteNew
+      parameters:
+      - name: noteId
+        in: path
+        description: Internal identifier of a note to be updated
+        required: true
+        schema:
+          type: string
+      - name: releaseLock
+        in: query
+        description: If true then note lock (if any) will be released upon request
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMCreateNoteRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMNoteInfo'
+        '400':
+          description: Note is locked by another user
+        '403':
+          description: You have no permissions to update the note
+        '404':
+          description: Note is not found
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/notes/{noteId}/lock:
+    post:
+      tags:
+      - Notes
+      summary: Lock Note
+      description: Locks a note providing the user with the unique write access for 5 hours.
+      operationId: lockNoteNew
+      parameters:
+      - name: noteId
+        in: path
+        description: Internal identifier of a note to be locked
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Note is locked by another user
+        '403':
+          description: You have no permissions to lock the note
+        '404':
+          description: Note is not found
+      x-feature: TeamMessaging
+      x-throttling-group: Light
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/notes/{noteId}/publish:
+    post:
+      tags:
+      - Notes
+      summary: Publish Note
+      description: Publishes a note making it visible to other users.
+      operationId: publishNoteNew
+      parameters:
+      - name: noteId
+        in: path
+        description: Internal identifier of a note to be published
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMNoteInfo'
+        '400':
+          description: User is not a creator of note
+        '404':
+          description: Note is not found
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/notes/{noteId}/unlock:
+    post:
+      tags:
+      - Notes
+      summary: Unlock Note
+      description: Unlocks a note letting other users edit this note. Once the note is locked (by another user) it cannot be unlocked during 5 hours since the lock datetime.
+      operationId: unlockNoteNew
+      parameters:
+      - name: noteId
+        in: path
+        description: Internal identifier of a note to be unlocked
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Note is locked by another user
+        '403':
+          description: You have no permissions to unlock the note
+        '404':
+          description: Note is not found
+      x-feature: TeamMessaging
+      x-throttling-group: Light
+      x-app-permission: TeamMessaging
+components:
+  schemas:
+    TMCreateNoteRequest:
+      required:
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of a note. Max allowed length is 250 characters
+        body:
+          type: string
+          description: Contents of a note; HTML markup text. Max allowed length is 1048576 characters (1 Mb).
+    TMNoteList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMNoteInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+    TMCreatorInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user who created a note/task
+      description: Note creator information
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+    TMNoteWithBodyInfo:
+      allOf:
+      - $ref: '#/components/schemas/TMNoteInfo'
+      - type: object
+        properties:
+          body:
+            type: string
+            description: Text of a note
+    LockedByInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of the user editing the note
+      description: Returned for the note being edited (locked) at the current moment. Information on the user editing the note
+    TMNoteInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a note
+        title:
+          type: string
+          description: Title of a note
+        chatIds:
+          type: array
+          description: Internal identifiers of the chat(s) where the note is posted or shared.
+          items:
+            type: string
+        preview:
+          type: string
+          description: Preview of a note (first 150 characters of a body)
+        creator:
+          $ref: '#/components/schemas/TMCreatorInfo'
+        lastModifiedBy:
+          $ref: '#/components/schemas/LastModifiedByInfo'
+        lockedBy:
+          $ref: '#/components/schemas/LockedByInfo'
+        status:
+          type: string
+          description: Note publishing status. Any note is created in 'Draft' status. After it is posted it becomes 'Active'
+          enum:
+          - Active
+          - Draft
+        creationTime:
+          type: string
+          format: date-time
+          description: Creation time
+        lastModifiedTime:
+          type: string
+          format: date-time
+          description: Datetime of the note last update
+        type:
+          type: string
+          enum:
+          - Note
+    LastModifiedByInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of the user who last updated the note
+      description: Note last modification information
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

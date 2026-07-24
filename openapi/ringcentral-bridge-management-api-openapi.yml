@@ -1,0 +1,913 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Bridge Management API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Bridge Management
+paths:
+  /rcvideo/v2/account/{accountId}/extension/{extensionId}/bridges:
+    post:
+      tags:
+      - Bridge Management
+      summary: Create Bridge
+      description: 'Creates a new bridge for the user specified by **accountId** and **extensionId** identifiers. The request body
+
+        should contain JSON object which describes properties of the new bridge.
+
+        The bridge can be created by a user himself, his delegate or any user who has the **Super Admin** privilege.
+
+        '
+      operationId: createBridge
+      parameters:
+      - name: accountId
+        in: path
+        description: Account identifier
+        required: true
+        schema:
+          type: string
+      - name: extensionId
+        in: path
+        description: Extension identifier
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JSON object that describes properties of the new bridge
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBridgeRequest'
+        required: false
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BridgeResponse'
+        '406':
+          description: Not acceptable
+        '409':
+          description: Conflicting settings
+        '500':
+          description: Internal server error
+      x-throttling-group: Heavy
+      x-websocket: true
+      x-app-permission: Video
+  /rcvideo/v2/account/{accountId}/extension/{extensionId}/bridges/default:
+    get:
+      tags:
+      - Bridge Management
+      summary: Get User's Default Bridge
+      description: 'Returns a default bridge (PMI) for the user specified by **accountId**
+
+        and **extensionId** identifiers.
+
+        '
+      operationId: getDefaultBridge
+      parameters:
+      - name: accountId
+        in: path
+        description: Account identifier
+        required: true
+        schema:
+          type: string
+      - name: extensionId
+        in: path
+        description: Extension identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BridgeResponse'
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+      x-throttling-group: Medium
+      x-websocket: true
+      x-app-permission: Video
+  /rcvideo/v2/bridges/pin/pstn/{pin}:
+    get:
+      tags:
+      - Bridge Management
+      summary: Search Bridge by PSTN PIN
+      description: Finds a bridge by Host or Participant PSTN PIN.
+      operationId: getBridgeByPstnPin
+      parameters:
+      - name: pin
+        in: path
+        description: Host or Participant PSTN PIN
+        required: true
+        schema:
+          type: string
+      - name: phoneNumber
+        in: query
+        description: 'Phone number to find a phone group for PSTN PIN. If it is not specified, then the default phone group will be used.
+
+          '
+        schema:
+          type: string
+      - name: pw
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Bridge hash password
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BridgeResponse'
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+      x-throttling-group: Medium
+      x-websocket: true
+      x-app-permission: Video
+  /rcvideo/v2/bridges/pin/web/{pin}:
+    get:
+      tags:
+      - Bridge Management
+      summary: Search Bridge by Web PIN
+      description: 'Finds a bridge by short identifier (Web PIN). Also it can be used to find a default bridge by the alias
+
+        (personal meeting name).
+
+        '
+      operationId: getBridgeByWebPin
+      parameters:
+      - name: pin
+        in: path
+        description: Bridge short identifier (Web PIN) or alias (personal meeting name)
+        required: true
+        schema:
+          type: string
+      - name: pw
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Bridge hash password
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BridgeResponse'
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+      x-throttling-group: Medium
+      x-websocket: true
+      x-app-permission: Video
+  /rcvideo/v2/bridges/{bridgeId}:
+    get:
+      tags:
+      - Bridge Management
+      summary: Get Bridge
+      description: Returns a bridge by **bridgeId** identifier.
+      operationId: getBridge
+      parameters:
+      - name: bridgeId
+        in: path
+        description: Bridge identifier
+        required: true
+        schema:
+          type: string
+      - name: pw
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Bridge hash password
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BridgeResponse'
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+      x-throttling-group: Medium
+      x-websocket: true
+      x-app-permission: Video
+    patch:
+      tags:
+      - Bridge Management
+      summary: Update Bridge
+      description: 'Updates a bridge by **bridgeId** identifier. The request body should contain JSON object with updating properties.
+
+        Update can only be done by bridge owner, his delegate or any user who has the **Super Admin** privilege.
+
+        '
+      operationId: updateBridge
+      parameters:
+      - name: bridgeId
+        in: path
+        description: Bridge identifier
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JSON object with updating properties. Only specified properties will be updated.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBridgeRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BridgeResponse'
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+        '406':
+          description: Not acceptable
+        '409':
+          description: Conflicting settings
+        '500':
+          description: Internal server error
+      x-throttling-group: Medium
+      x-websocket: true
+      x-app-permission: Video
+    delete:
+      tags:
+      - Bridge Management
+      summary: Delete Bridge
+      description: 'Deletes a bridge by **bridgeId** identifier.
+
+        Deletion can only be done by bridge owner, his delegate or any user who has the **Super Admin** privilege.
+
+        '
+      operationId: deleteBridge
+      parameters:
+      - name: bridgeId
+        in: path
+        description: Bridge identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: OK
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+      x-throttling-group: Medium
+      x-websocket: true
+      x-app-permission: Video
+components:
+  schemas:
+    BridgePinsWithAliases:
+      type: object
+      properties:
+        pstn:
+          $ref: '#/components/schemas/BridgePstnPins'
+        web:
+          $ref: '#/components/schemas/WebPin'
+        aliases:
+          type: array
+          description: 'List of bridge aliases. An alias is a unique personal meeting name that can be specified for the default bridge.
+
+            It can be used to join to a meeting in the same way as the short identifier.
+
+            '
+          example:
+          - joseph1990
+          - qa_team_2_lead
+          items:
+            type: string
+    AutoShared:
+      type: object
+      description: Controls whether recording can be auto shared
+      properties:
+        enabled:
+          type: boolean
+          description: Controls whether preference is enabled
+          example: true
+        locked:
+          type: boolean
+          description: Describes whether preference is locked on Service Web
+          example: false
+    BridgePreferences:
+      type: object
+      properties:
+        join:
+          $ref: '#/components/schemas/BridgeJoinPreferences'
+        playTones:
+          type: string
+          description: 'Specifies enter and exit tones mode.
+
+            1) On - Enter and exit tones switched on.
+
+            2) Off - Enter and exit tones switched off.
+
+            3) ExitOnly - Only exit tones switched on.
+
+            4) EnterOnly - Only enter tones switched on.
+
+            '
+          default: 'Off'
+          enum:
+          - 'On'
+          - 'Off'
+          - ExitOnly
+          - EnterOnly
+        musicOnHold:
+          type: boolean
+          description: Specifies whether to play music on hold when alone
+          default: true
+        joinBeforeHost:
+          type: boolean
+          description: 'Specifies if participants can join to a meeting before host.
+
+            Default value depends on the bridge type:
+
+            - default bridge (PMI) -> false
+
+            - other types -> true
+
+            '
+          example: true
+        screenSharing:
+          type: boolean
+          description: Specifies if screen sharing is allowed
+          default: true
+        recordingsMode:
+          type: string
+          enum:
+          - Auto
+          - ForceAuto
+          - User
+          example: User
+          description: Controls whether recordings are enabled automatically or by user decision
+        transcriptionsMode:
+          type: string
+          enum:
+          - Auto
+          - ForceAuto
+          - User
+          example: User
+          description: Controls whether transcriptions are enabled automatically or by user decision
+        recordings:
+          $ref: '#/components/schemas/RecordingsPreferences'
+        allowEveryoneTranscribeMeetings:
+          type: boolean
+          default: true
+          description: Controls whether participants can start and pause transcription
+    RecordingsPreferences:
+      type: object
+      description: Recordings preferences
+      properties:
+        everyoneCanControl:
+          $ref: '#/components/schemas/EveryoneCanControl'
+        autoShared:
+          $ref: '#/components/schemas/AutoShared'
+    BridgeDiscovery:
+      type: object
+      properties:
+        web:
+          type: string
+          description: 'URI that can be used to join to the meeting.
+
+            It contains password parameter only if the request was done by bridge owner, his delegate or any user who has
+
+            the Super Admin privilege.
+
+            '
+          example: https://v.ringcentral.com/join/018209241352?pw=99e4f8e6a241fc71279449a9c8f46eef
+    BridgeResponseSecurity:
+      type: object
+      properties:
+        passwordProtected:
+          type: boolean
+          description: Specifies if a meeting is password protected.
+        password:
+          $ref: '#/components/schemas/BridgeResponseSecurityPassword'
+        noGuests:
+          type: boolean
+          description: If true, only authenticated users can join to a meeting.
+          example: false
+        sameAccount:
+          type: boolean
+          description: If true, only users have the same account can join to a meeting.
+          example: false
+        e2ee:
+          type: boolean
+          description: If true, end to end encryption will be enabled for a meeting.
+          default: false
+    BridgeJoinPstnPreferences:
+      type: object
+      properties:
+        promptAnnouncement:
+          type: boolean
+          description: Specifies whether to play 'Announce yourself' prompt
+          default: true
+        promptParticipants:
+          type: boolean
+          description: Specifies whether to play 'There are X participants' prompt
+          default: true
+    BridgePinsWithoutPstn:
+      type: object
+      properties:
+        web:
+          $ref: '#/components/schemas/WebPin'
+    BridgeRequestSecurity:
+      type: object
+      properties:
+        passwordProtected:
+          type: boolean
+          description: 'Specifies if a meeting is password protected.
+
+
+            By default, Instant and Scheduled bridges are not password protected. For default (PMI) bridge, password
+
+            protection will be turned on and the password will be generated if it is not specified while creation.
+
+
+            While creation to set password protection you should set this field to true and specify a password in the
+
+            **password** field. If you want to change password or set password protection for an unprotected bridge,
+
+            you should set this field to true and specify a password in the **password** field in the update operation.
+
+
+            To make protected bridge as unprotected you should set this field to false in the update operation.
+
+            '
+          example: true
+        password:
+          type: string
+          description: 'Specifies a password if bridge meetings should be password protected (passwordProtected field is true).
+
+            Besides that, if the field is specified in the request but **passwordProtected** field is missing then
+
+            it means that **passwordProtected** field is set to true.
+
+            '
+          example: Wq123ygs15
+        noGuests:
+          type: boolean
+          description: If true, only authenticated users can join to a meeting.
+          default: false
+        sameAccount:
+          type: boolean
+          description: If true, only users have the same account can join to a meeting.
+          default: false
+        e2ee:
+          type: boolean
+          description: If true, end to end encryption will be enabled for a meeting.
+          default: false
+    BridgeResponseSecurityPassword:
+      type: object
+      properties:
+        plainText:
+          type: string
+          description: 'Meeting password.
+
+            This field will be returned only if the request was done by bridge owner, his delegate or any user who has
+
+            the Super Admin privilege.
+
+            '
+          example: Wq123ygs15
+        pstn:
+          type: string
+          description: 'Meeting password for PSTN users.
+
+            This field will be returned only if the request was done by bridge owner, his delegate or any user who has
+
+            the Super Admin privilege.
+
+            '
+          example: '7492486829'
+        joinQuery:
+          type: string
+          description: 'Meeting password hash.
+
+            This field will be returned only if the request was done by bridge owner, his delegate or any user who has
+
+            the Super Admin privilege.
+
+            '
+          example: 99e4f8e6a241fc71279449a9c8f46eef
+    WebPin:
+      type: string
+      description: 'Bridge short identifier (Web PIN). The digital unique code which is used to join to a meeting. If it is not specified
+
+        while creation, then a code will be generated. If it is a default bridge, then this code is
+
+        Personal Meeting Identifier (PMI).
+
+
+        NOTE: Changing this PIN via update method is deprecated. So to change Web PIN use the method:
+
+        _*[PATCH] /rcvideo/v2/bridges/{bridgeId}/pin/web*_
+
+        '
+      example: 018209241352
+    EveryoneCanControl:
+      type: object
+      description: Controls whether participants can start and pause recording
+      properties:
+        enabled:
+          type: boolean
+          description: Controls whether preference is enabled
+          example: true
+        locked:
+          type: boolean
+          description: Describes whether preference is locked on Service Web
+          example: false
+    CreateBridgeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Custom name of a bridge
+          example: Weekly Meeting with Joseph
+        type:
+          type: string
+          description: 'Type of bridge. It specifies bridge life cycle.
+
+            1) Instant - The bridge will be used for a meeting only once immediately after creation. Then it will be deleted.
+
+            2) Scheduled - The bridge will be used for scheduled one or more meetings. If the bridge is not used for a long
+
+            time after the last meeting, then it will be deleted.
+
+            3) PMI - The bridge will contain Personal Meeting Identifier owned by a user. It is the default user bridge.
+
+            Each user may have only one default (PMI) bridge. Such bridge will be deleted only in case the user is deleted
+
+            from the system.
+
+            '
+          default: Instant
+          enum:
+          - Instant
+          - Scheduled
+          - PMI
+        pins:
+          $ref: '#/components/schemas/BridgePins'
+        security:
+          $ref: '#/components/schemas/BridgeRequestSecurity'
+        preferences:
+          $ref: '#/components/schemas/BridgePreferences'
+    BridgeJoinPreferences:
+      type: object
+      properties:
+        audioMuted:
+          type: boolean
+          description: Specifies if audio is muted for meeting participants (in the preset after joining)
+          default: false
+        videoMuted:
+          type: boolean
+          description: Specifies if video is muted for meeting participants (in the preset after joining)
+          default: false
+        waitingRoomRequired:
+          type: string
+          description: 'Specifies rules for the waiting room before the host starts the meeting.
+
+            1) Nobody - No waiting room. Participants are not waiting for meeting start.
+
+            2) Everybody - All participants are waiting for meeting start.
+
+            3) GuestsOnly - Only unauthenticated participants (guests) are waiting for meeting start.
+
+            4) OtherAccount - Only participants who have other account are waiting for meeting start.
+
+
+            Default value depends on the bridge type:
+
+            - PMI -> OtherAccount
+
+            - Instant, Scheduled -> Nobody
+
+            '
+          example: Nobody
+          enum:
+          - Nobody
+          - Everybody
+          - GuestsOnly
+          - OtherAccount
+        pstn:
+          $ref: '#/components/schemas/BridgeJoinPstnPreferences'
+    User:
+      required:
+      - accountId
+      - extensionId
+      type: object
+      properties:
+        accountId:
+          type: string
+          description: User account identifier
+          example: '664287016'
+        extensionId:
+          type: string
+          description: User extension identifier
+          example: '664307016'
+    BridgePstnPins:
+      type: object
+      properties:
+        host:
+          type: string
+          description: Host PSTN PIN. If it is not specified while creation, then a PIN will be generated.
+          example: '432331057631'
+        participant:
+          type: string
+          description: Participant PSTN PIN. If it is not specified while creation, then a PIN will be generated.
+          example: 013409241367
+    UpdateBridgeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Custom name of a bridge
+          example: Weekly Meeting with Joseph
+        pins:
+          $ref: '#/components/schemas/BridgePinsWithoutPstn'
+        security:
+          $ref: '#/components/schemas/BridgeRequestSecurity'
+        preferences:
+          $ref: '#/components/schemas/BridgePreferences'
+    BridgePins:
+      type: object
+      properties:
+        pstn:
+          $ref: '#/components/schemas/BridgePstnPins'
+        web:
+          $ref: '#/components/schemas/WebPin'
+    BridgeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique bridge identifier
+          example: iad41-c04-ndb256065cf14ae6a1832389d9c2e
+        name:
+          type: string
+          description: Custom name of a bridge
+          example: Weekly Meeting with Joseph
+        type:
+          type: string
+          description: 'Type of bridge. It specifies bridge life cycle.
+
+            1) Instant - The bridge will be used for a meeting only once immediately after creation. Then it will be deleted.
+
+            2) Scheduled - The bridge will be used for scheduled one or more meetings. If the bridge is not used for a long
+
+            time after the last meeting, then it will be deleted.
+
+            3) PMI - The bridge will contain Personal Meeting Identifier owned by a user. It is the default user bridge.
+
+            Each user may have only one default (PMI) bridge. Such bridge will be deleted only in case the user is deleted
+
+            from the system.
+
+            '
+          example: Instant
+          enum:
+          - Instant
+          - Scheduled
+          - PMI
+        host:
+          $ref: '#/components/schemas/User'
+        pins:
+          $ref: '#/components/schemas/BridgePinsWithAliases'
+        security:
+          $ref: '#/components/schemas/BridgeResponseSecurity'
+        preferences:
+          $ref: '#/components/schemas/BridgePreferences'
+        discovery:
+          $ref: '#/components/schemas/BridgeDiscovery'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

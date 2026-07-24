@@ -1,0 +1,457 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards RingOut API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: RingOut
+paths:
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/ring-out:
+    post:
+      tags:
+      - RingOut
+      summary: Make RingOut Call
+      description: Makes a 2-legged RingOut call.
+      operationId: createRingOutCall
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MakeRingOutRequest'
+        required: true
+      responses:
+        '200':
+          description: Ring out call information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetRingOutStatusResponse'
+      x-availability: High
+      x-throttling-group: Heavy
+      x-app-permission: RingOut
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/ring-out/{ringoutId}:
+    get:
+      tags:
+      - RingOut
+      summary: Get RingOut Call Status
+      description: Returns a status of a 2-legged RingOut call.
+      operationId: readRingOutCallStatus
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - name: ringoutId
+        in: path
+        description: Internal identifier of a RingOut call
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: RingOut call status information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetRingOutStatusResponse'
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: RingOut
+    delete:
+      tags:
+      - RingOut
+      summary: Cancel RingOut Call
+      description: Cancels a 2-legged RingOut call.
+      operationId: deleteRingOutCall
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - name: ringoutId
+        in: path
+        description: Internal identifier of a RingOut call
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No content
+      x-availability: High
+      x-throttling-group: Heavy
+      x-app-permission: RingOut
+components:
+  schemas:
+    MakeRingOutCallerInfoRequestFrom:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number in E.164 format
+        forwardingNumberId:
+          type: string
+          description: 'Internal identifier of a forwarding number; returned in response
+
+            as an ''id'' field value. Can be specified instead of a `phoneNumber` attribute
+
+            '
+      description: 'Phone number of a caller. This number corresponds to the 1st
+
+        leg of a RingOut call. This number can be one of the user''s configured forwarding
+
+        numbers or an arbitrary number
+
+        '
+    MakeRingOutCallerIdInfo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number in E.164 format
+      description: Phone number which will be displayed to the called party
+    RingOutStatusInfo:
+      type: object
+      properties:
+        callStatus:
+          type: string
+          description: Status of a call
+          enum:
+          - Invalid
+          - Success
+          - InProgress
+          - Busy
+          - NoAnswer
+          - Rejected
+          - GenericError
+          - Finished
+          - InternationalDisabled
+          - DestinationBlocked
+          - NotEnoughFunds
+          - NoSuchUser
+        callerStatus:
+          type: string
+          description: Status of a calling party
+          enum:
+          - Invalid
+          - Success
+          - InProgress
+          - Busy
+          - NoAnswer
+          - Rejected
+          - GenericError
+          - Finished
+          - InternationalDisabled
+          - DestinationBlocked
+          - NotEnoughFunds
+          - NoSuchUser
+        calleeStatus:
+          type: string
+          description: Status of a called party
+          enum:
+          - Invalid
+          - Success
+          - InProgress
+          - Busy
+          - NoAnswer
+          - Rejected
+          - GenericError
+          - Finished
+          - InternationalDisabled
+          - DestinationBlocked
+          - NotEnoughFunds
+          - NoSuchUser
+      description: RingOut status information
+    GetRingOutStatusResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a RingOut call
+        uri:
+          type: string
+          description: Link to a RingOut call resource
+          format: uri
+        status:
+          $ref: '#/components/schemas/RingOutStatusInfo'
+    MakeRingOutRequest:
+      required:
+      - from
+      - to
+      type: object
+      properties:
+        from:
+          $ref: '#/components/schemas/MakeRingOutCallerInfoRequestFrom'
+        to:
+          $ref: '#/components/schemas/MakeRingOutCallerInfoRequestTo'
+        callerId:
+          $ref: '#/components/schemas/MakeRingOutCallerIdInfo'
+        playPrompt:
+          type: boolean
+          description: 'Audio prompt that a calling party hears when a call
+
+            is connected
+
+            '
+        country:
+          $ref: '#/components/schemas/MakeRingOutCountryInfo'
+    MakeRingOutCallerInfoRequestTo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number in E.164 format
+      description: 'Phone number of a called party. This number corresponds to the
+
+        2nd leg of a RingOut call
+
+        '
+    MakeRingOutCountryInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Dialing plan country identifier
+      description: 'Optional. Dialing plan country data. If not specified, then an extension
+
+        home country is applied by default
+
+        '
+  parameters:
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

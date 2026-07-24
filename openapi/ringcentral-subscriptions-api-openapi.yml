@@ -1,0 +1,995 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Subscriptions API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Subscriptions
+  description: General interface to manage subscriptions
+paths:
+  /restapi/v1.0/subscription:
+    get:
+      tags:
+      - Subscriptions
+      summary: List Subscriptions
+      description: 'Returns a list of subscriptions created by the user for the current authorized client application.
+
+        '
+      operationId: listSubscriptions
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionListResource'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-request-max-body-size: 100m
+      x-availability: High
+      x-throttling-group: Light
+    post:
+      tags:
+      - Subscriptions
+      summary: Create Subscription
+      description: 'This API allows client applications to register a new subscription so that it
+
+        can be notified of events when they occur on the platform.
+
+
+        A subscription relates to a set of events that a client application would like
+
+        to be informed of and the delivery channel by which they will be notified of
+
+        those events. How subscriptions are established depends upon the notification
+
+        channel the client application would like to use to receive the event
+
+        notification. For example, to create a webhook a developer would create a
+
+        subscription via a REST API call, while specifying a list of events or "event
+
+        filters" to be notified of, a transport type of `WebHook`, and the address or
+
+        URL to which they would like the webhook delivered.
+
+
+        However, developers wishing to subscribe to a set of events via a WebSocket
+
+        channel, would first connect to the WebSocket gateway, and then issue their
+
+        subscription request over the WebSocket itself, as opposed to making a REST
+
+        API call to this endpoint.
+
+
+        While the protocol for establishing a subscription may vary depending upon
+
+        the delivery channel for that subscription, the schemas used for representing
+
+        a subscription are the same across all delivery modes.
+
+
+        Subscriptions are currently limited to 20 subscriptions per user/extension (for particular application).
+
+
+        RingCentral currently supports the following delivery modes for event subscriptions:
+
+
+        * [WebHook](https://developers.ringcentral.com/guide/notifications/webhooks/quick-start) - to receive event notifications as an HTTP POST to a given URL
+
+        * [WebSocket](https://developers.ringcentral.com/guide/notifications/websockets/quick-start) - to receive real-time events over a persistent WebSocket connection
+
+        * [PubNub](https://developers.ringcentral.com/guide/notifications/push-notifications/quick-start) (deprecated) - to receive a push notification sent directly to a client application
+
+
+        Developers should be aware that the PubNub delivery mode is currently
+
+        deprecated and will be removed in 2024. Developers are encouraged to
+
+        [migrate their client applications to use WebSockets](https://developers.ringcentral.com/guide/notifications/websockets/migration/)
+
+        instead.
+
+        '
+      operationId: createSubscription
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionRequest'
+            examples:
+              CreateSubscriptionRequestPubnub:
+                $ref: '#/components/examples/CreateSubscriptionRequestPubnub'
+              CreateSubscriptionRequestWebhook:
+                $ref: '#/components/examples/CreateSubscriptionRequestWebhook'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionInfo'
+              examples:
+                CreateSubscriptionResponsePubnub:
+                  $ref: '#/components/examples/CreateSubscriptionResponsePubnub'
+                CreateSubscriptionResponseWebhook:
+                  $ref: '#/components/examples/CreateSubscriptionResponseWebhook'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-request-max-body-size: 100m
+      x-availability: High
+      x-throttling-group: Medium
+  /restapi/v1.0/subscription/{subscriptionId}:
+    get:
+      tags:
+      - Subscriptions
+      summary: Get Subscription
+      description: Returns the existing subscription by ID.
+      operationId: readSubscription
+      parameters:
+      - $ref: '#/components/parameters/SubscriptionId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionInfo'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-request-max-body-size: 100m
+      x-availability: High
+      x-throttling-group: Light
+    put:
+      tags:
+      - Subscriptions
+      summary: Update Subscription
+      description: 'Updates the existing subscription. The client application can extend or narrow
+
+        the list of events for which it receives notifications within the current subscription.
+
+        If event filters are specified, calling this method modifies them for the
+
+        existing subscription. The method also allows one to set an expiration time for the
+
+        subscription itself.
+
+
+        If parameters other than `events` and `expiresIn` are specified in the request they will be ignored.
+
+        If the request body is empty then the specified subscription will be renewed without any
+
+        event filter modifications and using the default expiration time.
+
+
+        If the request is sent with empty body, it just renews a subscription
+
+        (so it is an equivalent of the `POST /restapi/v1.0/subscription/{subscriptionId}/renew`).
+
+
+        Please note that `WebSocket` subscriptions cannot be updated via HTTP interface.
+
+        '
+      operationId: updateSubscription
+      parameters:
+      - $ref: '#/components/parameters/SubscriptionId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionRequest'
+        required: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionInfo'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-request-max-body-size: 100m
+      x-availability: High
+      x-throttling-group: Medium
+    delete:
+      tags:
+      - Subscriptions
+      summary: Cancel Subscription
+      description: Cancels the existing subscription.
+      operationId: deleteSubscription
+      parameters:
+      - $ref: '#/components/parameters/SubscriptionId'
+      responses:
+        '204':
+          description: No Content
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-request-max-body-size: 100m
+      x-availability: High
+      x-throttling-group: Medium
+  /restapi/v1.0/subscription/{subscriptionId}/renew:
+    post:
+      tags:
+      - Subscriptions
+      summary: Renew Subscription
+      description: 'Renews the existing subscription (this request comes with empty body).
+
+
+        Please note that `WebSocket` subscriptions are renewed automatically while websocket session is alive.
+
+        '
+      operationId: renewSubscription
+      parameters:
+      - $ref: '#/components/parameters/SubscriptionId'
+      responses:
+        '200':
+          description: Subscription renewed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionInfo'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-request-max-body-size: 100m
+      x-availability: High
+      x-throttling-group: Light
+components:
+  schemas:
+    WebhookDeliveryModeRequest:
+      type: object
+      required:
+      - transportType
+      - address
+      properties:
+        transportType:
+          type: string
+          description: The transport type for this subscription, or the channel by which an app should be notified of an event
+          enum:
+          - WebHook
+        address:
+          type: string
+          format: uri
+          description: 'The URL to which notifications should be delivered. This is only applicable for the `WebHook` transport type, for which it is a required field.
+
+            '
+          example: https://acme.com/myservice/webhook
+        verificationToken:
+          type: string
+          description: An optional validation token used to verify the authenticity of the incoming webhook. Applicable only for the `WebHook` transport type.
+          writeOnly: true
+    MobileDeliveryMode:
+      allOf:
+      - $ref: '#/components/schemas/MobileDeliveryModeRequest'
+      - type: object
+        required:
+        - encryption
+        properties:
+          encryption:
+            type: boolean
+            description: Specifies if notification messages will be encrypted or not.
+            enum:
+            - false
+            readOnly: true
+    NotificationDeliveryMode:
+      description: Notification delivery transport information
+      anyOf:
+      - $ref: '#/components/schemas/WebhookDeliveryMode'
+      - $ref: '#/components/schemas/MobileDeliveryMode'
+      - $ref: '#/components/schemas/PubNubDeliveryMode'
+      - $ref: '#/components/schemas/WebSocketDeliveryMode'
+      discriminator:
+        propertyName: transportType
+        mapping:
+          WebHook: '#/components/schemas/WebhookDeliveryMode'
+          RC/APNS: '#/components/schemas/MobileDeliveryMode'
+          RC/GCM: '#/components/schemas/MobileDeliveryMode'
+          PubNub: '#/components/schemas/PubNubDeliveryMode'
+          WebSocket: '#/components/schemas/WebSocketDeliveryMode'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    DisabledFilterInfo:
+      type: object
+      required:
+      - filter
+      - reason
+      properties:
+        filter:
+          type: string
+          description: Event filter that is disabled for the user
+        reason:
+          type: string
+          description: Reason why the filter is disabled for the user
+        message:
+          type: string
+          description: Error message
+    WebSocketDeliveryMode:
+      type: object
+      required:
+      - transportType
+      properties:
+        transportType:
+          type: string
+          description: The transport type for this subscription, or the channel by which an app should be notified of an event
+          enum:
+          - WebSocket
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    UpdateSubscriptionRequest:
+      type: object
+      required:
+      - eventFilters
+      properties:
+        eventFilters:
+          type: array
+          description: The list of event filters corresponding to events the user is subscribed to
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
+        expiresIn:
+          type: integer
+          format: int32
+          minimum: 1
+          example: 1200
+          description: 'Subscription lifetime in seconds. The maximum subscription lifetime depends upon the specified `transportType`:
+
+
+            | Transport type      | Maximum permitted lifetime     |
+
+            | ------------------- | ------------------------------ |
+
+            | `WebHook`           | 315360000 seconds (10 years)   |
+
+            | `RC/APNS`, `RC/GSM` | 7776000 seconds (90 days)      |
+
+            | `PubNub`            | 900 seconds (15 minutes)       |
+
+            | `WebSocket`         | n/a (the parameter is ignored) |
+
+            '
+    WebhookDeliveryMode:
+      type: object
+      required:
+      - transportType
+      - address
+      - encryption
+      properties:
+        transportType:
+          type: string
+          description: The transport type for this subscription, or the channel by which an app should be notified of an event
+          enum:
+          - WebHook
+        address:
+          type: string
+          format: uri
+          description: 'The URL to which notifications should be delivered. This is only applicable for the `WebHook` transport type, for which it is a required field.
+
+            '
+          example: https://acme.com/myservice/webhook
+        encryption:
+          type: boolean
+          description: Specifies if notification messages will be encrypted or not.
+          enum:
+          - false
+          readOnly: true
+    NotificationDeliveryModeRequest:
+      description: Notification delivery transport information
+      anyOf:
+      - $ref: '#/components/schemas/WebhookDeliveryModeRequest'
+      - $ref: '#/components/schemas/MobileDeliveryModeRequest'
+      - $ref: '#/components/schemas/PubNubDeliveryModeRequest'
+      discriminator:
+        propertyName: transportType
+        mapping:
+          WebHook: '#/components/schemas/WebhookDeliveryModeRequest'
+          RC/APNS: '#/components/schemas/MobileDeliveryModeRequest'
+          RC/GCM: '#/components/schemas/MobileDeliveryModeRequest'
+          PubNub: '#/components/schemas/PubNubDeliveryModeRequest'
+    PubNubDeliveryMode:
+      allOf:
+      - $ref: '#/components/schemas/PubNubDeliveryModeRequest'
+      - type: object
+        required:
+        - address
+        - subscriberKey
+        - secretKey
+        - encryption
+        properties:
+          address:
+            type: string
+            description: 'PubNub channel name
+
+              '
+            example: 54770517599294_6dda849e
+            readOnly: true
+          subscriberKey:
+            type: string
+            description: PubNub credential required to subscribe to the channel
+            readOnly: true
+          secretKey:
+            type: string
+            description: PubNub credential required to subscribe to the channel
+            readOnly: true
+          encryptionAlgorithm:
+            type: string
+            description: '(Only for a "PubNub" transport, returned only if `encryption` is `true`)
+
+              Encryption algorithm used
+
+              '
+            enum:
+            - AES
+            readOnly: true
+          encryptionKey:
+            type: string
+            description: '(Only for a "PubNub" transport, returned only if `encryption` is `true`)
+
+              Cryptographic key to decrypt PubNub notification messages
+
+              '
+            readOnly: true
+    PubNubDeliveryModeRequest:
+      type: object
+      required:
+      - transportType
+      properties:
+        transportType:
+          type: string
+          description: The transport type for this subscription, or the channel by which an app should be notified of an event
+          enum:
+          - PubNub
+        encryption:
+          type: boolean
+          description: 'Optional. Specifies if notification messages will be encrypted
+
+            or not. Please note that for some event filters (e.g. presence) encryption is mandatory and
+
+            `false` value provided by caller will be ignored.
+
+            '
+          default: false
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    MobileDeliveryModeRequest:
+      type: object
+      required:
+      - transportType
+      - certificateName
+      - registrationId
+      properties:
+        transportType:
+          type: string
+          description: The transport type for this subscription, or the channel by which an app should be notified of an event
+          enum:
+          - RC/APNS
+          - RC/GCM
+        certificateName:
+          type: string
+          description: Certificate name for mobile notification transports
+        registrationId:
+          type: string
+          description: Device instance ID for mobile notification transports
+          example: 38b062ae-85f8-4dcc-8734-04d3f7393d42
+    SubscriptionInfo:
+      required:
+      - id
+      - uri
+      - eventFilters
+      - deliveryMode
+      - creationTime
+      - expirationTime
+      - status
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a subscription resource
+          readOnly: true
+        id:
+          type: string
+          description: Internal identifier of a subscription
+          readOnly: true
+          example: 95fecfc9-9cdc-4e94-a78a-89fd65889d37
+        eventFilters:
+          type: array
+          description: The list of event filter names corresponding to events the user is subscribed to
+          minItems: 0
+          items:
+            type: string
+            minLength: 1
+        disabledFilters:
+          type: array
+          minItems: 0
+          description: 'The list of event filter names corresponding to events the user is not subscribed to due to
+
+            certain limitations
+
+            '
+          items:
+            $ref: '#/components/schemas/DisabledFilterInfo'
+          readOnly: true
+        expirationTime:
+          type: string
+          format: date-time
+          description: 'Subscription expiration time in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+            format including timezone, for example *2016-03-10T18:07:52.534Z*
+
+            '
+          readOnly: true
+        expiresIn:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Subscription lifetime in seconds
+        status:
+          type: string
+          description: Subscription status
+          enum:
+          - Active
+          - Blacklisted
+          readOnly: true
+        creationTime:
+          type: string
+          description: 'Subscription creation time in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+            format including timezone, for example *2016-03-10T18:07:52.534*
+
+            '
+          format: date-time
+          readOnly: true
+        deliveryMode:
+          $ref: '#/components/schemas/NotificationDeliveryMode'
+        blacklistedData:
+          type: object
+          description: Returned if a WebHook subscription is blacklisted
+          readOnly: true
+          properties:
+            blacklistedAt:
+              type: string
+              format: date-time
+              description: 'Time of adding subscription to a black list in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+                format including timezone, for example *2016-03-10T18:07:52.534Z*
+
+                '
+            reason:
+              type: string
+              description: Reason of adding subscription to a black list
+    CreateSubscriptionRequest:
+      allOf:
+      - $ref: '#/components/schemas/UpdateSubscriptionRequest'
+      - type: object
+        required:
+        - deliveryMode
+        properties:
+          deliveryMode:
+            $ref: '#/components/schemas/NotificationDeliveryModeRequest'
+    SubscriptionListResource:
+      type: object
+      required:
+      - uri
+      - records
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a resource
+        records:
+          type: array
+          minItems: 0
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/SubscriptionInfo'
+  examples:
+    CreateSubscriptionResponsePubnub:
+      summary: PubNub
+      value:
+        uri: https://platform.ringcentral.com/restapi/v1.0/subscription/ed329ec1-0600-4560-b6dc-c764399e9a54
+        id: ed329ec1-0600-4560-b6dc-c764399e9a54
+        creationTime: '2016-02-17T15:41:45.601Z'
+        status: Active
+        eventFilters:
+        - /restapi/v1.0/account/2021383004/extension/2021383004/presence?detailedTelephonyState=true
+        expirationTime: '2016-02-17T15:56:45.617Z'
+        expiresIn: 899
+        deliveryMode:
+          transportType: PubNub
+          encryption: true
+          address: 54770517599294_6dda849e
+          subscriberKey: sub-c-b8b9cd8c-e906-11e2-b383-02ee2ddab7fe
+          secretKey: y943yr9834ry394yriy4489yr93y4r983y4r3894ry94
+          encryptionAlgorithm: AES
+          encryptionKey: 0mWk/6SMiSz191u2dV5drg==
+    CreateSubscriptionRequestPubnub:
+      summary: PubNub
+      value:
+        eventFilters:
+        - /restapi/v1.0/account/~/extension/~/presence?detailedTelephonyState=true
+        deliveryMode:
+          transportType: PubNub
+          encryption: true
+    CreateSubscriptionResponseWebhook:
+      summary: Webhook
+      value:
+        uri: https://platform.ringcentral.com/restapi/v1.0/subscription/dd2f0ff2-580e-4581-a277-76f9c9a54bc9
+        id: dd2f0ff2-580e-4581-a277-76f9c9a54bc9
+        creationTime: '2016-03-30T11:16:23.162Z'
+        status: Active
+        eventFilters:
+        - /restapi/v1.0/account/10366034004/extension/10366034004/presence
+        - /restapi/v1.0/account/10366034004/extension/10366034004/message-store
+        expirationTime: '2016-04-06T11:16:23.177Z'
+        expiresIn: 604799
+        deliveryMode:
+          transportType: WebHook
+          encryption: false
+          address: https://consumer-host.example.com/consumer/path
+    CreateSubscriptionRequestWebhook:
+      summary: Webhook
+      value:
+        eventFilters:
+        - /restapi/v1.0/account/~/extension/~/presence
+        - /restapi/v1.0/account/~/extension/~/message-store
+        deliveryMode:
+          transportType: WebHook
+          address: https://consumer-host.example.com/consumer/path
+  responses:
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
+
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+  parameters:
+    SubscriptionId:
+      name: subscriptionId
+      in: path
+      description: Internal identifier of a subscription
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 20
+      example: '12345678'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

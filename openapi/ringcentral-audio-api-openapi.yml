@@ -1,0 +1,1082 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Audio API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Audio
+  description: Conversational AI audio processing APIs
+paths:
+  /ai/audio/v1/enrollments:
+    get:
+      tags:
+      - Audio
+      summary: List Enrolled Speakers
+      description: Returns the List of Enrolled Speakers
+      operationId: caiEnrollmentsList
+      parameters:
+      - name: partial
+        in: query
+        description: Indicates if partially enrolled speakers should be returned
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: boolean
+      - name: perPage
+        in: query
+        description: Number of enrollments to be returned per page
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+      - name: page
+        in: query
+        description: Page number to be returned
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+        '200':
+          description: List of enrolled speakers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnrolledSpeakers'
+      x-throttling-group: Heavy
+      x-app-permission: AI
+    post:
+      tags:
+      - Audio
+      summary: Create Speaker Enrollment
+      description: Creates Enrollment for the provided Speaker.
+      operationId: caiEnrollmentsCreate
+      requestBody:
+        $ref: '#/components/requestBodies/EnrollmentRequest'
+      responses:
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+        '409':
+          description: The {speakerId} already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+        '201':
+          description: Enrollments Request Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentStatus'
+      x-throttling-group: Heavy
+      x-app-permission: AI
+  /ai/audio/v1/enrollments/{speakerId}:
+    get:
+      tags:
+      - Audio
+      summary: Get Speaker Enrollment Status
+      description: Get The Status of Enrollment for the provided Speaker.
+      operationId: caiEnrollmentsGet
+      parameters:
+      - $ref: '#/components/parameters/SpeakerId'
+      responses:
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+        '404':
+          description: The {speakerId} doesn't exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+        '200':
+          description: Fetch enrollment status for speaker {speakerId}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentStatus'
+      x-throttling-group: Heavy
+      x-app-permission: AI
+    delete:
+      tags:
+      - Audio
+      summary: Delete Speaker Enrollment
+      description: Delete The Enrollment for the provided Speaker.
+      operationId: caiEnrollmentsDelete
+      parameters:
+      - $ref: '#/components/parameters/SpeakerId'
+      responses:
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+        '404':
+          description: The speakerId wasn't enrolled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+        '410':
+          description: The speakerId doesn't exist, already deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+        '204':
+          description: Enrollment deleted successfully
+      x-throttling-group: Heavy
+      x-app-permission: AI
+    patch:
+      tags:
+      - Audio
+      summary: Update Speaker Enrollment
+      description: Add newer audio data to improve an existing speaker enrollment
+      operationId: caiEnrollmentsUpdate
+      parameters:
+      - $ref: '#/components/parameters/SpeakerId'
+      requestBody:
+        $ref: '#/components/requestBodies/EnrollmentPatchRequest'
+      responses:
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+        '404':
+          description: The {speakerId} doesn't exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+        '201':
+          description: Enrollments Request Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentStatus'
+      x-throttling-group: Heavy
+      x-app-permission: AI
+  /ai/audio/v1/async/speech-to-text:
+    post:
+      tags:
+      - Audio
+      summary: Speech to Text Conversion
+      description: Returns Speech to Text Conversion to the provided webhook URI.
+      operationId: caiSpeechToText
+      parameters:
+      - $ref: '#/components/parameters/Webhook'
+      requestBody:
+        $ref: '#/components/requestBodies/AsrRequest'
+      responses:
+        '202':
+          description: Task accepted for processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiAsyncApiResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+      callbacks:
+        requestProcessed:
+          '{$request.query.webhook}':
+            post:
+              parameters:
+              - $ref: '#/components/parameters/CallbackRequestId'
+              requestBody:
+                $ref: '#/components/requestBodies/SpeechToTextCallbackRequest'
+              responses:
+                '200':
+                  description: Callback successfully accepted
+      x-throttling-group: Heavy
+      x-app-permission: AI
+  /ai/audio/v1/async/speaker-diarize:
+    post:
+      tags:
+      - Audio
+      summary: Speaker Diarization
+      description: 'Identifies who said what. Speaker diarization will identify the speaker for each segment
+
+        so you can tell who spoke the sentence, paragraph, or phrase.
+
+        '
+      operationId: caiSpeakerDiarize
+      parameters:
+      - $ref: '#/components/parameters/Webhook'
+      requestBody:
+        $ref: '#/components/requestBodies/DiarizeRequest'
+      responses:
+        '202':
+          description: Task accepted for processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiAsyncApiResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+      callbacks:
+        requestProcessed:
+          '{$request.query.webhook}':
+            post:
+              parameters:
+              - $ref: '#/components/parameters/CallbackRequestId'
+              requestBody:
+                $ref: '#/components/requestBodies/DiarizeCallbackRequest'
+              responses:
+                '200':
+                  description: Callback successfully accepted
+      x-throttling-group: Heavy
+      x-app-permission: AI
+  /ai/audio/v1/async/speaker-identify:
+    post:
+      tags:
+      - Audio
+      summary: Speaker Identification
+      description: Returns Speaker Identification to the provided webhook URI.
+      operationId: caiSpeakerIdentify
+      parameters:
+      - $ref: '#/components/parameters/Webhook'
+      requestBody:
+        $ref: '#/components/requestBodies/IdentifyRequest'
+      responses:
+        '202':
+          description: Task accepted for processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiAsyncApiResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+      callbacks:
+        requestProcessed:
+          '{$request.query.webhook}':
+            post:
+              parameters:
+              - $ref: '#/components/parameters/CallbackRequestId'
+              requestBody:
+                $ref: '#/components/requestBodies/SpeakerIdentifyCallbackRequest'
+              responses:
+                '200':
+                  description: Callback successfully accepted
+      x-throttling-group: Heavy
+      x-app-permission: AI
+components:
+  parameters:
+    SpeakerId:
+      name: speakerId
+      in: path
+      description: Speaker identifier of enrolled speaker
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+      example: JohnDoe
+    CallbackRequestId:
+      name: RCRequestId
+      deprecated: true
+      in: header
+      description: 'Input RequestId corresponding to this response.\
+
+        DEPRECATED. "jobId" body attribute should be used for tracking.
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Webhook:
+      name: webhook
+      in: query
+      description: The webhook URI to which the job response will be returned
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+        format: uri
+  schemas:
+    TranscribedObject:
+      required:
+      - transcript
+      - words
+      type: object
+      properties:
+        speakerCount:
+          type: integer
+          description: The number of speakers detected. Field is set only when enableSpeakerDiarization is true.
+          format: int32
+          example: 2
+        utterances:
+          type: array
+          description: Speaker wise utterances. Field is set only when enableSpeakerDiarization is true.
+          items:
+            $ref: '#/components/schemas/UtteranceObject'
+        words:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordSegment'
+        confidence:
+          type: number
+          description: Overall transcription confidence.
+          format: float
+        transcript:
+          type: string
+          description: The entire transcript with/without punctuations according to the input.
+    WordSegment:
+      required:
+      - end
+      - start
+      - word
+      type: object
+      properties:
+        speakerId:
+          type: string
+          example: JohnDoe
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        word:
+          type: string
+          example: hello
+    CaiErrorCodeResponse:
+      required:
+      - errorCode
+      - message
+      type: object
+      properties:
+        errorCode:
+          type: string
+          enum:
+          - CAI-101
+          - CAI-102
+          - CAI-103
+          - CAI-104
+          - CAI-105
+          - CAI-106
+          - CAI-107
+          - CAI-108
+          - CAI-109
+          - CAI-110
+        message:
+          type: string
+          description: Helpful description of the errorCode
+        parameterName:
+          type: string
+          description: Name of parameter if specified in the message
+    PagingSchema:
+      required:
+      - page
+      - perPage
+      - totalPages
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          example: 2
+        totalPages:
+          type: integer
+          format: int32
+          example: 10
+        perPage:
+          type: integer
+          format: int32
+          example: 5
+    CaiAsyncApiResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+    ContentInput:
+      type: object
+      properties:
+        contentUri:
+          type: string
+          description: Publicly facing uri
+          format: uri
+    DiarizedObject:
+      required:
+      - speakerCount
+      - utterances
+      type: object
+      properties:
+        speakerCount:
+          type: integer
+          format: int32
+          example: 2
+        utterances:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiarizeSegment'
+    DiarizeInput:
+      allOf:
+      - $ref: '#/components/schemas/AudioInput'
+      - type: object
+        properties:
+          separateSpeakerPerChannel:
+            type: boolean
+            description: Set to True if the input audio is multi-channel and each channel has a separate speaker.
+            example: false
+          speakerCount:
+            type: integer
+            description: Number of speakers in the file, omit parameter if unknown
+            format: int32
+            example: 2
+          speakerIds:
+            type: array
+            description: Optional set of speakers to be identified from the call.
+            example:
+            - speakerId1
+            - speakerId2
+            items:
+              type: string
+          enableVoiceActivityDetection:
+            type: boolean
+            description: Apply voice activity detection.
+    SpeechContextPhrasesInput:
+      required:
+      - phrases
+      type: object
+      minItems: 1
+      maxItems: 50
+      properties:
+        phrases:
+          type: array
+          description: Words or Phrases to boost
+          example:
+          - Mohit
+          - Sushant
+          - RingCentral
+          items:
+            type: string
+    CaiErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaiErrorCodeResponse'
+    WordTimingsUnit:
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        word:
+          type: string
+          example: Hello
+    SpeakerIdentificationObject:
+      required:
+      - utterances
+      type: object
+      properties:
+        utterances:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiarizeSegment'
+    EnrollmentPatchInput:
+      required:
+      - content
+      - encoding
+      type: object
+      properties:
+        encoding:
+          type: string
+          description: The encoding of the original audio
+          example: Wav
+          enum:
+          - Mpeg
+          - Mp4
+          - Wav
+          - Webm
+          - Webp
+          - Aac
+          - Avi
+          - Ogg
+        languageCode:
+          type: string
+          description: Language spoken in the audio file.
+          example: en-US
+        content:
+          type: string
+          description: Base64-encoded audio file data.
+          example: base64EncodedAudioInput
+    IdentifyInput:
+      required:
+      - speakerIds
+      allOf:
+      - $ref: '#/components/schemas/AudioInput'
+      - type: object
+        properties:
+          speakerIds:
+            type: array
+            description: Set of enrolled speakers to be identified from the media.
+            example:
+            - speakerId1
+            - speakerId2
+            items:
+              type: string
+          enableVoiceActivityDetection:
+            type: boolean
+            description: Apply voice activity detection.
+    DiarizeApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/DiarizedObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    AsrApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/TranscribedObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    UtteranceObject:
+      required:
+      - end
+      - start
+      - text
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        text:
+          type: string
+          example: Hello! This is John.
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        speakerId:
+          type: string
+          example: JohnDoe
+        wordTimings:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordTimingsUnit'
+    EnrollmentInput:
+      required:
+      - content
+      - encoding
+      - speakerId
+      allOf:
+      - $ref: '#/components/schemas/EnrollmentPatchInput'
+      - type: object
+        properties:
+          speakerId:
+            type: string
+            description: The enrollment ID to be registered. Acceptable format [a-zA-Z0-9_]+
+            example: JohnDoe
+    ListEnrolledSpeakers:
+      required:
+      - paging
+      - records
+      type: object
+      properties:
+        paging:
+          $ref: '#/components/schemas/PagingSchema'
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentStatus'
+    AudioInput:
+      required:
+      - encoding
+      - languageCode
+      allOf:
+      - $ref: '#/components/schemas/ContentInput'
+      - type: object
+        properties:
+          encoding:
+            type: string
+            description: The encoding of the original audio
+            example: Wav
+            enum:
+            - Mpeg
+            - Mp4
+            - Wav
+            - Webm
+            - Webp
+            - Aac
+            - Avi
+            - Ogg
+          languageCode:
+            type: string
+            description: Language spoken in the audio file.
+            example: en-US
+          source:
+            type: string
+            description: 'Source of the audio file eg: Phone, RingCentral, GoogleMeet, Zoom etc'
+            example: RingCentral
+          audioType:
+            type: string
+            description: Type of the audio
+            example: CallCenter
+            enum:
+            - CallCenter
+            - Meeting
+            - EarningsCalls
+            - Interview
+            - PressConference
+            - Voicemail
+    DiarizeSegment:
+      required:
+      - end
+      - speakerId
+      - start
+      type: object
+      properties:
+        speakerId:
+          type: string
+          example: JohnDoe
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+    AsrInput:
+      allOf:
+      - $ref: '#/components/schemas/DiarizeInput'
+      - type: object
+        properties:
+          enablePunctuation:
+            type: boolean
+            description: Enables Smart Punctuation API.
+          enableSpeakerDiarization:
+            type: boolean
+            description: Tags each word corresponding to the speaker.
+            default: false
+          separateSpeakerPerChannel:
+            type: boolean
+            description: Indicates that the input audio is multi-channel and each channel has a separate speaker.
+            default: false
+          speechContexts:
+            type: array
+            description: Indicates the words/phrases that will be used for boosting the transcript. This can help to boost accuracy for cases like Person Names, Company names etc.
+            items:
+              $ref: '#/components/schemas/SpeechContextPhrasesInput'
+    EnrollmentStatus:
+      required:
+      - enrollmentComplete
+      - speakerId
+      - totalSpeechDuration
+      type: object
+      properties:
+        enrollmentQuality:
+          type: string
+          description: Quality of the enrollment.
+          example: Average
+          enum:
+          - Poor
+          - Average
+          - Good
+          - High
+        enrollmentComplete:
+          type: boolean
+          description: Status of the enrollment.
+          example: true
+        speakerId:
+          type: string
+          example: JohnDoe
+        totalEnrollDuration:
+          type: number
+          description: Total speech duration of the enrollment in seconds.
+          format: float
+          example: 20.1
+        totalSpeechDuration:
+          type: number
+          description: Total duration of the enrollment in seconds.
+          format: float
+          example: 30.5
+    SpeakerIdentifyApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/SpeakerIdentificationObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+  requestBodies:
+    AsrRequest:
+      description: Speech to Text API Input Format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AsrInput'
+      required: true
+    SpeechToTextCallbackRequest:
+      description: Speech to Text API Callback Output
+      content:
+        application/json:
+          schema:
+            allOf:
+            - type: object
+              properties:
+                jobId:
+                  type: string
+                creationTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time
+                expirationTime:
+                  type: string
+                  format: date-time
+            - $ref: '#/components/schemas/AsrApiResponse'
+      required: true
+    EnrollmentPatchRequest:
+      description: Patch Speaker Enrollment API Input Format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnrollmentPatchInput'
+      required: true
+    DiarizeRequest:
+      description: Speaker Diarization API Input Format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DiarizeInput'
+      required: true
+    EnrollmentRequest:
+      description: Speaker Enrollment API Input Format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnrollmentInput'
+      required: true
+    IdentifyRequest:
+      description: Speaker Identification API Input Format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentifyInput'
+      required: true
+    SpeakerIdentifyCallbackRequest:
+      description: Speaker Identification API Callback Output
+      content:
+        application/json:
+          schema:
+            allOf:
+            - type: object
+              properties:
+                jobId:
+                  type: string
+                creationTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time
+                expirationTime:
+                  type: string
+                  format: date-time
+            - $ref: '#/components/schemas/SpeakerIdentifyApiResponse'
+      required: true
+    DiarizeCallbackRequest:
+      description: Speaker Diarization API Callback Output
+      content:
+        application/json:
+          schema:
+            allOf:
+            - type: object
+              properties:
+                jobId:
+                  type: string
+                creationTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time
+                expirationTime:
+                  type: string
+                  format: date-time
+            - $ref: '#/components/schemas/DiarizeApiResponse'
+      required: true
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

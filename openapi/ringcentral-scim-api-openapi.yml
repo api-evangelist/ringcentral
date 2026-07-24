@@ -1,0 +1,1261 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards SCIM API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: SCIM
+paths:
+  /scim/v2/Schemas:
+    get:
+      tags:
+      - SCIM
+      summary: List Schemas
+      description: Returns the list of schemas
+      operationId: scimListSchemas2
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimSchemaSearchResponse'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimSchemaSearchResponse'
+        '403':
+          description: Filtering is not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimErrorResponse'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimErrorResponse'
+      x-request-max-body-size: 1m
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+  /scim/v2/Schemas/{uri}:
+    get:
+      tags:
+      - SCIM
+      summary: Get Schema
+      description: Returns SCIM schema
+      operationId: scimGetSchema2
+      parameters:
+      - name: uri
+        in: path
+        description: Schema URI
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimSchemaResponse'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimSchemaResponse'
+        '404':
+          $ref: '#/components/responses/ScimNotFound'
+      x-request-max-body-size: 1m
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+  /scim/v2/Users:
+    get:
+      tags:
+      - SCIM
+      summary: Search/List Users
+      description: Returns the list of users satisfying search criteria
+      operationId: scimSearchViaGet2
+      parameters:
+      - name: filter
+        in: query
+        description: Only support 'userName' or 'email' filter expressions for now
+        schema:
+          type: string
+      - name: startIndex
+        in: query
+        description: Start index (1-based)
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: count
+        in: query
+        description: Page size
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimUserSearchResponse'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimUserSearchResponse'
+        '400':
+          $ref: '#/components/responses/ScimBadRequest'
+        '401':
+          $ref: '#/components/responses/ScimUnauthorized'
+        '403':
+          $ref: '#/components/responses/ScimForbidden'
+        '429':
+          $ref: '#/components/responses/ScimTooManyRequests'
+        '500':
+          $ref: '#/components/responses/ScimInternalError'
+      x-request-max-body-size: 1m
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+    post:
+      tags:
+      - SCIM
+      summary: Create User
+      description: Creates a new user
+      operationId: scimCreateUser2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScimUser'
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/ScimUser'
+        required: true
+      responses:
+        '201':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimUserResponse'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimUserResponse'
+        '400':
+          $ref: '#/components/responses/ScimBadRequest'
+        '401':
+          $ref: '#/components/responses/ScimUnauthorized'
+        '403':
+          $ref: '#/components/responses/ScimForbidden'
+        '404':
+          $ref: '#/components/responses/ScimNotFound'
+        '409':
+          $ref: '#/components/responses/ScimConflict'
+        '429':
+          $ref: '#/components/responses/ScimTooManyRequests'
+        '500':
+          $ref: '#/components/responses/ScimInternalError'
+      x-request-max-body-size: 10m
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditAccounts
+  /scim/v2/Users/.search:
+    post:
+      tags:
+      - SCIM
+      summary: Search/List Users
+      description: Returns the list of users satisfying search criteria
+      operationId: scimSearchViaPost2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScimSearchRequest'
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/ScimSearchRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimUserSearchResponse'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimUserSearchResponse'
+        '400':
+          $ref: '#/components/responses/ScimBadRequest'
+        '401':
+          $ref: '#/components/responses/ScimUnauthorized'
+        '403':
+          $ref: '#/components/responses/ScimForbidden'
+        '429':
+          $ref: '#/components/responses/ScimTooManyRequests'
+        '500':
+          $ref: '#/components/responses/ScimInternalError'
+      x-request-max-body-size: 1m
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+  /scim/v2/Users/{scimUserId}:
+    get:
+      tags:
+      - SCIM
+      summary: Get User
+      description: Returns a user by ID
+      operationId: scimGetUser2
+      parameters:
+      - $ref: '#/components/parameters/ScimUserId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimUserResponse'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimUserResponse'
+        '401':
+          $ref: '#/components/responses/ScimUnauthorized'
+        '403':
+          $ref: '#/components/responses/ScimForbidden'
+        '404':
+          $ref: '#/components/responses/ScimNotFound'
+        '429':
+          $ref: '#/components/responses/ScimTooManyRequests'
+        '500':
+          $ref: '#/components/responses/ScimInternalError'
+      x-request-max-body-size: 1m
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+    put:
+      tags:
+      - SCIM
+      summary: Update/Replace User
+      description: Updates a user
+      operationId: scimUpdateUser2
+      parameters:
+      - $ref: '#/components/parameters/ScimUserId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScimUser'
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/ScimUser'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimUserResponse'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimUserResponse'
+        '400':
+          $ref: '#/components/responses/ScimBadRequest'
+        '401':
+          $ref: '#/components/responses/ScimUnauthorized'
+        '403':
+          $ref: '#/components/responses/ScimForbidden'
+        '404':
+          $ref: '#/components/responses/ScimNotFound'
+        '409':
+          $ref: '#/components/responses/ScimConflict'
+        '429':
+          $ref: '#/components/responses/ScimTooManyRequests'
+        '500':
+          $ref: '#/components/responses/ScimInternalError'
+      x-request-max-body-size: 10m
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditAccounts
+    delete:
+      tags:
+      - SCIM
+      summary: Delete User
+      description: Deletes a user
+      operationId: scimDeleteUser2
+      parameters:
+      - $ref: '#/components/parameters/ScimUserId'
+      responses:
+        '204':
+          description: Successful response
+        '401':
+          $ref: '#/components/responses/ScimUnauthorized'
+        '403':
+          $ref: '#/components/responses/ScimForbidden'
+        '404':
+          $ref: '#/components/responses/ScimNotFound'
+        '429':
+          $ref: '#/components/responses/ScimTooManyRequests'
+        '500':
+          $ref: '#/components/responses/ScimInternalError'
+      x-request-max-body-size: 1m
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditAccounts
+    patch:
+      tags:
+      - SCIM
+      summary: Update/Patch User
+      description: Updates a user (partial update)
+      operationId: scimPatchUser2
+      parameters:
+      - $ref: '#/components/parameters/ScimUserId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScimUserPatch'
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/ScimUserPatch'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimUserResponse'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimUserResponse'
+        '400':
+          $ref: '#/components/responses/ScimBadRequest'
+        '401':
+          $ref: '#/components/responses/ScimUnauthorized'
+        '403':
+          $ref: '#/components/responses/ScimForbidden'
+        '404':
+          $ref: '#/components/responses/ScimNotFound'
+        '409':
+          $ref: '#/components/responses/ScimConflict'
+        '429':
+          $ref: '#/components/responses/ScimTooManyRequests'
+        '500':
+          $ref: '#/components/responses/ScimInternalError'
+      x-request-max-body-size: 10m
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditAccounts
+  /scim/v2/ServiceProviderConfig:
+    get:
+      tags:
+      - SCIM
+      summary: Get Provider Config
+      description: Returns SCIM service provider configuration
+      operationId: scimGetProviderConfig2
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimProviderConfig'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimProviderConfig'
+      x-request-max-body-size: 1m
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+  /scim/v2/ResourceTypes:
+    get:
+      tags:
+      - SCIM
+      summary: List Resource Types
+      description: Returns the list of supported SCIM resource types
+      operationId: scimListResourceTypes2
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimResourceTypeSearchResponse'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimResourceTypeSearchResponse'
+        '403':
+          description: Filtering is not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimErrorResponse'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimErrorResponse'
+      x-request-max-body-size: 1m
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+  /scim/v2/ResourceTypes/{type}:
+    get:
+      tags:
+      - SCIM
+      summary: Get Resource Type
+      description: Returns resource type by ID
+      operationId: scimGetResourceType2
+      parameters:
+      - name: type
+        in: path
+        description: Resource type
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScimResourceTypeResponse'
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ScimResourceTypeResponse'
+        '404':
+          $ref: '#/components/responses/ScimNotFound'
+      x-request-max-body-size: 1m
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+components:
+  schemas:
+    ScimBulkSupported:
+      type: object
+      properties:
+        maxOperations:
+          type: integer
+          format: int32
+        maxPayloadSize:
+          type: integer
+          format: int32
+        supported:
+          type: boolean
+          default: false
+    ScimResourceTypeSearchResponse:
+      type: object
+      properties:
+        Resources:
+          type: array
+          description: Resource type list
+          items:
+            $ref: '#/components/schemas/ScimResourceTypeResponse'
+        itemsPerPage:
+          type: integer
+          format: int64
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:api:messages:2.0:ListResponse
+        startIndex:
+          type: integer
+          format: int64
+        totalResults:
+          type: integer
+          format: int64
+    ScimEnterpriseUser:
+      type: object
+      properties:
+        department:
+          type: string
+    ScimUserAddress:
+      required:
+      - type
+      type: object
+      properties:
+        country:
+          type: string
+        locality:
+          type: string
+        postalCode:
+          type: string
+        region:
+          type: string
+        streetAddress:
+          type: string
+        type:
+          type: string
+          enum:
+          - work
+    ScimUserPatch:
+      required:
+      - Operations
+      - schemas
+      type: object
+      properties:
+        Operations:
+          type: array
+          description: Patch operations list
+          items:
+            $ref: '#/components/schemas/ScimPatchOperation'
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:api:messages:2.0:PatchOp
+    ScimSchemaExtension:
+      required:
+      - schema
+      - required
+      type: object
+      properties:
+        schema:
+          type: string
+          enum:
+          - urn:ietf:params:scim:schemas:extension:enterprise:2.0:User
+        required:
+          type: boolean
+          default: false
+    ScimPatchOperation:
+      required:
+      - op
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - add
+          - replace
+          - remove
+        path:
+          type: string
+        value:
+          type: string
+          description: Corresponding 'value' of that field specified by 'path'
+    ScimUserResponse:
+      required:
+      - emails
+      - name
+      - schemas
+      - userName
+      type: object
+      properties:
+        active:
+          type: boolean
+          description: User status
+          default: false
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimUserAddress'
+        emails:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimEmail'
+        externalId:
+          type: string
+          description: External unique resource ID defined by provisioning client
+        id:
+          type: string
+          description: Unique resource ID defined by RingCentral
+        name:
+          $ref: '#/components/schemas/ScimName'
+        phoneNumbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimPhoneNumber'
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimPhoto'
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:schemas:core:2.0:User
+        title:
+          type: string
+          description: User title
+        urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:
+          $ref: '#/components/schemas/ScimEnterpriseUser'
+        userName:
+          type: string
+          description: MUST be same as work type email address
+        meta:
+          $ref: '#/components/schemas/ScimMeta'
+    ScimMeta:
+      type: object
+      properties:
+        created:
+          type: string
+          format: date-time
+        lastModified:
+          type: string
+          format: date-time
+        location:
+          type: string
+          description: Resource location URI
+        resourceType:
+          type: string
+          enum:
+          - User
+          - Group
+          - ResourceType
+          - Schema
+      description: Resource metadata
+    ScimProviderConfig:
+      type: object
+      properties:
+        authenticationSchemes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimAuthenticationScheme'
+        bulk:
+          $ref: '#/components/schemas/ScimBulkSupported'
+        changePassword:
+          $ref: '#/components/schemas/ScimSupported'
+        etag:
+          $ref: '#/components/schemas/ScimSupported'
+        filter:
+          $ref: '#/components/schemas/ScimFilterSupported'
+        patch:
+          $ref: '#/components/schemas/ScimSupported'
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig
+        sort:
+          $ref: '#/components/schemas/ScimSupported'
+        xmlDataFormat:
+          $ref: '#/components/schemas/ScimSupported'
+    ScimFilterSupported:
+      type: object
+      properties:
+        maxResults:
+          type: integer
+          format: int32
+        supported:
+          type: boolean
+          default: false
+    ScimSupported:
+      type: object
+      properties:
+        supported:
+          type: boolean
+          default: false
+    ScimName:
+      required:
+      - familyName
+      - givenName
+      type: object
+      properties:
+        familyName:
+          type: string
+        givenName:
+          type: string
+    ScimErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Detailed error message
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:api:messages:2.0:Error
+        scimType:
+          type: string
+          description: Bad request type when status code is 400
+          enum:
+          - uniqueness
+          - tooMany
+          - mutability
+          - sensitive
+          - invalidSyntax
+          - invalidFilter
+          - invalidPath
+          - invalidValue
+          - invalidVers
+          - noTarget
+        status:
+          type: string
+          description: Same as HTTP status code, e.g. 400, 401, etc.
+    ScimUserSearchResponse:
+      type: object
+      properties:
+        Resources:
+          type: array
+          description: User list
+          items:
+            $ref: '#/components/schemas/ScimUserResponse'
+        itemsPerPage:
+          type: integer
+          format: int64
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:api:messages:2.0:ListResponse
+        startIndex:
+          type: integer
+          format: int64
+        totalResults:
+          type: integer
+          format: int64
+    ScimResourceTypeResponse:
+      required:
+      - name
+      - endpoint
+      - schema
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique resource type ID, same value as the "name" attribute
+        name:
+          type: string
+          description: Resource type name
+        endpoint:
+          type: string
+          description: The resource type's HTTP-addressable endpoint
+        description:
+          type: string
+          description: Description of the resource type
+        schema:
+          type: string
+          enum:
+          - urn:ietf:params:scim:schemas:core:2.0:User
+        schemaExtensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimSchemaExtension'
+        meta:
+          $ref: '#/components/schemas/ScimMeta'
+    ScimEmail:
+      required:
+      - type
+      - value
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - work
+        value:
+          type: string
+    ScimSearchRequest:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Page size
+          format: int32
+        filter:
+          type: string
+          description: Only support 'userName' or 'email' filter expressions for now
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:api:messages:2.0:SearchRequest
+        startIndex:
+          type: integer
+          description: Start index (1-based)
+          format: int32
+    ScimPhoto:
+      required:
+      - type
+      - value
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - photo
+        value:
+          type: string
+    ScimSchemaSearchResponse:
+      type: object
+      properties:
+        Resources:
+          type: array
+          description: Resource type list
+          items:
+            $ref: '#/components/schemas/ScimSchemaResponse'
+        itemsPerPage:
+          type: integer
+          format: int64
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:api:messages:2.0:ListResponse
+        startIndex:
+          type: integer
+          format: int64
+        totalResults:
+          type: integer
+          format: int64
+    ScimSchemaResponse:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique URI of the schema
+        name:
+          type: string
+          description: The name of the schema
+        description:
+          type: string
+          description: The description of the schema
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimSchemaAttribute'
+        meta:
+          $ref: '#/components/schemas/ScimMeta'
+    ScimAuthenticationScheme:
+      type: object
+      properties:
+        description:
+          type: string
+        documentationUri:
+          type: string
+        name:
+          type: string
+        specUri:
+          type: string
+        primary:
+          type: boolean
+    ScimUser:
+      required:
+      - emails
+      - name
+      - schemas
+      - userName
+      type: object
+      properties:
+        active:
+          type: boolean
+          description: User status
+          default: false
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimUserAddress'
+        emails:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimEmail'
+        externalId:
+          type: string
+          description: External unique resource ID defined by provisioning client
+        id:
+          type: string
+          description: Unique resource ID defined by RingCentral
+        name:
+          $ref: '#/components/schemas/ScimName'
+        phoneNumbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimPhoneNumber'
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimPhoto'
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:schemas:core:2.0:User
+        title:
+          type: string
+          description: User title
+        urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:
+          $ref: '#/components/schemas/ScimEnterpriseUser'
+        userName:
+          type: string
+          description: MUST be same as work type email address
+    ScimSchemaAttribute:
+      required:
+      - name
+      - type
+      - multiValued
+      - required
+      - mutability
+      - returned
+      - uniqueness
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the attribute
+        type:
+          type: string
+          enum:
+          - string
+          - boolean
+          - decimal
+          - integer
+          - dateTime
+          - reference
+          - complex
+        subAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimSchemaAttribute'
+        multiValued:
+          type: boolean
+          description: A Boolean value indicating the attribute's plurality
+          default: false
+        description:
+          type: string
+          description: The description of the attribute
+        required:
+          type: boolean
+          default: false
+        canonicalValues:
+          type: array
+          items:
+            type: string
+          description: A collection of suggested canonical values
+        caseExact:
+          type: boolean
+          default: false
+        mutability:
+          type: string
+          enum:
+          - readOnly
+          - readWrite
+          - immutable
+          - writeOnly
+          description: Indicates the circumstances under which the value of the attribute can be (re)defined
+        returned:
+          type: string
+          enum:
+          - always
+          - never
+          - default
+          - request
+          description: Indicates when an attribute and associated values are returned
+        uniqueness:
+          type: string
+          enum:
+          - none
+          - server
+          - global
+          description: Specifies how the service provider enforces uniqueness of attribute values
+        referenceTypes:
+          type: array
+          items:
+            type: string
+          description: Indicates the SCIM resource types that be referenced
+    ScimPhoneNumber:
+      required:
+      - type
+      - value
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - work
+          - mobile
+          - other
+        value:
+          type: string
+  responses:
+    ScimBadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+    ScimNotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+    ScimInternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+    ScimTooManyRequests:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+    ScimForbidden:
+      description: Permissions denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+    ScimConflict:
+      description: Duplicate email
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+    ScimUnauthorized:
+      description: Authorization failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+  parameters:
+    ScimUserId:
+      name: scimUserId
+      in: path
+      description: User ID
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

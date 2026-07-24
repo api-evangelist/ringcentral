@@ -1,0 +1,686 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Adaptive Cards
+paths:
+  /team-messaging/v1/chats/{chatId}/adaptive-cards:
+    post:
+      tags:
+      - Adaptive Cards
+      summary: Create Adaptive Card
+      description: Creates a new adaptive card in the chat specified in path.
+      operationId: createGlipAdaptiveCardNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdaptiveCardRequest'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdaptiveCardShortInfo'
+        '400':
+          description: Some of the parameters are missing or have invalid format
+        '403':
+          description: You do not have permissions to create adaptive card in the specified chat.
+        '404':
+          description: Specified chat ID does not exist.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/adaptive-cards/{cardId}:
+    get:
+      tags:
+      - Adaptive Cards
+      summary: Get Adaptive Card
+      description: Returns adaptive card(s) with given id(s).
+      operationId: getGlipAdaptiveCardNew
+      parameters:
+      - name: cardId
+        in: path
+        description: Internal identifier of an adaptive card, or comma separated list of adaptive cards IDs.
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdaptiveCardInfo'
+        '207':
+          description: Multi-Status
+        '400':
+          description: Some of the parameters are missing or have invalid format
+        '404':
+          description: Adaptive Card not found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    put:
+      tags:
+      - Adaptive Cards
+      summary: Update Adaptive Card
+      description: Updates an adaptive card.
+      operationId: updateGlipAdaptiveCardNew
+      parameters:
+      - name: cardId
+        in: path
+        description: Internal identifier of an adaptive card
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdaptiveCardRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdaptiveCardShortInfo'
+        '400':
+          description: Some of the parameters are missing or have invalid format
+        '403':
+          description: You do not have permissions to update specified adaptive card.
+        '404':
+          description: Adaptive Card for update does not exist.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    delete:
+      tags:
+      - Adaptive Cards
+      summary: Delete Adaptive Card
+      description: Deletes an adaptive card by ID.
+      operationId: deleteGlipAdaptiveCardNew
+      parameters:
+      - name: cardId
+        in: path
+        description: Adaptive Card ID to be deleted.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Some of the parameters are missing or have invalid format
+        '403':
+          description: You do not have permissions to delete specified adaptive card.
+        '404':
+          description: Adaptive Card not found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+components:
+  schemas:
+    AdaptiveCardColumnInfo:
+      type: object
+      properties:
+        type:
+          type: string
+        width:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdaptiveCardColumnItemInfo'
+    AdaptiveCardSelectAction:
+      type: object
+      description: An action that will be invoked when the card is tapped or selected. `Action.ShowCard` is not supported
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - Action.Submit
+          - Action.OpenUrl
+          - Action.ToggleVisibility
+    BackgroundImage:
+      type: object
+      required:
+      - url
+      description: Specifies a background image oa a card. Acceptable formats are PNG, JPEG, and GIF
+      properties:
+        type:
+          type: string
+          enum:
+          - BackgroundImage
+          description: Must be `BackgroundImage`
+        url:
+          type: string
+          format: uri
+          description: The URL/data URL of an image to be used as a background of a card. Acceptable formats are PNG, JPEG, and GIF
+        fillMode:
+          $ref: '#/components/schemas/ImageFillMode'
+        horizontalAlignment:
+          $ref: '#/components/schemas/HorizontalAlignment'
+        verticalAlignment:
+          $ref: '#/components/schemas/VerticalAlignment'
+    AdaptiveCardInfoRequestItem:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - TextBlock
+          - ColumnSet
+          - Column
+          - FactSet
+        text:
+          type: string
+        weight:
+          type: string
+        size:
+          type: string
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdaptiveCardColumnInfo'
+    AdaptiveCardRequest:
+      type: object
+      required:
+      - type
+      - version
+      properties:
+        type:
+          type: string
+          description: 'Type of attachment. This field is mandatory and filled on server side -
+
+            will be ignored if set in request body
+
+            '
+          enum:
+          - AdaptiveCard
+        version:
+          type: string
+          description: 'Version. This field is mandatory and filled on server side -
+
+            will be ignored if set in request body
+
+            '
+        body:
+          type: array
+          description: List of adaptive cards with the detailed information
+          items:
+            $ref: '#/components/schemas/AdaptiveCardInfoRequest'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdaptiveCardAction'
+        selectAction:
+          $ref: '#/components/schemas/AdaptiveCardSelectAction'
+        fallbackText:
+          type: string
+        backgroundImage:
+          description: Specifies the background image of a card
+          oneOf:
+          - type: string
+          - $ref: '#/components/schemas/BackgroundImage'
+        minHeight:
+          type: string
+          description: Specifies the minimum height of the card in pixels
+          example: 50px
+        speak:
+          type: string
+          description: Specifies what should be spoken for this entire card. This is simple text or SSML fragment
+        lang:
+          type: string
+          description: The 2-letter ISO-639-1 language used in the card. Used to localize any date/time functions
+          enum:
+          - en
+          - fr
+          - es
+        verticalContentAlignment:
+          $ref: '#/components/schemas/VerticalContentAlignment'
+    AdaptiveCardCreator:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a creator
+    ImageFillMode:
+      description: Describes how the image should fill the area
+      anyOf:
+      - type: string
+        enum:
+        - cover
+        - repeatHorizontally
+        - repeatVertically
+        - repeat
+      - type: string
+        pattern: ^([c|C][o|O][v|V][e|E][r|R])|([r|R][e|E][p|P][e|E][a|A][t|T][h|H][o|O][r|R][i|I][z|Z][o|O][n|N][t|T][a|A][l|L][l|L][y|Y])|([r|R][e|E][p|P][e|E][a|A][t|T][v|V][e|E][r|R][t|T][i|I][c|C][a|A][l|L][l|L][y|Y])|([r|R][e|E][p|P][e|E][a|A][t|T])$
+    HorizontalAlignment:
+      description: Describes how the image should be aligned if it must be cropped or if using repeat fill mode
+      anyOf:
+      - type: string
+        enum:
+        - left
+        - center
+        - right
+      - type: string
+        pattern: ^([l|L][e|E][f|F][t|T])|([c|C][e|E][n|N][t|T][e|E][r|R])|([r|R][i|I][g|G][h|H][t|T])$
+    AdaptiveCardInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an adaptive card
+        creationTime:
+          type: string
+          description: Adaptive Card creation datetime in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
+          format: date-time
+        lastModifiedTime:
+          type: string
+          description: Post last modification datetime in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
+          format: date-time
+        $schema:
+          type: string
+          format: uri
+          description: Schema of an adaptive card
+        type:
+          type: string
+          enum:
+          - AdaptiveCard
+        version:
+          type: string
+          description: Version of an adaptive card
+        creator:
+          $ref: '#/components/schemas/AdaptiveCardCreator'
+        chatIds:
+          type: array
+          description: Chat IDs where an adaptive card is posted or shared.
+          items:
+            type: string
+        body:
+          type: array
+          description: List of card elements to show in the primary card region
+          items:
+            $ref: '#/components/schemas/AdaptiveCardInfoRequest'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdaptiveCardAction'
+        selectAction:
+          $ref: '#/components/schemas/AdaptiveCardSelectAction'
+        fallbackText:
+          type: string
+          description: Text shown when the client doesn't support the version specified (may contain markdown)
+        backgroundImage:
+          oneOf:
+          - $ref: '#/components/schemas/BackgroundImage'
+          - type: string
+          description: Specifies the background image of a card
+        minHeight:
+          type: string
+          description: Specifies the minimum height of the card in pixels
+          example: 50px
+        speak:
+          type: string
+          description: Specifies what should be spoken for this entire card. This is simple text or SSML fragment
+        lang:
+          type: string
+          description: The 2-letter ISO-639-1 language used in the card. Used to localize any date/time functions
+          enum:
+          - en
+          - fr
+          - es
+        verticalContentAlignment:
+          $ref: '#/components/schemas/VerticalContentAlignment'
+    AdaptiveCardInfoRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Container
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdaptiveCardInfoRequestItem'
+    VerticalContentAlignment:
+      description: Defines how the content should be aligned vertically within the container. Only relevant for fixed-height cards, or cards with a `minHeight` specified
+      anyOf:
+      - type: string
+        enum:
+        - top
+        - center
+        - bottom
+      - type: string
+        pattern: ^([t|T][o|O][p|P])|([c|C][e|E][n|N][t|T][e|E][r|R])|([b|B][o|O][t|T][t|T][o|O][m|M])$
+    AdaptiveCardAction:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Action.ShowCard
+          - Action.Submit
+          - Action.OpenUrl
+          - Action.ToggleVisibility
+        title:
+          type: string
+        card:
+          $ref: '#/components/schemas/ActionAdaptiveCardInfo'
+        url:
+          type: string
+          format: uri
+    VerticalAlignment:
+      description: Describes how the image should be aligned if it must be cropped or if using repeat fill mode
+      anyOf:
+      - type: string
+        enum:
+        - top
+        - center
+        - bottom
+      - type: string
+        pattern: ^([t|T][o|O][p|P])|([c|C][e|E][n|N][t|T][e|E][r|R])|([b|B][o|O][t|T][t|T][o|O][m|M])$
+    AdaptiveCardShortInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an adaptive card
+        creationTime:
+          type: string
+          description: Adaptive Card creation datetime in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
+          format: date-time
+        lastModifiedTime:
+          type: string
+          description: Post last modification datetime in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
+          format: date-time
+        $schema:
+          type: string
+          description: Schema of an adaptive card
+        type:
+          type: string
+          enum:
+          - AdaptiveCard
+        version:
+          type: string
+          description: Version of an adaptive card. Filled on server-side
+        creator:
+          $ref: '#/components/schemas/AdaptiveCardCreator'
+        chatIds:
+          type: array
+          description: Chat IDs where an adaptive card is posted or shared.
+          items:
+            type: string
+    ActionCardBody:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Input.Text
+        id:
+          type: string
+        isMultiline:
+          type: boolean
+          description: If set to `true`, allows multiple lines of input
+          default: false
+        placeholder:
+          type: string
+          description: Description of the input desired. Displayed when no text has been input
+    AdaptiveCardColumnItemInfo:
+      type: object
+      properties:
+        type:
+          type: string
+        url:
+          type: string
+          format: uri
+        size:
+          type: string
+        style:
+          type: string
+        wrap:
+          type: boolean
+        spacing:
+          type: string
+        text:
+          type: string
+        isSubtle:
+          type: boolean
+    ActionAdaptiveCardInfo:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - AdaptiveCard
+        body:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionCardBody'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

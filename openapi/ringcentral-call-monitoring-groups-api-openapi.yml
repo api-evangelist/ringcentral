@@ -1,0 +1,698 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Call Monitoring Groups API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Call Monitoring Groups
+paths:
+  /restapi/v1.0/account/{accountId}/call-monitoring-groups:
+    get:
+      tags:
+      - Call Monitoring Groups
+      summary: List Call Monitoring Groups
+      description: 'Returns a list of call monitoring groups filtered by an extension.
+
+        '
+      operationId: listCallMonitoringGroups
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are allowed
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items)
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      - name: memberExtensionId
+        in: query
+        description: 'Internal identifier of an extension that is a member of every
+
+          group within the result
+
+          '
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Call monitoring groups information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallMonitoringGroups'
+      x-feature: ReadExtensions
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadExtensions
+    post:
+      tags:
+      - Call Monitoring Groups
+      summary: Create Call Monitoring Group
+      description: 'Creates a new call monitoring group.
+
+        '
+      operationId: createCallMonitoringGroup
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        description: Parameters of a call monitoring group that will be created
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCallMonitoringGroupRequest'
+        required: true
+      responses:
+        '200':
+          description: Call monitoring group information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallMonitoringGroup'
+      x-feature: EditGroups
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: EditExtensions
+      x-user-permission: Groups
+  /restapi/v1.0/account/{accountId}/call-monitoring-groups/{groupId}:
+    put:
+      tags:
+      - Call Monitoring Groups
+      summary: Update Call Monitoring Group
+      description: 'Updates a call monitoring group name.
+
+        '
+      operationId: updateCallMonitoringGroup
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: groupId
+        in: path
+        description: 'Internal identifier of a call monitoring group
+
+          '
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Parameters of a call monitoring group that will be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCallMonitoringGroupRequest'
+        required: true
+      responses:
+        '200':
+          description: Updated call monitoring group information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallMonitoringGroup'
+        '400':
+          description: Value for group name is unacceptable
+        '403':
+          description: User has no permissions to create groups
+        '404':
+          description: 'Group with the given identifier doesn''t belong to the account
+
+            '
+      x-feature: EditGroups
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: EditExtensions
+      x-user-permission: Groups
+    delete:
+      tags:
+      - Call Monitoring Groups
+      summary: Delete Call Monitoring Group
+      description: 'Removes information about a call monitoring group specified in path.
+
+        '
+      operationId: deleteCallMonitoringGroup
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: groupId
+        in: path
+        required: true
+        description: Internal identifier of a call monitoring group
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Group with the given identifier doesn't belong to the account
+      x-feature: EditGroups
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditExtensions
+      x-user-permission: Groups
+  /restapi/v1.0/account/{accountId}/call-monitoring-groups/{groupId}/bulk-assign:
+    post:
+      tags:
+      - Call Monitoring Groups
+      summary: Update Call Monitoring Group List
+      description: 'Updates a list of call monitoring groups.
+
+        '
+      operationId: updateCallMonitoringGroupList
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: groupId
+        in: path
+        required: true
+        description: 'Internal identifier of a call monitoring group
+
+          '
+        schema:
+          type: string
+      requestBody:
+        description: Changes for a given call monitoring group
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallMonitoringBulkAssign'
+        required: true
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: 'Extension of type [ParkLocation] could not be a member of [call
+
+            monitoring]
+
+            '
+      x-feature: EditGroups
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditExtensions
+      x-user-permission: Groups
+  /restapi/v1.0/account/{accountId}/call-monitoring-groups/{groupId}/members:
+    get:
+      tags:
+      - Call Monitoring Groups
+      summary: List Call Monitoring Group Members
+      description: 'Returns a list of members for a call monitoring group specified in path.
+
+        '
+      operationId: listCallMonitoringGroupMembers
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: groupId
+        in: path
+        required: true
+        description: 'Internal identifier of a call monitoring group
+
+          '
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are allowed
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items)
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: Call monitoring group members information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallMonitoringGroupMemberList'
+      x-feature: ReadExtensions
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadExtensions
+components:
+  schemas:
+    CallMonitoringGroup:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call monitoring group resource
+        id:
+          type: string
+          description: Internal identifier of a group
+        name:
+          type: string
+          description: Name of a group
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    CallMonitoringExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Internal identifier of an extension. Only the following extension
+
+            types are allowed: User, DigitalUser, VirtualUser, FaxUser, Limited
+
+            '
+        permissions:
+          type: array
+          description: 'Set of call monitoring group permissions granted to a specified
+
+            extension. In order to remove a specified extension from a call monitoring
+
+            group use an empty value
+
+            '
+          items:
+            type: string
+            enum:
+            - Monitoring
+            - Monitored
+    CallMonitoringGroupMemberList:
+      required:
+      - navigation
+      - paging
+      - records
+      - uri
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call monitoring group members resource
+        records:
+          type: array
+          description: List of a call monitoring group members
+          items:
+            $ref: '#/components/schemas/CallMonitoringGroupMemberInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CreateCallMonitoringGroupRequest:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of a group
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    CallMonitoringGroups:
+      required:
+      - navigation
+      - paging
+      - records
+      - uri
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call monitoring groups resource
+        records:
+          type: array
+          description: List of call monitoring group members
+          items:
+            $ref: '#/components/schemas/CallMonitoringGroup'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CallMonitoringBulkAssign:
+      type: object
+      properties:
+        addedExtensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallMonitoringExtensionInfo'
+        updatedExtensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallMonitoringExtensionInfo'
+        removedExtensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallMonitoringExtensionInfo'
+    CallMonitoringGroupMemberInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call monitoring group member
+        id:
+          type: string
+          description: 'Internal identifier of a call monitoring group member
+
+            '
+        extensionNumber:
+          type: string
+          description: 'Extension number of a call monitoring group member
+
+            '
+        permissions:
+          type: array
+          items:
+            type: string
+            description: 'Call monitoring permission; multiple values are allowed:
+
+              - `Monitoring` - User can monitor a group;
+
+              - `Monitored` - User can be monitored.
+
+              '
+            enum:
+            - Monitoring
+            - Monitored
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

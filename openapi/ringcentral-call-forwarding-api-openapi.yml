@@ -1,0 +1,844 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Call Forwarding API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Call Forwarding
+paths:
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/forwarding-number:
+    get:
+      tags:
+      - Call Forwarding
+      summary: List Forwarding Numbers
+      description: 'Returns the list of extension phone numbers used for call forwarding
+
+        and call flip. The returned list contains all the extension phone numbers
+
+        used for call forwarding and call flip.
+
+        '
+      operationId: listForwardingNumbers
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetExtensionForwardingNumberListResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadUserForwardingFlipNumbers
+    post:
+      tags:
+      - Call Forwarding
+      summary: Create Forwarding Number
+      description: Adds a new forwarding number to the forwarding number list.
+      operationId: createForwardingNumber
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateForwardingNumberRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForwardingNumberInfo'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditExtensionAnsweringRules
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditExtensions
+      x-user-permission: EditUserForwardingFlipNumbers
+    delete:
+      tags:
+      - Call Forwarding
+      summary: Delete Forwarding Numbers
+      description: Deletes multiple forwarding numbers from the forwarding number list by IDs.
+      operationId: deleteForwardingNumbers
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteForwardingNumbersRequest'
+        required: true
+      responses:
+        '204':
+          description: No content
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditExtensionAnsweringRules
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditExtensions
+      x-user-permission: EditUserForwardingFlipNumbers
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/forwarding-number/{forwardingNumberId}:
+    get:
+      tags:
+      - Call Forwarding
+      summary: Get Forwarding Number
+      description: Returns a specific forwarding number.
+      operationId: readForwardingNumber
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/ForwardingNumberId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForwardingNumberResource'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadUserForwardingFlipNumbers
+    put:
+      tags:
+      - Call Forwarding
+      summary: Update Forwarding Number
+      description: Updates the existing forwarding number from the forwarding number list.
+      operationId: updateForwardingNumber
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/ForwardingNumberId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateForwardingNumberRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForwardingNumberInfo'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditExtensionAnsweringRules
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditExtensions
+      x-user-permission: EditUserForwardingFlipNumbers
+    delete:
+      tags:
+      - Call Forwarding
+      summary: Delete Forwarding Number
+      description: Deletes a forwarding number from the forwarding number list by its ID.
+      operationId: deleteForwardingNumber
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/ForwardingNumberId'
+      responses:
+        '204':
+          description: No content
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditExtensionAnsweringRules
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditExtensions
+      x-user-permission: EditUserForwardingFlipNumbers
+components:
+  schemas:
+    ForwardingNumberId:
+      type: object
+      properties:
+        forwardingNumberId:
+          type: string
+          description: Forwarding number id
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    CreateForwardingNumberDeviceInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of the other extension device
+      description: 'Forwarding device information. Applicable for ''PhoneLine'' type only.
+
+        Cannot be specified together with ''phoneNumber'' parameter
+
+        '
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    CreateForwardingNumberRequest:
+      type: object
+      properties:
+        flipNumber:
+          type: integer
+          format: int32
+          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
+        phoneNumber:
+          type: string
+          description: Forwarding/Call flip phone number
+        label:
+          type: string
+          description: Forwarding/Call flip number title
+        type:
+          type: string
+          description: Forwarding/Call flip phone type. If specified, 'label' attribute value is ignored. The default value is 'Other'
+          enum:
+          - PhoneLine
+          - Home
+          - Mobile
+          - Work
+          - Other
+        device:
+          $ref: '#/components/schemas/CreateForwardingNumberDeviceInfo'
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    GetExtensionForwardingNumberListResponse:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the forwarding number list resource
+        records:
+          type: array
+          description: List of forwarding phone numbers
+          items:
+            $ref: '#/components/schemas/ForwardingNumberInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    ForwardingNumberResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+        phoneNumber:
+          type: string
+        label:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+            enum:
+            - CallFlip
+            - CallForwarding
+        flipNumber:
+          pattern: '[1-8]'
+          type: string
+        type:
+          type: string
+          description: Forwarding phone number type
+          enum:
+          - Home
+          - Mobile
+          - Work
+          - PhoneLine
+          - Outage
+          - Other
+    ForwardingNumberInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a forwarding/call flip phone number
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a forwarding/call flip phone number
+        phoneNumber:
+          type: string
+          description: Forwarding/Call flip phone number
+        label:
+          type: string
+          description: Forwarding/Call flip number title
+        features:
+          type: array
+          description: Type of option this phone number is used for. Multiple values are accepted
+          items:
+            type: string
+            enum:
+            - CallFlip
+            - CallForwarding
+        flipNumber:
+          type: string
+          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
+        device:
+          $ref: '#/components/schemas/CreateForwardingNumberDeviceInfo'
+        type:
+          type: string
+          description: Forwarding phone number type
+          enum:
+          - Home
+          - Mobile
+          - Work
+          - PhoneLine
+          - Outage
+          - Other
+          - BusinessMobilePhone
+          - ExternalCarrier
+          - ExtensionApps
+        extension:
+          type: object
+          description: Extension information. Returned only if extension type is 'ExtensionApps'
+          properties:
+            id:
+              type: string
+              description: Internal identifier of an extension
+            extensionNumber:
+              type: string
+              description: Number of an extension
+            name:
+              type: string
+              description: Extension name
+    UpdateForwardingNumberRequest:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Forwarding/Call flip phone number
+        label:
+          type: string
+          description: Forwarding/Call flip number title
+        flipNumber:
+          type: string
+          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
+        type:
+          type: string
+          description: Forwarding phone number type
+          enum:
+          - Home
+          - Mobile
+          - Work
+          - PhoneLine
+          - Outage
+          - Other
+          - BusinessMobilePhone
+          - ExternalCarrier
+    DeleteForwardingNumbersRequest:
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of forwarding number IDs
+          items:
+            $ref: '#/components/schemas/ForwardingNumberId'
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: The result set page number (1-indexed) to return
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 1
+      example: 1
+    PerPage:
+      name: perPage
+      in: query
+      description: 'The number of items per page. If provided value in the request
+
+        is greater than a maximum, the maximum value is applied
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 100
+      example: 100
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ForwardingNumberId:
+      name: forwardingNumberId
+      in: path
+      description: Internal identifier of a forwarding number (returned in response in the 'id' field)
+      required: true
+      schema:
+        type: string
+  responses:
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

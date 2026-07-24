@@ -1,0 +1,1430 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards High Volume SMS API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: High Volume SMS
+paths:
+  /restapi/v1.0/account/{accountId}/a2p-sms/statuses:
+    get:
+      tags:
+      - High Volume SMS
+      summary: List A2P SMS Statuses
+      description: Retrieves a set of message counts by message status and error codes filtered by dates, batchId and message direction.
+      operationId: aggregateA2PSMSStatuses
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/QueryBatchId'
+      - $ref: '#/components/parameters/SmsDirection'
+      - $ref: '#/components/parameters/SmsDateFrom'
+      - $ref: '#/components/parameters/SmsDateTo'
+      - name: phoneNumber
+        in: query
+        required: false
+        style: form
+        explode: true
+        description: List of phone numbers (specified in 'to' or 'from' fields of a message) to filter the results. Maximum number of phone numbers allowed to be specified as filters is 15
+        schema:
+          type: array
+          items:
+            type: string
+        example:
+        - '15551234455'
+        - '15551235577'
+      responses:
+        '200':
+          description: The statuses of the messages sent by the account filtered by criteria specified in the query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageStatusesResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              examples:
+                CMN-110:
+                  value:
+                    errorCode: CMN-110
+                    message: Header ${parameterName} should be specified
+                CMN-407:
+                  value:
+                    errorCode: CMN-407
+                    message: Parameter in header is invalid
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+        '404':
+          description: No resource found for the account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-102
+                message: Resource for parameter [${parameterName}] is not found.
+        '500':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-203
+                message: Internal Server Error
+      x-feature: SMSSending
+      x-throttling-group: Light
+      x-availability: High
+      x-app-permission: A2PSMS
+  /restapi/v1.0/account/{accountId}/a2p-sms/messages:
+    get:
+      tags:
+      - High Volume SMS
+      summary: List A2P SMS Messages
+      description: Returns the list of outbound/inbound A2P messages sent from/to A2P phone numbers of the current account. The list can be filtered by message batch ID and/or phone number.
+      operationId: listA2PSMS
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/QueryBatchId'
+      - $ref: '#/components/parameters/SmsDirection'
+      - $ref: '#/components/parameters/SmsDateFrom'
+      - $ref: '#/components/parameters/SmsDateTo'
+      - name: view
+        in: query
+        required: false
+        description: Indicates if the response has to be detailed, includes text in the response if detailed
+        schema:
+          type: string
+          default: Simple
+          enum:
+          - Simple
+          - Detailed
+      - name: phoneNumber
+        in: query
+        required: false
+        style: form
+        explode: true
+        description: List of phone numbers (specified in 'to' or 'from' fields of a message) to filter the results. Maximum number of phone numbers allowed to be specified as filters is 15
+        schema:
+          type: array
+          items:
+            type: string
+        example:
+        - '15551234455'
+        - '15551235577'
+      - name: pageToken
+        in: query
+        required: false
+        description: The page token of the page to be retrieved.
+        schema:
+          type: string
+        example: pgt1
+      - name: perPage
+        in: query
+        required: false
+        description: The number of messages to be returned per request
+        schema:
+          type: integer
+          format: int32
+          default: 1000
+        example: 1
+      responses:
+        '200':
+          description: 'The list of messages sent by the account and filtered by the criteria specified in the query parameters
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageListResponse'
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              examples:
+                CMN-101:
+                  value:
+                    errorCode: CMN-101
+                    message: Parameter [${parameterName}] value is invalid.
+                CMN-110:
+                  value:
+                    errorCode: CMN-110
+                    message: Header ${parameterName} should be specified
+                CMN-407:
+                  value:
+                    errorCode: CMN-407
+                    message: Parameter in header is invalid
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+        '404':
+          description: No resource found for the account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-102
+                message: Resource for parameter [${parameterName}] is not found.
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-203
+                message: Internal Server Error
+      x-feature: SMSSending
+      x-throttling-group: Light
+      x-availability: High
+      x-app-permission: A2PSMS
+  /restapi/v1.0/account/{accountId}/a2p-sms/messages/{messageId}:
+    get:
+      tags:
+      - High Volume SMS
+      summary: Get A2P SMS
+      description: Returns the details of an A2P SMS message by ID.
+      operationId: readA2PSMS
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: messageId
+        in: path
+        description: Internal identifier of a message to be retrieved
+        required: true
+        schema:
+          type: string
+        example: '1234'
+      responses:
+        '200':
+          description: The message is found and returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageDetailsResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              examples:
+                CMN-101:
+                  value:
+                    errorCode: CMN-101
+                    message: Parameter [${parameterName}] value is invalid.
+                CMN-110:
+                  value:
+                    errorCode: CMN-110
+                    message: Header ${parameterName} should be specified
+                CMN-407:
+                  value:
+                    errorCode: CMN-407
+                    message: Parameter in header is invalid
+        '401':
+          description: Unauthorized error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+        '404':
+          description: The message is not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-102
+                message: Resource for parameter [${parameterName}] is not found.
+        '500':
+          description: Service is not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-203
+                message: Internal Server Error
+      x-feature: SMSSending
+      x-throttling-group: Light
+      x-availability: High
+      x-app-permission: A2PSMS
+  /restapi/v1.0/account/{accountId}/a2p-sms/opt-outs:
+    get:
+      tags:
+      - High Volume SMS
+      summary: List Opted Out Numbers
+      description: 'Returns the list of numbers opted out from the account. The list
+
+        can be filtered by `to`/`from` phone number query parameters. Specifying `text/csv`
+
+        in the `Accept` header lets download the data in the CSV format.
+
+        '
+      operationId: readA2PSMSOptOuts
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: from
+        in: query
+        required: false
+        description: 'The sender''s phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format for filtering messages.
+
+          The asterisk value "*" means any number in `from` field
+
+          '
+        schema:
+          type: string
+        example: '15551234455'
+      - name: to
+        in: query
+        required: false
+        description: 'The receiver''s phone number (`to` field) in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format for filtering messages
+
+          '
+        example: '15551237755'
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        description: The status (opted out, opted in, or both) to be used as the filter
+        schema:
+          type: string
+          default: optout
+          enum:
+          - optout
+          - optin
+          - all
+        example: optout
+      - name: pageToken
+        in: query
+        required: false
+        description: The page token of the page to be retrieved
+        schema:
+          type: string
+        example: pgt1
+      - name: perPage
+        in: query
+        required: false
+        description: The number of records to be returned for the page
+        schema:
+          type: integer
+          format: int32
+          default: 1000
+        example: 5
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptOutListResponse'
+            text/csv:
+              schema:
+                $ref: '#/components/schemas/OptOutListResponse'
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              examples:
+                CMN-101:
+                  value:
+                    errorCode: CMN-101
+                    message: Parameter [${parameterName}] value is invalid.
+                CMN-110:
+                  value:
+                    errorCode: CMN-110
+                    message: Header ${parameterName} should be specified
+                CMN-407:
+                  value:
+                    errorCode: CMN-407
+                    message: Parameter in header is invalid
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+        '404':
+          description: No resource found for the account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-102
+                message: Resource for parameter [${parameterName}] is not found.
+        '500':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-203
+                message: Internal Server Error
+      x-feature: SMSSending
+      x-throttling-group: Light
+      x-availability: High
+      x-app-permission: A2PSMS
+  /restapi/v1.0/account/{accountId}/a2p-sms/opt-outs/bulk-assign:
+    post:
+      tags:
+      - High Volume SMS
+      operationId: addA2PSMSOptOuts
+      description: 'Adds multiple opt-outs and/or opt-ins for the specified sender number and a set of recipient numbers.
+
+        '
+      summary: Add Opt-In/Out Numbers
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        description: 'Consists of `from` field and `optOuts` and `optIns` lists.
+
+          Both `optOuts` and `optIns` can be empty but not simultaneously - at least one of the lists must be entered.
+
+          '
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptOutBulkAssignRequest'
+      responses:
+        '200':
+          description: The results of adding opt-outs and opt-ins.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptOutBulkAssignResponse'
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              examples:
+                CMN-101:
+                  value:
+                    errorCode: CMN-101
+                    message: Parameter [from] value is invalid.
+                CMN-104:
+                  value:
+                    errorCode: CMN-104
+                    message: Cannot parse request
+        '500':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-203
+                message: Internal Server Error
+      x-feature: SMSSending
+      x-throttling-group: Light
+      x-availability: High
+      x-app-permission: A2PSMS
+  /restapi/v1.0/account/{accountId}/a2p-sms/batches:
+    post:
+      tags:
+      - High Volume SMS
+      summary: Send A2P SMS
+      description: 'Allows to send high volume of A2P (Application-to-Person) SMS messages
+
+        (in message batches). Only phone number with the `A2PSmsSender` feature can
+
+        be used as a sender.
+
+        '
+      operationId: createA2PSMS
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        description: SMS batch payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageBatchCreateRequest'
+      responses:
+        '201':
+          description: Message batch created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageBatchResponse'
+        '400':
+          description: Validation Failed, Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              examples:
+                CMN-101:
+                  value:
+                    errorCode: CMN-101
+                    message: Parameter [${parameterName}] value is invalid.
+                CMN-104:
+                  value:
+                    errorCode: CMN-104
+                    message: Cannot parse request
+                CMN-110:
+                  value:
+                    errorCode: CMN-110
+                    message: Header ${parameterName} should be specified
+                CMN-407:
+                  value:
+                    errorCode: CMN-407
+                    message: Parameter in header is invalid
+        '401':
+          description: Unauthorized error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-203
+                message: Internal Server Error
+      x-feature: SMSSending
+      x-request-max-body-size: 50m
+      x-throttling-group: Light
+      x-availability: High
+      x-app-permission: A2PSMS
+    get:
+      tags:
+      - High Volume SMS
+      summary: List A2P SMS Batches
+      description: 'Returns the list of A2P batches sent from the current account.
+
+        The list can be filtered by message batch ID and/or from phone number.
+
+        '
+      operationId: listA2PBatches
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/SmsDateFrom'
+      - $ref: '#/components/parameters/SmsDateTo'
+      - name: from
+        in: query
+        required: false
+        description: Phone number in E.164 format from which the messages are going to be sent
+        schema:
+          type: string
+        example: '15551234455'
+      - name: status
+        in: query
+        required: false
+        style: form
+        explode: true
+        description: A list of batch statuses to filter the results
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - Queued
+            - Processing
+            - Sent
+            - Completed
+        example:
+        - Queued
+        - Processing
+      - name: pageToken
+        in: query
+        required: false
+        description: The page token of the page to be retrieved
+        schema:
+          type: string
+        example: pgt1
+      - name: perPage
+        in: query
+        required: false
+        description: The number of records to be returned per page
+        schema:
+          type: integer
+          format: int64
+        example: 1
+      responses:
+        '200':
+          description: 'The list of batches sent by the account and filtered by the criteria specified in the query parameters
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchListResponse'
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              examples:
+                CMN-101:
+                  value:
+                    errorCode: CMN-101
+                    message: Parameter [${parameterName}] value is invalid.
+                CMN-110:
+                  value:
+                    errorCode: CMN-110
+                    message: Header ${parameterName} should be specified
+                CMN-407:
+                  value:
+                    errorCode: CMN-407
+                    message: Parameter in header is invalid
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+        '404':
+          description: No resource found for the account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-102
+                message: Resource for parameter [${parameterName}] is not found.
+        '500':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-203
+                message: Internal Server Error
+      x-feature: SMSSending
+      x-request-max-body-size: 50m
+      x-throttling-group: Light
+      x-availability: High
+      x-app-permission: A2PSMS
+  /restapi/v1.0/account/{accountId}/a2p-sms/batches/{batchId}:
+    get:
+      tags:
+      - High Volume SMS
+      summary: Get A2P SMS Batch
+      description: Returns information on a message batch.
+      operationId: readA2PBatch
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/BatchId'
+      responses:
+        '200':
+          description: Message batch information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageBatchResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              examples:
+                CMN-101:
+                  value:
+                    errorCode: CMN-101
+                    message: Parameter [${parameterName}] value is invalid.
+                CMN-110:
+                  value:
+                    errorCode: CMN-110
+                    message: Header ${parameterName} should be specified
+                CMN-407:
+                  value:
+                    errorCode: CMN-407
+                    message: Parameter in header is invalid
+        '401':
+          description: Unauthorized error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+        '404':
+          description: The batch is not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-102
+                message: Resource for parameter [${parameterName}] is not found.
+        '500':
+          description: Service is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ASGErrorResponse'
+              example:
+                errorCode: CMN-203
+                message: Internal Server Error
+      x-feature: SMSSending
+      x-throttling-group: Light
+      x-availability: High
+      x-app-permission: A2PSMS
+components:
+  schemas:
+    OptOutListResponse:
+      type: object
+      description: The list of opt outs
+      properties:
+        records:
+          type: array
+          description: List of individual opt-out number records
+          items:
+            $ref: '#/components/schemas/OptOutResponse'
+        paging:
+          $ref: '#/components/schemas/PagingResource'
+    SmsDirectionEnum:
+      type: string
+      description: Direction of the SMS message
+      enum:
+      - Inbound
+      - Outbound
+    RejectedRecipientResponseResource:
+      type: object
+      description: The rejected recipient details
+      properties:
+        index:
+          type: integer
+          description: The index of the messages list in the send batch request where the invalid recipient was found
+          format: int64
+          example: 1
+        to:
+          type: array
+          items:
+            type: string
+          description: The invalid recipient number as found in the request
+          example:
+          - '29395'
+        errorCode:
+          type: string
+          description: The error code
+          example: CMN-100
+        description:
+          type: string
+          description: The description of the error
+          example: The recipient is invalid
+    MessageStatusesResponse:
+      type: object
+      description: The messages status object with details of each status
+      properties:
+        queued:
+          $ref: '#/components/schemas/MessageStatusCounts'
+        delivered:
+          $ref: '#/components/schemas/MessageStatusCounts'
+        deliveryFailed:
+          $ref: '#/components/schemas/MessageStatusCounts'
+        sent:
+          $ref: '#/components/schemas/MessageStatusCounts'
+        sendingFailed:
+          $ref: '#/components/schemas/MessageStatusCounts'
+    MessageCreateRequest:
+      type: object
+      description: Single individual SMS resource
+      required:
+      - to
+      properties:
+        to:
+          type: array
+          items:
+            type: string
+          description: 'List of phone numbers in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            format, recipients of this message. Currently only one number is supported
+
+            '
+          example:
+          - '15551234477'
+        text:
+          type: string
+          description: Text to send, maximum number of characters is 1000
+          example: Hello, World!
+    OptOutBulkAssignResponse:
+      type: object
+      description: The results of adding opt-outs and opt-ins
+      properties:
+        optIns:
+          type: object
+          description: Contains successful and failed opt-ins
+          properties:
+            successful:
+              type: array
+              description: Recipients' phone numbers which opt-ins were successfully added for.
+              items:
+                type: string
+              example:
+              - '+15551237799'
+            failed:
+              type: array
+              description: Recipients' phone numbers which opt-ins were failed to be added for. Plus, error messages
+              items:
+                $ref: '#/components/schemas/OptOutBulkAssignFailedEntry'
+              example:
+              - to: '+15551237798'
+                errorMessage: Unexpected issue on removing an opt-out from bulk-assign request
+        optOuts:
+          type: object
+          description: Contains successful and failed opt-outs
+          properties:
+            successful:
+              type: array
+              description: Recipients' phone numbers which opt-outs were successfully added for.
+              items:
+                type: string
+              example:
+              - '+15551237755'
+            failed:
+              type: array
+              description: Recipients' phone numbers which opt-outs were failed to be added for. Plus, error messages
+              items:
+                $ref: '#/components/schemas/OptOutBulkAssignFailedEntry'
+              example:
+              - to: '+15551237756'
+                errorMessage: Unexpected issue on creating an opt-out from bulk-assign request
+    OptOutResponse:
+      type: object
+      description: Opt-out record
+      properties:
+        from:
+          type: string
+          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format from which the recipient has opted out
+          example: '+15551234567'
+        to:
+          type: string
+          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format which is opted out
+          example: '+15551234567'
+        status:
+          type: string
+          description: Status of a phone number
+          enum:
+          - OptIn
+          - OptOut
+        source:
+          type: string
+          enum:
+          - Recipient
+          - Account
+          - Upstream
+          - Carrier
+    MessageListResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          description: An array containing individual messages
+          items:
+            $ref: '#/components/schemas/MessageListMessageResponse'
+        paging:
+          $ref: '#/components/schemas/PagingResource'
+      description: List of messages retrieved for an account and other filter criteria such as `batchId` and `fromPhoneNumber` specified in the request
+    MessageDetailsResponse:
+      type: object
+      description: Complete details of the message
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a message
+          example: '1234'
+        from:
+          type: string
+          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format from which the message was sent
+          example: '+15551234567'
+        to:
+          type: array
+          description: List of phone numbers in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format to which the message was sent
+          example:
+          - '+15551234567'
+          items:
+            type: string
+        text:
+          type: string
+          description: Text of a message, maximum number of characters is 1000
+          example: Hello, World!
+        creationTime:
+          type: string
+          format: date-time
+          description: The time when this is message was created.
+        lastModifiedTime:
+          type: string
+          format: date-time
+          description: The time when this message was last updated.
+        messageStatus:
+          $ref: '#/components/schemas/SmsStatusEnum'
+        segmentCount:
+          type: integer
+          description: Number of segments of a message
+          format: int32
+          example: 1
+        cost:
+          type: number
+          description: Cost of a message
+          format: double
+          example: 0.007
+        batchId:
+          type: string
+          description: The batch in which the message was submitted
+          example: batch12345
+        direction:
+          $ref: '#/components/schemas/SmsDirectionEnum'
+        errorCode:
+          type: string
+          description: The RC error code of the message sending failure reason
+          example: SMS-RC-503
+    MessageStatusCounts:
+      type: object
+      description: Message status parameters
+      properties:
+        cost:
+          type: number
+          format: float
+          description: Total cost of all messages with this status code
+        count:
+          type: integer
+          description: Count of messages with this status code
+          format: int32
+          example: 7
+        errorCodeCounts:
+          type: object
+          description: Message sending/delivery errors. Returned in `deliveryFailed` and `sendingFailed` resources
+          additionalProperties:
+            type: integer
+            description: Count of messages with this error code
+            format: int32
+            example: 5
+    MessageBatchCreateRequest:
+      required:
+      - from
+      - messages
+      type: object
+      description: 'Batch of A2P SMS messages. This object provides specification to
+
+        send message(s) to many recipients. It contains top-level attributes, such
+
+        as `text` which apply to all `messages`. In addition to that, it is possible
+
+        to override this attribute for each message. This way a single API call may
+
+        be used to send individual messages to many recipients.
+
+        '
+      properties:
+        from:
+          type: string
+          description: Sender's phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format.
+          example: '+15551234567'
+        text:
+          type: string
+          description: Text to send to `messages.to` phone numbers. Can be overridden on a per-message basis
+          example: Hello, World!
+        messages:
+          type: array
+          description: Individual messages
+          items:
+            $ref: '#/components/schemas/MessageCreateRequest'
+    MessageBatchResponse:
+      type: object
+      description: 'Batch of A2P SMS messages. This object provides a specification
+
+        to send message(s) to many recipients. It contains top-level attributes which apply to all messages. In addition
+
+        to that, it is possible to override this attribute for each message. This
+
+        way a single API call may be used to send individual messages to many recipients
+
+        '
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the message batch
+          readOnly: true
+          example: '12345'
+        from:
+          type: string
+          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format from which the messages are going to be sent
+          example: '+15551234567'
+        batchSize:
+          type: integer
+          description: Total number of messages in the accepted batch
+          format: int32
+          example: 5
+        processedCount:
+          type: integer
+          format: int32
+          description: Total number of messages currently processed in the batch
+          example: 1
+        lastModifiedTime:
+          type: string
+          format: date-time
+          description: 'The last time the batch was processed.
+
+            '
+        status:
+          type: string
+          description: Current status of a message batch
+          example: Processing
+          enum:
+          - Processing
+          - Completed
+        creationTime:
+          type: string
+          format: date-time
+          description: 'The time at which the batch was created
+
+            '
+        rejected:
+          type: array
+          description: The list of rejected/invalid recipients
+          items:
+            $ref: '#/components/schemas/RejectedRecipientResponseResource'
+        cost:
+          type: number
+          format: double
+          description: 'The estimated batch cost for completed batch. Calculated after batch processing is completed.
+
+            '
+          example: 0.007
+    ASGErrorResponse:
+      type: object
+      description: Error response
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Error code
+          example: CMN-101
+        message:
+          type: string
+          description: Human-readable description of the error. Not suitable for end users.
+          example: AccountId 1234 is invalid
+    MessageListMessageResponse:
+      type: object
+      description: The short detail of the message in the get batch response
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The Id of the message
+          example: 1234
+        batchId:
+          type: string
+          description: Internal identifier of a batch the message was submitted in
+          example: '12345'
+        from:
+          type: string
+          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format from which the message is sent
+          example: '+15551234567'
+        to:
+          type: array
+          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format to which a message is sent
+          example:
+          - '+15551234567'
+          items:
+            type: string
+        creationTime:
+          type: string
+          format: date-time
+          description: The time at which the message was created
+        lastModifiedTime:
+          type: string
+          format: date-time
+          description: The time at which the messages was last updated
+        messageStatus:
+          $ref: '#/components/schemas/SmsStatusEnum'
+        segmentCount:
+          type: integer
+          description: Number of segments of a message
+          format: int32
+          example: 1
+        text:
+          type: string
+          description: Text of a message. Returned if the `view` parameter is set to 'Detailed'
+        cost:
+          type: number
+          description: Cost of a message
+          format: double
+          example: 0.007
+        direction:
+          $ref: '#/components/schemas/SmsDirectionEnum'
+        errorCode:
+          type: string
+          description: The RC error code of the message sending failure reason
+          example: SMS-RC-503
+    OptOutBulkAssignRequest:
+      type: object
+      description: Consists of `from` field and `optOuts` and `optIns` lists. Both `optOuts` and `optIns` can be empty but not simultaneously - at least one of the lists must be entered."
+      required:
+      - from
+      properties:
+        from:
+          type: string
+          description: The phone number of a sender which the recipients should be opted out from or opted in to
+          example: '+15551234455'
+        optOuts:
+          type: array
+          description: The list of phone numbers to be opted out
+          items:
+            type: string
+          example:
+          - '+15551237755'
+          - '+15551237756'
+        optIns:
+          type: array
+          description: The list of phone numbers to be opted in
+          items:
+            type: string
+          example:
+          - '+15551237799'
+          - '+15551237798'
+    PagingResource:
+      type: object
+      description: Pagination details
+      properties:
+        pageToken:
+          type: string
+          description: Page token of the current response list
+          example: pgt1
+        perPage:
+          type: integer
+          format: int32
+          description: Number of records per page
+          example: 3
+        firstPageToken:
+          type: string
+          description: First page token of the current filter criteria
+          example: fpgt1
+        previousPageToken:
+          type: string
+          description: Previous page token of the current filter criteria
+          example: lpgt1
+        nextPageToken:
+          type: string
+          description: Next page token of the current filter criteria
+          example: npgt1
+    BatchListResponse:
+      type: object
+      description: The list of batches retrieved for an account and other filter criteria such as fromPhoneNumber, date specified in the request.
+      properties:
+        records:
+          type: array
+          description: An array containing individual batches
+          items:
+            $ref: '#/components/schemas/MessageBatchResponse'
+        paging:
+          $ref: '#/components/schemas/PagingResource'
+    OptOutBulkAssignFailedEntry:
+      type: object
+      description: Represents a failure of adding opt-out / opt-in. A pair of a recipient phone number and an error message
+      properties:
+        to:
+          type: string
+          description: A recipient phone number
+          example: '+15551237756'
+        errorMessage:
+          type: string
+          description: An error happened on adding opt-out / opt-in
+          example: Unexpected issue on creating an opt-out from bulk-assign request
+    SmsStatusEnum:
+      type: string
+      description: Current status of a message
+      example: Queued
+      enum:
+      - Queued
+      - Delivered
+      - Sent
+      - SendingFailed
+      - DeliveryFailed
+  parameters:
+    QueryBatchId:
+      name: batchId
+      in: query
+      required: false
+      description: Internal identifier of a message batch to filter the response
+      example: '55577'
+      schema:
+        type: string
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    SmsDateTo:
+      name: dateTo
+      in: query
+      required: false
+      description: The end of the time range to filter the results in ISO 8601 format including timezone. Default is the current time
+      schema:
+        type: string
+        format: date-time
+      example: '2020-11-25T16:07:52.597Z'
+    SmsDateFrom:
+      name: dateFrom
+      in: query
+      required: false
+      description: The end of the time range to filter the results in ISO 8601 format including timezone. Default is the 'dateTo' minus 24 hours
+      schema:
+        type: string
+        format: date-time
+      example: '2020-11-09T16:07:52.597Z'
+    SmsDirection:
+      name: direction
+      in: query
+      required: false
+      description: 'Direction of a message to filter the message list result.
+
+        By default, there is no filter applied - both Inbound and Outbound messages are returned
+
+        '
+      schema:
+        $ref: '#/components/schemas/SmsDirectionEnum'
+      example: Inbound
+    BatchId:
+      name: batchId
+      in: path
+      required: true
+      description: Internal identifier of a message batch to be retrieved
+      example: '55577'
+      schema:
+        type: string
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

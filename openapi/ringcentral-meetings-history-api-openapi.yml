@@ -1,0 +1,539 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Meetings History API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Meetings History
+paths:
+  /rcvideo/v1/history/meetings:
+    get:
+      tags:
+      - Meetings History
+      summary: List Video Meetings
+      description: Returns the list of user meetings.
+      operationId: listVideoMeetings
+      parameters:
+      - name: text
+        in: query
+        description: Search text
+        schema:
+          type: string
+      - name: pageToken
+        in: query
+        description: Token to get the next page
+        schema:
+          type: string
+      - name: perPage
+        in: query
+        description: Number of records returned
+        schema:
+          type: integer
+          format: int32
+      - name: type
+        in: query
+        description: 'Specify what kind of meeting should be returned. Possible values: All, My, Deleted, Shared
+
+          Request type meaning in meeting search:
+
+          `None` (not passed) - take meetings only where requested acc/ext is participant OR host OR deputy OR watcher.
+
+          `ALL`- access rights of meeting is equal to Alive AND requested acc/ext  is in watchers list OR host OR deputy
+
+          `My`- access rights of meeting is equal to Alive AND requested acc/ext is host OR deputy
+
+          `Shared` - access rights of meeting is equal to Alive AND requested acc/ext is in watcher list AND not HOST
+
+          `Deleted` - access rights of meeting is equal to Delete and requested acc/ext is host OR deputy
+
+          '
+        schema:
+          type: string
+          enum:
+          - All
+          - My
+          - Deleted
+          - Shared
+      - name: startTime
+        in: query
+        description: Unix timestamp in milliseconds (inclusive) indicates the start time of meetings which should be included in response
+        schema:
+          type: integer
+          format: int64
+      - name: endTime
+        in: query
+        description: Unix timestamp in milliseconds (inclusive) indicates the end time of meetings which should be included in response
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Returns meetings list with pagination
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingPage'
+        '400':
+          $ref: '#/components/responses/RcvBadRequest'
+        '500':
+          $ref: '#/components/responses/RcvInternalError'
+        '504':
+          $ref: '#/components/responses/RcvTimeout'
+      x-throttling-group: Light
+      x-app-permission: Video
+  /rcvideo/v1/history/meetings/{meetingId}:
+    get:
+      tags:
+      - Meetings History
+      summary: Get Video Meeting
+      description: Returns a user meeting by ID.
+      operationId: getVideoMeeting
+      parameters:
+      - $ref: '#/components/parameters/RcvMeetingId'
+      responses:
+        '200':
+          description: Return meeting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meeting'
+        '400':
+          $ref: '#/components/responses/RcvBadRequest'
+        '403':
+          $ref: '#/components/responses/RcvAccessForbidden'
+        '500':
+          $ref: '#/components/responses/RcvInternalError'
+        '504':
+          $ref: '#/components/responses/RcvTimeout'
+      x-throttling-group: Light
+      x-app-permission: Video
+components:
+  responses:
+    RcvTimeout:
+      description: Data processing timeout
+    RcvInternalError:
+      description: Error processing data
+    RcvAccessForbidden:
+      description: Access forbidden
+    RcvBadRequest:
+      description: Bad request format
+  schemas:
+    JsValue:
+      type: object
+      properties: {}
+    Host:
+      type: object
+      properties:
+        accountId:
+          type: string
+          description: Account id
+        extensionId:
+          type: string
+          description: Extension id
+        displayName:
+          type: string
+          description: Display name
+      description: Meeting host
+    Meeting:
+      required:
+      - bridgeId
+      - displayName
+      - hostInfo
+      - rights
+      - id
+      - participants
+      - shortId
+      - startTime
+      - status
+      - type
+      - recordings
+      type: object
+      properties:
+        id:
+          type: string
+          description: Call id
+        bridgeId:
+          type: string
+          description: Bridge id
+        shortId:
+          type: string
+          description: Short bridge id
+        startTime:
+          type: string
+          description: Start time ISO 8601
+          format: date-time
+        duration:
+          type: integer
+          description: Duration second
+          format: int32
+          example: 36
+        displayName:
+          type: string
+          description: Meetings name
+        type:
+          type: string
+          description: Meeting type
+          enum:
+          - Meeting
+          - Call
+        status:
+          type: string
+          description: Meeting status
+          enum:
+          - InProgress
+          - Done
+        hostInfo:
+          $ref: '#/components/schemas/Host'
+        rights:
+          description: Describe access rights which has participants to meeting
+          type: array
+          items:
+            type: string
+            enum:
+            - delete
+            - download
+            - share
+        longSummary:
+          description: During meeting AI team analyze code and after meeting finished generates text summary about this meeting
+          type: string
+        shortSummary:
+          description: During meeting AI team analyze code and after meeting finished generates text summary about this meeting
+          type: string
+        keywords:
+          description: During meeting AI team analyze code and after meeting finished generates key words used in meeting
+          type: array
+          items:
+            type: string
+        participants:
+          type: array
+          description: List of the participants in the meeting
+          items:
+            $ref: '#/components/schemas/Participant'
+        recordings:
+          type: array
+          description: Recording information
+          items:
+            $ref: '#/components/schemas/Recording'
+        chatUrl:
+          type: string
+          description: Chat location
+      description: Meeting information
+    MeetingPage:
+      required:
+      - meetings
+      - paging
+      type: object
+      properties:
+        meetings:
+          type: array
+          description: Meetings array
+          items:
+            $ref: '#/components/schemas/Meeting'
+        paging:
+          $ref: '#/components/schemas/Paging'
+      description: Meetings page
+    Paging:
+      required:
+      - currentPageToken
+      type: object
+      properties:
+        currentPageToken:
+          type: string
+          description: Current offset token
+        nextPageToken:
+          type: string
+          description: Next page offset token
+      description: Paging information
+    Participant:
+      required:
+      - type
+      - id
+      type: object
+      properties:
+        type:
+          type: string
+          description: Participant type
+        id:
+          type: string
+          description: id
+        accountId:
+          type: string
+          description: Account id
+        extensionId:
+          type: string
+          description: Extension id
+        displayName:
+          type: string
+          description: Display name
+        callerId:
+          type: string
+          description: Caller id
+        correlationId:
+          description: Pass-thru parameter in join url
+          type: string
+      description: Participant information
+    Recording:
+      required:
+      - id
+      - availabilityStatus
+      type: object
+      properties:
+        id:
+          type: string
+          description: Recording id
+        startTime:
+          type: integer
+          format: int64
+          description: Recording start time
+        url:
+          type: string
+          description: Secure Link to the recording file
+        metadata:
+          $ref: '#/components/schemas/JsValue'
+        status:
+          type: string
+          description: Recording processing status
+          enum:
+          - Processing
+          - Processed
+          - Error
+          - Corrupted
+          - InProgress
+          - Purged
+          - Failed
+        availabilityStatus:
+          type: string
+          description: Availability status
+          enum:
+          - Alive
+          - Deleted
+          - Purged
+          - NotAvailable
+        longSummary:
+          type: string
+          description: During meeting AI team analyze code and after meeting finished generates text summary about this meeting
+        shortSummary:
+          type: string
+          description: During meeting AI team analyze code and after meeting finished generates text summary about this meeting
+        keywords:
+          type: array
+          description: During meeting AI team analyze code and after meeting finished generates key words used in meeting
+          items:
+            type: string
+      description: Recording information
+  parameters:
+    RcvMeetingId:
+      name: meetingId
+      in: path
+      description: Meeting id
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

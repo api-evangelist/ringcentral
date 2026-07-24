@@ -1,0 +1,498 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Registration Management API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Registration Management
+  description: External APIs for registration flow management
+paths:
+  /webinar/registration/v1/sessions/{sessionId}:
+    get:
+      tags:
+      - Registration Management
+      summary: Get Registration Session Info
+      description: 'Returns a registration Session information by ID.
+
+
+        A caller must be an authorized user: either a host of the webinar or an IT Admin:
+
+        a user from host''s account with "WebinarSettings" permission.
+
+        '
+      operationId: rcwRegGetSession
+      parameters:
+      - $ref: '#/components/parameters/RcwSessionId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegSessionModel'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: ReadWebinars
+    patch:
+      tags:
+      - Registration Management
+      summary: Update Registration Session
+      description: 'Updates a Session by ID.
+
+
+        This is a PARTIAL update (PATCH), client may call it providing only attributes which are to be changed.
+
+
+        A caller must be an authorized user: either a host of the webinar or an IT Admin:
+
+        a user from host''s account with "WebinarSettings" permission.
+
+
+        If a session record with given ID doesn''t exist on Registration Service side the API should return HTTP 404.
+
+        '
+      operationId: rcwRegUpdateSession
+      parameters:
+      - $ref: '#/components/parameters/RcwSessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegSessionModel'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegSessionModel'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: EditWebinars
+components:
+  responses:
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
+
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+  schemas:
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    RegSessionModel:
+      type: object
+      required:
+      - id
+      - registrationStatus
+      - registrantCount
+      - hasRealRegistrants
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: ID of the session
+          example: '123456789'
+        registrationStatus:
+          type: string
+          enum:
+          - Open
+          - Closed
+          description: Status of the registration
+          example: Open
+        registrationPageUri:
+          type: string
+          format: uri
+          description: The URI of the registration landing page
+          readOnly: true
+          example: https://abcde12345.webinar.ringcentral.com/register
+        brandingDescriptorUri:
+          type: string
+          format: uri
+          description: The URI of the branding descriptor
+          readOnly: true
+          example: https://abcde12345.webinar.ringcentral.com/branding
+        registrantCount:
+          type: integer
+          format: int32
+          description: The current number of registrants
+          readOnly: true
+          example: 10
+        hasRealRegistrants:
+          type: boolean
+          description: Indicates that there are non-test registrants
+          readOnly: true
+          example: true
+        icalendarSequence:
+          type: integer
+          format: int32
+          minimum: 0
+          readOnly: true
+          description: Sequence number for iCalendar email attachments
+        settings:
+          type: object
+          properties:
+            autoCloseLimit:
+              type: integer
+              description: The maximum number of registrants which forces closing the registration (0 means "off").
+              format: int32
+              minimum: 0
+              default: 0
+            suppressEmails:
+              type: boolean
+              description: Indicates that emails to registrants should be suppressed (should be supported by external party)
+              default: false
+            registrationDigestEnabled:
+              type: boolean
+              description: Indicates that registration digest should be sent to host.
+              default: true
+            preventMultipleDeviceJoins:
+              type: boolean
+              description: Indicates that registrants are allowed to join from multiple devices.
+              default: false
+            workEmailRequired:
+              type: boolean
+              description: Indicates that work email address is required for registration.
+              default: false
+            viewRecording:
+              type: boolean
+              description: Indicates that recording will be shown after the webinar and in emails.
+            onDemandDuration:
+              type: string
+              description: Duration of on-demand webinar. The default value can only be used if the session is on demand.
+              enum:
+              - OneMonth
+              - TwoMonths
+              - ThreeMonths
+              - SixMonths
+              - OneYear
+              default: SixMonths
+            recordingExist:
+              type: boolean
+              description: Indicates that recording exists for the session.
+              readOnly: true
+              nullable: true
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+  parameters:
+    RcwSessionId:
+      name: sessionId
+      in: path
+      description: Identifier of the Session.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 20
+      example: '353535353'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

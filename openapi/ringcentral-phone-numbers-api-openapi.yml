@@ -1,0 +1,1957 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Phone Numbers API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Phone Numbers
+paths:
+  /restapi/v2/accounts/{accountId}/phone-numbers:
+    get:
+      tags:
+      - Phone Numbers
+      summary: List Account Phone Numbers
+      description: 'Returns the list of phone numbers assigned to RingCentral customer
+
+        account. Both company-level and extension-level numbers are returned.
+
+        Conferencing numbers, hot desk and ELIN numbers are not returned.
+
+        '
+      operationId: listAccountPhoneNumbersV2
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - name: type
+        in: query
+        description: Types of phone numbers to be returned
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneNumberType'
+      - name: usageType
+        in: query
+        description: Usage type(s) of phone numbers to be returned
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneNumberUsageType'
+      - name: status
+        in: query
+        required: false
+        description: Status of the phone number(s) to be returned
+        schema:
+          $ref: '#/components/schemas/PhoneNumberStatus'
+      - name: tollType
+        in: query
+        required: false
+        description: Toll type of phone numbers to return
+        schema:
+          $ref: '#/components/schemas/PhoneNumberTollType'
+      - name: extensionStatus
+        in: query
+        description: Statuses of extensions to return phone numbers for
+        required: false
+        schema:
+          $ref: '#/components/schemas/ExtensionStatus'
+      - name: byocNumber
+        in: query
+        description: The parameter reflects whether this number is BYOC or not
+        required: false
+        schema:
+          type: boolean
+      - name: phoneNumber
+        in: query
+        description: 'Phone number in e.164 format to be searched for.
+
+          Parameter value can include wildcards (e.g. "+165012345**")
+
+          or be an exact number "+16501234500" - single number is searched in that case.
+
+          Make sure you escape the "+" in the URL as "%2B"
+
+          '
+        required: false
+        schema:
+          type: string
+          maxLength: 18
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountPhoneNumberList'
+              examples:
+                ListAccountPhoneNumbersResponse:
+                  $ref: '#/components/examples/ListAccountPhoneNumbersResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadCompanyPhoneNumbers
+    delete:
+      tags:
+      - Phone Numbers
+      summary: Delete Numbers from Inventory
+      description: "This method can only delete numbers that meet one of the following requirements:\n  - numbers that have `\"usageType\": \"Inventory\"`\n  - `\"Forwarded\"` numbers\n  - `\"Forwarded Company\"` numbers\n\nIn other words, this method will not delete numbers which are in use on the account - extension direct numbers,\nmain number, etc. It is possible to indicate phone numbers to be deleted using their IDs or exact string values\nin e.164 format. However, the same lookup method (by ID or by value) must be used for all numbers within the same API call.\n"
+      operationId: deleteNumbersFromInventoryV2
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeletePhoneNumbersRequest'
+            examples:
+              DeletePhoneNumbersRequest:
+                $ref: '#/components/examples/DeletePhoneNumbersRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletePhoneNumbersResponse'
+              examples:
+                DeletePhoneNumbersResponse:
+                  $ref: '#/components/examples/DeletePhoneNumbersResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+      x-user-permission: EditCompanyPhoneNumbers
+  /restapi/v2/accounts/{accountId}/phone-numbers/{phoneNumberId}:
+    patch:
+      tags:
+      - Phone Numbers
+      summary: Assign Phone Number
+      description: 'Assigns or reassigns a phone number as a company or extension number.
+
+
+        Assign scenarios supported:
+
+        - from Inventory to a company number;
+
+        - from Inventory to an extension number.
+
+
+        Reassign scenarios supported:
+
+        - from an extension to another extension;
+
+        - from an extension to a company number;
+
+        - from a company number to an extension.
+
+        '
+      operationId: assignPhoneNumberV2
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/PhoneNumberId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignPhoneNumberRequest'
+            examples:
+              AssignPhoneNumberRequest:
+                $ref: '#/components/examples/AssignPhoneNumberRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountPhoneNumberInfo'
+              examples:
+                AssignPhoneNumberResponse:
+                  $ref: '#/components/examples/AssignPhoneNumberResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+      x-user-permission: EditCompanyPhoneNumbers
+  /restapi/v2/accounts/{accountId}/phone-numbers/{phoneNumberId}/replace:
+    post:
+      tags:
+      - Phone Numbers
+      summary: Replace Phone Number
+      description: 'Replaces (swaps) phone numbers from Inventory with the main, company, direct or company fax numbers.
+
+        This method is used to replace temporary numbers when the porting process is complete.
+
+        '
+      operationId: replacePhoneNumberV2
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/PhoneNumberId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReplacePhoneNumberRequest'
+        required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountPhoneNumberInfo'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+      x-user-permission: EditCompanyPhoneNumbers
+  /restapi/v2/accounts/{accountId}/phone-numbers/bulk-add:
+    post:
+      tags:
+      - Phone Numbers
+      summary: Add Numbers to Inventory
+      description: 'Adds phone numbers to the account Inventory as unassigned. Currently, we support the following values: `Inventory`,
+
+        `InventoryPartnerBusinessMobileNumber` and `PartnerBusinessMobileNumber`. Later we may support some other values like `ForwardedNumber`, etc.
+
+        '
+      operationId: addNumbersToInventoryV2
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        description: List of phone numbers
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddPhoneNumbersRequest'
+            examples:
+              AddPhoneNumbersRequest:
+                $ref: '#/components/examples/AddPhoneNumbersRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful response (synchronous operation)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddPhoneNumbersResponse'
+              examples:
+                AddPhoneNumbersResponse:
+                  $ref: '#/components/examples/AddPhoneNumbersResponse'
+        '202':
+          description: Successful response (asynchronous operation)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddPhoneNumbersTask'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditAccounts
+      x-user-permission: EditCompanyPhoneNumbers
+  /restapi/v2/accounts/{accountId}/phone-numbers/bulk-add/{taskId}:
+    get:
+      tags:
+      - Phone Numbers
+      summary: Get Add Numbers Task Results
+      description: 'Returns the result of asynchronous operation which adds phone numbers to the account Inventory.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: taskId
+        in: path
+        description: Identifier of a task returned by asynchronous bulk add operation
+        required: true
+        schema:
+          type: string
+      operationId: getBulkAddTaskResultsV2
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/AddPhoneNumbersResponse'
+                - $ref: '#/components/schemas/AddPhoneNumbersTask'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditAccounts
+      x-user-permission: EditCompanyPhoneNumbers
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/phone-number:
+    get:
+      tags:
+      - Phone Numbers
+      summary: Get Extension Phone Number List
+      description: 'Returns the list of phone numbers that are used by a particular extension,
+
+        can be filtered by the phone number type. The returned list contains all
+
+        numbers which are directly mapped to the given extension. Plus the features
+
+        and company-level numbers that may be used when performing different operations
+
+        on behalf of this extension.
+
+        '
+      operationId: listExtensionPhoneNumbers
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - name: status
+        in: query
+        description: Status of a phone number
+        schema:
+          type: string
+          enum:
+          - Normal
+          - Pending
+          - PortedIn
+          - Temporary
+      - name: usageType
+        in: query
+        description: Usage type of phone number
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - MainCompanyNumber
+            - AdditionalCompanyNumber
+            - CompanyNumber
+            - DirectNumber
+            - CompanyFaxNumber
+            - ForwardedNumber
+            - ForwardedCompanyNumber
+            - BusinessMobileNumber
+            - PartnerBusinessMobileNumber
+            - IntegrationNumber
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are allowed. Default value is ''1''
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items). If not specified, the value is '100' by default
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: 'OK: User Phone Number List'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetExtensionPhoneNumbersResponse'
+      x-feature: ReadExtensionPhoneNumbers
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadUserPhoneNumbers
+  /restapi/v1.0/account/{accountId}/phone-number:
+    get:
+      tags:
+      - Phone Numbers
+      summary: List Company Phone Numbers
+      description: 'Returns the list of phone numbers assigned to RingCentral customer
+
+        account. Both company-level and extension-level numbers are returned.
+
+        '
+      operationId: listAccountPhoneNumbers
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are accepted
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items)
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      - name: usageType
+        in: query
+        description: Usage type of phone number
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - MainCompanyNumber
+            - AdditionalCompanyNumber
+            - CompanyNumber
+            - DirectNumber
+            - CompanyFaxNumber
+            - ForwardedNumber
+            - ForwardedCompanyNumber
+            - ContactCenterNumber
+            - ConferencingNumber
+            - MeetingsNumber
+            - BusinessMobileNumber
+            - PartnerBusinessMobileNumber
+            - IntegrationNumber
+      - name: paymentType
+        in: query
+        description: Payment Type of the number
+        schema:
+          $ref: '#/components/schemas/PlatformPaymentType'
+      - name: status
+        in: query
+        description: Status of a phone number
+        schema:
+          type: string
+          enum:
+          - Normal
+          - Pending
+          - PortedIn
+          - Temporary
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountPhoneNumbers'
+      x-feature: ReadAccountPhoneNumbers
+      x-availability: High
+      x-throttling-group: Heavy
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadCompanyPhoneNumbers
+  /restapi/v1.0/account/{accountId}/phone-number/{phoneNumberId}:
+    get:
+      tags:
+      - Phone Numbers
+      summary: Get Phone Number
+      description: 'Returns phone number(s) belonging to a certain account or extension by phoneNumberId(s).
+
+        [Batch request syntax](https://developers.ringcentral.com/api-reference/Batch-Requests) is supported.
+
+        '
+      operationId: readAccountPhoneNumber
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: phoneNumberId
+        in: path
+        description: Internal identifier of a phone number
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Phone number information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyPhoneNumberInfo'
+      x-feature: ReadAccountPhoneNumbers
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadCompanyPhoneNumbers
+  /restapi/v1.0/number-parser/parse:
+    post:
+      tags:
+      - Phone Numbers
+      summary: Parse Phone Number(s)
+      description: Returns one or more parsed and/or formatted phone numbers that are passed as strings.
+      operationId: parsePhoneNumber
+      parameters:
+      - name: homeCountry
+        in: query
+        required: false
+        description: 'ISO 3166 alpha2 code of the home country to be used if it is impossible to determine country from the number itself.
+
+          By default, this parameter is preset to the current user''s home country or brand country if the user is undefined
+
+          '
+        schema:
+          type: string
+          example: US
+      - name: nationalAsPriority
+        in: query
+        required: false
+        description: 'The default value is `false`. If `true`, the numbers that are
+
+          closer to the home country are given higher priority
+
+          '
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        description: Phone number list to parse
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParsePhoneNumberRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParsePhoneNumberResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: High
+      x-throttling-group: Light
+components:
+  schemas:
+    PhoneNumberId:
+      type: string
+      pattern: ^[1-9]\d{1,14}$
+      description: Internal unique identifier of a phone number
+      maxLength: 18
+      example: '1162820004'
+    UserPhoneNumberInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the user phone number resource
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of a phone number
+        country:
+          $ref: '#/components/schemas/CountryInfoBasicModel'
+        contactCenterProvider:
+          $ref: '#/components/schemas/ContactCenterProvider'
+        extension:
+          $ref: '#/components/schemas/UserPhoneNumberExtensionInfo'
+        label:
+          type: string
+          description: Custom user-defined name of a phone number, if any
+        location:
+          type: string
+          description: Location (City, State). Filled for local US numbers
+        paymentType:
+          $ref: '#/components/schemas/PlatformPaymentType'
+        phoneNumber:
+          type: string
+          description: Phone number
+        primary:
+          type: boolean
+          description: 'Indicates if a phone number is primary, i.e. displayed as ''main number'' and called by default
+
+            '
+          example: false
+        status:
+          type: string
+          description: 'Status of a phone number. If the value is ''Normal'', the phone
+
+            number is ready to be used. Otherwise, it is an external number not yet
+
+            ported to RingCentral
+
+            '
+          enum:
+          - Normal
+          - Pending
+          - PortedIn
+          - Temporary
+        type:
+          type: string
+          description: Phone number type
+          enum:
+          - VoiceFax
+          - FaxOnly
+          - VoiceOnly
+        subType:
+          type: string
+          description: 'Extension subtype, if applicable. For any unsupported subtypes the ''Unknown'' value will be returned
+
+            '
+          enum:
+          - VideoPro
+          - VideoProPlus
+          - DigitalSignage
+          - Unknown
+          - Emergency
+        usageType:
+          type: string
+          description: 'Usage type of phone number. Numbers of ''NumberPool'' type will not be returned for phone number list requests
+
+            '
+          enum:
+          - MainCompanyNumber
+          - AdditionalCompanyNumber
+          - CompanyNumber
+          - DirectNumber
+          - CompanyFaxNumber
+          - ForwardedNumber
+          - ForwardedCompanyNumber
+          - ContactCenterNumber
+          - ConferencingNumber
+          - NumberPool
+          - BusinessMobileNumber
+          - PartnerBusinessMobileNumber
+          - IntegrationNumber
+        features:
+          type: array
+          description: List of features of a phone number
+          items:
+            type: string
+            enum:
+            - CallerId
+            - SmsSender
+            - A2PSmsSender
+            - MmsSender
+            - InternationalSmsSender
+            - Delegated
+    ReplacePhoneNumberRequest:
+      type: object
+      properties:
+        targetPhoneNumberId:
+          $ref: '#/components/schemas/PhoneNumberId'
+    GetCountryInfoNumberParser:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a country
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a country resource
+        callingCode:
+          type: string
+          description: 'Country calling code defined by ITU-T recommendations `E.123`
+
+            and `E.164`, see Calling Codes
+
+            '
+          example: '1'
+        isoCode:
+          type: string
+          description: Country code in `ISO 3166` alpha-2 format
+          pattern: ^[A-Za-z]{2}$
+          example: US
+        name:
+          type: string
+          description: The official name of the country.
+          example: United States
+    AccountPhoneNumberList:
+      type: object
+      required:
+      - records
+      - paging
+      properties:
+        records:
+          type: array
+          description: List of account phone numbers
+          items:
+            $ref: '#/components/schemas/AccountPhoneNumberInfo'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    AccountPhoneNumbers:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a list of account phone numbers
+        records:
+          type: array
+          description: List of account phone numbers
+          items:
+            $ref: '#/components/schemas/CompanyPhoneNumberInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    AddPhoneNumbersResponse:
+      type: object
+      required:
+      - records
+      properties:
+        records:
+          type: array
+          minItems: 1
+          description: List of account phone numbers
+          items:
+            $ref: '#/components/schemas/AddPhoneNumbersResponseItem'
+    DeletePhoneNumbersRequestItem:
+      type: object
+      description: The indication of a number to be deleted - either "id" or "phoneNumber" must be specified.
+      properties:
+        id:
+          $ref: '#/components/schemas/PhoneNumberId'
+        phoneNumber:
+          $ref: '#/components/schemas/PhoneNumberE164'
+    PhoneNumberStatus:
+      type: string
+      description: Status of a phone number. If the value is 'Normal', the phone number is ready to be used. Otherwise, it is an external number not yet ported to RingCentral
+      enum:
+      - Normal
+      - Pending
+      - PortedIn
+      - Temporary
+      - Unknown
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    CountryInfoMinimalModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a country
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a country resource
+    AddPhoneNumbersTask:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a task
+        creationTime:
+          type: string
+          format: date-time
+          description: Task creation time in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
+        status:
+          type: string
+          description: Task status
+          example: Accepted
+    DeletePhoneNumbersResponse:
+      type: object
+      required:
+      - records
+      properties:
+        records:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DeletePhoneNumbersResponseItem'
+    GetExtensionPhoneNumbersResponse:
+      required:
+      - navigation
+      - paging
+      - records
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the user phone number list resource
+        records:
+          type: array
+          description: List of phone numbers
+          items:
+            $ref: '#/components/schemas/UserPhoneNumberInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    AddPhoneNumberRequestItem:
+      type: object
+      required:
+      - phoneNumber
+      - usageType
+      properties:
+        phoneNumber:
+          type: string
+          description: 'Phone number in e.164 format (with ''+'' prefix).
+
+            Wildcards are supported to pass large sets (for example 100 numbers);
+
+            only one phone number record must be passed in request in that case, for example ''+1650123456*''
+
+            '
+        usageType:
+          type: string
+          description: 'Usage type of phone number. Currently, we support the following values: `Inventory`, `InventoryPartnerBusinessMobileNumber`
+
+            and `PartnerBusinessMobileNumber`. Later we may support some other values like `ForwardedNumber`, etc.
+
+            '
+          default: Inventory
+          enum:
+          - Inventory
+          - InventoryPartnerBusinessMobileNumber
+          - PartnerBusinessMobileNumber
+    PhoneNumberType:
+      type: string
+      description: Type of phone number
+      nullable: true
+      enum:
+      - VoiceFax
+      - VoiceOnly
+      - FaxOnly
+    ExtensionStatus:
+      type: string
+      description: Extension status
+      enum:
+      - Enabled
+      - Disabled
+      - Frozen
+      - NotActivated
+      - Unassigned
+    ParsePhoneNumberResponse:
+      required:
+      - homeCountry
+      - phoneNumbers
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a resource
+        homeCountry:
+          $ref: '#/components/schemas/GetCountryInfoNumberParser'
+        phoneNumbers:
+          type: array
+          description: Parsed phone numbers information
+          items:
+            $ref: '#/components/schemas/PhoneNumberInfoNumberParser'
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    ExtensionNumber:
+      description: 'Short number of an extension.
+
+        Actual max length depends on system length limit for extension.
+
+        '
+      type: string
+      pattern: ^\d{3,8}$
+      minLength: 1
+      maxLength: 8
+      example: '205'
+    PhoneNumberUsageType:
+      type: string
+      description: Usage type of phone number
+      enum:
+      - MainCompanyNumber
+      - DirectNumber
+      - Inventory
+      - InventoryPartnerBusinessMobileNumber
+      - PartnerBusinessMobileNumber
+      - AdditionalCompanyNumber
+      - CompanyNumber
+      - PhoneLine
+      - CompanyFaxNumber
+      - ForwardedNumber
+      - ForwardedCompanyNumber
+      - ContactCenterNumber
+      - ConferencingNumber
+      - MeetingsNumber
+      - BusinessMobileNumber
+      - ELIN
+    ParsePhoneNumberRequest:
+      type: object
+      properties:
+        originalStrings:
+          type: array
+          description: The list of phone numbers passed as an array of strings (not more than 64 items). The maximum size of each string is 64 characters
+          maxItems: 64
+          items:
+            type: string
+            maxLength: 64
+            example: (650) 722-1621
+    AssignPhoneNumberRequest:
+      type: object
+      required:
+      - usageType
+      properties:
+        type:
+          $ref: '#/components/schemas/PhoneNumberType'
+        usageType:
+          type: string
+          description: Target usage type of phone number (only listed values are supported)
+          enum:
+          - MainCompanyNumber
+          - CompanyNumber
+          - DirectNumber
+          - PhoneLine
+        extension:
+          type: object
+          required:
+          - id
+          properties:
+            id:
+              type: string
+              description: Internal identifier of an extension
+        costCenterId:
+          type: string
+    AccountPhoneNumberInfo:
+      type: object
+      required:
+      - id
+      - tollType
+      - usageType
+      - status
+      - phoneNumber
+      properties:
+        id:
+          $ref: '#/components/schemas/PhoneNumberId'
+        phoneNumber:
+          $ref: '#/components/schemas/PhoneNumberE164'
+        type:
+          $ref: '#/components/schemas/PhoneNumberType'
+        tollType:
+          $ref: '#/components/schemas/PhoneNumberTollType'
+        usageType:
+          $ref: '#/components/schemas/PhoneNumberUsageType'
+        byocNumber:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/PhoneNumberStatus'
+        extension:
+          type: object
+          description: Reference to the extension this number is assigned to. Omitted for company numbers
+          required:
+          - id
+          properties:
+            id:
+              type: string
+              description: Unique identifier of extension
+              example: '1234567'
+            extensionNumber:
+              $ref: '#/components/schemas/ExtensionNumber'
+    CompanyPhoneNumberInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a company phone number resource
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of a phone number
+        country:
+          $ref: '#/components/schemas/CountryInfoBasicModel'
+        extension:
+          $ref: '#/components/schemas/ExtensionInfo'
+        label:
+          type: string
+          description: Custom user-defined name of a phone number, if any
+        location:
+          type: string
+          description: Location (City, State). Filled for local US numbers
+        paymentType:
+          $ref: '#/components/schemas/PlatformPaymentType'
+        phoneNumber:
+          type: string
+          description: Phone number
+        status:
+          type: string
+          description: 'Status of a phone number. If the value is ''Normal'', the phone
+
+            number is ready to be used. If the value is ''Pending'' it is an
+
+            external number not yet ported to RingCentral.
+
+            '
+          enum:
+          - Normal
+          - Pending
+          - PortedIn
+          - Temporary
+        type:
+          type: string
+          description: Phone number type
+          enum:
+          - VoiceFax
+          - FaxOnly
+          - VoiceOnly
+        usageType:
+          type: string
+          description: 'Usage type of phone number. Usage type of phone number.
+
+            Numbers of ''NumberPool'' type are not returned in phone number list
+
+            requests
+
+            '
+          enum:
+          - MainCompanyNumber
+          - AdditionalCompanyNumber
+          - CompanyNumber
+          - DirectNumber
+          - CompanyFaxNumber
+          - ForwardedNumber
+          - ForwardedCompanyNumber
+          - ContactCenterNumber
+          - ConferencingNumber
+          - MeetingsNumber
+          - NumberPool
+          - BusinessMobileNumber
+          - PartnerBusinessMobileNumber
+          - IntegrationNumber
+        temporaryNumber:
+          $ref: '#/components/schemas/TemporaryNumberInfo'
+        contactCenterProvider:
+          $ref: '#/components/schemas/ContactCenterProvider'
+        vanityPattern:
+          type: string
+          description: Vanity pattern for this number. Returned only when vanity search option is requested. Vanity pattern corresponds to request parameters `nxx` plus `line` or `numberPattern`
+        primary:
+          type: boolean
+          description: Specifies if a phone number is primary, i.e. displayed as 'main number' and called by default
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    PhoneNumberInfoNumberParser:
+      type: object
+      properties:
+        originalString:
+          type: string
+          description: Original phone number string as it was passed in the request
+          example: (650) 722-1621
+        country:
+          $ref: '#/components/schemas/GetCountryInfoNumberParser'
+        areaCode:
+          type: string
+          description: 'Area code of location. The portion of the [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            number that identifies a specific geographic region/numbering area of
+
+            the national numbering plan (NANP); that can be summarized as `NPA-NXX-xxxx`
+
+            and covers Canada, the United States, parts of the Caribbean Sea, and
+
+            some Atlantic and Pacific islands.
+
+            See [North American Numbering Plan](https://en.wikipedia.org/wiki/North_American_Numbering_Plan)
+
+            for details
+
+            '
+          example: '650'
+        dialable:
+          type: string
+          description: Dialing format of a phone number
+        e164:
+          type: string
+          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format
+        formattedInternational:
+          type: string
+          description: The formatted phone number string in international format
+        formattedNational:
+          type: string
+          description: The formatted phone number string in domestic format
+        special:
+          type: boolean
+          description: Indicates if the number is in a special format (for example N11 code)'
+        normalized:
+          type: string
+          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format without plus sign ('+')
+        tollFree:
+          type: boolean
+          description: Indicates if the number is toll free
+        subAddress:
+          type: string
+          description: Sub-Address. The portion of the number that identifies a subscriber into the subscriber internal (non-public) network.
+        subscriberNumber:
+          type: string
+          description: Subscriber number. The portion of the [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) number that identifies a subscriber in a network or numbering area.
+        dtmfPostfix:
+          type: string
+          description: DTMF (Dual Tone Multi-Frequency) postfix
+    PlatformPaymentType:
+      type: string
+      description: 'Payment type. ''External'' is returned for forwarded numbers
+
+        which are not terminated in the RingCentral phone system
+
+        '
+      enum:
+      - External
+      - TollFree
+      - Local
+      - BusinessMobileNumberProvider
+      - ExternalNumberProvider
+      - ExternalNumberProviderTollFree
+    CountryInfoBasicModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoMinimalModel'
+      - type: object
+        properties:
+          name:
+            type: string
+            description: The official name of a country
+    BulkItemResultModel:
+      type: object
+      required:
+      - bulkItemSuccessful
+      properties:
+        bulkItemSuccessful:
+          type: boolean
+          description: 'Indicates if this item was processed successfully during bulk operation.
+
+            If false, `bulkItemErrors` attribute contains the list of errors
+
+            '
+          example: true
+        bulkItemErrors:
+          type: array
+          description: 'The list of errors occurred during processing of particular item of bulk operation.
+
+            Returned only if `bulkItemSuccessful` is false
+
+            '
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    ContactCenterProvider:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of the provider
+        name:
+          type: string
+          description: Provider's name
+      description: 'CCRN (Contact Center Routing Number) provider. If not specified
+
+        then the default value ''InContact/North America'' is used, its ID is ''1''
+
+        '
+    PhoneNumberE164:
+      type: string
+      pattern: ^\+[1-9]\d{1,14}$
+      description: Phone number in e.164 format (with '+' prefix)
+      maxLength: 18
+      example: '+16501234567'
+    DeletePhoneNumbersRequest:
+      type: object
+      required:
+      - records
+      properties:
+        records:
+          type: array
+          description: List of phone numbers or phone IDs to be deleted
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DeletePhoneNumbersRequestItem'
+    UserPhoneNumberExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        extensionNumber:
+          type: string
+          description: Extension short number
+        partnerId:
+          type: string
+          description: 'For Partner Applications Internal identifier of an extension
+
+            created by partner. The RingCentral supports the mapping of accounts and
+
+            stores the corresponding account ID/extension ID for each partner ID of
+
+            a client application. In request URIs partner IDs are accepted instead
+
+            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
+
+            Though in response URIs contain the corresponding account IDs and extension
+
+            IDs. In all request and response bodies these values are reflected via
+
+            partnerId attributes of account and extension
+
+            '
+        type:
+          type: string
+          description: 'Extension type. Please note that legacy ''Department'' extension type
+
+            corresponds to ''Call Queue'' extensions in modern RingCentral product terminology
+
+            '
+          enum:
+          - User
+          - FaxUser
+          - VirtualUser
+          - DigitalUser
+          - Department
+          - Announcement
+          - Voicemail
+          - SharedLinesGroup
+          - PagingOnly
+          - IvrMenu
+          - ApplicationExtension
+          - ParkLocation
+          - Site
+        contactCenterProvider:
+          $ref: '#/components/schemas/ContactCenterProvider'
+        name:
+          type: string
+          description: 'Extension name. For user extension types the value is a combination
+
+            of the specified first name and last name
+
+            '
+      description: 'Information on the extension, to which the phone number is assigned.
+
+        Returned only for the request of Account phone number list
+
+        '
+    AddPhoneNumbersResponseItem:
+      allOf:
+      - $ref: '#/components/schemas/BulkItemResultModel'
+      - type: object
+        required:
+        - phoneNumber
+        properties:
+          id:
+            $ref: '#/components/schemas/PhoneNumberId'
+          phoneNumber:
+            $ref: '#/components/schemas/PhoneNumberE164'
+    PhoneNumberTollType:
+      description: Indicates if a number is toll or toll-free
+      type: string
+      enum:
+      - Toll
+      - TollFree
+      example: Toll
+    DeletePhoneNumbersResponseItem:
+      allOf:
+      - $ref: '#/components/schemas/BulkItemResultModel'
+      - type: object
+        properties:
+          id:
+            $ref: '#/components/schemas/PhoneNumberId'
+          phoneNumber:
+            $ref: '#/components/schemas/PhoneNumberE164'
+    ExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        name:
+          type: string
+          description: Extension name
+        extensionNumber:
+          type: string
+          description: Extension short number
+        partnerId:
+          type: string
+          description: 'For partner applications. Internal identifier of an extension
+
+            created by partner. The RingCentral supports the mapping of accounts and
+
+            stores the corresponding account ID/extension ID for each partner ID of
+
+            a client application. In request URIs partner IDs are accepted instead
+
+            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
+
+            Though in response URIs contain the corresponding account IDs and extension
+
+            IDs. In all request and response bodies these values are reflected via
+
+            partnerId attributes of account and extension
+
+            '
+      description: 'Information on the extension, to which the phone number is assigned.
+
+        Returned only for the request of Account phone number list
+
+        '
+    AddPhoneNumbersRequest:
+      type: object
+      required:
+      - records
+      properties:
+        records:
+          type: array
+          minItems: 1
+          description: List of account phone numbers
+          items:
+            $ref: '#/components/schemas/AddPhoneNumberRequestItem'
+    TemporaryNumberInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Temporary phone number identifier
+        phoneNumber:
+          type: string
+          description: 'Temporary phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            (with ''+'' sign) format
+
+            '
+      description: 'Temporary phone number, if any. Returned for phone numbers in `Pending` porting status only
+
+        '
+  parameters:
+    PhoneNumberId:
+      name: phoneNumberId
+      in: path
+      required: true
+      description: Internal identifier of a phone number
+      schema:
+        $ref: '#/components/schemas/PhoneNumberId'
+      example: '1162820004'
+    Page:
+      name: page
+      in: query
+      description: The result set page number (1-indexed) to return
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 1
+      example: 1
+    PerPage:
+      name: perPage
+      in: query
+      description: 'The number of items per page. If provided value in the request
+
+        is greater than a maximum, the maximum value is applied
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 100
+      example: 100
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  responses:
+    TooManyRequests:
+      description: 'General response with **HTTP 429 "Too many requests"** status.<br>
+
+        Reasons: certain rate limit is exceeded.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
+
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+  examples:
+    ListAccountPhoneNumbersResponse:
+      value:
+        records:
+        - id: '1162821004'
+          phoneNumber: '+18002024080'
+          tollType: TollFree
+          usageType: Inventory
+          byocNumber: false
+          status: Normal
+        - id: '1162822004'
+          phoneNumber: '+18332023665'
+          tollType: Toll
+          usageType: DirectNumber
+          type: VoiceFax
+          byocNumber: false
+          status: Normal
+          extension:
+            id: '697477005'
+            extensionNumber: '10022'
+        - id: '1272824004'
+          phoneNumber: '+18332023678'
+          tollType: Toll
+          usageType: MainCompanyNumber
+          byocNumber: false
+          type: VoiceOnly
+          status: Normal
+        paging:
+          page: 1
+          perPage: 1
+          pageStart: 1
+          pageEnd: 1
+          totalPages: 1
+          totalElements: 3
+    AddPhoneNumbersResponse:
+      value:
+        records:
+        - bulkItemSuccessful: true
+          id: '1162820004'
+          phoneNumber: '+18002024080'
+        - bulkItemSuccessful: false
+          phoneNumber: '+16501234567'
+          bulkItemErrors:
+          - errorCode: CMN-1000
+            message: Some error msg
+    DeletePhoneNumbersRequest:
+      value:
+        records:
+        - phoneNumber: '+18002024080'
+        - phoneNumber: '+18332456789'
+    AssignPhoneNumberRequest:
+      value:
+        usageType: DirectNumber
+        extension:
+          id: '20498230948'
+        type: VoiceFax
+    DeletePhoneNumbersResponse:
+      value:
+        records:
+        - bulkItemSuccessful: true
+          id: '1162820004'
+          phoneNumber: '+18002024080'
+        - bulkItemSuccessful: false
+          id: '1162820005'
+          phoneNumber: '+18332456789'
+          bulkItemErrors:
+          - errorCode: CMN-1000
+            message: Some error msg
+    AddPhoneNumbersRequest:
+      value:
+        records:
+        - phoneNumber: '+18002024080'
+          usageType: Inventory
+        - phoneNumber: '+16501234567'
+          usageType: Inventory
+    AssignPhoneNumberResponse:
+      value:
+        id: '1162822004'
+        phoneNumber: '+18332023665'
+        tollType: Toll
+        usageType: DirectNumber
+        type: VoiceFax
+        status: Normal
+        extension:
+          id: '20498230948'
+          extensionNumber: '10022'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

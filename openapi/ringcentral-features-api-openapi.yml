@@ -1,0 +1,352 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Features API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Features
+paths:
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/features:
+    get:
+      tags:
+      - Features
+      summary: Get User Features
+      description: "Returns a list of supported features and the information on their\navailability for the current extension. Particular feature(s) can\nbe checked by providing `featureId` query parameter. Multiple values\nare supported in the format: `?featureId=Feature1&featureId=Feature2`.\nTo get only available features in order to decrease response size,\n`availableOnly=true` query param can be specified. If a feature\nis available for the current user, `\"available\": true` is returned in\nresponse for the record with the corresponding feature ID. Otherwise,\nthe additional attribute `reason` is returned with the appropriate code:\n- `ServicePlanLimitation` -  a feature is not included in account service plan;\n- `AccountLimitation` - a feature is turned off for account;\n- `ExtensionTypeLimitation` - a feature is not applicable for extension type;\n- `ExtensionLimitation` - a feature is not available for extension, e.g., additional license required;\n- `InsufficientPermissions` - required permission is not granted to the current user (not the one, who is specified in the URL, but the one who is calling this API);\n- `ConfigurationLimitation` - a feature is turned off for extension, e.g., by account administrator.\n\nAlso, some features may have additional parameters, e.g. limits, which are returned in `params` attribute as a name-value collection:\n\n    {\n      \"id\": \"HUD\",\n      \"available\": true,\n      \"params\": [\n        {\n          \"name\": \"limitMax\",\n          \"value\": \"100\"\n        }\n      ]\n    }\n"
+      operationId: readExtensionFeatures
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - name: availableOnly
+        in: query
+        description: 'Allows to filter features by availability for an extension
+
+          '
+        schema:
+          type: boolean
+          default: false
+      - name: featureId
+        in: query
+        description: Internal identifier(s) of the feature(s)
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        '200':
+          description: Feature list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureList'
+      x-feature: ReadExtensions
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadExtensions
+components:
+  schemas:
+    FeatureList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureInfo'
+    ParamsInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Parameter name
+        value:
+          type: string
+          description: Parameter value
+    FeatureInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a feature
+        available:
+          type: boolean
+          description: 'Specifies if the feature is available for the current user
+
+            according to services enabled for the account, type, entitlements and
+
+            permissions of the extension. If the authorized user gets features of
+
+            the other extension, only features that can be delegated are returned
+
+            (such as configuration by administrators).
+
+            '
+        params:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParamsInfo'
+        reason:
+          $ref: '#/components/schemas/ReasonInfo'
+    ReasonInfo:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Reason code
+          enum:
+          - ServicePlanLimitation
+          - AccountLimitation
+          - ExtensionTypeLimitation
+          - ExtensionLimitation
+          - InsufficientPermissions
+          - ConfigurationLimitation
+        message:
+          type: string
+          description: Reason description
+        permission:
+          type: string
+      description: 'Reason for the feature unavailability. Returned only if `available`
+
+        is set to `false`
+
+        '
+  parameters:
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

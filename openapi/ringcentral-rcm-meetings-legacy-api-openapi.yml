@@ -1,0 +1,1535 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards RCM Meetings (Legacy) API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: RCM Meetings (Legacy)
+paths:
+  /restapi/v1.0/account/{accountId}/meeting/locked-settings:
+    get:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Get Locked Meeting Settings
+      description: 'Returns the information about user meeting settings that are locked on
+
+        account level and therefore cannot be changed by a user.
+
+        '
+      operationId: getAccountLockedSetting
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: 'OK: Account Lock Setting'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountLockedSettingResponse'
+      deprecated: true
+      x-availability: High
+      x-throttling-group: Light
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+  /restapi/v1.0/account/{accountId}/meeting/{meetingId}:
+    get:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Get Account-level Meeting Info
+      description: Returns a particular account-level meeting details by ID
+      operationId: readAccountMeeting
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/MeetingId'
+      responses:
+        '200':
+          description: 'OK: Meeting Info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingResponseResource'
+      deprecated: true
+      x-availability: High
+      x-throttling-group: Light
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+  /restapi/v1.0/account/{accountId}/meeting-recordings:
+    get:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: List Account Meeting Recordings
+      description: Returns the list of meeting recordings for the current account.
+      operationId: listAccountMeetingRecordings
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: meetingId
+        in: query
+        description: Internal identifier of a meeting. Either `meetingId` or `meetingStartTime`/`meetingEndTime` can be specified
+        schema:
+          type: string
+      - name: meetingStartTimeFrom
+        in: query
+        description: 'Recordings of meetings started after the time specified will
+
+          be returned. Either `meetingId` or `meetingStartTime`/`meetingEndTime` can
+
+          be specified
+
+          '
+        schema:
+          type: string
+          format: date-time
+      - name: meetingStartTimeTo
+        in: query
+        description: 'Recordings of meetings started before the time specified will
+
+          be returned. The default value is current time. Either `meetingId` or `meetingStartTime`/`meetingEndTime`
+
+          can be specified
+
+          '
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        in: query
+        description: Page number
+        schema:
+          type: integer
+          format: int32
+      - name: perPage
+        in: query
+        description: Number of items per page. The `max` value is supported to indicate the maximum size - 300
+        schema:
+          maximum: 300
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListMeetingRecordingsResponse'
+      deprecated: true
+      x-feature: MeetingsCompanyRecordings
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: Meetings
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting-configuration/profile-image:
+    post:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Upload User Meeting Profile Image
+      description: Uploads profile picture for user meetings
+      operationId: createUserMeetingProfileImage
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - profilePic
+              properties:
+                profilePic:
+                  type: string
+                  description: 'Profile image file size cannot exceed 2Mb. Supported formats are: JPG/JPEG, GIF and PNG'
+                  format: binary
+      responses:
+        '204':
+          description: No Content
+      deprecated: true
+      x-request-max-body-size: 2m
+      x-availability: High
+      x-throttling-group: Light
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting:
+    get:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: List Scheduled Meetings
+      description: 'Returns a list of user meetings scheduled for the future (meetings
+
+        of ''Instant'' type are not included).
+
+        '
+      operationId: listMeetings
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      responses:
+        '200':
+          description: 'OK: Scheduled Meeting List'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingsResource'
+      deprecated: true
+      x-feature: Meetings
+      x-availability: High
+      x-throttling-group: Light
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+    post:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Create Meeting
+      description: Creates a new meeting.
+      operationId: createMeeting
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingRequestResource'
+        required: true
+      responses:
+        '201':
+          description: Created Meeting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingResponseResource'
+      deprecated: true
+      x-feature: EditMeetings
+      x-availability: High
+      x-throttling-group: Medium
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting/user-settings:
+    get:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Get Meeting User Settings
+      description: Returns user settings for meetings.
+      operationId: getUserSetting
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      responses:
+        '200':
+          description: 'OK: User Setting'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingUserSettingsResponse'
+      deprecated: true
+      x-feature: Meetings
+      x-availability: High
+      x-throttling-group: Light
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting/{meetingId}:
+    get:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Get Meeting Info
+      description: Returns a particular meeting details by ID
+      operationId: readMeeting
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/MeetingId'
+      responses:
+        '200':
+          description: 'OK: Meeting Info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingResponseResource'
+      deprecated: true
+      x-feature: Meetings
+      x-availability: High
+      x-throttling-group: Light
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+    put:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Update Meeting
+      description: Modifies a particular meeting
+      operationId: updateMeeting
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/MeetingId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingRequestResource'
+        required: true
+      responses:
+        '200':
+          description: 'OK: Updated Meeting Info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingResponseResource'
+      deprecated: true
+      x-availability: High
+      x-throttling-group: Medium
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+    delete:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Delete Meeting
+      description: Deletes a scheduled meeting.
+      operationId: deleteMeeting
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/MeetingId'
+      - name: occurrenceId
+        in: query
+        description: Internal identifier of a recurrent meeting occurrence
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+      deprecated: true
+      x-feature: EditMeetings
+      x-availability: High
+      x-throttling-group: Medium
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+    patch:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Update Meeting
+      description: Modifies a particular meeting
+      operationId: patchMeeting
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/MeetingId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingRequestResource'
+        required: true
+      responses:
+        '200':
+          description: 'OK: Updated Meeting Info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingResponseResource'
+      deprecated: true
+      x-availability: High
+      x-throttling-group: Medium
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting/{meetingId}/end:
+    post:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: End Meeting
+      description: Ends a meeting which is in progress
+      operationId: endMeeting
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/MeetingId'
+      responses:
+        '204':
+          description: No Content
+      deprecated: true
+      x-feature: EditMeetings
+      x-availability: High
+      x-throttling-group: Medium
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting/{meetingId}/invitation:
+    get:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Get Meeting Invitation
+      description: Returns a Meeting Invitation by ID.
+      operationId: readMeetingInvitation
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/MeetingId'
+      responses:
+        '200':
+          description: 'OK: Meeting Invitation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicMeetingInvitationResponse'
+      deprecated: true
+      x-availability: High
+      x-throttling-group: Light
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting/service-info:
+    get:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Get Meeting Service Info
+      description: Returns information on dial-in numbers for meetings, support and international dial-in numbers URIs and meeting account information.
+      operationId: readMeetingServiceInfo
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      responses:
+        '200':
+          description: 'OK: Meeting Service Info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingServiceInfoResource'
+      deprecated: true
+      x-feature: Meetings
+      x-availability: High
+      x-throttling-group: Light
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+    patch:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Update Meeting Service Info
+      description: Updates personal meeting identifier.
+      operationId: updateMeetingServiceInfo
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingServiceInfoRequest'
+        required: true
+      responses:
+        '200':
+          description: 'OK: Meeting Service Info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingServiceInfoResource'
+      deprecated: true
+      x-feature: EditMeetings
+      x-availability: High
+      x-throttling-group: Medium
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/meetings-configuration/assisted:
+    get:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Get Assisted Users
+      description: Returns assisted users information.
+      operationId: readAssistedUsers
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      responses:
+        '200':
+          description: Assisted User Info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssistedUsersResource'
+      deprecated: true
+      x-feature: Meetings
+      x-availability: High
+      x-throttling-group: Light
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/meetings-configuration/assistants:
+    get:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: Get Assistants
+      description: Returns assistants information.
+      operationId: readAssistants
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      responses:
+        '200':
+          description: 'OK: Assistants Info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssistantsResource'
+      deprecated: true
+      x-feature: Meetings
+      x-availability: High
+      x-throttling-group: Light
+      x-user-permission: Meetings
+      x-app-permission: Meetings
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/meeting-recordings:
+    get:
+      tags:
+      - RCM Meetings (Legacy)
+      summary: List User Meeting Recordings
+      description: Returns the list of meetings recordings for the current user.
+      operationId: listUserMeetingRecordings
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - name: meetingId
+        in: query
+        description: Internal identifier of a meeting. Either `meetingId` or `meetingStartTime`/`meetingEndTime` can be specified
+        schema:
+          type: string
+      - name: meetingStartTimeFrom
+        in: query
+        description: Recordings of meetings started after the time specified will be returned. Either `meetingId` or `meetingStartTime`/`meetingEndTime` can be specified
+        schema:
+          type: string
+          format: date-time
+      - name: meetingStartTimeTo
+        in: query
+        description: Recordings of meetings started before the time specified will be returned. The default value is current time. Either `meetingId` or `meetingStartTime`/`meetingEndTime` can be specified
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        in: query
+        description: Page number
+        schema:
+          type: integer
+          format: int32
+      - name: perPage
+        in: query
+        description: Number of items per page. The `max` value is supported to indicate the maximum size - 300
+        schema:
+          maximum: 300
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListMeetingRecordingsResponse'
+      deprecated: true
+      x-feature: MeetingsPersonalRecordings
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: Meetings
+components:
+  schemas:
+    AssistedUsersResource:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssistedUserResource'
+    ListMeetingRecordingsResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetingRecordings'
+        paging:
+          $ref: '#/components/schemas/MeetingRecordingsPagingInfo'
+        navigation:
+          $ref: '#/components/schemas/MeetingRecordingsNavigationInfo'
+    UserMeetingRecordingSetting:
+      type: object
+      properties:
+        localRecording:
+          type: boolean
+          description: Allows hosts and participants to record a meeting to a local file
+        cloudRecording:
+          type: boolean
+          description: Allows hosts to record and save a meeting/webinar in the cloud
+        recordSpeakerView:
+          type: boolean
+          description: Allows to record active speaker with the shared screen
+          default: false
+        recordGalleryView:
+          type: boolean
+          description: Allows to record gallery view with the shared screen
+          default: false
+        recordAudioFile:
+          type: boolean
+          description: Allows to record an audio-only file
+          default: false
+        saveChatText:
+          type: boolean
+          description: Allows to save chat text from a meeting
+          default: false
+        showTimestamp:
+          type: boolean
+          description: Allows to show timestamp on video
+          default: false
+        autoRecording:
+          type: string
+          description: Automatic recording (local/cloud/none) of meetings as they start
+          default: local
+          enum:
+          - local
+          - cloud
+          - none
+        autoDeleteCmr:
+          type: string
+          description: Automatic deletion of cloud recordings
+          default: 'false'
+        autoDeleteCmrDays:
+          type: integer
+          format: int32
+          description: A specified number of days for automatic deletion of cloud recordings, the value range is 1-60
+      description: Meeting recording settings locked on account level
+    AssistantsResource:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssistantResource'
+    MeetingScheduleResource:
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: date-time
+        durationInMinutes:
+          type: integer
+          format: int32
+        timeZone:
+          $ref: '#/components/schemas/MeetingsTimezoneResource'
+      description: Timing of a meeting
+    AccountLockSettingRecordResponse:
+      type: object
+      properties:
+        localRecording:
+          type: boolean
+        cloudRecording:
+          type: boolean
+        autoRecording:
+          type: boolean
+        cloudRecordingDownload:
+          type: boolean
+        hostDeleteCloudRecording:
+          type: boolean
+        accountUserAccessRecording:
+          type: boolean
+        autoDeleteCmr:
+          type: boolean
+    MonthlyWeek:
+      type: string
+      description: Supported together with `weeklyByDay`
+      enum:
+      - Last
+      - First
+      - Second
+      - Third
+      - Fourth
+    MeetingRecordings:
+      type: object
+      properties:
+        meeting:
+          $ref: '#/components/schemas/MeetingInfo'
+        recordings:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetingRecordingInfo'
+    MeetingFrequency:
+      type: string
+      description: Recurrence time frame
+      enum:
+      - Daily
+      - Weekly
+      - Monthly
+    MeetingResponseResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          description: Link to a meeting resource
+          format: uri
+        uuid:
+          type: string
+          description: Universally unique identifier of a meeting"
+        id:
+          type: string
+          description: Internal identifier of a meeting
+        topic:
+          type: string
+          description: Custom topic of a meeting
+        meetingType:
+          type: string
+          enum:
+          - Instant
+          - Scheduled
+          - ScheduledRecurring
+          - Recurring
+        password:
+          type: string
+          description: Meeting password
+        h323Password:
+          type: string
+        status:
+          type: string
+          description: Status of a meeting
+        links:
+          $ref: '#/components/schemas/MeetingLinks'
+        schedule:
+          $ref: '#/components/schemas/MeetingScheduleResource'
+        host:
+          $ref: '#/components/schemas/HostInfoRequest'
+        allowJoinBeforeHost:
+          type: boolean
+          description: If true, then participants can join the meeting before host arrives
+          default: false
+        startHostVideo:
+          type: boolean
+          description: Starting meetings with host video on/off (true/false)
+          default: false
+        startParticipantsVideo:
+          type: boolean
+          description: Starting meetings with participant video on/off (true/false)
+          default: false
+        audioOptions:
+          type: array
+          items:
+            type: string
+            enum:
+            - Phone
+            - ComputerAudio
+        recurrence:
+          $ref: '#/components/schemas/RecurrenceInfo'
+        autoRecordType:
+          type: string
+          description: Automatic record type
+          default: none
+          enum:
+          - local
+          - cloud
+          - none
+        enforceLogin:
+          type: boolean
+          description: If true, then only signed-in users can join this meeting
+        muteParticipantsOnEntry:
+          type: boolean
+          description: If true, then participants are muted on entry
+        occurrences:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetingOccurrenceInfo'
+        enableWaitingRoom:
+          type: boolean
+          description: If true, then the waiting room for participants is enabled
+        globalDialInCountries:
+          type: array
+          description: List of global dial-in countries (eg. US, UK, AU, etc.)
+          items:
+            type: string
+        alternativeHosts:
+          type: string
+    MeetingRecordingsPagingInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          description: The current page number. 1-indexed, so the first page is 1 by default. May be omitted if result is empty (because non-existent page was specified or perPage=0 was requested)
+        perPage:
+          type: integer
+          format: int32
+          description: Current page size, describes how many items are in each page. Default value is 100. Maximum value is 1000. If perPage value in the request is greater than 1000, the maximum value (1000) is applied
+        pageStart:
+          type: integer
+          format: int32
+          description: The zero-based number of the first element on the current page. Omitted if the page is omitted or result is empty
+        pageEnd:
+          type: integer
+          format: int32
+          description: The zero-based index of the last element on the current page. Omitted if the page is omitted or result is empty
+        totalPages:
+          type: integer
+          format: int32
+          description: The total number of pages in a dataset. May be omitted for some resources due to performance reasons
+        totalElements:
+          type: integer
+          format: int32
+          description: The total number of elements in a dataset. May be omitted for some resource due to performance reasons
+    UserInMeetingResponse:
+      type: object
+      properties:
+        enableWaitingRoom:
+          type: boolean
+        breakoutRoom:
+          type: boolean
+        chat:
+          type: boolean
+        polling:
+          type: boolean
+        annotation:
+          type: boolean
+        virtualBackground:
+          type: boolean
+        screenSharing:
+          type: boolean
+        requestPermissionToUnmute:
+          type: boolean
+    DialInNumberResource:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+        formattedNumber:
+          type: string
+        location:
+          type: string
+        country:
+          $ref: '#/components/schemas/MeetingsCountryResource'
+    MeetingLinks:
+      type: object
+      properties:
+        startUri:
+          type: string
+          format: uri
+        joinUri:
+          type: string
+          format: uri
+      description: Meeting links
+    MeetingsResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetingResponseResource'
+        paging:
+          $ref: '#/components/schemas/MeetingsPagingInfo'
+        navigation:
+          $ref: '#/components/schemas/MeetingsNavigationInfo'
+    MeetingInfo:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Unique identifier of a meeting instance
+        id:
+          type: string
+        topic:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+    MeetingsTimezoneResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+    WeekDay:
+      type: string
+      description: 'This field is used only if you''re scheduling a recurring meeting of type `3` to state a specific day in a week when the monthly meeting should recur; it works together with `MonthlyByWeek` field. The values are: 1 - Sunday; 2 - Monday; 3 - Tuesday; 4 - Wednesday; 5 - Thursday; 6 - Friday; 7- Saturday'
+      enum:
+      - Sunday
+      - Monday
+      - Tuesday
+      - Wednesday
+      - Thursday
+      - Friday
+      - Saturday
+    MeetingServiceInfoResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        supportUri:
+          type: string
+          format: uri
+        intlDialInNumbersUri:
+          type: string
+          format: uri
+        externalUserInfo:
+          $ref: '#/components/schemas/MeetingExternalUserInfoResource'
+        dialInNumbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/DialInNumberResource'
+    AssistantResource:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    MeetingsPagingInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+        perPage:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int32
+        pageStart:
+          type: integer
+          format: int32
+        pageEnd:
+          type: integer
+          format: int32
+    ScheduleUserMeetingInfo:
+      type: object
+      properties:
+        enforceLogin:
+          type: boolean
+          description: If true, then only signed-in users can join this meeting
+        startHostVideo:
+          type: boolean
+          description: Starting meetings with host video on/off (true/false)
+        startParticipantsVideo:
+          type: boolean
+          description: Starting meetings with participant video on/off (true/false)
+        audioOptions:
+          type: array
+          description: Determines how participants can join the audio channel of a meeting
+          items:
+            type: string
+            enum:
+            - Phone
+            - ComputerAudio
+            - ThirdParty
+        allowJoinBeforeHost:
+          type: boolean
+          description: Allows participants to join the meeting before the host arrives
+        usePmiForScheduledMeetings:
+          type: boolean
+          description: Determines whether to use Personal Meeting ID (PMI) when scheduling a meeting
+        usePmiForInstantMeetings:
+          type: boolean
+          description: Determines whether to use Personal Meeting ID (PMI) when starting an instant meeting
+        requirePasswordForSchedulingNewMeetings:
+          type: boolean
+          description: A password will be generated when scheduling a meeting and participants will require password to join a meeting. The Personal Meeting ID (PMI) meetings are not included
+        requirePasswordForScheduledMeetings:
+          type: boolean
+          description: Specifies whether to require a password for meetings which have already been scheduled
+        defaultPasswordForScheduledMeetings:
+          type: string
+          description: Password for already scheduled meetings. Users can set it individually
+        requirePasswordForInstantMeetings:
+          type: boolean
+          description: A random password will be generated for an instant meeting, if set to `true`. If you use PMI for your instant meetings, this option will be disabled
+        requirePasswordForPmiMeetings:
+          type: string
+          description: 'Specifies whether to require a password for meetings using Personal Meeting ID (PMI). The supported values are: ''none'', ''all'' and ''jbhOnly'' (joined before host only)'
+          enum:
+          - all
+          - none
+          - jbhOnly
+        pmiPassword:
+          type: string
+          description: The default password for Personal Meeting ID (PMI) meetings
+        pstnPasswordProtected:
+          type: boolean
+          description: Specifies whether to generate and require a password for participants joining by phone
+        muteParticipantsOnEntry:
+          type: boolean
+      description: Scheduling meeting settings locked on account level || Settings defining how to schedule user meetings
+    PublicMeetingInvitationResponse:
+      type: object
+      properties:
+        invitation:
+          type: string
+          description: Meeting invitation
+    RecurrenceInfo:
+      type: object
+      properties:
+        frequency:
+          $ref: '#/components/schemas/MeetingFrequency'
+        interval:
+          type: integer
+          format: int32
+          description: 'Recurrence interval. The supported ranges are: 1-90 for `Daily`;
+
+            1-12 for `Weekly`; 1-3 for `Monthly`
+
+            '
+        weeklyByDays:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeekDay'
+        monthlyByDay:
+          type: integer
+          format: int32
+          description: The supported range is 1-31
+        monthlyByWeek:
+          $ref: '#/components/schemas/MonthlyWeek'
+        monthlyByWeekDay:
+          $ref: '#/components/schemas/WeekDay'
+        count:
+          type: integer
+          format: int32
+          description: Number of meeting occurrences
+        until:
+          type: string
+          description: Meeting expiration date-time
+    MeetingOccurrenceInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identifier of a meeting occurrence
+        startTime:
+          type: string
+          format: date-time
+          description: Starting time of a meeting occurrence
+        durationInMinutes:
+          type: integer
+          format: int64
+          description: Duration of a meeting occurrence
+        status:
+          type: string
+          description: Status of a meeting occurrence
+    AssistedUserResource:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    ScheduleMeetingResponse:
+      type: object
+      properties:
+        startHostVideo:
+          type: boolean
+        startParticipantVideo:
+          type: boolean
+        audioOptions:
+          type: boolean
+        allowJoinBeforeHost:
+          type: boolean
+        requirePasswordForSchedulingNewMeetings:
+          type: boolean
+        requirePasswordForInstantMeetings:
+          type: boolean
+        requirePasswordForPmiMeetings:
+          type: boolean
+        enforceLogin:
+          type: boolean
+    MeetingsNavigationInfoUri:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+    MeetingRecordingsNavigationInfo:
+      type: object
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/MeetingRecordingsNavigationInfoUri'
+        nextPage:
+          $ref: '#/components/schemas/MeetingRecordingsNavigationInfoUri'
+        previousPage:
+          $ref: '#/components/schemas/MeetingRecordingsNavigationInfoUri'
+        lastPage:
+          $ref: '#/components/schemas/MeetingRecordingsNavigationInfoUri'
+    MeetingsCountryResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+        name:
+          type: string
+        isoCode:
+          type: string
+        callingCode:
+          type: string
+        emergencyCalling:
+          type: boolean
+          default: false
+        numberSelling:
+          type: boolean
+          default: false
+        loginAllowed:
+          type: boolean
+          default: false
+    MeetingUserSettingsResponse:
+      type: object
+      properties:
+        recording:
+          $ref: '#/components/schemas/UserMeetingRecordingSetting'
+        scheduleMeeting:
+          $ref: '#/components/schemas/ScheduleUserMeetingInfo'
+        telephony:
+          $ref: '#/components/schemas/TelephonyUserMeetingSettings'
+        inMeetings:
+          $ref: '#/components/schemas/UserInMeetingResponse'
+    MeetingRequestResource:
+      type: object
+      properties:
+        topic:
+          type: string
+          description: Custom topic of a meeting
+        meetingType:
+          type: string
+          enum:
+          - Instant
+          - Scheduled
+          - ScheduledRecurring
+          - Recurring
+        schedule:
+          $ref: '#/components/schemas/MeetingScheduleResource'
+        password:
+          type: string
+          format: password
+          description: Meeting password
+        host:
+          $ref: '#/components/schemas/HostInfoRequest'
+        allowJoinBeforeHost:
+          type: boolean
+          default: false
+        startHostVideo:
+          type: boolean
+          default: false
+        startParticipantsVideo:
+          type: boolean
+          description: Starting meetings with participant video on/off (true/false)
+          default: false
+        usePersonalMeetingId:
+          type: boolean
+          description: If true, then personal user's meeting ID is applied for creation of this meeting
+        audioOptions:
+          type: array
+          items:
+            type: string
+            enum:
+            - Phone
+            - ComputerAudio
+        recurrence:
+          $ref: '#/components/schemas/RecurrenceInfo'
+        autoRecordType:
+          type: string
+          description: Automatic record type
+          default: none
+          enum:
+          - local
+          - cloud
+          - none
+        enforceLogin:
+          type: boolean
+          description: If true, then only signed-in users can join this meeting
+        muteParticipantsOnEntry:
+          type: boolean
+          description: If true, then participants are muted on entry
+        enableWaitingRoom:
+          type: boolean
+          description: If true, then the waiting room for participants is enabled
+        globalDialInCountries:
+          type: array
+          description: List of global dial-in countries (eg. US, UK, AU, etc.)
+          items:
+            type: string
+        alternativeHosts:
+          type: string
+    AccountLockedSettingResponse:
+      type: object
+      properties:
+        scheduleMeeting:
+          $ref: '#/components/schemas/ScheduleMeetingResponse'
+        recording:
+          $ref: '#/components/schemas/AccountLockSettingRecordResponse'
+    MeetingExternalUserInfoResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        userId:
+          type: string
+        accountId:
+          type: string
+        userType:
+          type: integer
+          format: int64
+        userToken:
+          type: string
+        hostKey:
+          type: string
+        personalMeetingId:
+          type: string
+        personalLink:
+          type: string
+          description: Link to the user's personal meeting room, used as an alias for personal meeting URL (with personal meeting ID)
+          example: https://meetings.ringcentral.com/my/jsmith
+        personalLinkName:
+          type: string
+        usePmiForInstantMeetings:
+          type: boolean
+          description: Enables using personal meeting ID for instant meetings
+          default: false
+    MeetingsNavigationInfo:
+      type: object
+      properties:
+        nextPage:
+          $ref: '#/components/schemas/MeetingsNavigationInfoUri'
+        previousPage:
+          $ref: '#/components/schemas/MeetingsNavigationInfoUri'
+        firstPage:
+          $ref: '#/components/schemas/MeetingsNavigationInfoUri'
+        lastPage:
+          $ref: '#/components/schemas/MeetingsNavigationInfoUri'
+    MeetingRecordingInfo:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Unique identifier of a meeting instance
+        id:
+          type: string
+        contentDownloadUri:
+          type: string
+          format: uri
+          description: Link for downloading the recorded file (mp4, mp3 audio and text/plain chat file)
+        contentType:
+          type: string
+          enum:
+          - video/mp4
+          - audio/m4a
+          - text/vtt
+        size:
+          type: integer
+          format: int32
+        startTime:
+          type: string
+          format: date-time
+          description: Starting time of a recording
+        endTime:
+          type: string
+          format: date-time
+          description: Ending time of a recording
+        status:
+          type: string
+          enum:
+          - Completed
+          - Processing
+    HostInfoRequest:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the meeting host resource
+        id:
+          type: string
+          description: Internal identifier of an extension which is assigned to be a meeting host. The default value is currently logged-in extension identifier
+      description: Meeting host information
+    TelephonyUserMeetingSettings:
+      type: object
+      properties:
+        thirdPartyAudio:
+          type: boolean
+          description: ThirdParty audio option
+        audioConferenceInfo:
+          type: boolean
+          description: Users can join the meeting using the existing 3rd party audio configuration
+        globalDialCountries:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalDialInCountryResponse'
+    MeetingServiceInfoRequest:
+      type: object
+      properties:
+        externalUserInfo:
+          $ref: '#/components/schemas/MeetingExternalUserInfoResource'
+    GlobalDialInCountryResponse:
+      type: object
+      properties:
+        countryCode:
+          type: string
+        countryName:
+          type: string
+        checked:
+          type: boolean
+        order:
+          type: integer
+          format: int32
+    MeetingRecordingsNavigationInfoUri:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+      description: Canonical URI for the corresponding page of the list
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    MeetingId:
+      name: meetingId
+      in: path
+      description: Internal identifier of a RingCentral meeting
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

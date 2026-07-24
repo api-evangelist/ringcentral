@@ -1,0 +1,734 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Teams API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Teams
+paths:
+  /team-messaging/v1/everyone:
+    get:
+      tags:
+      - Teams
+      summary: Get Everyone Chat
+      description: Returns information about "Everyone" chat (a company level chat which includes all employees).
+      operationId: readGlipEveryoneNew
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EveryoneTeamInfo'
+        '404':
+          description: Chat Not Found.
+      x-feature: TeamMessaging
+      x-throttling-group: Light
+      x-app-permission: TeamMessaging
+    patch:
+      tags:
+      - Teams
+      summary: Update Everyone Chat
+      description: Updates "Everyone" chat information.
+      operationId: patchGlipEveryoneNew
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEveryoneTeamRequest'
+        required: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EveryoneTeamInfo'
+        '404':
+          description: Chat Not Found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/teams:
+    get:
+      tags:
+      - Teams
+      summary: List Teams
+      description: Returns the list of teams where the user is a member (both archived and active) combined with a list of public teams that can be joined by the current user. All records in response are sorted by creation time of a chat in ascending order. A team is a chat between 2 and more (unlimited number) participants assigned with specific name.
+      operationId: listGlipTeamsNew
+      parameters:
+      - name: recordCount
+        in: query
+        description: Number of teams to be fetched by one request. The maximum value is 250, by default - 30
+        schema:
+          maximum: 250
+          type: integer
+          format: int32
+          default: 30
+      - name: pageToken
+        in: query
+        description: Pagination token.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMTeamList'
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    post:
+      tags:
+      - Teams
+      summary: Create Team
+      description: Creates a team, and adds a list of people to the team.
+      operationId: createGlipTeamNew
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMCreateTeamRequest'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMTeamInfo'
+        '400':
+          description: One of body parameters has invalid value.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/teams/{chatId}:
+    get:
+      tags:
+      - Teams
+      summary: Get Team
+      description: Returns information about the specified team.
+      operationId: readGlipTeamNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a team to be returned.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMTeamInfo'
+        '404':
+          description: Team Not Found.
+      x-feature: TeamMessaging
+      x-throttling-group: Light
+      x-app-permission: TeamMessaging
+    delete:
+      tags:
+      - Teams
+      summary: Delete Team
+      description: Deletes the specified team.
+      operationId: deleteGlipTeamNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a team.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content.
+        '403':
+          description: User is not Team Admin.
+        '404':
+          description: Team Not Found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    patch:
+      tags:
+      - Teams
+      summary: Update Team
+      description: Updates the name and description of the specified team.
+      operationId: patchGlipTeamNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a team to be updated.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMUpdateTeamRequest'
+        required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMTeamInfo'
+        '400':
+          description: One of body parameters has invalid value.
+        '403':
+          description: User is not Team Admin or Team is not active.
+        '404':
+          description: Team Not Found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/teams/{chatId}/remove:
+    post:
+      tags:
+      - Teams
+      summary: Remove Team Members
+      description: Removes members from the specified team.
+      operationId: removeGlipTeamMembersNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a team to remove members from.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMRemoveTeamMembersRequest'
+        required: true
+      responses:
+        '204':
+          description: No Content.
+        '400':
+          description: Some of the parameters are missing or have invalid format
+        '403':
+          description: User is not Team Admin.
+        '404':
+          description: Team Not Found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/teams/{chatId}/join:
+    post:
+      tags:
+      - Teams
+      summary: Join Team
+      description: Adds the current user to the specified team.
+      operationId: joinGlipTeamNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a team to be joined.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '205':
+          description: Reset Content
+        '403':
+          description: Team status is not Active or Team is not public
+        '404':
+          description: Team Not Found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/teams/{chatId}/archive:
+    post:
+      tags:
+      - Teams
+      summary: Archive Team
+      description: Changes the status of the specified team to 'Archived'.
+      operationId: archiveGlipTeamNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a team to be archived.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '205':
+          description: Reset Content
+        '403':
+          description: User is not Team Admin
+        '404':
+          description: Team Not Found
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/teams/{chatId}/unarchive:
+    post:
+      tags:
+      - Teams
+      summary: Unarchive Team
+      description: Changes the status of the specified team to 'Active'.
+      operationId: unarchiveGlipTeamNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a team to be made active.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '205':
+          description: Reset Content
+        '403':
+          description: User is not Team Admin
+        '404':
+          description: Team Not Found
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/teams/{chatId}/leave:
+    post:
+      tags:
+      - Teams
+      summary: Leave Team
+      description: Removes the current user from the specified team.
+      operationId: leaveGlipTeamNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a team to be left.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '205':
+          description: Reset Content.
+        '403':
+          description: Team status is not Active.
+        '404':
+          description: Team Not Found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/teams/{chatId}/add:
+    post:
+      tags:
+      - Teams
+      summary: Add Team Members
+      description: Adds members to the specified team.
+      operationId: addGlipTeamMembersNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a team to add members to.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMAddTeamMembersRequest'
+        required: true
+      responses:
+        '204':
+          description: No Content.
+        '400':
+          description: Some of the parameters are missing or have invalid format
+        '403':
+          description: User is not Team Admin.
+        '404':
+          description: Team Not Found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+components:
+  schemas:
+    TMAddTeamMembersRequest:
+      required:
+      - members
+      type: object
+      properties:
+        members:
+          type: array
+          description: Identifier(s) of chat member(s)
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of a person
+              email:
+                type: string
+                format: email
+                description: Email of a person
+            description: Conversation is opened
+    EveryoneTeamInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a chat
+        type:
+          type: string
+          description: Type of chat
+          enum:
+          - Everyone
+        name:
+          type: string
+          description: Chat name
+        description:
+          type: string
+          description: Chat description
+        creationTime:
+          type: string
+          description: Chat creation datetime in ISO 8601 format
+          format: date-time
+        lastModifiedTime:
+          type: string
+          description: Chat last change datetime in ISO 8601 format
+          format: date-time
+    TMTeamList:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of teams
+          items:
+            $ref: '#/components/schemas/TMTeamInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+    TMTeamInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a team
+        type:
+          type: string
+          description: Type of chat
+          enum:
+          - Team
+        public:
+          type: boolean
+          description: Team access level
+        name:
+          type: string
+          description: Team name
+        description:
+          type: string
+          description: Team description
+        status:
+          type: string
+          description: Team status
+          enum:
+          - Active
+          - Archived
+        creationTime:
+          type: string
+          description: Team creation datetime in ISO 8601 format
+          format: date-time
+        lastModifiedTime:
+          type: string
+          description: Team last change datetime in ISO 8601 format
+          format: date-time
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+    UpdateEveryoneTeamRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Everyone chat name. Maximum number of characters supported is 250
+        description:
+          type: string
+          description: Everyone chat description. Maximum number of characters supported is 1000
+    TMUpdateTeamRequest:
+      type: object
+      properties:
+        public:
+          type: boolean
+          description: Team access level
+        name:
+          type: string
+          description: Team name. Maximum number of characters supported is 250
+        description:
+          type: string
+          description: Team description. Maximum number of characters supported is 1000
+    TMCreateTeamRequest:
+      required:
+      - name
+      type: object
+      properties:
+        public:
+          type: boolean
+          description: Team access level.
+        name:
+          type: string
+          description: Team name.
+        description:
+          type: string
+          description: Team description.
+        members:
+          type: array
+          description: Identifier(s) of team members.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of a person
+              email:
+                type: string
+                format: email
+                description: Email of a person
+    TMRemoveTeamMembersRequest:
+      required:
+      - members
+      type: object
+      properties:
+        members:
+          type: array
+          description: Identifier(s) of chat members.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of a person
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

@@ -1,0 +1,515 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Chats API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Chats
+paths:
+  /team-messaging/v1/recent/chats:
+    get:
+      tags:
+      - Chats
+      summary: List Recent Chats
+      description: Returns recent chats where the user is a member. All records in response are sorted by the `lastModifiedTime` in descending order (the latest changed chat is displayed first on page)
+      operationId: listRecentChatsNew
+      parameters:
+      - name: type
+        in: query
+        description: Type of chats to be fetched. By default, all chat types are returned
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - Everyone
+            - Group
+            - Personal
+            - Direct
+            - Team
+      - name: recordCount
+        in: query
+        description: Max number of chats to be fetched by one request (Not more than 250).
+        schema:
+          maximum: 250
+          type: integer
+          format: int32
+          default: 30
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMChatListWithoutNavigation'
+        '400':
+          description: Some of the parameters are missing or have invalid format
+      x-feature: TeamMessaging
+      x-throttling-group: Light
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/chats:
+    get:
+      tags:
+      - Chats
+      summary: List Chats
+      description: 'Returns the list of chats where the user is a member and also public teams that can be joined.
+
+
+        All records in response are sorted by creation time of a chat in ascending order.
+
+
+        **Chat types**
+
+
+        There are multiple types of chats, including:
+
+
+        * **Personal** - each user is given a dedicated "personal chat" in which they are the only member.
+
+        * **Direct** - a chat between two individuals.
+
+        * **Group** - a chat between three or more named individuals. A "group" chat has no name.
+
+        * **Team** - a chat related to a specific topic. Members can come and go freely from this chat type.
+
+        * **Everyone** - a special chat containing every individual in a company.
+
+        '
+      operationId: listGlipChatsNew
+      parameters:
+      - name: type
+        in: query
+        description: Type of chats to be fetched. By default, all type of chats will be fetched
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - Personal
+            - Direct
+            - Group
+            - Team
+            - Everyone
+      - name: recordCount
+        in: query
+        description: Number of chats to be fetched by one request. The maximum value is 250, by default - 30.
+        schema:
+          maximum: 250
+          type: integer
+          format: int32
+          default: 30
+      - name: pageToken
+        in: query
+        description: Pagination token.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMChatList'
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/chats/{chatId}:
+    get:
+      tags:
+      - Chats
+      summary: Get Chat
+      description: 'Returns information about a chat by ID.
+
+
+        **Note** ''Chat'' is a general name for all types of threads including *Personal* (user''s own me-chat), *Direct* (one on one chat), *Group* (chat of 3-15 participants without specific name), *Team* (chat of 2 and more participants, with a specific name), *Everyone* (company chat including all employees, with a specific name)."
+
+        '
+      operationId: readGlipChatNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat. If tilde (~) is specified, then `/me` (Personal) chat will be returned
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMChatInfo'
+        '404':
+          description: Chat Not Found.
+      x-feature: TeamMessaging
+      x-throttling-group: Light
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/chats/{chatId}/unfavorite:
+    post:
+      tags:
+      - Chats
+      summary: Remove Chat from Favorites
+      description: Removes the specified chat from the users's list of favorite chats.
+      operationId: unfavoriteGlipChatNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat to remove from favorite list.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Chat not found
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/chats/{chatId}/favorite:
+    post:
+      tags:
+      - Chats
+      summary: Add Chat to Favorites
+      description: Adds the specified chat to the users's list of favorite chats.
+      operationId: favoriteGlipChatNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat to add to favorite list.
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Favorite chat list is limited to 250 unique chats
+        '403':
+          description: User is not member of chat
+        '404':
+          description: Chat not found
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/favorites:
+    get:
+      tags:
+      - Chats
+      summary: List Favorite Chats
+      description: Returns a list of the current user's favorite chats.
+      operationId: listFavoriteChatsNew
+      parameters:
+      - name: recordCount
+        in: query
+        description: Max number of chats to be fetched by one request (Not more than 250).
+        schema:
+          maximum: 250
+          type: integer
+          format: int32
+          default: 30
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMChatListWithoutNavigation'
+        '400':
+          description: Some of the parameters are missing or have invalid format
+      x-feature: TeamMessaging
+      x-throttling-group: Light
+      x-app-permission: TeamMessaging
+components:
+  schemas:
+    TMChatInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a chat
+        type:
+          type: string
+          description: Type of chat
+          enum:
+          - Everyone
+          - Team
+          - Group
+          - Direct
+          - Personal
+        public:
+          type: boolean
+          description: For 'Team' chat type only. Team access level.
+        name:
+          type: string
+          description: For 'Team','Everyone' chats types only. Chat name.
+        description:
+          type: string
+          description: For 'Team','Everyone' chats types only. Chat description.
+        status:
+          type: string
+          description: For 'Team' chat type only. Team status.
+          enum:
+          - Active
+          - Archived
+        creationTime:
+          type: string
+          description: Chat creation datetime in ISO 8601 format
+          format: date-time
+        lastModifiedTime:
+          type: string
+          description: Chat last change datetime in ISO 8601 format
+          format: date-time
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMChatMemberInfo'
+    TMChatListWithoutNavigation:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of chats
+          items:
+            $ref: '#/components/schemas/TMChatInfo'
+    TMChatList:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of chats
+          items:
+            $ref: '#/components/schemas/TMChatInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+    TMChatMemberInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

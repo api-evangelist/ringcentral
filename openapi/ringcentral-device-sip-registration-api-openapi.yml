@@ -1,0 +1,1171 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Device SIP Registration API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Device SIP Registration
+paths:
+  /restapi/v1.0/client-info/sip-provision:
+    post:
+      tags:
+      - Device SIP Registration
+      summary: Register Device
+      description: 'Creates SIP registration of a device/application (WebPhone, Mobile, Softphone).
+
+        '
+      operationId: createSIPRegistration
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSipRegistrationRequest'
+        required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateSipRegistrationResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: High
+      x-throttling-group: Heavy
+      x-app-permission: VoipCalling
+components:
+  schemas:
+    SipRegistrationDeviceLocationInfo:
+      type: object
+      description: Company emergency response location details
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an emergency response location
+        name:
+          type: string
+          description: Emergency response location name
+        addressFormatId:
+          type: string
+          description: Address format ID
+    SipInfoResponse:
+      type: object
+      properties:
+        username:
+          type: string
+          description: User credentials
+        password:
+          type: string
+          format: password
+          description: User password. Not returned if SipDigest is not enabled
+        authorizationTypes:
+          type: array
+          description: Supported authorization types and their priority for clients
+          items:
+            $ref: '#/components/schemas/AuthorizationType'
+        authorizationId:
+          type: string
+          description: Identifier for SIP authorization
+        domain:
+          type: string
+          description: SIP domain
+        outboundProxy:
+          type: string
+          description: SIP outbound proxy server address (in the format <host:port>)
+        outboundProxyIPv6:
+          type: string
+          description: SIP outbound IPv6 proxy server address (in the format <host:port>)
+        outboundProxyBackup:
+          type: string
+          description: SIP outbound proxy server backup address (in the format <host:port>)
+        outboundProxyIPv6Backup:
+          type: string
+          description: SIP outbound IPv6 proxy server backup address (in the format <host:port>)
+        transport:
+          type: string
+          description: Preferred transport. SIP info will be returned for this transport if supported
+          enum:
+          - UDP
+          - TCP
+          - TLS
+          - WSS
+        certificate:
+          type: string
+          description: For TLS transport only, Base64 encoded certificate
+        switchBackInterval:
+          type: integer
+          format: int32
+          description: 'The interval in seconds after which the app must try to switch
+
+            back to primary proxy if it was previously switched to backup. If this
+
+            parameter is not returned, the app must stay on backup proxy and try to
+
+            switch to primary proxy after the next SIP-provision call.
+
+            '
+        stunServers:
+          type: array
+          description: List of stun servers in the format <host:port>
+          items:
+            type: string
+    DevicePhoneLinesEmergencyAddressInfo:
+      type: object
+      properties:
+        required:
+          type: boolean
+          description: Indicates that emergency address is required
+        localOnly:
+          type: boolean
+          description: Indicates that only local emergency address can be specified
+    DeviceEmergencyServiceAddressResourceDefault:
+      type: object
+      properties:
+        street:
+          type: string
+        street2:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        customerName:
+          type: string
+        state:
+          type: string
+          description: State/province name
+        stateId:
+          type: string
+          description: Internal identifier of a state
+        stateIsoCode:
+          type: string
+          description: ISO code of a state
+        stateName:
+          type: string
+          description: Full name of a state
+        countryId:
+          type: string
+          description: Internal identifier of a country
+        countryIsoCode:
+          type: string
+          description: ISO code of a country
+        country:
+          type: string
+          description: Country name
+        countryName:
+          type: string
+          description: Full name of a country
+        outOfCountry:
+          type: boolean
+          description: Specifies if emergency address is out of country
+      description: Address for emergency cases. The same emergency address is assigned to all the numbers of one device
+    DeviceModelInfo:
+      required:
+      - addons
+      type: object
+      description: HardPhone model information
+      properties:
+        id:
+          type: string
+          description: Addon identifier. For HardPhones of certain types, which are compatible with this add-on identifier
+        name:
+          type: string
+          description: Device name
+        addons:
+          type: array
+          description: Add-ons description
+          items:
+            $ref: '#/components/schemas/DeviceAddonInfo'
+        features:
+          type: array
+          description: Device feature or multiple features supported
+          items:
+            type: string
+            enum:
+            - BLA
+            - Intercom
+            - Paging
+            - HELD
+    DevicePhoneLinesInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a phone line
+        lineType:
+          type: string
+          description: Type of phone line
+          enum:
+          - Standalone
+          - StandaloneFree
+          - BlaPrimary
+          - BlaSecondary
+        emergencyAddress:
+          $ref: '#/components/schemas/DevicePhoneLinesEmergencyAddressInfo'
+        phoneInfo:
+          $ref: '#/components/schemas/DevicePhoneNumberInfo'
+    SipRegistrationDeviceEmergencyInfo:
+      type: object
+      description: Emergency response location settings of a device
+      properties:
+        address:
+          oneOf:
+          - $ref: '#/components/schemas/DeviceEmergencyServiceAddressResourceDefault'
+          - $ref: '#/components/schemas/DeviceEmergencyServiceAddressResourceAu'
+          - $ref: '#/components/schemas/DeviceEmergencyServiceAddressResourceFr'
+        location:
+          $ref: '#/components/schemas/SipRegistrationDeviceLocationInfo'
+        outOfCountry:
+          type: boolean
+          description: Specifies if emergency address is out of country
+        addressStatus:
+          type: string
+          description: Emergency address status
+          enum:
+          - Valid
+          - Invalid
+          - Processing
+        visibility:
+          type: string
+          description: 'Specifies whether to return only private or only public (company) ERLs (Emergency Response Locations)
+
+            '
+          enum:
+          - Private
+          - Public
+        syncStatus:
+          type: string
+          description: 'Resulting status of emergency address synchronization. Returned
+
+            if `syncEmergencyAddress` parameter is set to `true`
+
+            '
+          enum:
+          - Verified
+          - Updated
+          - Deleted
+          - NotRequired
+          - Unsupported
+          - Failed
+        addressEditableStatus:
+          type: string
+          description: 'Ability to register new emergency address for a phone line
+
+            using devices sharing this line or only main device (line owner)
+
+            '
+          enum:
+          - MainDevice
+          - AnyDevice
+        addressRequired:
+          type: boolean
+          description: Indicates if emergency address is required for the country of a phone line
+        addressLocationOnly:
+          type: boolean
+          description: Indicates if out of country emergency address is not allowed for the country of a phone line
+    SIPInfoRequest:
+      type: object
+      properties:
+        transport:
+          type: string
+          description: Supported transport. SIP info will be returned for this transport if supported
+          enum:
+          - UDP
+          - TCP
+          - TLS
+          - WSS
+    DeviceEmergencyServiceAddressResourceAu:
+      type: object
+      properties:
+        street:
+          type: string
+        street2:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        customerName:
+          type: string
+        state:
+          type: string
+          description: State/province name
+        stateId:
+          type: string
+          description: Internal identifier of a state
+        stateIsoCode:
+          type: string
+          description: ISO code of a state
+        stateName:
+          type: string
+          description: Full name of a state
+        countryId:
+          type: string
+          description: Internal identifier of a country
+        countryIsoCode:
+          type: string
+          description: ISO code of a country
+        country:
+          type: string
+          description: Country name
+        countryName:
+          type: string
+          description: Full name of a country
+        outOfCountry:
+          type: boolean
+          description: Specifies if emergency address is out of country
+        buildingName:
+          type: string
+          description: (Optional) Building name
+        streetType:
+          type: string
+          description: Street type
+        buildingNumber:
+          type: string
+          description: Building/street number
+      description: Address for emergency cases. The same emergency address is assigned to all the numbers of one device
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    ShippingAddressInfo:
+      type: object
+      properties:
+        customerName:
+          type: string
+          description: Name of a primary contact person (receiver)
+        additionalCustomerName:
+          type: string
+          description: 'Name of an additional contact person. Should be specified for
+
+            countries except the US, Canada, the UK and Australia.
+
+            '
+        customerEmail:
+          type: string
+          format: email
+          description: 'Email of a primary contact person (receiver). Should be specified
+
+            for countries except the US, Canada, the UK and Australia.
+
+            '
+        additionalCustomerEmail:
+          type: string
+          format: email
+          description: 'Email of an additional contact person. Should be specified
+
+            for countries except the US, Canada, the UK and Australia.
+
+            '
+        customerPhone:
+          type: string
+          description: 'Phone number of a primary contact person (receiver). Should
+
+            be specified for countries except the US, Canada, the UK and Australia
+
+            '
+        additionalCustomerPhone:
+          type: string
+          description: 'Phone number of an additional contact person. Should be specified
+
+            for countries except the US, Canada, the UK & Australia.
+
+            '
+        street:
+          type: string
+          description: 'Street address, line 1 - street address, P.O. box, company
+
+            name, c/o
+
+            '
+        street2:
+          type: string
+          description: 'Street address, line 2 - apartment, suite, unit, building,
+
+            floor, etc.
+
+            '
+        city:
+          type: string
+          description: City name
+        state:
+          type: string
+          description: State/province name
+        stateId:
+          type: string
+          description: Internal identifier of a state
+        stateIsoCode:
+          type: string
+          description: ISO code of a state
+        stateName:
+          type: string
+          description: Full name of a state
+        countryId:
+          type: string
+          description: Internal identifier of a country
+        countryIsoCode:
+          type: string
+          description: ISO code of a country
+        country:
+          type: string
+          description: Country name
+        countryName:
+          type: string
+          description: Full name of a country
+        zip:
+          type: string
+          description: Zip code
+        taxId:
+          type: string
+          description: 'National taxpayer identification number. Should be specified
+
+            for Brazil (CNPJ/CPF number) and Argentina (CUIT number).
+
+            '
+      description: 'Shipping address for the order. If it coincides with the Emergency
+
+        Service Address, then can be omitted. By default, the same value as the
+
+        emergencyServiceAddress. Multiple addresses can be specified; in case
+
+        an order contains several devices, they can be delivered to different addresses
+
+        '
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    DevicePhoneNumberCountryInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a home country
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a home country
+        name:
+          type: string
+          description: Official name of a home country
+      description: Brief information on a phone number country
+    AuthorizationType:
+      type: string
+      enum:
+      - SipDigest
+      - BearerToken
+    ShippingInfo:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ShippingStatus'
+        carrier:
+          type: string
+          description: 'Shipping carrier name. Appears only if the device status is ''Shipped''
+
+            '
+        trackingNumber:
+          type: string
+          description: 'Carrier-specific tracking number. Appears only if the device status is ''Shipped''
+
+            '
+        method:
+          $ref: '#/components/schemas/ShippingMethodInfo'
+        address:
+          $ref: '#/components/schemas/ShippingAddressInfo'
+      description: 'Shipping information, according to which devices (in case of HardPhone)
+
+        or e911 stickers (in case of SoftPhone and OtherPhone) will be delivered
+
+        to the customer
+
+        '
+    DeviceExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Canonical URL of an extension resource
+        extensionNumber:
+          type: string
+          description: Short extension number
+    CreateSipRegistrationRequest:
+      type: object
+      properties:
+        device:
+          $ref: '#/components/schemas/DeviceInfoRequest'
+        sipInfo:
+          type: array
+          description: SIP settings for device
+          items:
+            $ref: '#/components/schemas/SIPInfoRequest'
+        softPhoneLineReassignment:
+          type: string
+          description: 'Supported for Softphone clients only. If ''SoftphoneLineReassignment'' feature is enabled
+
+            the reassignment process can be initialized, however if there is no DL for the given user''s device
+
+            then SPR-131 error code will be returned.
+
+            '
+          default: None
+          enum:
+          - None
+          - Initialize
+          - Reassign
+    DeviceAddonInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        count:
+          type: integer
+          format: int32
+    DeviceEmergencyServiceAddressResourceFr:
+      type: object
+      properties:
+        street:
+          type: string
+        street2:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        customerName:
+          type: string
+        state:
+          type: string
+          description: State/province name
+        stateId:
+          type: string
+          description: Internal identifier of a state
+        stateIsoCode:
+          type: string
+          description: ISO code of a state
+        stateName:
+          type: string
+          description: Full name of a state
+        countryId:
+          type: string
+          description: Internal identifier of a country
+        countryIsoCode:
+          type: string
+          description: ISO code of a country
+        country:
+          type: string
+          description: Country name
+        countryName:
+          type: string
+          description: Full name of a country
+        outOfCountry:
+          type: boolean
+          description: Specifies if emergency address is out of country
+        buildingName:
+          type: string
+          description: (Optional) Building name
+        buildingNumber:
+          type: string
+          description: Building/street number
+      description: Address for emergency cases. The same emergency address is assigned to all the numbers of one device
+    ShippingStatus:
+      description: 'Order item shipping status. It is set to `Initial` when the order is submitted.
+
+        Then it is changed to `Accepted` when a distributor starts processing the order.
+
+        Finally, it is changed to `Shipped` which means that the distributor has shipped the device.
+
+        '
+      type: string
+      enum:
+      - Initial
+      - Accepted
+      - Shipped
+      example: Shipped
+    LinePoolingEnum:
+      type: string
+      description: 'Pooling type of device:
+
+        - `Host` - device with a standalone paid phone line which can be linked to soft phone client instance;
+
+        - `Guest` - device with a linked phone line;
+
+        - `None` - device without a phone line or with a specific line (free, BLA, etc.)
+
+        '
+      enum:
+      - Host
+      - Guest
+      - None
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    ShippingMethodIdModel:
+      type: object
+      description: 'Devices shipping method. It is required if devices are ordered.
+
+        Availability of different shipping methods depends on package
+
+        definition.
+
+        '
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: 'Shipping method ID:
+
+            - "1" - Ground Shipping (5-7 business days)
+
+            - "2" - Expedited Shipping (2-days)
+
+            - "3" - Overnight Shipping
+
+            '
+          enum:
+          - '1'
+          - '2'
+          - '3'
+          default: '1'
+    DeviceInfoRequest:
+      type: object
+      description: Device information
+      properties:
+        id:
+          type: string
+          description: Device unique identifier, retrieved at previous session (if any)
+        appExternalId:
+          type: string
+          description: 'Supported for iOS devices only. Certificate name (used by iOS
+
+            applications for APNS subscription)
+
+            '
+        computerName:
+          type: string
+          description: Computer name (for devices of `SoftPhone` type only)
+        serial:
+          type: string
+          description: 'Endpoint/device instance identifier for Softphone and mobile applications
+
+            '
+    CreateSipRegistrationResponse:
+      required:
+      - device
+      - sipFlags
+      - sipInfo
+      type: object
+      properties:
+        device:
+          $ref: '#/components/schemas/SipRegistrationDeviceInfo'
+        sipInfo:
+          type: array
+          description: SIP settings for device
+          items:
+            $ref: '#/components/schemas/SipInfoResponse'
+        sipInfoPstn:
+          type: array
+          description: SIP PSTN settings for device
+          items:
+            $ref: '#/components/schemas/SipInfoResponse'
+        sipFlags:
+          $ref: '#/components/schemas/SipFlagsResponse'
+        sipErrorCodes:
+          type: array
+          items:
+            type: string
+        pollingInterval:
+          type: integer
+          format: int32
+          description: 'Suggested interval in seconds to periodically call SIP-provision API and update the local cache
+
+            '
+    DeviceSiteInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a site
+        name:
+          type: string
+          description: Name of a site
+      description: Site data
+    ShippingMethodInfo:
+      allOf:
+      - $ref: '#/components/schemas/ShippingMethodIdModel'
+      - type: object
+        properties:
+          name:
+            type: string
+            description: Method name, corresponding to the identifier
+            enum:
+            - Ground
+            - 2 Day
+            - Overnight
+    SipFlagsResponse:
+      type: object
+      description: SIP flags information
+      properties:
+        voipFeatureEnabled:
+          type: boolean
+          description: Indicates that VoIP calling feature is enabled
+        voipCountryBlocked:
+          type: boolean
+          description: 'Indicates that the request is sent from IP address of a country where VoIP calling is disallowed
+
+            '
+        outboundCallsEnabled:
+          type: boolean
+          description: Indicates that outbound calls are enabled
+        dscpEnabled:
+          type: boolean
+        dscpSignaling:
+          type: integer
+          format: int32
+        dscpVoice:
+          type: integer
+          format: int32
+        dscpVideo:
+          type: integer
+          format: int32
+    SipRegistrationDeviceInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of the resource
+        id:
+          type: string
+          description: Internal identifier of a device
+        type:
+          type: string
+          description: Device type
+          enum:
+          - HardPhone
+          - SoftPhone
+          - OtherPhone
+          - Paging
+          - WebPhone
+          - Room
+        sku:
+          type: string
+          description: 'Device identification number (SKU, Stock Keeping Unit) in the format
+
+            TP-ID [-AT-AC], where TP is device type (HP for RC desk phones, DV for all
+
+            other devices including soft phones); ID - device model ID; AT - add-on type
+
+            ID; AC - add-on count (if any). For example ''HP-56-2-2''
+
+            '
+        status:
+          type: string
+          enum:
+          - Online
+          - Offline
+        name:
+          type: string
+          description: 'Device name. Mandatory if ordering  SoftPhone or OtherPhone.
+
+            Optional for HardPhone. If not specified for HardPhone, then device  model  name
+
+            is used as device  name
+
+            '
+        serial:
+          type: string
+          description: 'Serial number for HardPhone (is returned only when the phone
+
+            is shipped and provisioned); endpoint_id for Softphone and mobile applications
+
+            '
+        computerName:
+          type: string
+          description: Computer name (for devices of `SoftPhone` type only)
+        model:
+          $ref: '#/components/schemas/DeviceModelInfo'
+        extension:
+          $ref: '#/components/schemas/DeviceExtensionInfo'
+        emergencyServiceAddress:
+          $ref: '#/components/schemas/DeviceEmergencyServiceAddressResourceDefault'
+        emergency:
+          $ref: '#/components/schemas/SipRegistrationDeviceEmergencyInfo'
+        shipping:
+          $ref: '#/components/schemas/ShippingInfo'
+        phoneLines:
+          type: array
+          description: Phone lines information
+          items:
+            $ref: '#/components/schemas/DevicePhoneLinesInfo'
+        boxBillingId:
+          type: integer
+          format: int64
+          description: 'Box billing identifier of a device. Applicable only for devices of `HardPhone` type.
+
+            '
+        useAsCommonPhone:
+          type: boolean
+          description: Supported only for devices assigned to Limited extensions. If true, enables users to log in to this phone as a common phone.
+        linePooling:
+          $ref: '#/components/schemas/LinePoolingEnum'
+        inCompanyNet:
+          type: boolean
+          description: 'Network location status. `true` if the device is located in
+
+            the configured corporate network (On-Net); `false` for Off-Net location.
+
+            Parameter is not returned if `EmergencyAddressAutoUpdate` feature is not
+
+            enabled for the account/user, or if device network location is not determined
+
+            '
+        site:
+          $ref: '#/components/schemas/DeviceSiteInfo'
+        lastLocationReportTime:
+          type: string
+          format: date-time
+          description: 'Timestamp of receiving last location report in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+            format including timezone, for example *2016-03-10T18:07:52.534Z
+
+            '
+    DevicePhoneNumberInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of a phone number
+        country:
+          $ref: '#/components/schemas/DevicePhoneNumberCountryInfo'
+        paymentType:
+          type: string
+          description: Payment type. 'External' is returned for forwarded numbers which are not terminated in the RingCentral phone system = ['External', 'TollFree', 'Local']
+          enum:
+          - External
+          - TollFree
+          - Local
+        phoneNumber:
+          maxLength: 128
+          minLength: 0
+          type: string
+          description: Phone number
+        usageType:
+          type: string
+          enum:
+          - CompanyNumber
+          - MainCompanyNumber
+          - AdditionalCompanyNumber
+          - DirectNumber
+          - CompanyFaxNumber
+          - ForwardedNumber
+          - ForwardedCompanyNumber
+          - ContactCenterNumber
+        type:
+          type: string
+          description: Type of phone number
+          enum:
+          - VoiceFax
+          - FaxOnly
+          - VoiceOnly
+      description: Phone number information
+  responses:
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

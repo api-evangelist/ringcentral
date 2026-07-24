@@ -1,0 +1,957 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards IVR API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: IVR
+paths:
+  /restapi/v1.0/account/{accountId}/ivr-prompts/{promptId}/content:
+    get:
+      tags:
+      - IVR
+      summary: Get IVR Prompt Content
+      description: Returns media content of an IVR prompt by ID.
+      operationId: readIVRPromptContent
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/IvrPromptId'
+      - $ref: '#/components/parameters/ContentDisposition'
+      - $ref: '#/components/parameters/ContentDispositionFilename'
+      responses:
+        '200':
+          description: IVR Prompt Media Data
+          content:
+            audio/*:
+              schema:
+                type: string
+                format: binary
+      x-media-api: true
+      x-availability: High
+      x-throttling-group: Heavy
+      x-app-permission: ReadAccounts
+  /restapi/v1.0/account/{accountId}/ivr-prompts:
+    get:
+      tags:
+      - IVR
+      summary: List IVR Prompts
+      description: Returns the list of IVR prompts.
+      operationId: listIvrPrompts
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IvrPrompts'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: ReadAccountGreetings
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadCompanyGreetings
+    post:
+      tags:
+      - IVR
+      summary: Create IVR Prompts
+      description: Creates an IVR prompt.
+      operationId: createIVRPrompt
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - attachment
+              properties:
+                attachment:
+                  type: string
+                  description: Audio file that will be used as a prompt. Attachment cannot be empty, only audio files are supported
+                  format: binary
+                name:
+                  type: string
+                  description: Description of file contents.
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromptInfo'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditAccountGreetings
+      x-request-max-body-size: 20m
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditAccounts
+      x-user-permission: EditCompanyGreetings
+  /restapi/v1.0/account/{accountId}/ivr-prompts/{promptId}:
+    get:
+      tags:
+      - IVR
+      summary: Get IVR Prompt
+      description: Returns an IVR prompt by ID.
+      operationId: readIVRPrompt
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/IvrPromptId'
+      responses:
+        '200':
+          description: Prompt Information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromptInfo'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: ReadAccountGreetings
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadCompanyGreetings
+    put:
+      tags:
+      - IVR
+      summary: Update IVR Prompt
+      description: Updates an IVR prompt by ID
+      operationId: updateIVRPrompt
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/IvrPromptId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIVRPromptRequest'
+        required: false
+      responses:
+        '200':
+          description: Updated Prompt Information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromptInfo'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditAccountGreetings
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+      x-user-permission: EditCompanyGreetings
+    delete:
+      tags:
+      - IVR
+      summary: Delete IVR Prompt
+      description: Deletes an IVR prompt by ID.
+      operationId: deleteIVRPrompt
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/IvrPromptId'
+      responses:
+        '204':
+          description: No Content
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditAccountGreetings
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditAccounts
+      x-user-permission: EditCompanyGreetings
+  /restapi/v1.0/account/{accountId}/ivr-menus:
+    get:
+      tags:
+      - IVR
+      summary: Get IVR Menu list
+      description: Returns a company IVR menus.
+      operationId: readIVRMenuList
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IVRMenuList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: ReadAccountGreetings
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+    post:
+      tags:
+      - IVR
+      summary: Create IVR Menu
+      description: Creates a company IVR menu.
+      operationId: createIVRMenu
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IVRMenuInfo'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IVRMenuInfo'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditAutoReceptionist
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditAccounts
+      x-user-permission: AutoReceptionist
+  /restapi/v1.0/account/{accountId}/ivr-menus/{ivrMenuId}:
+    get:
+      tags:
+      - IVR
+      summary: Get IVR Menu
+      description: Returns a company IVR menu by ID.
+      operationId: readIVRMenu
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/IvrMenuId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IVRMenuInfo'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditAutoReceptionist
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: AutoReceptionist
+    put:
+      tags:
+      - IVR
+      summary: Update IVR Menu
+      description: Updates a company IVR menu by ID.
+      operationId: updateIVRMenu
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/IvrMenuId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IVRMenuInfo'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IVRMenuInfo'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-feature: EditAutoReceptionist
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: AutoReceptionist
+components:
+  schemas:
+    AudioPromptInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a prompt audio file
+        id:
+          type: string
+          description: Internal identifier of a prompt
+      description: For 'Audio' mode only. Prompt media reference
+    IvrMenuPromptInfo:
+      type: object
+      properties:
+        mode:
+          type: string
+          description: 'Prompt mode: custom media or text'
+          enum:
+          - Audio
+          - TextToSpeech
+        audio:
+          $ref: '#/components/schemas/AudioPromptInfo'
+        text:
+          type: string
+          description: For 'TextToSpeech' mode only. Prompt text
+        language:
+          $ref: '#/components/schemas/PromptLanguageInfo'
+      description: Prompt metadata
+    IvrPrompts:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to prompts library resource
+        records:
+          type: array
+          description: List of Prompts
+          items:
+            $ref: '#/components/schemas/PromptInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    IVRMenuList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to an IVR Menu list
+        records:
+          type: array
+          description: List of ivr menus
+          items:
+            $ref: '#/components/schemas/IVRMenuListInfo'
+    IVRMenuInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an IVR Menu extension
+        uri:
+          type: string
+          format: uri
+          description: Link to an IVR Menu extension resource
+        name:
+          type: string
+          description: First name of an IVR Menu user
+        extensionNumber:
+          type: string
+          description: Number of an IVR Menu extension
+        site:
+          $ref: '#/components/schemas/IvrMenuSiteInfo'
+        prompt:
+          $ref: '#/components/schemas/IvrMenuPromptInfo'
+        actions:
+          type: array
+          description: Keys handling settings
+          items:
+            $ref: '#/components/schemas/IVRMenuActionsInfo'
+    IVRMenuActionsInfo:
+      type: object
+      properties:
+        input:
+          type: string
+          description: 'Key. The following values are supported: numeric: ''1'' to ''9'' Star Hash NoInput '
+        action:
+          type: string
+          description: Internal identifier of an answering rule
+          enum:
+          - Connect
+          - Voicemail
+          - DialByName
+          - Transfer
+          - Repeat
+          - ReturnToRoot
+          - ReturnToPrevious
+          - Disconnect
+          - ReturnToTopLevelMenu
+          - DoNothing
+          - ConnectToOperator
+        extension:
+          $ref: '#/components/schemas/IVRMenuExtensionInfo'
+        phoneNumber:
+          type: string
+          description: For 'Transfer' action only. PSTN number in E.164 format
+    IVRMenuExtensionInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to an extension resource
+        id:
+          type: string
+          description: Internal identifier of an extension
+        name:
+          type: string
+          description: Name of an extension
+      description: For 'Connect' or 'Voicemail' actions only. Extension reference
+    PromptInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Internal identifier of a prompt
+        id:
+          type: string
+          description: Link to a prompt metadata
+        contentType:
+          type: string
+          description: Type of prompt media content
+        contentUri:
+          type: string
+          format: uri
+          description: Link to a prompt media content
+        filename:
+          type: string
+          description: Name of a prompt
+    IvrMenuSiteInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a site. If the value is not specified in request, then the `main-site` default value is used
+        name:
+          type: string
+          description: Site name
+      description: Site data
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    UpdateIVRPromptRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+          description: Name of a file to be uploaded as a prompt
+    PromptLanguageInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a prompt language
+        id:
+          type: string
+          description: Internal identifier of a language
+        name:
+          type: string
+          description: Language name
+        localeCode:
+          type: string
+          description: Language locale code
+      description: For 'TextToSpeech' mode only. Prompt language metadata
+    IVRMenuListInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an IVR Menu extension
+          example: '7258440006'
+        uri:
+          type: string
+          format: uri
+          description: Link to an IVR Menu extension resource
+          example: https://api-example.rincentral.com/restapi/v1.0/account/5936989006/ivr-menus/7258440006
+        name:
+          type: string
+          description: First name of an IVR Menu user
+          example: IVR Menu 1001
+        extensionNumber:
+          type: string
+          description: Number of an IVR Menu extension
+          example: '1001'
+  parameters:
+    IvrMenuId:
+      name: ivrMenuId
+      description: Internal identifier of an IVR menu
+      in: path
+      required: true
+      schema:
+        type: string
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ContentDispositionFilename:
+      name: contentDispositionFilename
+      in: query
+      description: The default filename of the file to be downloaded
+      required: false
+      schema:
+        type: string
+    IvrPromptId:
+      name: promptId
+      in: path
+      description: Internal identifier of an IVR prompt
+      required: true
+      schema:
+        type: string
+    ContentDisposition:
+      name: contentDisposition
+      in: query
+      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
+      required: false
+      schema:
+        type: string
+        enum:
+        - Inline
+        - Attachment
+  responses:
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

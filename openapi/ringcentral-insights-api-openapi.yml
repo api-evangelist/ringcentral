@@ -1,0 +1,668 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Insights API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Insights
+  description: Conversational AI insight APIs
+paths:
+  /ai/insights/v1/async/analyze-interaction:
+    post:
+      tags:
+      - Insights
+      summary: Interaction Analytics
+      description: 'Returns multiple insights including summaries, emotion, key phrases, questions asked, and more in a single API call.
+
+        '
+      operationId: caiAnalyzeInteraction
+      parameters:
+      - $ref: '#/components/parameters/Webhook'
+      requestBody:
+        $ref: '#/components/requestBodies/InteractionAnalyticsRequest'
+      responses:
+        '202':
+          description: Task accepted for processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiAsyncApiResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaiErrorResponse'
+      callbacks:
+        requestProcessed:
+          '{$request.query.webhook}':
+            post:
+              parameters:
+              - $ref: '#/components/parameters/CallbackRequestId'
+              requestBody:
+                $ref: '#/components/requestBodies/InteractionAnalyticsCallbackRequest'
+              responses:
+                '200':
+                  description: Callback successfully accepted
+      x-throttling-group: Heavy
+      x-app-permission: AI
+components:
+  schemas:
+    InteractionObject:
+      type: object
+      properties:
+        utteranceInsights:
+          type: array
+          items:
+            $ref: '#/components/schemas/UtteranceInsightsObject'
+        speakerInsights:
+          $ref: '#/components/schemas/SpeakerInsightsObject'
+        conversationalInsights:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationalInsightsUnit'
+    UtteranceInsightsUnit:
+      required:
+      - name
+      - value
+      type: object
+      properties:
+        name:
+          type: string
+          example: Emotion
+          enum:
+          - Emotion
+        value:
+          type: string
+          example: Neutral
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+      additionalProperties:
+        type: string
+    InsightsEnum:
+      type: string
+      enum:
+      - All
+      - KeyPhrases
+      - Emotion
+      - AbstractiveSummaryLong
+      - AbstractiveSummaryShort
+      - ExtractiveSummary
+      - Topics
+      - TalkToListenRatio
+      - Energy
+      - Pace
+      - QuestionsAsked
+    CaiErrorCodeResponse:
+      required:
+      - errorCode
+      - message
+      type: object
+      properties:
+        errorCode:
+          type: string
+          enum:
+          - CAI-101
+          - CAI-102
+          - CAI-103
+          - CAI-104
+          - CAI-105
+          - CAI-106
+          - CAI-107
+          - CAI-108
+          - CAI-109
+          - CAI-110
+        message:
+          type: string
+          description: Helpful description of the errorCode
+        parameterName:
+          type: string
+          description: Name of parameter if specified in the message
+    UtteranceInsightsObject:
+      required:
+      - end
+      - start
+      - text
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        text:
+          type: string
+          example: Hello! This is John.
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        speakerId:
+          type: string
+          example: JohnDoe
+        wordTimings:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordTimingsUnit'
+        insights:
+          type: array
+          items:
+            $ref: '#/components/schemas/UtteranceInsightsUnit'
+    SpeakerInsightsUnit:
+      required:
+      - name
+      - values
+      type: object
+      properties:
+        name:
+          type: string
+          example: TalkToListenRatio
+          enum:
+          - Energy
+          - Pace
+          - TalkToListenRatio
+          - QuestionsAsked
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpeakerInsightsValuesItems'
+    SpeakerInsightsValuesItems:
+      required:
+      - speakerId
+      - value
+      type: object
+      properties:
+        speakerId:
+          type: string
+          example: JohnDoe
+        value:
+          type: string
+          description: The value corresponding to the insight for the speaker
+          example: 20:80
+      additionalProperties:
+        type: string
+    CaiAsyncApiResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+    ContentInput:
+      type: object
+      properties:
+        contentUri:
+          type: string
+          description: Publicly facing uri
+          format: uri
+    DiarizeInput:
+      allOf:
+      - $ref: '#/components/schemas/AudioInput'
+      - type: object
+        properties:
+          separateSpeakerPerChannel:
+            type: boolean
+            description: Set to True if the input audio is multi-channel and each channel has a separate speaker.
+            example: false
+          speakerCount:
+            type: integer
+            description: Number of speakers in the file, omit parameter if unknown
+            format: int32
+            example: 2
+          speakerIds:
+            type: array
+            description: Optional set of speakers to be identified from the call.
+            example:
+            - speakerId1
+            - speakerId2
+            items:
+              type: string
+          enableVoiceActivityDetection:
+            type: boolean
+            description: Apply voice activity detection.
+    SpeechContextPhrasesInput:
+      required:
+      - phrases
+      type: object
+      minItems: 1
+      maxItems: 50
+      properties:
+        phrases:
+          type: array
+          description: Words or Phrases to boost
+          example:
+          - Mohit
+          - Sushant
+          - RingCentral
+          items:
+            type: string
+    CaiErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaiErrorCodeResponse'
+    WordTimingsUnit:
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        word:
+          type: string
+          example: Hello
+    SpeakerInsightsObject:
+      type: object
+      properties:
+        speakerCount:
+          type: integer
+          format: int32
+          example: 2
+        insights:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpeakerInsightsUnit'
+    ConversationalInsightsUnitValues:
+      required:
+      - end
+      - start
+      - value
+      type: object
+      properties:
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        value:
+          type: string
+          example: RingCentral
+        start:
+          type: number
+          format: float
+          example: 4.7
+        end:
+          type: number
+          format: float
+          example: 5.1
+        groupId:
+          type: string
+          example: '0'
+          description: Paragraph index of the long summary.
+        speakerId:
+          type: string
+          example: JohnDoe
+        assignee:
+          type: string
+          example: Speaker
+        category:
+          type: string
+          example: NextStep
+        text:
+          type: string
+          example: All right, now let us go down to a CD settings.
+        question:
+          type: string
+          example: So so you want me to add it to the B D as well?
+        answer:
+          type: string
+          example: Or or you can add another tab and have it resigned.
+      additionalProperties:
+        type: string
+    ConversationalInsightsUnit:
+      required:
+      - name
+      - values
+      type: object
+      properties:
+        name:
+          type: string
+          example: KeyPhrases
+          enum:
+          - ExtractiveSummary
+          - AbstractiveSummaryLong
+          - AbstractiveSummaryShort
+          - KeyPhrases
+          - QuestionsAsked
+          - OverallSentiment
+          - Topics
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationalInsightsUnitValues'
+    AudioInput:
+      required:
+      - encoding
+      - languageCode
+      allOf:
+      - $ref: '#/components/schemas/ContentInput'
+      - type: object
+        properties:
+          encoding:
+            type: string
+            description: The encoding of the original audio
+            example: Wav
+            enum:
+            - Mpeg
+            - Mp4
+            - Wav
+            - Webm
+            - Webp
+            - Aac
+            - Avi
+            - Ogg
+          languageCode:
+            type: string
+            description: Language spoken in the audio file.
+            example: en-US
+          source:
+            type: string
+            description: 'Source of the audio file eg: Phone, RingCentral, GoogleMeet, Zoom etc'
+            example: RingCentral
+          audioType:
+            type: string
+            description: Type of the audio
+            example: CallCenter
+            enum:
+            - CallCenter
+            - Meeting
+            - EarningsCalls
+            - Interview
+            - PressConference
+            - Voicemail
+    InteractionInput:
+      allOf:
+      - $ref: '#/components/schemas/DiarizeInput'
+      - type: object
+        properties:
+          insights:
+            type: array
+            items:
+              $ref: '#/components/schemas/InsightsEnum'
+          speechContexts:
+            type: array
+            description: Indicates the words/phrases that will be used for boosting the transcript. This can help to boost accuracy for cases like Person Names, Company names etc.
+            items:
+              $ref: '#/components/schemas/SpeechContextPhrasesInput'
+    InteractionApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/InteractionObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+  parameters:
+    CallbackRequestId:
+      name: RCRequestId
+      deprecated: true
+      in: header
+      description: 'Input RequestId corresponding to this response.\
+
+        DEPRECATED. "jobId" body attribute should be used for tracking.
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Webhook:
+      name: webhook
+      in: query
+      description: The webhook URI to which the job response will be returned
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+        format: uri
+  requestBodies:
+    InteractionAnalyticsRequest:
+      description: Interaction Analytics API Input Format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InteractionInput'
+      required: true
+    InteractionAnalyticsCallbackRequest:
+      description: Interaction Analytics Callback Output
+      content:
+        application/json:
+          schema:
+            allOf:
+            - type: object
+              properties:
+                jobId:
+                  type: string
+                creationTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time
+                expirationTime:
+                  type: string
+                  format: date-time
+            - $ref: '#/components/schemas/InteractionApiResponse'
+      required: true
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

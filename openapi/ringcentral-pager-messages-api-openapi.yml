@@ -1,0 +1,682 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Pager Messages API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Pager Messages
+paths:
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/company-pager:
+    post:
+      tags:
+      - Pager Messages
+      summary: Create Internal Text Message
+      description: Creates and sends an internal text message (company pager message).
+      operationId: createInternalTextMessage
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInternalTextMessageRequest'
+        required: true
+      responses:
+        '200':
+          description: Created text message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetInternalTextMessageInfoResponse'
+      x-feature: PagesSending
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: InternalMessages
+      x-user-permission: InternalSMS
+components:
+  schemas:
+    MessageDirectionEnum:
+      type: string
+      enum:
+      - Inbound
+      - Outbound
+      description: 'Text message direction. Note that for some message types not all
+
+        directions are allowed. For example voicemail messages can
+
+        be only inbound
+
+        '
+    MessageAvailabilityEnum:
+      type: string
+      enum:
+      - Alive
+      - Deleted
+      - Purged
+      description: 'Message availability status. Message in ''Deleted'' state is still
+
+        preserved with all its attachments and can be restored. ''Purged'' means
+
+        that all attachments are already deleted and the message itself is about
+
+        to be physically deleted shortly
+
+        '
+    MessageStoreCallerInfoResponseTo:
+      type: object
+      properties:
+        extensionNumber:
+          type: string
+          description: 'Extension short number (usually 3 or 4 digits). This property
+
+            is filled when parties communicate by means of short internal numbers,
+
+            for example when calling to other extension or sending/receiving Company
+
+            Pager messages
+
+            '
+        extensionId:
+          type: string
+        location:
+          type: string
+          description: 'Contains party location (city, state) if one can be determined
+
+            from a phone number. This property is filled only when `phoneNumber` is not
+
+            empty and a server can calculate location information from it (for example,
+
+            this information is unavailable for US toll-free numbers)
+
+            '
+        target:
+          type: boolean
+          description: 'The `true` value specifies that message is sent exactly to this recipient.
+
+            Returned in the `to` field for group MMS. Useful if one extension has several
+
+            phone numbers''
+
+            '
+        messageStatus:
+          $ref: '#/components/schemas/MessageStatusEnum'
+        faxErrorCode:
+          $ref: '#/components/schemas/FaxErrorCodeEnum'
+        name:
+          type: string
+          description: 'Symbolic name associated with a party. If the phone does not
+
+            belong to the known extension, only the location is returned, the name
+
+            is not determined then
+
+            '
+        phoneNumber:
+          type: string
+          description: 'Phone number of a party. Usually it is a plain number including
+
+            country and area code like 18661234567. But sometimes it could be returned
+
+            from database with some formatting applied, for example (866)123-4567.
+
+            This property is filled in all cases where parties communicate by means
+
+            of global phone numbers, for example when calling to direct numbers or
+
+            sending/receiving SMS
+
+            '
+        recipientId:
+          type: string
+          description: Internal identifier of a message recipient
+    MessageAttachmentTypeEnum:
+      type: string
+      description: Type of message attachment
+      enum:
+      - AudioRecording
+      - AudioTranscription
+      - Text
+      - SourceDocument
+      - RenderedDocument
+      - MmsAttachment
+    MessageStoreCallerInfoResponseFrom:
+      type: object
+      properties:
+        extensionNumber:
+          type: string
+          description: 'Extension short number (usually 3 or 4 digits). This property
+
+            is filled when parties communicate by means of short internal numbers,
+
+            for example when calling to other extension or sending/receiving Company
+
+            Pager message
+
+            '
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        location:
+          type: string
+          description: 'Contains party location (city, state) if one can be determined
+
+            from phoneNumber. This property is filled only when phoneNumber is not
+
+            empty and server can calculate location information from it (for example,
+
+            this information is unavailable for US toll-free numbers)
+
+            '
+        name:
+          type: string
+          description: 'Symbolic name associated with a party. If the phone does not
+
+            belong to the known extension, only the location is returned, the name
+
+            is not determined then
+
+            '
+        phoneNumber:
+          type: string
+          description: 'Phone number of a party. Usually it is a plain number including
+
+            country and area code like 18661234567. But sometimes it could be returned
+
+            from database with some formatting applied, for example (866)123-4567.
+
+            This property is filled in all cases where parties communicate by means
+
+            of global phone numbers, for example when calling to direct numbers or
+
+            sending/receiving SMS
+
+            '
+      description: Sender information
+    MessagePriorityEnum:
+      type: string
+      description: Message priority
+      enum:
+      - Normal
+      - High
+    GetInternalTextMessageInfoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of a message
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a message
+        attachments:
+          type: array
+          description: The list of message attachments
+          items:
+            $ref: '#/components/schemas/MessageAttachmentInfo'
+        availability:
+          $ref: '#/components/schemas/MessageAvailabilityEnum'
+        conversationId:
+          type: integer
+          format: int64
+          description: 'SMS and Pager only. Identifier of a conversation that the message
+
+            belongs to
+
+            '
+        conversation:
+          $ref: '#/components/schemas/ConversationInfo'
+        creationTime:
+          type: string
+          description: 'Message creation date/time in ISO 8601 format including timezone,
+
+            for example 2016-03-10T18:07:52.534Z
+
+            '
+          format: date-time
+        direction:
+          $ref: '#/components/schemas/MessageDirectionEnum'
+        from:
+          $ref: '#/components/schemas/MessageStoreCallerInfoResponseFrom'
+        lastModifiedTime:
+          type: string
+          description: 'Date/time when the message was modified on server in ISO
+
+            8601 format including timezone, for example 2016-03-10T18:07:52.534Z
+
+            '
+          format: date-time
+        messageStatus:
+          $ref: '#/components/schemas/MessageStatusEnum'
+        pgToDepartment:
+          type: boolean
+          description: 'Pager only. `true` if at least one of a message recipients
+
+            is ''Department'' extension
+
+            '
+        priority:
+          $ref: '#/components/schemas/MessagePriorityEnum'
+        readStatus:
+          $ref: '#/components/schemas/MessageReadStatusEnum'
+        subject:
+          type: string
+          description: 'Message subject. For SMS and Pager messages it replicates message
+
+            text which is also returned as an attachment
+
+            '
+        to:
+          type: array
+          description: Recipient information
+          items:
+            $ref: '#/components/schemas/MessageStoreCallerInfoResponseTo'
+        type:
+          type: string
+          description: Message type
+          enum:
+          - Fax
+          - SMS
+          - VoiceMail
+          - Pager
+          - Text
+    MessageStatusEnum:
+      type: string
+      description: 'Message status. Different message types may have different
+
+        allowed status values. For outbound faxes the aggregated message status
+
+        is returned. If, for outbound message, a status for at least one recipient is ''Queued'', then
+
+        the ''Queued'' value is returned. If a status for at least one recipient is
+
+        ''SendingFailed'', then the ''SendingFailed'' value is returned. In other cases
+
+        the ''Sent'' status is returned
+
+        '
+      enum:
+      - Queued
+      - Sent
+      - Delivered
+      - DeliveryFailed
+      - SendingFailed
+      - Received
+    MessageAttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of a message attachment
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a message attachment
+        type:
+          $ref: '#/components/schemas/MessageAttachmentTypeEnum'
+        contentType:
+          type: string
+          description: MIME type for a given attachment, for instance 'audio/wav'
+        vmDuration:
+          type: integer
+          format: int32
+          description: 'Supported for `Voicemail` only. Duration of a voicemail in
+
+            seconds
+
+            '
+        fileName:
+          type: string
+          description: Name of a file attached
+        size:
+          type: integer
+          format: int32
+          description: Size of attachment in bytes
+        height:
+          type: integer
+          format: int32
+          description: Attachment height in pixels if available
+        width:
+          type: integer
+          format: int32
+          description: Attachment width in pixels if available
+    FaxErrorCodeEnum:
+      type: string
+      enum:
+      - AllLinesInUse
+      - Undefined
+      - NoFaxSendPermission
+      - NoInternationalPermission
+      - NoFaxMachine
+      - NoAnswer
+      - LineBusy
+      - CallerHungUp
+      - NotEnoughCredits
+      - SentPartially
+      - InternationalCallingDisabled
+      - DestinationCountryDisabled
+      - UnknownCountryCode
+      - NotAccepted
+      - InvalidNumber
+      - CallDeclined
+      - TooManyCallsPerLine
+      - CallFailed
+      - RenderingFailed
+      - TooManyPages
+      - ReturnToDBQueue
+      - NoCallTime
+      - WrongNumber
+      - ProhibitedNumber
+      - InternalError
+      - FaxSendingProhibited
+      - ThePhoneIsBlacklisted
+      - UserNotFound
+      - ConvertError
+      - DBGeneralError
+      - SkypeBillingFailed
+      - AccountSuspended
+      - ProhibitedDestination
+      - InternationalDisabled
+    CreateInternalTextMessageRequest:
+      required:
+      - text
+      type: object
+      properties:
+        from:
+          $ref: '#/components/schemas/PagerCallerInfoRequest'
+        replyOn:
+          type: integer
+          format: int32
+          description: Internal identifier of a message this message replies to
+        text:
+          type: string
+          description: 'Text of a pager message. Max length is 1024 symbols (2-byte
+
+            UTF-16 encoded). If a character is encoded in 4 bytes in UTF-16 it is
+
+            treated as 2 characters, thus restricting the maximum message length to
+
+            512 symbols
+
+            '
+          example: hello world
+        to:
+          type: array
+          description: 'Optional if `replyOn` parameter is specified. Receiver of a pager
+
+            message.
+
+            '
+          items:
+            $ref: '#/components/schemas/PagerCallerInfoRequest'
+    MessageReadStatusEnum:
+      description: Message read status
+      type: string
+      enum:
+      - Read
+      - Unread
+    PagerCallerInfoRequest:
+      type: object
+      properties:
+        extensionId:
+          type: string
+          description: Extension identifier
+          example: '123456789'
+        extensionNumber:
+          type: string
+          description: Extension number
+          example: '105'
+      description: Sender of a pager message.
+    ConversationInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a conversation
+        uri:
+          type: string
+          format: uri
+          description: Deprecated. Link to a conversation resource
+      description: SMS and Pager only. Information about a conversation the message belongs to
+  parameters:
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

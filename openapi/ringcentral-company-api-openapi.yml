@@ -1,0 +1,1740 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Company API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Company
+paths:
+  /restapi/v2/accounts/{accountId}:
+    get:
+      tags:
+      - Company
+      summary: Get Account Info
+      description: Returns basic information about particular RingCentral account
+      operationId: getAccountInfoV2
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountInfo'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: Limited
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadCompanyInfo
+  /restapi/v2/accounts/{accountId}/send-welcome-email:
+    post:
+      tags:
+      - Company
+      summary: Send/Resend Welcome Email
+      description: Sends/resends welcome email to the system user of confirmed account
+      operationId: sendWelcomeEmailV2
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@email.com
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditExtensions
+      x-user-permission: Users
+  /restapi/v2/accounts/{accountId}/send-activation-email:
+    post:
+      tags:
+      - Company
+      summary: Send/Resend Activation Email
+      description: Sends/resends activation email to the system user of unconfirmed account.
+      operationId: sendActivationEmailV2
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceNotAvailable'
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+      x-user-permission: AccountAdministration
+  /restapi/v1.0/account/{accountId}:
+    get:
+      tags:
+      - Company
+      summary: Get Account Info
+      description: 'Returns basic information about a particular RingCentral customer account.
+
+        '
+      operationId: readAccountInfo
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Account information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAccountInfoResponse'
+      x-feature: ReadCompanyInfo
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadCompanyInfo
+  /restapi/v1.0/account/{accountId}/service-info:
+    get:
+      tags:
+      - Company
+      summary: Get Account Service Info
+      description: 'Returns the information about service plan, available features
+
+        and limitations for a particular RingCentral customer account.
+
+        '
+      operationId: readAccountServiceInfo
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountServiceInfo'
+      x-feature: ReadServicePlan
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadServicePlanInfo
+  /restapi/v1.0/account/{accountId}/business-address:
+    get:
+      tags:
+      - Company
+      summary: Get Account Business Address
+      description: 'Returns business address of a company.
+
+        '
+      operationId: readAccountBusinessAddress
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountBusinessAddressResource'
+      x-feature: ReadCompanyInfo
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadCompanyInfo
+    put:
+      tags:
+      - Company
+      summary: Update Company Business Address
+      description: 'Updates the business address of a company that account is linked
+
+        to.
+
+        '
+      operationId: updateAccountBusinessAddress
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifyAccountBusinessAddressRequest'
+        required: true
+      responses:
+        '200':
+          description: Updated company business address
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountBusinessAddressResource'
+      x-feature: EditCompanyInfo
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: EditAccounts
+      x-user-permission: EditCompanyInfo
+  /restapi/v1.0/dictionary/brand/{brandId}/contracted-country:
+    get:
+      tags:
+      - Company
+      summary: List Contracted Countries
+      description: Returns the list of contracted countries for the given brand.
+      operationId: listContractedCountries
+      parameters:
+      - name: brandId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractedCountryListResponse'
+      x-availability: High
+      x-throttling-group: Light
+  /restapi/v1.0/dictionary/brand/{brandId}/contracted-country/{contractedCountryId}:
+    get:
+      tags:
+      - Company
+      summary: List Domestic Countries
+      description: 'Returns the list of domestic countries for account contracted country and brand.
+
+        '
+      operationId: listDomesticCountries
+      parameters:
+      - name: brandId
+        in: path
+        description: Internal identifier of a brand
+        required: true
+        schema:
+          type: string
+      - name: contractedCountryId
+        in: path
+        description: Internal identifier of a country
+        required: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are accepted
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items)
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: Domestic countries list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountryListDictionaryModel'
+      x-availability: High
+      x-throttling-group: Light
+components:
+  schemas:
+    AccountOperatorInfo:
+      type: object
+      description: 'Operator extension information. This extension will receive
+
+        all calls and messages addressed to an operator.
+
+        '
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to an operator extension resource
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of an operator extension
+        extensionNumber:
+          type: string
+          description: Number of an operator extension
+        partnerId:
+          type: string
+          description: 'Internal identifier of an extension created by partner. Supported for Partner Applications.
+
+            The RingCentral supports the mapping of accounts and stores the corresponding account ID/extension
+
+            ID for each partner ID of a client application. In request URIs partner IDs are accepted instead
+
+            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
+
+            Though in response URIs contain the corresponding account IDs and extension
+
+            IDs. In all request and response bodies these values are reflected via
+
+            partnerId attributes of account and extension
+
+            '
+    ContractedCountryListResponse:
+      type: object
+      required:
+      - records
+      properties:
+        records:
+          type: array
+          description: List of countries with the country data
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of a country
+              name:
+                type: string
+                description: Official name of a country
+    ServiceInfoPackage:
+      description: Billing package information
+      type: object
+      required:
+      - id
+      - version
+      properties:
+        id:
+          type: string
+          description: Billing package ID
+          example: '555'
+        version:
+          type: string
+          description: Billing package version
+          enum:
+          - '1'
+    ServiceInfoCountryShortModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoBasicModel'
+      - type: object
+        properties:
+          isoCode:
+            type: string
+            description: 'A ISO country code value complying with the
+
+              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+
+              format.
+
+              '
+          callingCode:
+            type: string
+            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
+
+              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
+
+              [E.164](http://en.wikipedia.org/wiki/E.164),
+
+              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
+
+              '
+    PackageInfo:
+      type: object
+      properties:
+        version:
+          type: string
+          description: Billing package version
+        id:
+          type: string
+          description: Billing package identifier
+    AccountServiceInfo:
+      allOf:
+      - $ref: '#/components/schemas/AccountServiceInfoRequest'
+      - type: object
+        properties:
+          uBrand:
+            $ref: '#/components/schemas/UBrandInfo'
+        description: 'Account service information, including brand, service plan and billing plan
+
+          '
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    BusinessAddressInfo:
+      type: object
+      properties:
+        country:
+          type: string
+          description: Name of a country
+        state:
+          type: string
+          description: Name of a state/province
+        city:
+          type: string
+          description: Name of a city
+        street:
+          type: string
+          description: Street address
+        zip:
+          type: string
+          description: Zip code
+      description: Company business address
+    CountryInfoDictionaryModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoShortModel'
+      - type: object
+        properties:
+          emergencyCalling:
+            type: boolean
+            description: 'Emergency calling feature availability/emergency address requirement indicator
+
+              '
+          isoCode:
+            type: string
+            description: 'Country code according to the ISO standard, see
+
+              [ISO 3166](https://www.iso.org/iso-3166-country-codes.html)
+
+              '
+          name:
+            type: string
+            description: The official name of a country
+          numberSelling:
+            type: boolean
+            description: Indicates that phone numbers are available for this country
+          loginAllowed:
+            type: boolean
+            description: Indicates that login with the phone number of this country is allowed
+          signupAllowed:
+            type: boolean
+            description: Indicates that signup/billing is allowed for this country
+          freeSoftphoneLine:
+            type: boolean
+            description: Indicates that free phone line for softphone is available for this country
+          localDialing:
+            type: boolean
+            description: Indicates that the local dialing is supported in this country and default area code can be set
+    ContactBusinessAddressInfo:
+      type: object
+      properties:
+        country:
+          type: string
+          description: Country name of a user's company
+        state:
+          type: string
+          description: 'State/province name of a user''s company. Mandatory
+
+            for the USA, UK and Canada
+
+            '
+        city:
+          type: string
+          description: City name of a user's company
+        street:
+          type: string
+          description: Street address of a user's company
+        zip:
+          type: string
+          description: Zip code of a user's company
+      description: 'User''s business address. The default is
+
+        Company (Auto-Receptionist) settings
+
+        '
+    AccountBusinessAddressResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        company:
+          type: string
+          description: Company business name
+        email:
+          type: string
+          format: email
+          description: Company business email address
+        mainSiteName:
+          type: string
+          description: Custom site name
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    CountryInfoMinimalModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a country
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a country resource
+    GetAccountInfoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of an account
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an account
+        bsid:
+          type: string
+          description: 'Internal identifier of an account in the billing system
+
+            '
+        mainNumber:
+          type: string
+          description: 'Main phone number of the current account
+
+            '
+        operator:
+          $ref: '#/components/schemas/AccountOperatorInfo'
+        partnerId:
+          type: string
+          description: 'Additional account identifier, created by partner application
+
+            and applied on client side
+
+            '
+        serviceInfo:
+          $ref: '#/components/schemas/ServiceInfo'
+        setupWizardState:
+          $ref: '#/components/schemas/SetupWizardStateEnum'
+        signupInfo:
+          $ref: '#/components/schemas/SignupInfoResource'
+        status:
+          type: string
+          description: Status of the current account
+          enum:
+          - Initial
+          - Confirmed
+          - Unconfirmed
+          - Disabled
+        statusInfo:
+          $ref: '#/components/schemas/AccountStatusInfo'
+        regionalSettings:
+          $ref: '#/components/schemas/AccountRegionalSettings'
+        federated:
+          type: boolean
+          description: 'Specifies whether an account is included into any federation
+
+            of accounts or not
+
+            '
+        outboundCallPrefix:
+          type: integer
+          format: int32
+          description: 'If outbound call prefix is not specified, or set to null (0),
+
+            then the parameter is not returned; the supported value range is 2-9
+
+            '
+        cfid:
+          type: string
+          description: 'Customer facing identifier. Returned for accounts with the
+
+            turned off PBX features. Equals to main company number in
+
+            [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            (without "+" sign)format
+
+            '
+        limits:
+          $ref: '#/components/schemas/AccountLimits'
+    AccountStatusInfo:
+      type: object
+      description: Optional information to be used when account is moved to "Disabled" status
+      properties:
+        reason:
+          type: string
+          description: Type of suspension, voluntarily or not
+          enum:
+          - SuspendedVoluntarily
+          - SuspendedInvoluntarily
+          - CancelledVoluntarily
+          - CancelledInvoluntarily
+          example: CancelledVoluntarily
+        comment:
+          type: string
+          description: A meaningful description of the reason to change the status
+          minLength: 1
+          maxLength: 256
+          example: By customer request. Case ABC123
+        till:
+          type: string
+          description: Date after which the account will get deleted. Parameter can be used to overwrite default retention period
+          format: date-time
+          example: '2023-03-26T11:30:45.940Z'
+    ServiceFeatureInfo:
+      type: object
+      properties:
+        featureName:
+          type: string
+          description: Feature name
+          enum:
+          - AccountFederation
+          - Archiver
+          - AutomaticCallRecordingMute
+          - AutomaticInboundCallRecording
+          - AutomaticOutboundCallRecording
+          - BlockedMessageForwarding
+          - Calendar
+          - CallerIdControl
+          - CallForwarding
+          - CallPark
+          - CallParkLocations
+          - CallSupervision
+          - CallSwitch
+          - CallQualitySurvey
+          - Conferencing
+          - ConferencingNumber
+          - ConfigureDelegates
+          - DeveloperPortal
+          - DND
+          - DynamicConference
+          - EmergencyAddressAutoUpdate
+          - EmergencyCalling
+          - EncryptionAtRest
+          - ExternalDirectoryIntegration
+          - Fax
+          - FaxReceiving
+          - FreeSoftPhoneLines
+          - HDVoice
+          - HipaaCompliance
+          - Intercom
+          - InternationalCalling
+          - InternationalSMS
+          - LinkedSoftphoneLines
+          - MMS
+          - MobileVoipEmergencyCalling
+          - OnDemandCallRecording
+          - Pager
+          - PagerReceiving
+          - Paging
+          - PasswordAuth
+          - PromoMessage
+          - Reports
+          - Presence
+          - RCTeams
+          - RingOut
+          - SalesForce
+          - SharedLines
+          - SingleExtensionUI
+          - SiteCodes
+          - SMS
+          - SMSReceiving
+          - SoftPhoneUpdate
+          - TelephonySessions
+          - UserManagement
+          - VideoConferencing
+          - VoipCalling
+          - VoipCallingOnMobile
+          - Voicemail
+          - VoicemailToText
+          - WebPhone
+        enabled:
+          type: boolean
+          description: 'Feature status, shows feature availability for the extension
+
+            '
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    FormattingLocaleInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a formatting language
+        localeCode:
+          type: string
+          description: Localization code of a formatting language
+        name:
+          type: string
+          description: Official name of a formatting language
+      description: 'Formatting language preferences for numbers, dates and currencies
+
+        '
+    AccountLimits:
+      type: object
+      properties:
+        freeSoftPhoneLinesPerExtension:
+          type: integer
+          format: int32
+          description: 'Max number of free softphone phone lines per user extension
+
+            '
+        meetingSize:
+          type: integer
+          format: int32
+          description: 'Max number of participants in RingCentral meeting hosted by
+
+            this account''s user
+
+            '
+        cloudRecordingStorage:
+          type: integer
+          format: int32
+          description: 'Meetings recording cloud storage limitation in Gb
+
+            '
+        maxMonitoredExtensionsPerUser:
+          type: integer
+          format: int32
+          description: 'Max number of extensions which can be included in the list
+
+            of users monitored for Presence
+
+            '
+        maxExtensionNumberLength:
+          type: integer
+          format: int32
+          description: 'Max length of extension numbers of an account; the supported
+
+            value is up to 8 symbols, depends on account type
+
+            '
+        siteCodeLength:
+          type: integer
+          format: int32
+          description: Length of a site code
+        shortExtensionNumberLength:
+          type: integer
+          format: int32
+          description: Length of a short extension number
+      description: Limits which are effective for the account
+    BillingPlanInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a billing plan
+        name:
+          type: string
+          description: Billing plan name
+        durationUnit:
+          type: string
+          description: Duration period
+          enum:
+          - Day
+          - Month
+          - Year
+        duration:
+          type: integer
+          format: int32
+          description: Number of duration units
+        type:
+          type: string
+          description: Billing plan type
+          enum:
+          - Initial
+          - Regular
+          - Suspended
+          - Trial
+          - TrialNoCC
+          - Free
+        includedPhoneLines:
+          type: integer
+          format: int32
+          description: Included digital lines count
+      description: Information on account billing plan
+    CountryListDictionaryModel:
+      required:
+      - navigation
+      - paging
+      - records
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the list of countries supported
+        records:
+          type: array
+          description: List of countries with the country data
+          items:
+            $ref: '#/components/schemas/CountryInfoDictionaryModel'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    AccountRegionalSettings:
+      type: object
+      properties:
+        homeCountry:
+          $ref: '#/components/schemas/CountryInfoShortModel'
+        timezone:
+          $ref: '#/components/schemas/TimezoneInfo'
+        language:
+          $ref: '#/components/schemas/RegionalLanguageInfo'
+        greetingLanguage:
+          $ref: '#/components/schemas/GreetingLanguageInfo'
+        formattingLocale:
+          $ref: '#/components/schemas/FormattingLocaleInfo'
+        timeFormat:
+          type: string
+          description: Time format setting. The default value is '12h' = ['12h', '24h']
+          enum:
+          - 12h
+          - 24h
+        currency:
+          $ref: '#/components/schemas/CurrencyInfo'
+      description: 'Account level region data (web service Auto-Receptionist settings)
+
+        '
+    GreetingLanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a greeting language
+        localeCode:
+          type: string
+          description: Localization code of a greeting language
+        name:
+          type: string
+          description: Official name of a greeting language
+      description: 'Information on language used for telephony greetings
+
+        '
+    ServiceInfoV2:
+      description: Service Plan information (billing package, brand, etc.)
+      type: object
+      required:
+      - package
+      properties:
+        package:
+          $ref: '#/components/schemas/ServiceInfoPackage'
+        brand:
+          $ref: '#/components/schemas/ServiceInfoBrand'
+        contractedCountry:
+          $ref: '#/components/schemas/ServiceInfoCountryShortModel'
+        uBrand:
+          $ref: '#/components/schemas/ServiceInfoUBrand'
+        servicePlan:
+          $ref: '#/components/schemas/ServiceInfoPlan'
+    BasicContactInfo:
+      description: Personal contact information
+      type: object
+      properties:
+        firstName:
+          description: Given name
+          type: string
+          maxLength: 64
+          example: John
+        lastName:
+          description: Family name
+          type: string
+          maxLength: 64
+          example: Smith
+        email:
+          description: Contact email
+          type: string
+          format: email
+          maxLength: 64
+          example: john.smith@acme.com
+    ServiceInfoPlan:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a service plan
+        name:
+          type: string
+          description: Name of a service plan
+        edition:
+          type: string
+          description: Edition of a service plan
+        freemiumProductType:
+          type: string
+          enum:
+          - Freyja
+          - Phoenix
+      description: Information on account service plan
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    ExtensionNumber:
+      description: 'Short number of an extension.
+
+        Actual max length depends on system length limit for extension.
+
+        '
+      type: string
+      pattern: ^\d{3,8}$
+      minLength: 1
+      maxLength: 8
+      example: '205'
+    AccountInfo:
+      type: object
+      required:
+      - id
+      - status
+      - serviceInfo
+      properties:
+        id:
+          description: Internal identifier of RingCentral account
+          type: string
+          example: '8000012345'
+        externalAccountId:
+          description: 'External account ID. Used as a primary key to link accounts between
+
+            RingCentral and partner systems.
+
+            '
+          type: string
+          maxLength: 30
+          example: acme-us-12345
+        mainNumber:
+          $ref: '#/components/schemas/PhoneNumberE164'
+        status:
+          description: Account status
+          type: string
+          enum:
+          - Initial
+          - Unconfirmed
+          - Confirmed
+          - Disabled
+          example: Confirmed
+        statusInfo:
+          $ref: '#/components/schemas/AccountStatusInfo'
+        companyName:
+          description: Company name
+          type: string
+          maxLength: 64
+          example: Acme Inc.
+        companyAddress:
+          $ref: '#/components/schemas/PostalAddress'
+        serviceInfo:
+          $ref: '#/components/schemas/ServiceInfoV2'
+        contactInfo:
+          $ref: '#/components/schemas/SystemUserContactInfo'
+        opportunityId:
+          type: string
+          description: Opportunity identifier (typically created by SalesForce)
+          example: 0061800000DwZzJAAV
+    SetupWizardStateEnum:
+      type: string
+      description: Initial configuration wizard state
+      enum:
+      - NotStarted
+      - Incomplete
+      - Completed
+      - Unknown
+    SystemUserContactInfo:
+      description: Primary system user contact information
+      allOf:
+      - $ref: '#/components/schemas/BasicContactInfoWithPhone'
+      - type: object
+        required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - contactPhone
+        - extensionNumber
+        properties:
+          id:
+            type: string
+            description: Internal identifier of System user extension
+          extensionNumber:
+            $ref: '#/components/schemas/ExtensionNumber'
+    ServicePlanInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a service plan
+        name:
+          type: string
+          description: Name of a service plan
+        edition:
+          type: string
+          description: Edition of a service plan
+        freemiumProductType:
+          type: string
+          enum:
+          - Freyja
+          - Phoenix
+      description: Information on account service plan
+    SignupInfoResource:
+      type: object
+      properties:
+        tosAccepted:
+          type: boolean
+          default: false
+        signupState:
+          type: array
+          items:
+            type: string
+            enum:
+            - AccountCreated
+            - BillingEntered
+            - CreditCardApproved
+            - AccountConfirmed
+            - PhoneVerificationRequired
+            - PhoneVerificationPassed
+        verificationReason:
+          type: string
+          enum:
+          - CC_Failed
+          - Phone_Suspicious
+          - CC_Phone_Not_Match
+          - AVS_Not_Available
+          - MaxMind
+          - CC_Blacklisted
+          - Email_Blacklisted
+          - Phone_Blacklisted
+          - Cookie_Blacklisted
+          - Device_Blacklisted
+          - IP_Blacklisted
+          - Agent_Instance_Blacklisted
+          - Charge_Limit
+          - Other_Country
+          - Unknown
+        marketingAccepted:
+          type: boolean
+          description: 'Updates ''Send Marketing Information'' flag on web interface
+
+            '
+        creationTime:
+          type: string
+          format: date-time
+          description: The timestamp of account creation
+          example: '2023-03-10T18:07:52.534Z'
+      description: Account sign up data
+    CurrencyInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of a currency
+        code:
+          type: string
+          description: Official code of a currency
+        name:
+          type: string
+          description: Official name of a currency
+        symbol:
+          type: string
+          description: Graphic symbol of a currency
+        minorSymbol:
+          type: string
+          description: Minor graphic symbol of a currency
+      description: Currency information
+    BrandInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a brand
+        name:
+          type: string
+          description: 'Brand name, for example  RingCentral UK ,  ClearFax '
+        homeCountry:
+          $ref: '#/components/schemas/CountryInfoShortModel'
+      description: Information on account brand
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    AccountServiceInfoRequest:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of the account Service Info resource
+        servicePlanName:
+          type: string
+          description: Account Service Plan name
+        brand:
+          $ref: '#/components/schemas/BrandInfo'
+        contractedCountry:
+          $ref: '#/components/schemas/CountryInfoShortModel'
+        servicePlan:
+          $ref: '#/components/schemas/ServicePlanInfo'
+        targetServicePlan:
+          $ref: '#/components/schemas/TargetServicePlanInfo'
+        billingPlan:
+          $ref: '#/components/schemas/BillingPlanInfo'
+        serviceFeatures:
+          type: array
+          description: Service features information, see Service Feature List
+          items:
+            $ref: '#/components/schemas/ServiceFeatureInfo'
+        limits:
+          $ref: '#/components/schemas/AccountLimits'
+        package:
+          $ref: '#/components/schemas/PackageInfo'
+      description: 'Account service information, including brand, service plan and billing plan
+
+        '
+    CountryInfoBasicModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoMinimalModel'
+      - type: object
+        properties:
+          name:
+            type: string
+            description: The official name of a country
+    TimezoneInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a timezone
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a timezone
+        name:
+          type: string
+          description: Short name of a timezone
+        description:
+          type: string
+          description: Meaningful description of the timezone
+        bias:
+          type: string
+      description: Extension timezone information
+    ModifyAccountBusinessAddressRequest:
+      type: object
+      properties:
+        company:
+          type: string
+          description: Company business name
+        email:
+          type: string
+          format: email
+          description: Company business email address
+        businessAddress:
+          $ref: '#/components/schemas/BusinessAddressInfo'
+        mainSiteName:
+          type: string
+          description: Custom site name
+    RegionalLanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a language set as regional
+        localeCode:
+          type: string
+          description: Localization code of a language set as regional
+        name:
+          type: string
+          description: Official name of a language set as regional
+      description: Information on a language set as regional
+    PhoneNumberE164:
+      type: string
+      pattern: ^\+[1-9]\d{1,14}$
+      description: Phone number in e.164 format (with '+' prefix)
+      maxLength: 18
+      example: '+16501234567'
+    ServiceInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a service info resource
+        billingPlan:
+          $ref: '#/components/schemas/BillingPlanInfo'
+        brand:
+          $ref: '#/components/schemas/BrandInfo'
+        servicePlan:
+          $ref: '#/components/schemas/ServicePlanInfo'
+        targetServicePlan:
+          $ref: '#/components/schemas/TargetServicePlanInfo'
+        contractedCountry:
+          $ref: '#/components/schemas/CountryInfoShortModel'
+        uBrand:
+          $ref: '#/components/schemas/UBrandInfo'
+      description: 'Account service information, including brand, sub-brand, service plan and
+
+        billing plan
+
+        '
+    PostalAddress:
+      type: object
+      description: Postal address/location
+      required:
+      - street
+      - city
+      - zip
+      - country
+      properties:
+        street:
+          type: string
+          description: Street address
+          maxLength: 256
+          example: 20 Davis Dr
+        street2:
+          type: string
+          description: Street address (2nd line)
+          maxLength: 256
+        city:
+          type: string
+          description: City name
+          maxLength: 64
+          example: Belmont
+        state:
+          description: State or province information in the target country
+          maxLength: 64
+          type: string
+          example: CA
+        zip:
+          description: Postal code in the target country
+          type: string
+          maxLength: 10
+          example: '94002'
+        country:
+          description: ISO-3166-1 2-letter country code (alpha2)
+          type: string
+          maxLength: 2
+          minLength: 2
+          example: US
+    BasicContactInfoWithPhone:
+      allOf:
+      - $ref: '#/components/schemas/BasicContactInfo'
+      - type: object
+        properties:
+          contactPhone:
+            $ref: '#/components/schemas/PhoneNumberE164'
+    ServiceInfoUBrand:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Sub-brand unique ID
+          example: '111.222'
+        name:
+          type: string
+          description: Sub-brand name
+          example: Sub-brand name
+      description: Account sub-brand information
+    CountryInfoShortModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoBasicModel'
+      - type: object
+        properties:
+          isoCode:
+            type: string
+            description: 'A ISO country code value complying with the
+
+              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+
+              format.
+
+              '
+          callingCode:
+            type: string
+            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
+
+              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
+
+              [E.164](http://en.wikipedia.org/wiki/E.164),
+
+              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
+
+              '
+    TargetServicePlanInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a target service plan
+        name:
+          type: string
+          description: Name of a target service plan
+        edition:
+          type: string
+          description: Edition of a service plan
+        freemiumProductType:
+          type: string
+          enum:
+          - Freyja
+          - Phoenix
+      description: Information on account target service plan
+    UBrandInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Sub-brand unique ID
+          example: '111.222'
+        name:
+          type: string
+          description: Sub-brand name
+          example: Sub-brand name
+      description: Account sub-brand information
+    ServiceInfoBrand:
+      description: Internal RC "brand" information
+      type: object
+      readOnly: true
+      required:
+      - id
+      - name
+      properties:
+        id:
+          type: string
+          description: RingCentral brand ID
+          readOnly: true
+          example: '6699'
+        name:
+          type: string
+          description: RingCentral brand name
+          readOnly: true
+          example: Partner 1
+  responses:
+    TooManyRequests:
+      description: 'General response with **HTTP 429 "Too many requests"** status.<br>
+
+        Reasons: certain rate limit is exceeded.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
+
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

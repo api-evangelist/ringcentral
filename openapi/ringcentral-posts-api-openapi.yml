@@ -1,0 +1,740 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Posts API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Posts
+paths:
+  /team-messaging/v1/files:
+    post:
+      tags:
+      - Posts
+      summary: Upload File
+      description: Posts a file.
+      operationId: createGlipFileNew
+      parameters:
+      - name: groupId
+        in: query
+        description: Internal identifier of a group to which the post with attachment will be added to
+        schema:
+          type: integer
+          format: int64
+      - name: name
+        in: query
+        description: Name of a file attached
+        schema:
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - body
+              properties:
+                body:
+                  type: string
+                  description: The file (binary or multipart/form-data) to upload
+                  format: binary
+        required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMAddFileRequest'
+        '400':
+          description: Some of the parameters are missing or have invalid format
+        '415':
+          description: Media type is not supported
+      x-feature: TeamMessaging
+      x-request-max-body-size: 30m
+      x-throttling-group: Heavy
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/chats/{chatId}/posts:
+    get:
+      tags:
+      - Posts
+      summary: List Posts
+      description: Returns a list of posts from the specified chat.
+      operationId: readGlipPostsNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat
+        required: true
+        schema:
+          type: string
+      - name: recordCount
+        in: query
+        description: Max number of posts to be fetched by one request (not more than 250)
+        schema:
+          maximum: 250
+          type: integer
+          format: int32
+          default: 30
+      - name: pageToken
+        in: query
+        description: Pagination token.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMPostsList'
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    post:
+      tags:
+      - Posts
+      summary: Create Post
+      description: Creates a post in the chat specified in path. Any mention can be added within the `text` attribute of the request body in .md format - `![:Type](id)`, where `type` is one of (Person, Team, File, Note, Task, Event, Link, Card) and `id` is a unique identifier of the mentioned object of the specified type. Attachments of the following types (File, Card, Event, Note) can also be added to a post by passing type and ID of attachment(s) in request body.
+      operationId: createGlipPostNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMCreatePostRequest'
+        required: true
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMPostInfo'
+        '400':
+          description: One of body parameters has invalid value.
+        '404':
+          description: Resource for parameter [chatId] is not found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+  /team-messaging/v1/chats/{chatId}/posts/{postId}:
+    get:
+      tags:
+      - Posts
+      summary: Get Post
+      description: Returns information about the specified post.
+      operationId: readGlipPostNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat
+        required: true
+        schema:
+          type: string
+      - name: postId
+        in: path
+        description: Internal identifier of a post
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMPostInfo'
+        '404':
+          description: Post Not Found
+      x-feature: TeamMessaging
+      x-throttling-group: Light
+      x-app-permission: TeamMessaging
+    delete:
+      tags:
+      - Posts
+      summary: Delete Post
+      description: Deletes the specified post from the chat.
+      operationId: deleteGlipPostNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat
+        required: true
+        schema:
+          type: string
+      - name: postId
+        in: path
+        description: Internal identifier of a post to be deleted
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content.
+        '403':
+          description: Requestor has no permissions to do this action
+        '404':
+          description: Post Not Found
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+    patch:
+      tags:
+      - Posts
+      summary: Update Post
+      description: Updates a specific post within a chat.
+      operationId: patchGlipPostNew
+      parameters:
+      - name: chatId
+        in: path
+        description: Internal identifier of a chat
+        required: true
+        schema:
+          type: string
+      - name: postId
+        in: path
+        description: Internal identifier of a post to be updated
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TMUpdatePostRequest'
+        required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TMPostInfo'
+        '400':
+          description: One of body parameters has invalid value
+        '403':
+          description: Requestor has no permissions to do this action
+        '404':
+          description: Chat not found.
+      x-feature: TeamMessaging
+      x-throttling-group: Medium
+      x-app-permission: TeamMessaging
+components:
+  schemas:
+    EventRecurrenceInfo:
+      type: object
+      properties:
+        schedule:
+          type: string
+          description: "Event recurrence settings. For non-periodic events the value \nis `None`. Must be greater or equal to event duration: 1- Day/Weekday; \n7 - Week; 28 - Month; 365 - Year\n"
+          enum:
+          - None
+          - Day
+          - Weekday
+          - Week
+          - Month
+          - Year
+        endingCondition:
+          type: string
+          description: Condition of ending an event
+          enum:
+          - None
+          - Count
+          - Date
+        endingAfter:
+          type: integer
+          format: int32
+          description: "Count of event iterations. For periodic events only. Value range is 1 - 10. \nMust be specified if `endingCondition` is `Count`\n"
+        endingOn:
+          type: string
+          description: "Iterations ending datetime for periodic events in \n[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format\n"
+          format: date-time
+    TMPostInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a post
+        groupId:
+          type: string
+          description: Internal identifier of a group a post belongs to
+        type:
+          type: string
+          description: Type of post
+          enum:
+          - TextMessage
+          - PersonJoined
+          - PersonsAdded
+        text:
+          type: string
+          description: For 'TextMessage' post type only. Text of a message
+        creatorId:
+          type: string
+          description: Internal identifier of a user - author of a post
+        addedPersonIds:
+          type: array
+          description: For 'PersonsAdded' post type only. Identifiers of persons added to a group
+          items:
+            type: string
+        creationTime:
+          type: string
+          description: Post creation datetime in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
+          format: date-time
+        lastModifiedTime:
+          type: string
+          description: Post last modification datetime in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
+          format: date-time
+        attachments:
+          type: array
+          description: List of posted attachments
+          items:
+            $ref: '#/components/schemas/TMMessageAttachmentInfo'
+        mentions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMMentionsInfo'
+        activity:
+          type: string
+          description: Label of activity type
+        title:
+          type: string
+          description: Title of a message. (Can be set for bot's messages only)
+        iconUri:
+          type: string
+          format: uri
+          description: Link to an image used as an icon for this message
+        iconEmoji:
+          type: string
+          description: Emoji used as an icon for this message
+    TMMentionsInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user
+        type:
+          type: string
+          description: Type of mention
+          enum:
+          - Person
+          - Team
+          - File
+          - Link
+          - Event
+          - Task
+          - Note
+          - Card
+        name:
+          type: string
+          description: Name of a user
+    TMMessageAttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an attachment
+        type:
+          type: string
+          description: Type of an attachment
+          default: Card
+          enum:
+          - Card
+          - Event
+          - File
+          - Note
+          - Task
+        fallback:
+          type: string
+          description: A string of default text that will be rendered in the case that the client does not support Interactive Messages
+        intro:
+          type: string
+          description: A pretext to the message
+        author:
+          $ref: '#/components/schemas/TMAttachmentAuthorInfo'
+        title:
+          type: string
+          description: Message title
+        text:
+          type: string
+          description: A large string field (up to 1000 chars) to be displayed as the body of a message (Supports GlipDown)
+        imageUri:
+          type: string
+          format: uri
+          description: Link to an image displayed at the bottom of a message
+        thumbnailUri:
+          type: string
+          format: uri
+          description: Link to an image preview displayed to the right of a message (82x82)
+        fields:
+          type: array
+          description: Information on navigation
+          items:
+            $ref: '#/components/schemas/TMAttachmentFieldsInfo'
+        footnote:
+          $ref: '#/components/schemas/TMAttachmentFootnoteInfo'
+        creatorId:
+          type: string
+          description: Internal identifier of a person created an event
+        startTime:
+          type: string
+          format: date-time
+          description: Datetime of starting an event
+        endTime:
+          type: string
+          format: date-time
+          description: Datetime of ending an event
+        allDay:
+          type: boolean
+          description: Indicates whether an event has some specific time slot or lasts for the whole day(s)
+          default: false
+        recurrence:
+          $ref: '#/components/schemas/EventRecurrenceInfo'
+        color:
+          type: string
+          description: Color of Event title, including its presentation in Calendar; or the color of the side border of an interactive message of a Card
+          default: Black
+          enum:
+          - Black
+          - Red
+          - Orange
+          - Yellow
+          - Green
+          - Blue
+          - Purple
+          - Magenta
+        location:
+          type: string
+          description: Event location
+        description:
+          type: string
+          description: Event details
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+    TMAddFileRequest:
+      required:
+      - contentUri
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a file
+        contentUri:
+          type: string
+          format: uri
+          description: Link to binary content
+        name:
+          type: string
+          description: Name of a file
+    TMCreatePostRequest:
+      type: object
+      description: Post data. At least one attribute should be provided (text or attachments)
+      properties:
+        text:
+          type: string
+          description: Text of a post. Maximum length is 10000 symbols. Mentions can be added in .md format `![:Type](id)`
+        attachments:
+          type: array
+          description: Identifier(s) of attachments. Maximum number of attachments is 25
+          items:
+            $ref: '#/components/schemas/TMAttachmentInfo'
+    TMAttachmentFootnoteInfo:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Text of a footer
+        iconUri:
+          type: string
+          format: uri
+          description: Link to an icon displayed to the left of a footer; sized 32x32px
+        time:
+          type: string
+          description: Message creation datetime in ISO 8601 format including timezone
+          format: date-time
+          example: '2016-03-10T18:07:52.534Z'
+    TMUpdatePostRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Post text.
+    TMAttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an attachment
+        type:
+          type: string
+          description: Type of an attachment
+          enum:
+          - File
+          - Note
+          - Event
+          - Card
+    TMAttachmentAuthorInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of a message author
+        uri:
+          type: string
+          format: uri
+          description: Link to an author's name
+        iconUri:
+          type: string
+          format: uri
+          description: Link to an image displayed to the left of an author's name; sized 82x82px
+    TMAttachmentFieldsInfo:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of an individual field
+        value:
+          type: string
+          description: Value of an individual field (supports Markdown)
+        style:
+          type: string
+          description: Style of width span applied to a field
+          default: Short
+          enum:
+          - Short
+          - Long
+    TMPostsList:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of posts
+          items:
+            $ref: '#/components/schemas/TMPostInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

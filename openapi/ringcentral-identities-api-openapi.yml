@@ -1,0 +1,837 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Identities API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Identities
+paths:
+  /cx/social-messaging/v1/identities:
+    get:
+      tags:
+      - Identities
+      summary: List All Identities
+      description: 'List identities by creation date. The default order is descending.
+
+
+        The account context of this request is determined by the RC Account Id associated with the access token provided
+
+        in the Authorization header.
+
+
+        The query parameters provided shall be considered an AND operation to filter the list.
+
+
+        A query parameter not specified or a query parameter provided with no value is treated as not required for
+
+        filtering the list.
+
+        '
+      operationId: socMsgListIdentities
+      parameters:
+      - $ref: '#/components/parameters/SourceId'
+      - $ref: '#/components/parameters/IdentityGroupIds'
+      - $ref: '#/components/parameters/UserId'
+      - $ref: '#/components/parameters/UUID'
+      - $ref: '#/components/parameters/SocMsgOrderBy'
+      - $ref: '#/components/parameters/PageToken'
+      - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          $ref: '#/components/responses/SocMsgListIdentitiesResponse200'
+        '400':
+          $ref: '#/components/responses/SocMsgListIdentitiesResponse400'
+      x-throttling-group: Light
+      x-app-permission: SocialMessaging
+  /cx/social-messaging/v1/identities/{identityId}:
+    get:
+      tags:
+      - Identities
+      summary: Get Identity
+      description: 'Renders an identity from given id.
+
+        '
+      operationId: socMsgGetIdentity
+      parameters:
+      - $ref: '#/components/parameters/IdentityId'
+      responses:
+        '200':
+          $ref: '#/components/responses/SocMsgGetIdentityResponse200'
+        '404':
+          $ref: '#/components/responses/SocMsgResponse404'
+      x-throttling-group: Light
+      x-app-permission: SocialMessaging
+components:
+  schemas:
+    IdentityUUID:
+      description: UUID of the identity.
+      type: string
+      example: 9680ab94-3b78-495c-bb2c-a969954d8260
+    SocMsgLastName:
+      description: LastName.
+      type: string
+      example: Doe
+    SocMsgGender:
+      description: Gender.
+      type: string
+      example: Woman
+      enum:
+      - Man
+      - Woman
+      nullable: true
+    IdentityMcc:
+      description: 'Viber mobile country code of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: '1'
+    IdentityPrimaryDeviceOs:
+      description: 'Viber primary device OS of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: Android 11
+    IdentityViberVersion:
+      description: 'Viber application version of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: 19.5.0
+    IdentityTwLocation:
+      description: 'Twitter location of the identity.
+
+
+        Applicable to Twitter channels only.
+
+        '
+      type: string
+      example: Paris
+    SocMsgEmailAddress:
+      description: Email address.
+      type: string
+      format: email
+      example: user@example.com
+    IdentityDeviceType:
+      description: 'Viber device type of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: SM-G970U1
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    IdentityLanguage:
+      description: 'Viber language of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: fr-FR
+    IdentityTwFollowingCount:
+      description: 'Count of Twitter accounts followed by the identity.
+
+
+        Applicable to Twitter channels only.
+
+        '
+      type: integer
+      format: int32
+      example: 500
+    IdentityType:
+      description: Type of the identity.
+      type: string
+      enum:
+      - AppleMessagesForBusiness
+      - Email
+      - EngageMessaging
+      - Facebook
+      - GoogleBusinessMessages
+      - GoogleMyBusiness
+      - Instagram
+      - Linkedin
+      - Twitter
+      - Viber
+      - WhatsApp
+      - Youtube
+    SocMsgPhoneNumber:
+      description: Phone number.
+      type: string
+      example: '+33634231224'
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    IdentityFbBio:
+      description: 'Facebook biography of the identity.
+
+
+        Applicable to Facebook and Messenger channels only.
+
+        '
+      type: string
+      example: Painter living in Paris
+    IdentityGroupId:
+      description: 'The identity group id references the identity group that contains
+
+        all information (phone, notes, etc.). Many identities may belong to
+
+        this group. If the identity group id is null, it means that identity
+
+        does not have a group and any extra information.
+
+        '
+      type: string
+      example: 54085e5b7aa58d8b5d00006c
+    NonEnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        pageToken:
+          type: string
+          description: 'Current page token. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+        nextPageToken:
+          type: string
+          description: A page token to be used to fetch the next page of the result set. May be omitted if the current page is the last one.
+        previousPageToken:
+          type: string
+          description: 'A page token to be used to fetch the previous page of the result set.
+
+            May be omitted if the current page is the first one or if the result set does not support backward navigation.
+
+            '
+        firstPageToken:
+          type: string
+          description: A page token to be used to fetch the first page of the result set.
+    IdentityFbCategory:
+      description: 'Facebook category of the identity.
+
+
+        Applicable to Facebook and Messenger channels only.
+
+        '
+      type: string
+      example: Computers/Internet
+    IdentityScreenName:
+      description: Screen name of the identity.
+      type: string
+      example: John D.
+    SocMsgCreationTimeOrder:
+      description: Ordering by creationTime is descending by default.
+      type: string
+      enum:
+      - -creationTime
+      - +creationTime
+      - creationTime
+      default: -creationTime
+      example: +creationTime
+    IdentityTwStatusesCount:
+      description: 'Count of tweets of the identity.
+
+
+        Applicable to Twitter channels only.
+
+        '
+      type: integer
+      format: int32
+      example: 42
+    IdentityTwDescription:
+      description: 'Twitter description of the identity.
+
+
+        Applicable to Twitter channels only.
+
+        '
+      type: string
+      example: Software Engineer
+    IdentityUserIds:
+      description: List of the associated user identifiers who can use the identity.
+      items:
+        type: string
+        example: 54085e5b7aa58d8b5d00006c
+      type: array
+      minItems: 0
+    SocMsgLastModifiedTime:
+      description: The time when the last modification was completed.
+      format: date-time
+      type: string
+      example: '2023-02-04T12:43:07Z'
+    IdentityDisplayName:
+      description: Display name of the identity.
+      type: string
+      example: John Doe
+    IdentityAvatarURI:
+      description: Identity's avatar Uri.
+      type: string
+      format: uri
+      example: https://example.com/assets/avatar/default-79fd530c58c2a6b83a11fcc0e842ed7023ceb69292cfeb857bc2af2c624b90fd.png
+    IdentityCountry:
+      description: 'Viber country of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: FR
+    SocMsgCompany:
+      description: Company.
+      type: string
+      example: Test Company
+    IdentityModel:
+      type: object
+      required:
+      - id
+      - type
+      - creationTime
+      - lastModifiedTime
+      properties:
+        id:
+          $ref: '#/components/schemas/IdentityId'
+        avatarUri:
+          $ref: '#/components/schemas/IdentityAvatarURI'
+        company:
+          $ref: '#/components/schemas/SocMsgCompany'
+        creationTime:
+          $ref: '#/components/schemas/SocMsgCreationTime'
+        displayName:
+          $ref: '#/components/schemas/IdentityDisplayName'
+        emailAddress:
+          $ref: '#/components/schemas/SocMsgEmailAddress'
+        extraValues:
+          $ref: '#/components/schemas/IdentityExtraValues'
+        firstName:
+          $ref: '#/components/schemas/SocMsgFirstName'
+        gender:
+          $ref: '#/components/schemas/SocMsgGender'
+        homePhone:
+          $ref: '#/components/schemas/SocMsgPhoneNumber'
+        identityGroupId:
+          $ref: '#/components/schemas/IdentityGroupId'
+        lastName:
+          $ref: '#/components/schemas/SocMsgLastName'
+        mobilePhone:
+          $ref: '#/components/schemas/SocMsgPhoneNumber'
+        screenName:
+          $ref: '#/components/schemas/IdentityScreenName'
+        type:
+          $ref: '#/components/schemas/IdentityType'
+        lastModifiedTime:
+          $ref: '#/components/schemas/SocMsgLastModifiedTime'
+        userIds:
+          $ref: '#/components/schemas/IdentityUserIds'
+        uuid:
+          $ref: '#/components/schemas/IdentityUUID'
+        mobileDeviceInfo:
+          $ref: '#/components/schemas/IdentityMobileDeviceInfo'
+        fbBio:
+          $ref: '#/components/schemas/IdentityFbBio'
+        fbCategory:
+          $ref: '#/components/schemas/IdentityFbCategory'
+        fbLocale:
+          $ref: '#/components/schemas/IdentityFbLocale'
+        igFollowersCount:
+          $ref: '#/components/schemas/IdentityIgFollowersCount'
+        twDescription:
+          $ref: '#/components/schemas/IdentityTwDescription'
+        twFollowersCount:
+          $ref: '#/components/schemas/IdentityTwFollowersCount'
+        twFollowingCount:
+          $ref: '#/components/schemas/IdentityTwFollowingCount'
+        twStatusesCount:
+          $ref: '#/components/schemas/IdentityTwStatusesCount'
+        twLocation:
+          $ref: '#/components/schemas/IdentityTwLocation'
+        apiVersion:
+          $ref: '#/components/schemas/IdentityApiVersion'
+        country:
+          $ref: '#/components/schemas/IdentityCountry'
+        deviceType:
+          $ref: '#/components/schemas/IdentityDeviceType'
+        language:
+          $ref: '#/components/schemas/IdentityLanguage'
+        mcc:
+          $ref: '#/components/schemas/IdentityMcc'
+        mnc:
+          $ref: '#/components/schemas/IdentityMnc'
+        primaryDeviceOs:
+          $ref: '#/components/schemas/IdentityPrimaryDeviceOs'
+        viberVersion:
+          $ref: '#/components/schemas/IdentityViberVersion'
+    IdentityFbLocale:
+      description: 'Facebook locale of the identity.
+
+
+        Applicable to Facebook and Messenger channels only.
+
+        '
+      type: string
+      example: fr_FR
+    IdentityIgFollowersCount:
+      description: 'Instagram followers count of the identity.
+
+
+        Applicable to Instagram and InstagramMessaging channels only.
+
+        '
+      type: integer
+      format: int32
+      example: 10
+    IdentityTwFollowersCount:
+      description: 'Twitter followers count of the identity.
+
+
+        Applicable to Twitter channels only.
+
+        '
+      type: integer
+      format: int32
+      example: 10
+    IdentityApiVersion:
+      description: 'Viber API version of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: '10'
+    IdentityId:
+      type: string
+      description: Identity identifier.
+      example: 506d9e817aa58d1259000f12
+    IdentityExtraValues:
+      description: Additional data to store along the identity.
+      type: object
+      additionalProperties:
+        type: string
+      example:
+        key: value
+    SocMsgFirstName:
+      description: FirstName.
+      type: string
+      example: John
+    IdentitiesList:
+      type: object
+      required:
+      - records
+      - paging
+      properties:
+        records:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/IdentityModel'
+        paging:
+          $ref: '#/components/schemas/NonEnumeratedPagingModel'
+    IdentityMobileDeviceInfo:
+      description: 'Device info of the identity.
+
+
+        Applicable to RingCX Digital Messaging channels only.
+
+        '
+      type: string
+      example: iPhone (iPhone); iOS 15.0.2
+    SocMsgCreationTime:
+      description: Creation time of the resource.
+      format: date-time
+      type: string
+      example: '2023-02-04T12:43:07Z'
+    IdentityMnc:
+      description: 'Viber mobile network code of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: '220'
+  parameters:
+    SocMsgOrderBy:
+      in: query
+      name: orderBy
+      required: false
+      description: Order results by specified field.
+      schema:
+        $ref: '#/components/schemas/SocMsgCreationTimeOrder'
+    IdentityGroupIds:
+      name: identityGroupIds
+      description: Filter based on the specified identityGroupIds (separated by commas).
+      in: query
+      required: false
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    PerPage:
+      name: perPage
+      in: query
+      description: 'The number of items per page. If provided value in the request
+
+        is greater than a maximum, the maximum value is applied
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 100
+      example: 100
+    IdentityId:
+      in: path
+      name: identityId
+      required: true
+      schema:
+        $ref: '#/components/schemas/IdentityId'
+    UserId:
+      name: userId
+      description: Filter based on the specified userId.
+      in: query
+      required: false
+      schema:
+        type: string
+    SourceId:
+      name: sourceId
+      description: Filter based on the specified sourceId.
+      in: query
+      required: false
+      schema:
+        type: string
+    UUID:
+      name: uuid
+      description: Filter based on the specified uuid.
+      in: query
+      required: false
+      schema:
+        type: string
+    PageToken:
+      name: pageToken
+      in: query
+      description: 'The token indicating the particular page of the result set to be retrieved.
+
+        If omitted the first page will be returned.
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: string
+  responses:
+    SocMsgGetIdentityResponse200:
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityModel'
+    SocMsgListIdentitiesResponse200:
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentitiesList'
+    SocMsgListIdentitiesResponse400:
+      description: Error 400 on Identity search
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+          examples:
+            EDI-028:
+              $ref: '#/components/examples/EDI-028'
+    SocMsgResponse404:
+      description: Error 404
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+          examples:
+            EDI-029:
+              $ref: '#/components/examples/EDI-029'
+            EDI-032:
+              $ref: '#/components/examples/EDI-032'
+  examples:
+    EDI-029:
+      summary: Resource not found
+      value:
+        errors:
+        - errorCode: EDI-029
+          message: Resource not found
+    EDI-032:
+      summary: Invalid id
+      value:
+        errors:
+        - errorCode: EDI-032
+          message: 'Invalid id: [${invalidId}]'
+    EDI-028:
+      summary: Search query is invalid
+      value:
+        errors:
+        - errorCode: EDI-028
+          message: Search query is invalid
+        - errorCode: EDI-028
+          message: Searching identity groups by "firstname" only is disabled, please provide "lastname"
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

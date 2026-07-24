@@ -1,0 +1,761 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Fax API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Fax
+paths:
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/fax:
+    post:
+      tags:
+      - Fax
+      summary: Create Fax Message
+      description: 'Creates and sends/re-sends a fax message. Re-send can be implemented
+
+        if sending has failed. Fax attachment size (both single and total) is
+
+        limited to 50Mb.
+
+        '
+      operationId: createFaxMessage
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - attachment
+              - to
+              properties:
+                attachment:
+                  type: string
+                  description: File to upload
+                  format: binary
+                faxResolution:
+                  $ref: '#/components/schemas/FaxResolutionEnum'
+                to:
+                  type: array
+                  description: Recipient's phone number(s)
+                  items:
+                    $ref: '#/components/schemas/FaxRequestTo'
+                sendTime:
+                  type: string
+                  description: 'Timestamp to send a fax at. If not specified, current or the past
+
+                    a fax message is sent immediately
+
+                    '
+                  format: date-time
+                isoCode:
+                  type: string
+                  description: Alpha-2 ISO Code of a country
+                  example: US
+                coverIndex:
+                  type: integer
+                  description: 'Cover page identifier. If `coverIndex` is set to ''0'' (zero) a cover page
+
+                    is not attached. For a list of available cover page identifiers (1-13)
+
+                    please call the Fax Cover Pages method. If not specified, the default cover
+
+                    page is attached (which is configured in ''Outbound Fax Settings'')
+
+                    '
+                  format: int32
+                coverPageText:
+                  type: string
+                  description: 'Cover page text, entered by a fax sender and printed
+
+                    on a cover page. Maximum length is limited to 1024 symbols
+
+                    '
+                  maxLength: 1024
+        required: true
+      responses:
+        '200':
+          description: Fax message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FaxResponse'
+      x-request-max-body-size: 55m
+      x-feature: FaxSending
+      x-availability: High
+      x-throttling-group: Heavy
+      x-app-permission: Faxes
+      x-user-permission: OutboundFaxes
+  /restapi/v1.0/dictionary/fax-cover-page:
+    get:
+      tags:
+      - Fax
+      summary: List Fax Cover Pages
+      description: Returns fax cover pages available for the current extension.
+      operationId: listFaxCoverPages
+      parameters:
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are accepted
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items)
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: List of fax cover pages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListFaxCoverPagesResponse'
+      x-availability: High
+      x-throttling-group: Light
+components:
+  schemas:
+    MessageDirectionEnum:
+      type: string
+      enum:
+      - Inbound
+      - Outbound
+      description: 'Text message direction. Note that for some message types not all
+
+        directions are allowed. For example voicemail messages can
+
+        be only inbound
+
+        '
+    MessageAvailabilityEnum:
+      type: string
+      enum:
+      - Alive
+      - Deleted
+      - Purged
+      description: 'Message availability status. Message in ''Deleted'' state is still
+
+        preserved with all its attachments and can be restored. ''Purged'' means
+
+        that all attachments are already deleted and the message itself is about
+
+        to be physically deleted shortly
+
+        '
+    MessageAttachmentInfoIntId:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Internal identifier of a message attachment
+          format: int64
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a message attachment
+        type:
+          type: string
+          description: Type of message attachment
+          enum:
+          - AudioRecording
+          - AudioTranscription
+          - Text
+          - SourceDocument
+          - RenderedDocument
+          - MmsAttachment
+        contentType:
+          type: string
+          description: MIME type for a given attachment, for instance 'audio/wav'
+        filename:
+          type: string
+          description: Name of a file attached
+        size:
+          type: integer
+          format: int32
+          description: Size of an attachment in bytes
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    FaxCoverPageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Internal identifier of a fax cover page. The supported value
+
+            range is 0-13 (for language setting en-US) and 0, 15-28
+
+            (for all other languages)
+
+            '
+        name:
+          type: string
+          description: Name of a fax cover page pattern
+    ListFaxCoverPagesResponse:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/FaxCoverPageInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    MessageStoreCallerInfoResponseFrom:
+      type: object
+      properties:
+        extensionNumber:
+          type: string
+          description: 'Extension short number (usually 3 or 4 digits). This property
+
+            is filled when parties communicate by means of short internal numbers,
+
+            for example when calling to other extension or sending/receiving Company
+
+            Pager message
+
+            '
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        location:
+          type: string
+          description: 'Contains party location (city, state) if one can be determined
+
+            from phoneNumber. This property is filled only when phoneNumber is not
+
+            empty and server can calculate location information from it (for example,
+
+            this information is unavailable for US toll-free numbers)
+
+            '
+        name:
+          type: string
+          description: 'Symbolic name associated with a party. If the phone does not
+
+            belong to the known extension, only the location is returned, the name
+
+            is not determined then
+
+            '
+        phoneNumber:
+          type: string
+          description: 'Phone number of a party. Usually it is a plain number including
+
+            country and area code like 18661234567. But sometimes it could be returned
+
+            from database with some formatting applied, for example (866)123-4567.
+
+            This property is filled in all cases where parties communicate by means
+
+            of global phone numbers, for example when calling to direct numbers or
+
+            sending/receiving SMS
+
+            '
+      description: Sender information
+    MessageStatusEnum:
+      type: string
+      description: 'Message status. Different message types may have different
+
+        allowed status values. For outbound faxes the aggregated message status
+
+        is returned. If, for outbound message, a status for at least one recipient is ''Queued'', then
+
+        the ''Queued'' value is returned. If a status for at least one recipient is
+
+        ''SendingFailed'', then the ''SendingFailed'' value is returned. In other cases
+
+        the ''Sent'' status is returned
+
+        '
+      enum:
+      - Queued
+      - Sent
+      - Delivered
+      - DeliveryFailed
+      - SendingFailed
+      - Received
+    MessagePriorityEnum:
+      type: string
+      description: Message priority
+      enum:
+      - Normal
+      - High
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    MessageReadStatusEnum:
+      description: Message read status
+      type: string
+      enum:
+      - Read
+      - Unread
+    FaxResponseTo:
+      type: object
+      properties:
+        recipientId:
+          type: string
+          description: Internal identifier of a fax recipient
+        phoneNumber:
+          type: string
+          description: Phone number in E.164 (with '+' sign) format
+          example: '+18661234567'
+        name:
+          type: string
+          description: Name of a fax recipient listed on a fax cover page
+        messageStatus:
+          type: string
+          $ref: '#/components/schemas/MessageStatusEnum'
+        location:
+          type: string
+          description: 'Contains party location (city, state) if one can be determined
+
+            from phoneNumber. This property is filled only when phoneNumber is not
+
+            empty and server can calculate location information from it (for example,
+
+            this information is unavailable for US toll-free numbers)
+
+            '
+    FaxResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Internal identifier of a message
+          format: int64
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a message
+        type:
+          type: string
+          description: Message type - 'Fax'
+          enum:
+          - Fax
+        from:
+          $ref: '#/components/schemas/MessageStoreCallerInfoResponseFrom'
+        to:
+          type: array
+          description: Recipient information
+          items:
+            $ref: '#/components/schemas/FaxResponseTo'
+        creationTime:
+          type: string
+          description: 'Message creation date/time in ISO 8601 format including timezone,
+
+            for example 2016-03-10T18:07:52.534Z
+
+            '
+          format: date-time
+        readStatus:
+          $ref: '#/components/schemas/MessageReadStatusEnum'
+        priority:
+          $ref: '#/components/schemas/MessagePriorityEnum'
+        attachments:
+          type: array
+          description: List of message attachments
+          items:
+            $ref: '#/components/schemas/MessageAttachmentInfoIntId'
+        direction:
+          $ref: '#/components/schemas/MessageDirectionEnum'
+        availability:
+          $ref: '#/components/schemas/MessageAvailabilityEnum'
+        messageStatus:
+          $ref: '#/components/schemas/MessageStatusEnum'
+        faxResolution:
+          $ref: '#/components/schemas/FaxResolutionEnum'
+        faxPageCount:
+          type: integer
+          format: int32
+          description: Page count in a fax message
+        lastModifiedTime:
+          type: string
+          description: 'Date/time when the message was modified on server in ISO 8601
+
+            format including timezone, for example 2016-03-10T18:07:52.534Z
+
+            '
+          format: date-time
+        coverIndex:
+          type: integer
+          format: int32
+          description: 'Cover page identifier. If `coverIndex` is set to ''0'' (zero), a cover
+
+            page is not attached. For a list of available cover page identifiers
+
+            (1-13) please call the Fax Cover Pages method. If not specified,
+
+            the default cover page is attached (which is configured in
+
+            ''Outbound Fax Settings'')
+
+            '
+        coverPageText:
+          type: string
+          description: 'Cover page text, entered by a fax sender and printed on a
+
+            cover page. Maximum length is limited to 1024 symbols
+
+            '
+    FaxRequestTo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number in E.164 (with '+' sign) format
+          example: '+18661234567'
+        name:
+          type: string
+          description: Name of a fax recipient that will be listed on a fax cover page
+    FaxResolutionEnum:
+      type: string
+      description: 'Fax only. Resolution of a fax message. ''High'' for black and
+
+        white image scanned at 200 dpi, ''Low'' for black and white image scanned
+
+        at 100 dpi
+
+        '
+      enum:
+      - High
+      - Low
+  parameters:
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

@@ -1,0 +1,986 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Role Management API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Role Management
+paths:
+  /restapi/v1.0/account/{accountId}/assigned-role:
+    get:
+      tags:
+      - Role Management
+      summary: List Company Assigned Roles
+      description: Returns a list of roles assigned to the current account.
+      operationId: listAssignedRoles
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: showHidden
+        in: query
+        description: Specifies if hidden roles are shown or not
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: List of roles assigned to an account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionWithRolesCollectionResource'
+      x-feature: ReadAssignedRoles
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadAssignedRoles
+  /restapi/v1.0/account/{accountId}/user-role:
+    get:
+      tags:
+      - Role Management
+      summary: List Company User Roles
+      description: Returns a list of account user roles.
+      operationId: listUserRoles
+      parameters:
+      - name: custom
+        in: query
+        description: 'Specifies whether to return custom roles or predefined roles only.
+
+          If not specified, all roles are returned
+
+          '
+        schema:
+          type: boolean
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: List of account user roles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RolesCollectionResource'
+      x-feature: ReadRoles
+      x-availability: High
+      x-throttling-group: Medium
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadUserRoles
+    post:
+      tags:
+      - Role Management
+      summary: Create Custom Role
+      description: Creates a custom user role.
+      operationId: createCustomRole
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleResource'
+        required: true
+      responses:
+        '200':
+          description: Created custom role information
+      x-feature: EditRoles
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: RoleManagement
+      x-user-permission: EditUserRoles
+  /restapi/v1.0/account/{accountId}/user-role/default:
+    get:
+      tags:
+      - Role Management
+      summary: Get Default User Role
+      description: Returns the default user role of the current account.
+      operationId: readDefaultRole
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Default user role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultUserRole'
+      x-feature: EditRoles
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: RoleManagement
+      x-user-permission: Roles
+    put:
+      tags:
+      - Role Management
+      summary: Set Default User Role
+      description: Updates the account default user role.
+      operationId: updateDefaultUserRole
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        description: JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DefaultUserRoleRequest'
+        required: true
+      responses:
+        '200':
+          description: Updated default user role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultUserRole'
+      x-feature: EditRoles
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: RoleManagement
+      x-user-permission: Roles
+  /restapi/v1.0/account/{accountId}/user-role/{roleId}:
+    get:
+      tags:
+      - Role Management
+      summary: Get User Role
+      description: Returns a user role assigned to the current account.
+      operationId: readUserRole
+      parameters:
+      - name: roleId
+        in: path
+        description: Internal identifier of a role
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/AccountId'
+      - name: advancedPermissions
+        in: query
+        description: 'Specifies whether to return advanced permissions capabilities within `permissionsCapabilities` resource.
+
+          The default value is false.
+
+          '
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: User role information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResource'
+      x-feature: ReadRoles
+      x-availability: High
+      x-throttling-group: Light
+      x-user-permission: ReadUserRoles
+      x-app-permission: ReadAccounts
+    put:
+      tags:
+      - Role Management
+      summary: Update User Role
+      description: Updates a user role assigned to the current account by ID.
+      operationId: updateUserRole
+      parameters:
+      - name: roleId
+        in: path
+        description: Internal identifier of a role
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleResource'
+        required: true
+      responses:
+        '200':
+          description: Updated user role information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResource'
+      x-feature: EditRoles
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-user-permission: EditUserRoles
+      x-app-permission: RoleManagement
+    delete:
+      tags:
+      - Role Management
+      summary: Delete Custom Role
+      description: Deletes a custom user role by ID.
+      operationId: deleteCustomRole
+      parameters:
+      - name: roleId
+        in: path
+        description: Internal identifier of a role
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/AccountId'
+      - name: validateOnly
+        in: query
+        description: 'Specifies that role should be validated prior to deletion, whether
+
+          it can be deleted or not
+
+          '
+        schema:
+          type: boolean
+      responses:
+        '204':
+          description: No content
+      x-feature: EditRoles
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: RoleManagement
+      x-user-permission: EditUserRoles
+  /restapi/v1.0/account/{accountId}/user-role/{roleId}/bulk-assign:
+    post:
+      tags:
+      - Role Management
+      summary: Assign Multiple User Roles
+      description: Assigns multiple user roles.
+      operationId: assignMultipleUserRoles
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: roleId
+        in: path
+        description: Internal identifier of a role
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkRoleAssignResource'
+        required: true
+      responses:
+        '200':
+          description: Assigned user roles information
+      x-feature: EditAssignedRoles
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: RoleManagement
+      x-user-permission: EditUserRoles
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/assignable-roles:
+    get:
+      tags:
+      - Role Management
+      summary: List Assignable Roles
+      description: Returns a list of roles which can be assigned to a given extension.
+      operationId: listOfAvailableForAssigningRoles
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: List of roles which can be assigned to a given extension
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RolesCollectionResource'
+      x-feature: EditUsers AND AdvancedPermissionsCapabilities
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: RoleManagement
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/assigned-role:
+    get:
+      tags:
+      - Role Management
+      summary: List User Assigned Roles
+      description: Returns a list of roles assigned to the current extension.
+      operationId: listUserAssignedRoles
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - name: showHidden
+        in: query
+        description: Specifies if hidden roles are shown or not
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: List of roles assigned to an extension
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedRolesResource'
+      x-feature: ReadAssignedRoles
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadAssignedRoles
+    put:
+      tags:
+      - Role Management
+      summary: Update User Assigned Roles
+      description: Updates a list of roles assigned to the current user.
+      operationId: updateUserAssignedRoles
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignedRolesResource'
+        required: true
+      responses:
+        '200':
+          description: Updated list of roles assigned to an extension
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedRolesResource'
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: RoleManagement
+      x-user-permission: EditAssignedRoles
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/assigned-role/default:
+    put:
+      tags:
+      - Role Management
+      summary: Assign Default Role
+      description: Assigns the default role to the currently logged-in user extension.
+      operationId: assignDefaultRole
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      responses:
+        '200':
+          description: Assigned user role information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedRolesResource'
+      x-feature: EditUsers
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: RoleManagement
+      x-user-permission: Users
+  /restapi/v1.0/dictionary/user-role:
+    get:
+      tags:
+      - Role Management
+      summary: List Standard User Roles
+      description: Returns a list of standard user roles.
+      operationId: listStandardUserRole
+      parameters:
+      - name: servicePlanId
+        in: query
+        description: Internal identifier of a service plan.
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - name: advancedPermissions
+        in: query
+        description: 'Specifies whether to return advanced permissions capabilities within `permissionsCapabilities` resource.
+
+          The default value is false.
+
+          '
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: List of standard user roles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RolesCollectionResource'
+      x-availability: High
+      x-throttling-group: Light
+  /restapi/v1.0/dictionary/user-role/{roleId}:
+    get:
+      tags:
+      - Role Management
+      summary: Get Standard User Role
+      description: Returns a standard user role by ID.
+      operationId: readStandardUserRole
+      parameters:
+      - name: roleId
+        in: path
+        required: true
+        description: Internal identifier of a role
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Standard user role information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResource'
+      x-availability: High
+      x-throttling-group: Light
+components:
+  parameters:
+    PerPage:
+      name: perPage
+      in: query
+      description: 'The number of items per page. If provided value in the request
+
+        is greater than a maximum, the maximum value is applied
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 100
+      example: 100
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    Page:
+      name: page
+      in: query
+      description: The result set page number (1-indexed) to return
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 1
+      example: 1
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  schemas:
+    PermissionIdResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+        siteCompatible:
+          type: string
+          description: Site compatibility flag set for permission
+          enum:
+          - Compatible
+          - Incompatible
+          - Independent
+        readOnly:
+          type: boolean
+          description: Specifies if the permission is editable on UI (if set to `true`) or not (if set to `false`)
+        assignable:
+          type: boolean
+          description: Specifies if the permission can be assigned by the account administrator
+        permissionsCapabilities:
+          $ref: '#/components/schemas/PermissionsCapabilities'
+    ExtensionWithRolesCollectionResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtensionWithRolesResource'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    DefaultUserRoleRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user role to be set as default
+    AssignedRolesResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedRoleResource'
+    ExtensionWithRolesResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        extensionId:
+          type: string
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedRoleResource'
+    AssignedRoleResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          description: Link to an assigned role resource
+          format: uri
+          readOnly: true
+        id:
+          type: string
+          description: Internal identifier of a role
+        autoAssigned:
+          type: boolean
+          default: false
+          description: Specifies if a role can be auto assigned
+        displayName:
+          type: string
+          description: Name of a default role
+        siteCompatible:
+          type: boolean
+          description: Site compatibility flag
+        siteRestricted:
+          type: boolean
+          description: Site restricted flag
+    PermissionsCapabilities:
+      type: object
+      description: Advanced permissions capabilities. Returned if `advancedPermissions` query parameter is set to `true`.
+      properties:
+        enabled:
+          type: boolean
+          description: Specifies whether the user is enabled with the listed permission or not
+        manageEnabled:
+          type: boolean
+          description: Specifies if the user can manage the listed permission and is allowed to enable it on other users
+        grantEnabled:
+          type: boolean
+          description: Specifies if the users who were enabled with the listed permission can grant it further to other users
+    RolesCollectionResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleResource'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+    DefaultUserRole:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a default role resource
+        id:
+          type: string
+          description: Internal identifier of a default role
+        displayName:
+          maxLength: 128
+          minLength: 0
+          pattern: ^((?!(<|>|\/|\")).)*$
+          type: string
+          description: Custom name of a default role
+          example: My Custom User Role
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    RoleResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          description: Link to a role resource
+          format: uri
+          readOnly: true
+        id:
+          type: string
+          description: Internal identifier of a role
+        displayName:
+          maxLength: 128
+          minLength: 0
+          pattern: ^((?!(<|>|\/|\")).)*$
+          type: string
+          example: Super Admin
+          description: Dispayed name of a role
+        description:
+          maxLength: 2000
+          minLength: 0
+          pattern: ^((?!(<|>|\/|\")).)*$
+          type: string
+          description: Role description
+          example: Primary company administrator role
+        siteCompatible:
+          type: boolean
+          description: Site compatibility of a user role
+        custom:
+          type: boolean
+          default: false
+          description: Specifies if a user role is custom
+        scope:
+          type: string
+          description: Specifies resource for permission
+          enum:
+          - Account
+          - AllExtensions
+          - Federation
+          - Group
+          - NonUserExtensions
+          - RoleBased
+          - Self
+          - UserExtensions
+        hidden:
+          type: boolean
+          default: false
+        lastUpdated:
+          type: string
+          format: date-time
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionIdResource'
+    BulkRoleAssignResource:
+      type: object
+      properties:
+        siteRestricted:
+          type: boolean
+          example: true
+        siteCompatible:
+          type: boolean
+        uri:
+          type: string
+          format: uri
+        addedExtensionIds:
+          type: array
+          items:
+            type: string
+        removedExtensionIds:
+          type: array
+          items:
+            type: string
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

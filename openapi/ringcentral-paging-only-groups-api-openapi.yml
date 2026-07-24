@@ -1,0 +1,556 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Paging Only Groups API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Paging Only Groups
+paths:
+  /restapi/v1.0/account/{accountId}/paging-only-groups/{pagingOnlyGroupId}/users:
+    get:
+      tags:
+      - Paging Only Groups
+      summary: Get Paging Group Users
+      description: 'Returns a list of users allowed to page this group.
+
+        '
+      operationId: listPagingGroupUsers
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: pagingOnlyGroupId
+        in: path
+        description: 'Internal identifier of a paging group
+
+          '
+        required: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are accepted
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: Indicates a page size (number of items)
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: Paging only group users information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagingOnlyGroupUsers'
+      x-feature: ReadExtensionInfo
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadUserInfo
+  /restapi/v1.0/account/{accountId}/paging-only-groups/{pagingOnlyGroupId}/bulk-assign:
+    post:
+      tags:
+      - Paging Only Groups
+      summary: Assign Paging Group Users and Devices
+      description: 'Adds and/or removes paging group users and devices.
+
+        '
+      operationId: assignMultiplePagingGroupUsersDevices
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: pagingOnlyGroupId
+        in: path
+        description: 'Internal identifier of a paging group
+
+          '
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditPagingGroupRequest'
+        required: false
+      responses:
+        '200':
+          description: Assigned paging only groups/devices information
+      x-feature: EditGroups
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: EditAccounts
+      x-user-permission: Groups
+  /restapi/v1.0/account/{accountId}/paging-only-groups/{pagingOnlyGroupId}/devices:
+    get:
+      tags:
+      - Paging Only Groups
+      summary: Get Paging Group Devices
+      description: 'Returns a list of paging devices assigned to this group.
+
+        '
+      operationId: listPagingGroupDevices
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: pagingOnlyGroupId
+        in: path
+        description: 'Internal identifier of a paging group
+
+          '
+        required: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: 'Indicates a page number to retrieve. Only positive number values
+
+          are accepted
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: perPage
+        in: query
+        description: 'Indicates a page size (number of items)
+
+          '
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        '200':
+          description: Paging devices information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagingOnlyGroupDevices'
+      x-feature: ReadAccountDevices
+      x-availability: High
+      x-throttling-group: Light
+      x-app-permission: ReadAccounts
+      x-user-permission: ReadCompanyDevices
+components:
+  schemas:
+    PagingGroupExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a paging group user extension
+        uri:
+          type: string
+          format: uri
+          description: Link to a paging group user extension
+        extensionNumber:
+          type: string
+          description: Extension number of a paging group user
+        name:
+          type: string
+          description: Name of a paging group user
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    EditPagingGroupRequest:
+      type: object
+      properties:
+        addedUserIds:
+          type: array
+          description: 'List of users that will be allowed to page a group specified
+
+            '
+          items:
+            type: string
+        removedUserIds:
+          type: array
+          description: 'List of users that will be disallowed to page a group specified
+
+            '
+          items:
+            type: string
+        addedDeviceIds:
+          type: array
+          description: 'List of account devices that will be assigned to a paging group
+
+            specified
+
+            '
+          items:
+            type: string
+        removedDeviceIds:
+          type: array
+          description: 'List of account devices that will be unassigned from a paging
+
+            group specified
+
+            '
+          items:
+            type: string
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    PagingDeviceInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a paging device
+        uri:
+          type: string
+          format: uri
+          description: Link to a paging device resource
+        name:
+          type: string
+          description: Name of a paging device
+    PagingOnlyGroupDevices:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a list of devices assigned to the paging only group
+        records:
+          type: array
+          description: List of paging devices assigned to this group
+          items:
+            $ref: '#/components/schemas/PagingDeviceInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    PagingOnlyGroupUsers:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: 'Link to a list of users allowed to page the Paging Only group
+
+            '
+        records:
+          type: array
+          description: List of users allowed to page the Paging Only group
+          items:
+            $ref: '#/components/schemas/PagingGroupExtensionInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

@@ -1,0 +1,1226 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards Webinars and Sessions API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: Webinars and Sessions
+  description: External APIs for webinar and session management
+paths:
+  /webinar/configuration/v1/webinars:
+    post:
+      tags:
+      - Webinars and Sessions
+      summary: Create Webinar
+      description: 'Creates a new webinar.
+
+
+        If "host" parameter is NOT passed then the current authorized user will become a Host.
+
+        If "host" parameter is passed then the caller must be a company administrator and have "WebinarSettings" permission.
+
+        "host.linkedUser.accountId" must be the same as authorized user''s account ID.
+
+
+        The webinar settings which are not mandated at account level or are unlocked can be
+
+        specified. All other settings are defaulted according to account policy.
+
+        '
+      operationId: rcwConfigCreateWebinar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebinarCreationRequest'
+      responses:
+        '201':
+          description: Successful response, new Webinar is created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WcsWebinarResource'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: EditWebinars
+    get:
+      tags:
+      - Webinars and Sessions
+      summary: List User's Webinars
+      description: 'Returns the list of Webinars hosted by a current authorized user sorted by ''scheduledStartTime'' or ''creationTime'' in the ascending order.
+
+        '
+      operationId: rcwConfigListWebinars
+      parameters:
+      - $ref: '#/components/parameters/WcsCreationTimeFrom'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/PageToken'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebinarListResource'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: ReadWebinars
+  /webinar/configuration/v1/webinars/{webinarId}:
+    parameters:
+    - $ref: '#/components/parameters/RcwWebinarId'
+    get:
+      tags:
+      - Webinars and Sessions
+      summary: Get Webinar
+      description: 'Returns a Webinar information by ID.
+
+        Some webinar settings are returned basing on webinar-level overrides, other - from default settings defined at account level.
+
+        '
+      operationId: rcwConfigGetWebinar
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WcsWebinarResource'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: ReadWebinars
+    patch:
+      tags:
+      - Webinars and Sessions
+      summary: Update Webinar
+      description: 'Updates a Webinar. The payload may contain just changed fields of a Webinar resource (it is a partial update):
+
+        - host cannot be changed, and host user information cannot be updated;
+
+        - only the settings which are not mandated at account level or are unlocked can be
+
+        changed;
+
+        - in order to reset a webinar password it should be passed as an empty string;
+
+        - "registrationStatus" cannot be changed.
+
+        '
+      operationId: rcwConfigUpdateWebinar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebinarBaseModel'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WcsWebinarResource'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: EditWebinars
+    delete:
+      tags:
+      - Webinars and Sessions
+      summary: Delete Webinar
+      description: 'Deletes a Webinar by ID. All child objects (Sessions, Invitees) will be also deleted.
+
+        It is disallowed to delete a Webinar which has at least one Session in ''Active'' or ''Finished'' state.
+
+        '
+      operationId: rcwConfigDeleteWebinar
+      responses:
+        '204':
+          description: The Webinar was successfully deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: EditWebinars
+  /webinar/configuration/v1/webinars/{webinarId}/sessions:
+    parameters:
+    - $ref: '#/components/parameters/RcwWebinarId'
+    post:
+      tags:
+      - Webinars and Sessions
+      summary: Create Webinar Session
+      description: Creates a new Session for a given Webinar
+      operationId: rcwConfigCreateSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WcsSessionWithLocaleCodeModel'
+      responses:
+        '201':
+          description: Successful response, new Session is created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WcsSessionResource'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: EditWebinars
+  /webinar/configuration/v1/webinars/{webinarId}/sessions/{sessionId}:
+    parameters:
+    - $ref: '#/components/parameters/RcwWebinarId'
+    - $ref: '#/components/parameters/RcwSessionId'
+    patch:
+      tags:
+      - Webinars and Sessions
+      summary: Update Webinar Session
+      description: 'Updates a Webinar Session. The payload may contain certain attributes from the Session resource
+
+        (it is a partial update). Changing the ''status'' field usually invokes certain workflow actions.
+
+        Updating a Session in ''Active'' or ''Finished'' status is prohibited.
+
+        Some status transitions (for example, to ''Active" or ''Finished'') may be prohibited.
+
+        '
+      operationId: rcwConfigUpdateSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WcsSessionWithLocaleCodeModel'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WcsSessionResource'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: EditWebinars
+    get:
+      tags:
+      - Webinars and Sessions
+      summary: Get Webinar Session
+      description: Returns a Webinar Session by ID.
+      operationId: rcwConfigGetSession
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WcsSessionResource'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: ReadWebinars
+    delete:
+      tags:
+      - Webinars and Sessions
+      summary: Delete Webinar Session
+      description: 'Deletes a Webinar Session. All child objects (Invitees) will be also deleted.
+
+        It is disallowed to delete a Session which is in ''Active'' or ''Finished'' state
+
+        '
+      operationId: rcwConfigDeleteSession
+      responses:
+        '204':
+          description: The Session was successfully deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: EditWebinars
+  /webinar/configuration/v1/company/sessions:
+    get:
+      tags:
+      - Webinars and Sessions
+      summary: List Sessions across Multiple Webinars/Hosts
+      description: 'Returns the list of Webinar Sessions hosted by all company users or particular user(s) sorted by
+
+        ''scheduledStartTime'' or ''creationTime'' (if ''scheduledStartTime'' is not set) in the ascending ordered.
+
+        The user must have "WebinarSettings" permission granted otherwise the API returns HTTP 403.
+
+        '
+      operationId: rcwConfigListAllCompanySessions
+      parameters:
+      - name: status
+        in: query
+        description: Filter to return only webinar sessions in certain status. Multiple values are supported.
+        required: false
+        explode: true
+        schema:
+          $ref: '#/components/schemas/WcsSessionStatusModel'
+        example: Scheduled
+      - $ref: '#/components/parameters/WcsEndTimeFrom'
+      - $ref: '#/components/parameters/HostUserId'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/PageToken'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WcsSessionGlobalListResource'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: ReadWebinars
+  /webinar/configuration/v1/sessions:
+    get:
+      tags:
+      - Webinars and Sessions
+      summary: List Sessions across Multiple Webinars
+      description: 'Returns the list of Webinar Sessions hosted by a current authorized user sorted by
+
+        ''scheduledStartTime'' or ''creationTime'' (if ''scheduledStartTime'' is not set) in the ascending order
+
+        '
+      operationId: rcwConfigListAllSessions
+      parameters:
+      - name: nameFragment
+        in: query
+        description: Filter to return only webinar sessions containing particular substring within their names
+        required: false
+        explode: true
+        schema:
+          type: string
+        example: All-hands
+      - name: status
+        in: query
+        description: Filter to return only webinar sessions in certain status. Multiple values are supported.
+        required: false
+        explode: true
+        schema:
+          $ref: '#/components/schemas/WcsSessionStatusModel'
+        example: Scheduled
+      - $ref: '#/components/parameters/WcsEndTimeFrom'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/PageToken'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WcsSessionGlobalListResource'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      x-throttling-group: Heavy
+      x-app-permission: ReadWebinars
+components:
+  schemas:
+    WcsSessionWithLocaleCodeModel:
+      allOf:
+      - $ref: '#/components/schemas/WcsSessionBaseModel'
+      - type: object
+        properties:
+          localeCode:
+            type: string
+            description: Session locale code. Can't be blank or null
+            maxLength: 8
+            minLength: 2
+            example: en-US
+    WebinarGeneratedModel:
+      type: object
+      required:
+      - host
+      properties:
+        host:
+          $ref: '#/components/schemas/WcsHostModel'
+    WcsWebinarResource:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - $ref: '#/components/schemas/WebinarBaseModel'
+      - $ref: '#/components/schemas/WebinarGeneratedModel'
+    WcsSessionGlobalListResource:
+      type: object
+      required:
+      - records
+      - paging
+      properties:
+        records:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/SessionGlobalListEntry'
+        paging:
+          $ref: '#/components/schemas/RcwPagingModel'
+    WcsWebinarRefModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceIdModel'
+      - $ref: '#/components/schemas/WebinarInfoModel'
+      - required:
+        - title
+      - type: object
+        properties:
+          host:
+            $ref: '#/components/schemas/RcwLinkedUserModel'
+    WcsWebinarSettingsModel:
+      type: object
+      description: Various settings which define behavior of this Webinar's Sessions
+      properties:
+        recordingEnabled:
+          type: boolean
+          description: Indicates if recording is enabled (if false all other recording settings cannot be enabled)
+          default: true
+          readOnly: true
+        autoRecord:
+          type: boolean
+          description: Indicates if recording should start automatically when a Webinar goes live
+          default: false
+        recordingSharingEnabled:
+          type: boolean
+          description: Indicates if recording can be shared (this setting is read-only at webinar level)
+          readOnly: true
+          default: true
+        recordingDownloadEnabled:
+          type: boolean
+          description: Indicates if recording can be downloaded (this setting is read-only at webinar level)
+          readOnly: true
+          default: true
+        recordingDeletionEnabled:
+          deprecated: true
+          type: boolean
+          description: 'DEPRECATED AND REPLACED BY ''pastSessionDeletionEnabled'' setting.
+
+            Indicates if recording can be deleted (this setting is read-only at webinar level)
+
+            '
+          readOnly: true
+          default: false
+        pastSessionDeletionEnabled:
+          type: boolean
+          description: 'Indicates if deletion of past session along with its artifacts is enabled for Host.
+
+            This setting is read-only at webinar level
+
+            '
+          readOnly: true
+          default: false
+        panelistWaitingRoom:
+          type: boolean
+          description: Indicates if Panelists should be places to waiting room after joining
+          default: false
+        panelistVideoEnabled:
+          type: boolean
+          description: Indicates if Panelists' video should be 'on' by default
+          default: true
+        panelistScreenSharingEnabled:
+          type: boolean
+          description: Indicates if Panelists' screen sharing should be 'on' by default
+          default: true
+        panelistMuteControlEnabled:
+          type: boolean
+          description: Indicates if Panelists can mute/unmute themselves by default
+          default: true
+        panelistAuthentication:
+          type: string
+          description: Indicates if Panelists have to be authenticated users
+          enum:
+          - Guest
+          - AuthenticatedUser
+          - AuthenticatedCoworker
+          default: Guest
+        attendeeAuthentication:
+          type: string
+          description: Indicates if attendees have to be authenticated users
+          enum:
+          - Guest
+          - AuthenticatedUser
+          - AuthenticatedCoworker
+          default: Guest
+        artifactsAccessAuthentication:
+          type: string
+          description: 'Indicates who can access webinar artifacts. Applies to recordings at present.
+
+            Applicable to other artifacts such as Q&A, Polls in the future.
+
+            '
+          enum:
+          - Guest
+          - AuthenticatedUser
+          - AuthenticatedCoworker
+          default: AuthenticatedUser
+        pstnEnabled:
+          type: boolean
+          description: Indicates if dial-in PSTN audio option is enabled for Panelists
+          default: false
+        password:
+          type: string
+          maxLength: 64
+          x-sensitive-data: masked
+          description: 'Webinar password. If company-level "passwordEnabled" is true and "password" is null / omitted,
+
+            the backend generates the password
+
+            '
+        qnaEnabled:
+          type: boolean
+          description: Indicates if Q&A is enabled for the webinar (if false all other Q&A settings cannot be enabled)
+          default: true
+        qnaAnonymousEnabled:
+          type: boolean
+          description: Indicates if anonymous Q&A is enabled for the webinar
+          default: true
+        pollsEnabled:
+          type: boolean
+          description: Indicates if polls are enabled for the webinar (if false all other polls settings cannot be enabled)
+          readOnly: true
+          default: true
+        pollsAnonymousEnabled:
+          type: boolean
+          description: Indicates if anonymous poll answers are enabled for the webinar
+          readOnly: true
+          default: true
+        registrationEnabled:
+          type: boolean
+          description: Indicates if a registration is enabled for the webinar (if false all other registration settings are ignored)
+          default: false
+        postWebinarRedirectUri:
+          type: string
+          format: uri
+          description: URI to redirect users after the webinar
+          example: https://www.acme.com/thankyou
+        externalLivestreamEnabled:
+          type: boolean
+          description: Indicates if livestreaming to external streaming provider is enabled
+          readOnly: true
+          default: true
+        moderatedQnaEnabled:
+          type: boolean
+          description: Indicate if the moderated Q&A enabled for webinar
+          default: false
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    WcsSessionBaseModel:
+      type: object
+      required:
+      - scheduledStartTime
+      - scheduledDuration
+      - timeZone
+      properties:
+        scheduledStartTime:
+          type: string
+          description: Session scheduled start time.
+          format: date-time
+        scheduledDuration:
+          type: integer
+          format: int32
+          minimum: 30
+          maximum: 43200
+          description: The duration of the Session in seconds.
+          example: 1800
+        timeZone:
+          type: string
+          description: IANA-compatible time zone name (see https://www.iana.org/time-zones).
+          maxLength: 64
+          minLength: 3
+          example: America/New_York
+        localizedTimeZoneDescription:
+          type: string
+          description: Localized time zone description.
+          example: Eastern Time (America/New_York)
+        panelJoinTimeOffset:
+          type: integer
+          format: int32
+          description: 'The time offset (positive, in seconds) indicating how much in advance
+
+            (comparing to "scheduledStartTime") panel members should join for the pre-webinar team sync
+
+            '
+          minimum: 0
+          default: 0
+          example: 900
+        title:
+          type: string
+          description: Session title. Can be left blank - then Webinar title should be used for presentation.
+          maxLength: 512
+          minLength: 0
+          x-sensitive-data: masked
+          example: Live Broadcasting US
+        description:
+          type: string
+          description: User-friendly description of the Session. Can be left blank - then Webinar title should be used for presentation.
+          maxLength: 4096
+          minLength: 0
+          x-sensitive-data: masked
+          example: Live session for US-based participants
+        status:
+          $ref: '#/components/schemas/WcsSessionStatusModel'
+        hostJoinUri:
+          type: string
+          format: uri
+          readOnly: true
+          maxLength: 256
+          minLength: 5
+          description: The URI to join the webinar as a host
+          example: https://v.ringcentral.com/w/join/de7yd8ew7yfsdfjh899843rgj
+    WcsSessionStatusModel:
+      type: string
+      description: Session status (for the purposes of Configuration service)
+      enum:
+      - Scheduled
+      - Active
+      - Finished
+      example: Scheduled
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    WcsSessionResource:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - $ref: '#/components/schemas/WcsSessionWithLocaleCodeModel'
+      - $ref: '#/components/schemas/WcsSessionGeneratedModel'
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    WebinarListResource:
+      type: object
+      required:
+      - records
+      - paging
+      properties:
+        records:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/WcsWebinarResource'
+        paging:
+          $ref: '#/components/schemas/RcwPagingModel'
+    RcwDomainUserModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwUserModel'
+      - type: object
+        required:
+        - domain
+        properties:
+          domain:
+            type: string
+            description: Identity domain
+            enum:
+            - pbx
+            - ilm
+            default: pbx
+    WcsSessionGeneratedModel:
+      type: object
+      properties:
+        videoBridgeId:
+          type: string
+          description: The RCV bridge id
+          readOnly: true
+          example: '839874770'
+        videoBridgePassword:
+          type: string
+          format: password
+          readOnly: true
+          x-sensitive-data: masked
+          description: The RCV bridge password. Returned only if requested by Host/Co-host/Panelist and a password for the bridge is set.
+          example: abc123
+        videoBridgePstnPassword:
+          type: string
+          format: password
+          readOnly: true
+          x-sensitive-data: masked
+          description: The RCV bridge PSTN password. Returned only if requested by Host/Co-host/Panelist and a PSTN password for the bridge is set.
+          example: abc123
+        attendeeJoinUri:
+          type: string
+          format: uri
+          readOnly: true
+          maxLength: 256
+          minLength: 5
+          description: The URI for attendees to join the Webinar (if it is a public webinar)
+          example: https://v.ringcentral.com/w/a/join/iuyef77fsj473wn10ashjfk34
+        hasUnsentInvites:
+          type: boolean
+          readOnly: true
+          description: Calculated attribute indicating if there are any unsent/deferred invites to session participants
+    RcwPagingForwardModel:
+      type: object
+      required:
+      - pageToken
+      - perPage
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: Number of items per page
+          example: 100
+        pageToken:
+          type: string
+          description: Current page token
+        nextPageToken:
+          type: string
+          description: Next page token (absent for the last page of the result set)
+        previousPageToken:
+          type: string
+          description: 'Previous page token (absent for the first page of the result set)
+
+            May be omitted if the result set does not support backward navigation.
+
+            '
+    RcwUserModel:
+      type: object
+      required:
+      - userId
+      - accountId
+      properties:
+        userId:
+          type: string
+          maxLength: 256
+          description: User ID
+        accountId:
+          type: string
+          maxLength: 256
+          description: Account ID
+    RcwResourceBaseModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwImmutableResourceIdModel'
+      - type: object
+        required:
+        - creationTime
+        - lastModifiedTime
+        properties:
+          creationTime:
+            type: string
+            description: Object creation time
+            format: date-time
+            readOnly: true
+          lastModifiedTime:
+            type: string
+            description: Object last modification time
+            format: date-time
+            readOnly: true
+    WebinarCreationRequest:
+      allOf:
+      - $ref: '#/components/schemas/WebinarBaseModel'
+      - required:
+        - title
+      - type: object
+        properties:
+          host:
+            $ref: '#/components/schemas/RcwLinkedUserModel'
+    RcwImmutableResourceIdModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal object ID
+          minLength: 1
+          maxLength: 20
+          example: '78654321'
+          readOnly: true
+    RcwResourceIdModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal object ID
+          minLength: 1
+          maxLength: 20
+          example: '78654321'
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    WebinarBaseModel:
+      allOf:
+      - $ref: '#/components/schemas/WebinarInfoModel'
+      - type: object
+        properties:
+          settings:
+            $ref: '#/components/schemas/WcsWebinarSettingsModel'
+    WcsHostModel:
+      type: object
+      required:
+      - entitled
+      properties:
+        entitled:
+          type: boolean
+          description: Describes host's license, 'true' - license is active
+      allOf:
+      - $ref: '#/components/schemas/RcwUserModel'
+      - $ref: '#/components/schemas/RcwLinkedUserModel'
+    WebinarInfoModel:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Webinar title
+          minLength: 1
+          maxLength: 512
+          x-sensitive-data: masked
+          example: All-Hands Webinar
+        description:
+          type: string
+          description: User-friendly description of the Webinar
+          minLength: 0
+          maxLength: 4096
+          x-sensitive-data: masked
+          example: Quarterly All-hands event to present recent news about our company to employees
+    RcwLinkedUserModel:
+      type: object
+      description: The internal IDs of RC-authenticated users.
+      properties:
+        linkedUser:
+          $ref: '#/components/schemas/RcwDomainUserModel'
+    RcwPagingModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwPagingForwardModel'
+      - type: object
+        properties:
+          previousPageToken:
+            type: string
+            description: Previous page token (absent for the first page of the result set)
+    SessionGlobalListEntry:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - type: object
+        required:
+        - webinar
+        properties:
+          webinar:
+            $ref: '#/components/schemas/WcsWebinarRefModel'
+      - $ref: '#/components/schemas/WcsSessionWithLocaleCodeModel'
+  parameters:
+    HostUserId:
+      name: hostUserId
+      in: query
+      description: Identifier of the user who hosts a webinar (if omitted, webinars hosted by all company users will be returned)
+      required: false
+      explode: false
+      schema:
+        type: array
+        maxItems: 10
+        minItems: 0
+        items:
+          type: string
+          minLength: 1
+          maxLength: 20
+      example:
+      - '77777777'
+    PerPage:
+      name: perPage
+      in: query
+      description: 'The number of items per page. If provided value in the request
+
+        is greater than a maximum, the maximum value is applied
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 100
+      example: 100
+    RcwSessionId:
+      name: sessionId
+      in: path
+      description: Identifier of the Session.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 20
+      example: '353535353'
+    WcsEndTimeFrom:
+      name: endTimeFrom
+      in: query
+      description: The beginning of the time window by 'endTime' (it is calculated as scheduledStartTime+scheduledDuration)
+      required: true
+      explode: false
+      schema:
+        type: string
+        format: date-time
+    RcwWebinarId:
+      name: webinarId
+      in: path
+      description: Identifier of the Webinar.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 20
+      example: '98989898'
+    PageToken:
+      name: pageToken
+      in: query
+      description: 'The token indicating the particular page of the result set to be retrieved.
+
+        If omitted the first page will be returned.
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: string
+    WcsCreationTimeFrom:
+      name: creationTimeFrom
+      in: query
+      description: The beginning of the time window by 'creationTime' .
+      required: true
+      explode: false
+      schema:
+        type: string
+        format: date-time
+  responses:
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
+
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption

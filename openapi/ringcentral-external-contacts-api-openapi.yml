@@ -1,0 +1,1401 @@
+openapi: 3.0.3
+info:
+  title: RingCentral Adaptive Cards External Contacts API
+  description: RingCentral API specification
+  version: 1.0.58-20240529-47eda8bd
+  contact:
+    name: RingCentral Developers Support
+    url: https://developers.ringcentral.com/support
+  termsOfService: https://www.ringcentral.com/legal/apilitos.html
+  license:
+    name: RingCentral API License Agreement
+    url: https://www.ringcentral.com/legal/apilitos.html
+servers:
+- url: https://platform.ringcentral.com
+  description: Production API entry point
+- url: https://media.ringcentral.com
+  description: Production Media entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox API entry point
+- url: https://platform.devtest.ringcentral.com
+  description: Developer sandbox Media entry point
+security:
+- OAuth2: []
+tags:
+- name: External Contacts
+paths:
+  /restapi/v1.0/account/{accountId}/address-book-bulk-upload:
+    post:
+      tags:
+      - External Contacts
+      summary: Upload Multiple User Contacts
+      description: 'Uploads multiple contacts for multiple extensions at once.
+
+        Maximum 500 extensions can be uploaded per request. Max amount
+
+        of contacts that can be uploaded per extension is 10,000.
+
+        Each contact uploaded for a certain extension is not visible
+
+        to other extensions.
+
+        '
+      operationId: addressBookBulkUpload
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressBookBulkUploadRequest'
+        required: true
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressBookBulkUploadResponse'
+      x-feature: EditPersonalContacts
+      x-request-max-body-size: 20m
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: Contacts
+      x-user-permission: EditPersonalContacts
+  /restapi/v1.0/account/{accountId}/address-book-bulk-upload/tasks/{taskId}:
+    get:
+      tags:
+      - External Contacts
+      summary: Get Contacts Upload Task
+      description: 'Returns the status of a task on adding multiple contacts to multiple extensions.
+
+        '
+      operationId: getAddressBookBulkUploadTask
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - name: taskId
+        in: path
+        description: Internal identifier of a task
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Contacts upload task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressBookBulkUploadResponse'
+      x-feature: EditPersonalContacts
+      x-availability: Limited
+      x-throttling-group: Light
+      x-app-permission: Contacts
+      x-user-permission: EditPersonalContacts
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/favorite:
+    get:
+      tags:
+      - External Contacts
+      summary: List Favorite Contacts
+      description: 'Returns the list of favorite contacts of the current extension.
+
+        Favorite contacts include both company contacts (extensions) and personal
+
+        contacts (address book records).
+
+        '
+      operationId: listFavoriteContacts
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      responses:
+        '200':
+          description: Favorite Contact List
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoriteContactList'
+      x-feature: ReadPersonalContacts
+      x-availability: High
+      x-throttling-group: Light
+      x-user-permission: ReadPersonalContacts
+      x-app-permission: ReadContacts
+      x-notifications:
+      - $ref: '#/components/schemas/ExtensionFavoritesEvent'
+    put:
+      tags:
+      - External Contacts
+      summary: Update Favorite Contact List
+      description: 'Updates the list of favorite contacts of the current extension.
+
+        Favorite contacts include both company contacts (extensions) and personal
+
+        contacts (address book records).**Please note**: Currently personal address
+
+        book size is limited to 10 000 contacts.
+
+        '
+      operationId: updateFavoriteContactList
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FavoriteCollection'
+        required: true
+      responses:
+        '200':
+          description: Favorite contacts list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoriteContactList'
+      x-feature: EditPersonalContacts
+      x-availability: Limited
+      x-throttling-group: Medium
+      x-app-permission: Contacts
+      x-user-permission: EditPersonalContacts
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/address-book/contact:
+    get:
+      tags:
+      - External Contacts
+      summary: List Contacts
+      description: 'Returns the user personal contacts.
+
+        '
+      operationId: listContacts
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - name: startsWith
+        in: query
+        description: 'If specified, only contacts which ''First name'' or ''Last name'' start
+
+          with the mentioned substring will be returned. Case-insensitive
+
+          '
+        schema:
+          type: string
+      - name: sortBy
+        in: query
+        description: Sorts results by the specified property
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - FirstName
+            - LastName
+            - Company
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PerPage'
+      - name: phoneNumber
+        in: query
+        description: Phone number in e.164 format
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        '200':
+          description: Contact list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactList'
+      x-feature: ReadPersonalContacts
+      x-availability: High
+      x-throttling-group: Heavy
+      x-app-permission: ReadContacts
+      x-user-permission: ReadPersonalContacts
+    post:
+      tags:
+      - External Contacts
+      summary: Create User Contact
+      description: 'Creates the user personal contact.
+
+        '
+      operationId: createContact
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - name: dialingPlan
+        in: query
+        description: 'Country code value complying with the [ISO 3166-1 alpha-2](https://ru.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+
+          format. The default value is home country of the current extension
+
+          '
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalContactRequest'
+        required: true
+      responses:
+        '200':
+          description: Created contact information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalContactResource'
+        '400':
+          description: 'Contact cannot be created: max contacts count reached ($limit)'
+      x-feature: EditPersonalContacts
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: Contacts
+      x-user-permission: EditPersonalContacts
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/address-book/contact/{contactId}:
+    get:
+      tags:
+      - External Contacts
+      summary: Get User Contact(s)
+      description: "Returns the user personal contact(s). \n[Batch request syntax](https://developers.ringcentral.com/api-reference/Batch-Requests) is supported.\n"
+      operationId: readContact
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/ContactIds'
+      responses:
+        '200':
+          description: User personal contact(s) information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalContactResource'
+      x-feature: ReadPersonalContacts
+      x-availability: High
+      x-throttling-group: Heavy
+      x-app-permission: ReadContacts
+      x-user-permission: ReadPersonalContacts
+    put:
+      tags:
+      - External Contacts
+      summary: Update User Contact(s)
+      description: "Updates the user personal contact(s) (full resource update). \n[Batch request syntax](https://developers.ringcentral.com/api-reference/Batch-Requests) is supported.\n"
+      operationId: updateContact
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/ContactIds'
+      - name: dialingPlan
+        in: query
+        description: "Country code value complying with the [ISO 3166-1 alpha-2](https://ru.wikipedia.org/wiki/ISO_3166-1_alpha-2) format. \nThe default value is home country of the current extension\n"
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalContactRequest'
+        required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalContactResource'
+      x-feature: EditPersonalContacts
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: Contacts
+      x-user-permission: EditPersonalContacts
+    patch:
+      tags:
+      - External Contacts
+      summary: Update Contact Attributes
+      description: 'Updates particular values of a personal contact attributes specified in request (partial resource update). Omitted attributes will remain unchanged.
+
+        If any attribute is passed in request body with the null value, then this attribute value will be removed.
+
+        '
+      operationId: patchContact
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/ContactId'
+      - name: dialingPlan
+        in: query
+        description: 'Country code value complying with the [ISO 3166-1 alpha-2](https://ru.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+
+          format. The default value is home country of the current extension
+
+          '
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalContactRequest'
+        required: true
+      responses:
+        '200':
+          description: Edited personal contact information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalContactResource'
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: Contacts
+      x-user-permission: EditPersonalContacts
+    delete:
+      tags:
+      - External Contacts
+      summary: Delete User Contact(s)
+      description: "Deletes the user personal contact(s). \n[Batch request syntax](https://developers.ringcentral.com/api-reference/Batch-Requests) is supported.\n"
+      operationId: deleteContact
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - $ref: '#/components/parameters/ContactIds'
+      responses:
+        '204':
+          description: No Content
+      x-feature: EditPersonalContacts
+      x-availability: Limited
+      x-throttling-group: Heavy
+      x-app-permission: Contacts
+      x-user-permission: EditPersonalContacts
+  /restapi/v1.0/account/{accountId}/extension/{extensionId}/address-book-sync:
+    get:
+      tags:
+      - External Contacts
+      summary: Address Book Synchronization
+      description: 'Synchronizes user contacts.
+
+        '
+      operationId: syncAddressBook
+      parameters:
+      - $ref: '#/components/parameters/AccountId'
+      - $ref: '#/components/parameters/ExtensionId'
+      - name: syncType
+        in: query
+        description: Type of synchronization
+        schema:
+          type: string
+          enum:
+          - FSync
+          - ISync
+      - name: syncToken
+        in: query
+        description: 'Value of syncToken property of the last sync request response
+
+          '
+        schema:
+          type: string
+      - name: perPage
+        in: query
+        description: 'Number of records per page to be returned. Max number of
+
+          records is 250, which is also the default.
+
+          For ''FSync'' - if the number of records exceeds the parameter value
+
+          (either specified or default), all of the pages can be retrieved
+
+          in several requests. For ''ISync'' - if the number of records exceeds
+
+          page size, then the number of incoming changes to this
+
+          number is limited
+
+          '
+        schema:
+          type: integer
+          format: int32
+      - name: pageId
+        in: query
+        description: 'Internal identifier of a page. It can be obtained from the ''nextPageId''
+
+          parameter passed in response body
+
+          '
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Synchronized user contacts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressBookSync'
+      x-feature: ReadPersonalContacts
+      x-availability: High
+      x-throttling-group: Heavy
+      x-app-permission: ReadContacts
+      x-user-permission: ReadPersonalContacts
+components:
+  schemas:
+    AddressBookBulkContactResource:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email of a contact
+          example: charlie.williams@example.com
+        notes:
+          type: string
+          description: Notes for a contact
+          example: '#1 Customer'
+        company:
+          type: string
+          description: Company name of a contact
+          example: Example, Inc.
+        firstName:
+          type: string
+          description: First name of a contact
+          example: Charlie
+        lastName:
+          type: string
+          description: Last name of a contact
+          example: Williams
+        jobTitle:
+          type: string
+          description: Job title of a contact
+          example: CEO
+        birthday:
+          type: string
+          description: Date of birth of a contact
+          format: date-time
+        webPage:
+          type: string
+          description: Link to a contact home page
+          example: http://www.example.com
+        middleName:
+          type: string
+          description: Middle name of a contact
+          example: J
+        nickName:
+          type: string
+          description: Nick name of a contact
+          example: The Boss
+        email2:
+          type: string
+          format: email
+          description: Second email of a contact
+          example: charlie-example@gmail.com
+        email3:
+          type: string
+          format: email
+          description: Third email of the contact
+          example: theboss-example@hotmail.com
+        homePhone:
+          type: string
+          description: Home phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        homePhone2:
+          type: string
+          description: Second home phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessPhone:
+          type: string
+          description: Business phone of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessPhone2:
+          type: string
+          description: Second business phone of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        mobilePhone:
+          type: string
+          description: Mobile phone of the contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessFax:
+          type: string
+          description: Business fax number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        companyPhone:
+          type: string
+          description: Company number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        assistantPhone:
+          type: string
+          description: Phone number of a contact assistant in e.164 (with "+") format
+          example: '+15551234567'
+        carPhone:
+          type: string
+          description: Car phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        otherPhone:
+          type: string
+          description: Other phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        otherFax:
+          type: string
+          description: Other fax number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        callbackPhone:
+          type: string
+          description: Callback phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessAddress:
+          $ref: '#/components/schemas/AddressBookBulkContactAddressInfo'
+        homeAddress:
+          $ref: '#/components/schemas/AddressBookBulkContactAddressInfo'
+        otherAddress:
+          $ref: '#/components/schemas/AddressBookBulkContactAddressInfo'
+    FavoriteCollection:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteContactResource'
+    ExtensionFavoritesEventBody:
+      type: object
+      properties:
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
+      description: Notification payload body
+    PersonalContactResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a contact
+          example: https://platform.ringcentral.com/restapi/v1.0/account/230919004/extension/230919004/address-book/contact/623045004
+        availability:
+          type: string
+          description: 'This property has a special meaning only on Address Book Sync
+
+            (e.g. a contact can be `Deleted`). For simple contact list reading it
+
+            has always the default value - `Alive`
+
+            '
+          enum:
+          - Alive
+          - Deleted
+          - Purged
+        email:
+          type: string
+          format: email
+          description: Email of a contact
+          example: charlie.williams@example.com
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of availability contact
+          example: 623045004
+        notes:
+          type: string
+          description: Notes for a contact
+          example: '#1 Customer'
+        company:
+          type: string
+          description: Company name of a contact
+          example: Example, Inc.
+        firstName:
+          type: string
+          description: First name of a contact
+          example: Charlie
+        lastName:
+          type: string
+          description: Last name of a contact
+          example: Williams
+        jobTitle:
+          type: string
+          description: Job title of a contact
+          example: CEO
+        birthday:
+          type: string
+          description: Date of birth of a contact
+          format: date-time
+        webPage:
+          type: string
+          format: uri
+          description: The contact home page URL
+          example: http://www.example.com
+        middleName:
+          type: string
+          description: Middle name of a contact
+          example: J
+        nickName:
+          type: string
+          description: Nick name of a contact
+          example: The Boss
+        email2:
+          type: string
+          format: email
+          description: Second email of a contact
+          example: charlie-example@gmail.com
+        email3:
+          type: string
+          format: email
+          description: Third email of a contact
+          example: theboss-example@hotmail.com
+        homePhone:
+          type: string
+          description: Home phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        homePhone2:
+          type: string
+          description: Second home phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessPhone:
+          type: string
+          description: Business phone of the contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessPhone2:
+          type: string
+          description: Second business phone of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        mobilePhone:
+          type: string
+          description: Mobile phone of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessFax:
+          type: string
+          description: Business fax number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        companyPhone:
+          type: string
+          description: Company number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        assistantPhone:
+          type: string
+          description: Phone number of a contact assistant in e.164 (with "+") format
+          example: '+15551234567'
+        carPhone:
+          type: string
+          description: Car phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        otherPhone:
+          type: string
+          description: Other phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        otherFax:
+          type: string
+          description: Other fax number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        callbackPhone:
+          type: string
+          description: Callback phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessAddress:
+          $ref: '#/components/schemas/ContactAddressInfo'
+        homeAddress:
+          $ref: '#/components/schemas/ContactAddressInfo'
+        otherAddress:
+          $ref: '#/components/schemas/ContactAddressInfo'
+        ringtoneIndex:
+          type: string
+          description: Contact ringtone. Max number of symbols is 64
+    AddressBookSync:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonalContactResource'
+        syncInfo:
+          $ref: '#/components/schemas/SyncInfo'
+        nextPageId:
+          type: integer
+          format: int64
+        nextPageUri:
+          type: string
+          format: uri
+    UserContactsNavigationInfoUri:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+      description: Canonical URI for a corresponding page of a list
+    FavoriteContactList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteContactResource'
+    PersonalContactRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: First name of a contact
+          example: Charlie
+        lastName:
+          type: string
+          description: Last name of a contact
+          example: Williams
+        middleName:
+          type: string
+          description: Middle name of a contact
+          example: J
+        nickName:
+          type: string
+          description: Nick name of a contact
+          example: The Boss
+        company:
+          type: string
+          description: Company name of a contact
+          example: Example, Inc.
+        jobTitle:
+          type: string
+          description: Job title of a contact
+          example: CEO
+        email:
+          type: string
+          format: email
+          description: Email of a contact
+          example: charlie.williams@example.com
+        email2:
+          type: string
+          format: email
+          description: Second email of a contact
+          example: charlie-example@gmail.com
+        email3:
+          type: string
+          format: email
+          description: Third email of a contact
+          example: theboss-example@hotmail.com
+        birthday:
+          type: string
+          description: Date of birth of a contact
+          format: date-time
+        webPage:
+          type: string
+          format: uri
+          description: Contact home page URL
+          example: http://www.example.com
+        notes:
+          type: string
+          description: Notes for a contact
+          example: '#1 Customer'
+        homePhone:
+          type: string
+          description: Home phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        homePhone2:
+          type: string
+          description: Second home phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessPhone:
+          type: string
+          description: Business phone of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessPhone2:
+          type: string
+          description: Second business phone of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        mobilePhone:
+          type: string
+          description: Mobile phone of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessFax:
+          type: string
+          description: Business fax number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        companyPhone:
+          type: string
+          description: Company number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        assistantPhone:
+          type: string
+          description: Phone number of a contact assistant in e.164 (with "+") format
+          example: '+15551234567'
+        carPhone:
+          type: string
+          description: Car phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        otherPhone:
+          type: string
+          description: Other phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        otherFax:
+          type: string
+          description: Other fax number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        callbackPhone:
+          type: string
+          description: Callback phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        homeAddress:
+          $ref: '#/components/schemas/ContactAddressInfo'
+        businessAddress:
+          $ref: '#/components/schemas/ContactAddressInfo'
+        otherAddress:
+          $ref: '#/components/schemas/ContactAddressInfo'
+        ringtoneIndex:
+          type: string
+          description: Contact ringtone. Max number of symbols is 64
+    ContactList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the list of user personal contacts
+        records:
+          type: array
+          description: 'List of personal contacts from the extension address book
+
+            '
+          items:
+            $ref: '#/components/schemas/PersonalContactResource'
+        navigation:
+          $ref: '#/components/schemas/UserContactsNavigationInfo'
+        paging:
+          $ref: '#/components/schemas/UserContactsPagingInfo'
+        groups:
+          $ref: '#/components/schemas/UserContactsGroupsInfo'
+    AddressBookBulkUploadResource:
+      required:
+      - extensionId
+      - contacts
+      type: object
+      properties:
+        extensionId:
+          type: string
+        contacts:
+          type: array
+          minItems: 1
+          maxItems: 10000
+          items:
+            $ref: '#/components/schemas/AddressBookBulkContactResource'
+    ContactAddressInfo:
+      type: object
+      properties:
+        street:
+          type: string
+          description: Street address
+          example: 20 Davis Dr.
+        city:
+          type: string
+          description: City name
+          example: Belmont
+        country:
+          type: string
+          description: Country name
+        state:
+          type: string
+          description: State/province name
+          example: CA
+        zip:
+          type: string
+          description: Zip/Postal code
+          example: '94002'
+    AddressBookBulkUploadTaskResult:
+      type: object
+      properties:
+        affectedItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddressBookBulkUploadResource'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorEntity'
+    AddressBookBulkUploadResponse:
+      description: 'Information on a task for adding multiple contacts to multiple extensions
+
+        '
+      required:
+      - id
+      - uri
+      - creationTime
+      - lastModifiedTime
+      - status
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a task
+        uri:
+          type: string
+          format: uri
+          description: Link for the task status retrieval
+        status:
+          type: string
+          description: Task status
+          enum:
+          - Accepted
+          - InProgress
+          - Completed
+          - Failed
+        creationTime:
+          type: string
+          format: date-time
+          description: Date/time of a task creation
+        lastModifiedTime:
+          type: string
+          format: date-time
+          description: Date/time of a task latest update
+        results:
+          $ref: '#/components/schemas/AddressBookBulkUploadTaskResult'
+    ExtensionFavoritesEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        event:
+          type: string
+          description: Event filter URI
+        timestamp:
+          format: date-time
+          type: string
+          description: 'Date/time of sending a notification in
+
+            [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+            format including timezone, for example *2016-03-10T18:07:52.534Z*
+
+            '
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        body:
+          $ref: '#/components/schemas/ExtensionFavoritesEventBody'
+    UserContactsGroupsInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the list of address book groups
+      description: Information on address book groups
+    FavoriteContactResource:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        extensionId:
+          type: string
+        accountId:
+          type: string
+        contactId:
+          type: string
+    AddressBookBulkContactAddressInfo:
+      type: object
+      properties:
+        country:
+          type: string
+          description: 'Country name of the extension user company. Not returned for Address
+
+            Book
+
+            '
+        state:
+          type: string
+          description: State/province name of the extension user company
+        city:
+          type: string
+          description: City name of the extension user company
+        street:
+          type: string
+          description: Street address of the extension user company
+        zip:
+          type: string
+          description: Zip code of the extension user company
+    SyncInfo:
+      type: object
+      properties:
+        syncType:
+          type: string
+          enum:
+          - FSync
+          - ISync
+        syncToken:
+          type: string
+        syncTime:
+          type: string
+          format: date-time
+        olderRecordsExist:
+          type: boolean
+          default: false
+    UserContactsPagingInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: 'Current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if the result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          format: int32
+        perPage:
+          type: integer
+          description: 'Current page size, describes how many items each page contains.
+
+            Default value is 100. Maximum value is 1000. If perPage value in the request
+
+            is greater than 1000, the maximum value (1000) is applied
+
+            '
+          format: int32
+        pageStart:
+          type: integer
+          description: 'Zero-based number of the first element on the current page.
+
+            Omitted if a page is omitted or the result is empty
+
+            '
+          format: int32
+        pageEnd:
+          type: integer
+          description: 'Zero-based index of the last element on the current page.
+
+            Omitted if a page is omitted or the result is empty
+
+            '
+          format: int32
+        totalPages:
+          type: integer
+          description: 'Total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          format: int32
+        totalElements:
+          type: integer
+          description: 'Total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          format: int32
+      description: Information on paging
+    UserContactsNavigationInfo:
+      type: object
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
+        nextPage:
+          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
+        previousPage:
+          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
+        lastPage:
+          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
+      description: Information on navigation
+    AddressBookBulkUploadRequest:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/AddressBookBulkUploadResource'
+    ErrorEntity:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        parameterName:
+          type: string
+          description: Name of invalid parameter
+        parameterValue:
+          type: string
+          description: Value of invalid parameter
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: The result set page number (1-indexed) to return
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 1
+      example: 1
+    ContactIds:
+      name: contactId
+      in: path
+      description: The list of contact identifiers (comma-separated)
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: array
+        minItems: 1
+        items:
+          type: integer
+          format: int64
+    PerPage:
+      name: perPage
+      in: query
+      description: 'The number of items per page. If provided value in the request
+
+        is greater than a maximum, the maximum value is applied
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 100
+      example: 100
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ContactId:
+      name: contactId
+      in: path
+      description: 'Internal identifier of a contact record in the RingCentral database
+
+        '
+      required: true
+      schema:
+        type: integer
+        format: int64
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://platform.ringcentral.com/restapi/oauth/authorize
+          tokenUrl: https://platform.ringcentral.com/restapi/oauth/token
+          refreshUrl: https://platform.ringcentral.com/restapi/oauth/token
+          scopes: {}
+x-tagGroups:
+- name: Voice
+  popular: true
+  tags:
+  - Business Hours
+  - Call Blocking
+  - Call Control
+  - Call Forwarding
+  - Call Handling Rules
+  - Interaction Rules
+  - State-based Rules
+  - Call Flip
+  - Call Log
+  - Call History
+  - Call Log Export
+  - Call Monitoring Groups
+  - Call Queues
+  - Call Recordings
+  - Call Recording Settings
+  - Device SIP Registration
+  - Greetings
+  - IVR
+  - RingOut
+  - Verification Calls
+- name: SMS and Fax
+  popular: true
+  tags:
+  - Fax
+  - Message Exports
+  - Message Store
+  - Pager Messages
+  - SMS
+  - High Volume SMS
+  - SMS Log Export
+  - SMS Templates
+  - Voicemail Broadcasting
+- name: Social Messaging
+  popular: true
+  tags:
+  - Identities
+  - Contents
+- name: Team Messaging
+  popular: true
+  tags:
+  - Adaptive Cards
+  - Bots
+  - Calendar Events
+  - Chats
+  - Conversations
+  - Compliance Exports
+  - Contacts
+  - Incoming Webhooks
+  - Notes
+  - Posts
+  - Profile
+  - Tasks
+  - Teams
+- name: Video
+  popular: true
+  tags:
+  - Bridge Management
+  - Delegation Management
+  - Meetings History
+  - Meeting Recordings
+  - RCM Meetings (Legacy)
+  - RCM Webinars (Legacy)
+- name: Webinar
+  popular: true
+  tags:
+  - Webinars and Sessions
+  - Invitees
+  - Historical Webinars
+  - Historical Recordings
+  - Registration Management
+  - Registrants
+  - Webinar Analytics
+  - Webinar Subscriptions
+- name: Analytics
+  popular: true
+  tags:
+  - Business Analytics
+- name: Artificial Intelligence
+  popular: true
+  tags:
+  - Insights
+  - Audio
+  - Text
+  - Status
+- name: Authentication
+  tags:
+  - OAuth 2.0 / OpenID Connect
+  - Interoperability
+- name: Account
+  tags:
+  - Company
+  - Custom Fields
+  - Features
+  - Licenses
+  - Tax Locations
+  - Cost Centers
+  - Multi-Site
+  - Phone Numbers
+  - Presence
+  - Regional Settings
+  - User Permissions
+  - User Settings
+  - Audit Trail
+  - Calling Rates
+  - Appearance Customization
+  - Account Integrations
+- name: Provisioning
+  tags:
+  - Automatic Location Updates
+  - Devices
+  - Extensions
+  - Paging Only Groups
+  - Park Locations
+  - Phone Lines
+  - SCIM
+  - Shared Lines
+  - Group Call Pickup
+  - Delegated Lines Groups
+  - Directed Call Pickup
+  - IVR Apps
+  - Video Configuration
+  - Number Porting
+  - SMB
+  - Account Federation
+  - Integrations
+  - Enterprise Portal API
+  - Push to Talk Provisioning
+  - BYOC
+- name: Address Book
+  tags:
+  - External Contacts
+  - Internal Contacts
+  - Hybrid Directory Contacts
+  - Overlay Contacts
+  - External Shared Directory
+- name: Roles and Permissions
+  tags:
+  - Permissions
+  - Role Management
+  - Site Administration
+  - User Groups
+- name: Events & Notifications
+  tags:
+  - Subscriptions
+- name: User Integrations
+  tags:
+  - Token Management
+  - Calendar Management
+  - Calendar Event Management
+  - Calendar Presence Link
+  - Cloud Personal Contacts
+  - Cloud Shared Contacts
+  - Cloud Directory
+  - Deprecated Calendar API
+- name: Rooms
+  tags:
+  - Rooms Client API
+  - Rooms Management API
+- name: App Management
+  tags:
+  - App Gallery
+  - App Rating Review
+  - Bot Provisioning
+- name: Workflow Builder
+  tags:
+  - Flows
+  - Flow Editor
+  - Flow Log
+  - Flow Templates
+- name: Utilities
+  tags:
+  - API Info
+  - Application Settings
+  - Async Tasks
+  - User Notifications
+  - Client Versions
+  - End-to-End Encryption
