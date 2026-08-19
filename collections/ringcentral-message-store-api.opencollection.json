@@ -1,0 +1,479 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Message Store API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Message Store",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Message Attachment Content",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/message-store/:messageId/content/:attachmentId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "messageId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "attachmentId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "contentDisposition",
+                "value": "",
+                "type": "query",
+                "description": "Whether the content is expected to be displayed in the browser, or downloaded and saved locally"
+              },
+              {
+                "name": "contentDispositionFilename",
+                "value": "",
+                "type": "query",
+                "description": "The default filename of the file to be downloaded"
+              }
+            ]
+          },
+          "docs": "Returns media content of a message attachment.\nThe content is typically an audio file (`audio/mpeg` or `audio/wav`) for voicemails,\nTIFF or PDF for faxes and image/audio/video for MMS.\n\n**This API must be called via media API entry point, e.g. https://media.ringcentral.com**\n"
+        },
+        {
+          "info": {
+            "name": "Get Message Store Configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/message-store-configuration",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ]
+          },
+          "docs": "Returns message store settings."
+        },
+        {
+          "info": {
+            "name": "Update Message Store Configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/message-store-configuration",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates message store settings."
+        },
+        {
+          "info": {
+            "name": "Sync Messages",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/message-sync",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "conversationId",
+                "value": "",
+                "type": "query",
+                "description": "Conversation identifier for the resulting messages. Meaningful\nfor SMS and Pager messages only.\n"
+              },
+              {
+                "name": "dateFrom",
+                "value": "",
+                "type": "query",
+                "description": "The start date/time for resulting messages in ISO 8601 format\nincluding timezone, for example 2016-03-10T18:07:52.534Z. The default value\nis dateTo minus 24 hours\n"
+              },
+              {
+                "name": "dateTo",
+                "value": "",
+                "type": "query",
+                "description": "The end date/time for resulting messages in ISO 8601 format including\ntimezone, for example 2016-03-10T18:07:52.534Z. The default value is current\ntime\n"
+              },
+              {
+                "name": "direction",
+                "value": "",
+                "type": "query",
+                "description": "Direction for the resulting messages. If not specified, both\ninbound and outbound messages are returned. Multiple values are accepted\n"
+              },
+              {
+                "name": "distinctConversations",
+                "value": "",
+                "type": "query",
+                "description": "If `true`, then the latest messages per every conversation ID\nare returned\n"
+              },
+              {
+                "name": "messageType",
+                "value": "",
+                "type": "query",
+                "description": "Type for the resulting messages. If not specified, all types\nof messages are returned. Multiple values are accepted\n"
+              },
+              {
+                "name": "recordCount",
+                "value": "",
+                "type": "query",
+                "description": "Limits the number of records to be returned (works in combination\nwith dateFrom and dateTo if specified)\n"
+              },
+              {
+                "name": "syncToken",
+                "value": "",
+                "type": "query",
+                "description": "A `syncToken` value from the previous sync response (for `ISync` mode only, mandatory)"
+              },
+              {
+                "name": "syncType",
+                "value": "",
+                "type": "query",
+                "description": "Type of message synchronization"
+              },
+              {
+                "name": "voicemailOwner",
+                "value": "",
+                "type": "query",
+                "description": "This query parameter will filter voicemail messages based on its owner.\nThis parameter should be controlled by the 'SharedVoicemail' feature.\nIf the feature is disabled this filter shouldn't be applied.\n"
+              }
+            ]
+          },
+          "docs": "Synchronizes messages."
+        },
+        {
+          "info": {
+            "name": "List Messages",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/message-store",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "availability",
+                "value": "",
+                "type": "query",
+                "description": "Specifies the availability status for resulting messages.\nMultiple values are accepted\n"
+              },
+              {
+                "name": "conversationId",
+                "value": "",
+                "type": "query",
+                "description": "Specifies a conversation identifier for the resulting messages"
+              },
+              {
+                "name": "dateFrom",
+                "value": "",
+                "type": "query",
+                "description": "Start date/time for resulting messages in ISO 8601 format\nincluding timezone, for example 2016-03-10T18:07:52.534Z. The default value\nis dateTo minus 24 hours\n"
+              },
+              {
+                "name": "dateTo",
+                "value": "",
+                "type": "query",
+                "description": "End date/time for resulting messages in ISO 8601 format including\ntimezone, for example 2016-03-10T18:07:52.534Z. The default value is current\ntime\n"
+              },
+              {
+                "name": "direction",
+                "value": "",
+                "type": "query",
+                "description": "Direction for resulting messages. If not specified, both\ninbound and outbound messages are returned. Multiple values are accepted\n"
+              },
+              {
+                "name": "distinctConversations",
+                "value": "",
+                "type": "query",
+                "description": "If `true`, then the latest messages per every conversation ID\nare returned\n"
+              },
+              {
+                "name": "messageType",
+                "value": "",
+                "type": "query",
+                "description": "Type of resulting messages. If not specified, all messages\nwithout message type filtering are returned. Multiple values are accepted\n"
+              },
+              {
+                "name": "readStatus",
+                "value": "",
+                "type": "query",
+                "description": "Read status for resulting messages. Multiple values are\naccepted\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values\nare accepted\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items)"
+              },
+              {
+                "name": "phoneNumber",
+                "value": "",
+                "type": "query",
+                "description": "Phone number. If specified, messages are returned for this\nparticular phone number only\n"
+              }
+            ]
+          },
+          "docs": "Returns a list of messages from an extension mailbox."
+        },
+        {
+          "info": {
+            "name": "Delete Conversation",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/message-store",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "conversationId",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "dateTo",
+                "value": "",
+                "type": "query",
+                "description": "Messages received earlier then the date specified will be deleted.\nThe default value is current date/time\n"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Type of messages to be deleted"
+              }
+            ]
+          },
+          "docs": "Deletes conversation(s) by conversation ID(s). Batch request is\nsupported, max number of IDs passed as query/path parameters is 50. Alternative\nsyntax is supported - user conversations can be deleted by passing multiple\nIDs in request body as an array of string, max number of conversation IDs\npassed in request body is 100. In this case asterisk is used in the path instead\nof IDs\n"
+        },
+        {
+          "info": {
+            "name": "Get Message(s)",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/message-store/:messageId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "messageId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a message (or multiple messages in case of bulk operation)"
+              }
+            ]
+          },
+          "docs": "Returns an individual message record or multiple records by the given message ID(s).\nThe length of inbound messages is unlimited. Bulk syntax is supported.\n"
+        },
+        {
+          "info": {
+            "name": "Update Message(s)",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/message-store/:messageId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "messageId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a message (or multiple messages in case of bulk operation)"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates message(s) by their ID(s). Currently, only the `readStatus`\ncan be updated using this method.\n\nBulk syntax is supported, max number of IDs passed as query/path\nparameters is 50. Alternative bulk syntax is also supported - user messages can be updated\nby passing multiple IDs in request body as an array of string, max number\nof IDs passed in the body is 1000. In this case asterisk is used in the\npath instead of IDs.\n"
+        },
+        {
+          "info": {
+            "name": "Patch Message(s)",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/message-store/:messageId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "messageId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a message (or multiple messages in case of bulk operation)"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Patches message(s) by ID(s). Currently, only updating the `readStatus` and\nrestoring deleted messages are supported through this method.\n\nFor changing status of a message send `readStatus` set to either 'Read' or 'Unread' in request.\nIt is possible to restore a message and its attachments (if message status is 'Deleted') by sending\n`availability` attribute set to 'Alive' in request body. If a message is already in 'Purged' state\nthen its attachments cannot be restored and the message itself is a"
+        },
+        {
+          "info": {
+            "name": "Delete Message",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/message-store/:messageId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "messageId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a message (or multiple messages in case of bulk operation)"
+              },
+              {
+                "name": "purge",
+                "value": "",
+                "type": "query",
+                "description": "If the value is `true`, then the message is purged immediately\nwith all the attachments\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Deletes message(s) by the given message ID(s). The first call of\nthis method transfers the message to the 'Delete' status. The second call\ntransfers the deleted message to the 'Purged' status. If it is required to\nmake the message 'Purged' immediately (from the first call), then set the\nquery parameter purge to `true`.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

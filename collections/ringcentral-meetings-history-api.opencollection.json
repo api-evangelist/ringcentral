@@ -1,0 +1,98 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Meetings History API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Meetings History",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Video Meetings",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/rcvideo/v1/history/meetings",
+            "params": [
+              {
+                "name": "text",
+                "value": "",
+                "type": "query",
+                "description": "Search text"
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "Token to get the next page"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Number of records returned"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Specify what kind of meeting should be returned. Possible values: All, My, Deleted, Shared\nRequest type meaning in meeting search:\n`None` (not passed) - take meetings only where requested acc/ext is participant OR host OR deputy OR watcher.\n`ALL`- access rights of meeting is equal to Alive AND requested acc/ext  is in watchers list OR host OR deputy\n`My`- access rights of meeting is equal to Alive AND requested acc/ext is host OR deputy\n`Shared` - access rights of meeting is equal to Alive AND requested acc/ext is in watcher list AND not HOST\n`Deleted` - access rights of meeting is equal to Delete and requested acc/ext is host OR deputy\n"
+              },
+              {
+                "name": "startTime",
+                "value": "",
+                "type": "query",
+                "description": "Unix timestamp in milliseconds (inclusive) indicates the start time of meetings which should be included in response"
+              },
+              {
+                "name": "endTime",
+                "value": "",
+                "type": "query",
+                "description": "Unix timestamp in milliseconds (inclusive) indicates the end time of meetings which should be included in response"
+              }
+            ]
+          },
+          "docs": "Returns the list of user meetings."
+        },
+        {
+          "info": {
+            "name": "Get Video Meeting",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/rcvideo/v1/history/meetings/:meetingId",
+            "params": [
+              {
+                "name": "meetingId",
+                "value": "",
+                "type": "path",
+                "description": "Meeting id"
+              }
+            ]
+          },
+          "docs": "Returns a user meeting by ID."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

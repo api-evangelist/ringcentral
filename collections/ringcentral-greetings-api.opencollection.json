@@ -1,0 +1,292 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Greetings API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Greetings",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Account Greeting Media Content",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/greeting/:greetingId/content",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "greetingId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a greeting"
+              },
+              {
+                "name": "contentDisposition",
+                "value": "",
+                "type": "query",
+                "description": "Whether the content is expected to be displayed in the browser, or downloaded and saved locally"
+              },
+              {
+                "name": "contentDispositionFilename",
+                "value": "",
+                "type": "query",
+                "description": "The default filename of the file to be downloaded"
+              }
+            ]
+          },
+          "docs": "Returns account-level greeting media contents.\n\n**This API must be called via media API entry point, e.g. https://media.ringcentral.com**\n"
+        },
+        {
+          "info": {
+            "name": "Get Extension Greeting Media Content",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/greeting/:greetingId/content",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "greetingId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a greeting"
+              },
+              {
+                "name": "contentDisposition",
+                "value": "",
+                "type": "query",
+                "description": "Whether the content is expected to be displayed in the browser, or downloaded and saved locally"
+              },
+              {
+                "name": "contentDispositionFilename",
+                "value": "",
+                "type": "query",
+                "description": "The default filename of the file to be downloaded"
+              }
+            ]
+          },
+          "docs": "Returns extension-level greeting media contents.\n\n**This API must be called via media API entry point, e.g. https://media.ringcentral.com**\n"
+        },
+        {
+          "info": {
+            "name": "Create Company Greeting",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/greeting",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "type",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "answeringRuleId",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "languageId",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "binary",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "docs": "Creates a custom company greeting."
+        },
+        {
+          "info": {
+            "name": "Create Custom User Greeting",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/greeting",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "apply",
+                "value": "",
+                "type": "query",
+                "description": "Specifies whether to apply an answering rule or not. If set to\ntrue then `answeringRule` parameter is mandatory. If set to false, then\nthe answering rule is not applied even if specified\n"
+              }
+            ],
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "type",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "answeringRuleId",
+                  "type": "text",
+                  "value": ""
+                },
+                {
+                  "name": "binary",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "docs": "Creates custom greeting for an extension user."
+        },
+        {
+          "info": {
+            "name": "Get Custom Greeting",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/greeting/:greetingId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "greetingId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a greeting"
+              }
+            ]
+          },
+          "docs": "Returns a custom user greeting by ID."
+        },
+        {
+          "info": {
+            "name": "List Standard Greetings",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/dictionary/greeting",
+            "params": [
+              {
+                "name": "page",
+                "value": "1",
+                "type": "query",
+                "description": "The result set page number (1-indexed) to return"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Type of greeting, specifying the case when the greeting is played"
+              },
+              {
+                "name": "usageType",
+                "value": "",
+                "type": "query",
+                "description": "Usage type of greeting, specifying if the greeting is applied for user extension or department (call queue) extension"
+              }
+            ]
+          },
+          "docs": "Returns the list of predefined standard greetings. Custom greetings\nrecorded by user are not returned in response to this request. See Get Extension\nCustom Greetings.\n"
+        },
+        {
+          "info": {
+            "name": "Get Standard Greeting",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/dictionary/greeting/:greetingId",
+            "params": [
+              {
+                "name": "greetingId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a greeting"
+              }
+            ]
+          },
+          "docs": "Returns a standard greeting by ID."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

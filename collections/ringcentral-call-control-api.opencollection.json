@@ -1,0 +1,810 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Call Control API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Call Control",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Make CallOut",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/call-out",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new outbound call out session. Currently this method is supported for Softphone/Hardphone only, since device IDs for WebRTC/Mobile apps cannot be obtained."
+        },
+        {
+          "info": {
+            "name": "Start Conference Call Session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/conference",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ]
+          },
+          "docs": "Initiates a conference call session."
+        },
+        {
+          "info": {
+            "name": "Get Call Session Status",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "timestamp",
+                "value": "",
+                "type": "query",
+                "description": "The date and time of a call session latest change"
+              },
+              {
+                "name": "timeout",
+                "value": "",
+                "type": "query",
+                "description": "The time frame of awaiting for a status change before sending\nthe resulting one in response\n"
+              }
+            ]
+          },
+          "docs": "Returns the status of a call session by ID."
+        },
+        {
+          "info": {
+            "name": "Drop Call Session",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              }
+            ]
+          },
+          "docs": "Drops a call session."
+        },
+        {
+          "info": {
+            "name": "Bring-In Call Party",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/bring-in",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Adds a new party to the call session by bringing in an established\nSIP call connection. The maximum number of parties to bring in is 10; only\n1 call party can be added per request. Currently, the method is supported for\nsessions of the `Conference` origin only.\n"
+        },
+        {
+          "info": {
+            "name": "Get Call Party Status",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ]
+          },
+          "docs": "Returns a call party status by ID."
+        },
+        {
+          "info": {
+            "name": "Update Call Party",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Modifies a call party by ID. There is a known limitation for Mute scenario - mute via REST API doesn't work with mute placed via RingCentral apps or HardPhone. It means that if you muted participant via Call Control API and RingCentral Desktop app you need to unmute both endpoints to bring the media back."
+        },
+        {
+          "info": {
+            "name": "Delete Call Party",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ]
+          },
+          "docs": "Deletes a party from a call session by ID. A party can be deleted only if supervised or parked. It is possible to delete only one conference participant per request."
+        },
+        {
+          "info": {
+            "name": "Un-hold Call Party",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/unhold",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ]
+          },
+          "docs": "Brings a party back into a call and stops to play Hold Music. There is a known limitation for Hold API - hold via REST API doesn't work with hold placed via RingCentral apps or HardPhone. It means that if you muted participant via Call Control API and RingCentral Desktop app, then you need to un-hold both endpoints to remove Hold Music and bring media back."
+        },
+        {
+          "info": {
+            "name": "Call Park",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/park",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ]
+          },
+          "docs": "Parks a call to a virtual location from where it can further be retrieved by any user from any phone of the system. The call session and call party identifiers should be specified in path. Currently, the users can park only their own incoming calls. Up to 50 calls can be parked simultaneously. Park location starts with asterisk (*) and ranges 801-899."
+        },
+        {
+          "info": {
+            "name": "Call Flip on Party",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/flip",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Performs call flip procedure by holding opposite party and calling to the specified target"
+        },
+        {
+          "info": {
+            "name": "Reply with Text",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/reply",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Replies with text/pattern without picking up a call."
+        },
+        {
+          "info": {
+            "name": "Bridge Call Party",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/bridge",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Allows the user to connect multiple call session participants over a conference call bridge.\nThe current active call session ID and party ID of the user within this session should be specified\nin path; the bridged call session ID and party ID of the user within that session should be specified\nin request body. Thus, the user connects participants of two sessions into the one conference call\nusing his/her own party IDs from both sessions.\"\n"
+        },
+        {
+          "info": {
+            "name": "Ignore Call in Queue",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/ignore",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Ignores a call to a call queue agent in `Setup` or `Proceeding` state."
+        },
+        {
+          "info": {
+            "name": "Supervise Call Party",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/supervise",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Allows to monitor a call party in 'Listen' mode. Input parameters\nare extension number of a monitored user and internal identifier of a supervisor's\ndevice. Call session and party identifiers should be specified in path. Please\nnote that for this method dual channel audio flow is supported, which means\nthat you need to make one more request for monitoring the second participant\nof a call. And as a result of each monitoring request the client receives\nSIP invite with the following header `p-rc-ap"
+        },
+        {
+          "info": {
+            "name": "Reject Call Party",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/reject",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ]
+          },
+          "docs": "Rejects an inbound call in a \"Setup\" or \"Proceeding\" state"
+        },
+        {
+          "info": {
+            "name": "Create Recording",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/recordings",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ]
+          },
+          "docs": "Starts a new call recording for the party"
+        },
+        {
+          "info": {
+            "name": "Pause/Resume Recording",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/recordings/:recordingId",
+            "params": [
+              {
+                "name": "brandId",
+                "value": "",
+                "type": "query",
+                "description": "Identifies a brand of a logged-in user or a brand of a sign-up session"
+              },
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              },
+              {
+                "name": "recordingId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a recording"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Pause/resume recording"
+        },
+        {
+          "info": {
+            "name": "Answer Call Party",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/answer",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Answers a call on a certain device by passing the corresponding device ID in request body. Supported for call forwarding, call transfer, call flip and call queues."
+        },
+        {
+          "info": {
+            "name": "Transfer Call Party",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/transfer",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Transfers an answered call to the specified call party. Applicable for a call session in \"Answered\" or \"Hold\" state."
+        },
+        {
+          "info": {
+            "name": "Hold Call Party",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/hold",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Puts the party to stand-alone mode and starts to play Hold Music according to configuration & state to peers. There is a known limitation for Hold API - hold via REST API doesn't work with hold placed via RingCentral apps or HardPhone. It means that if you muted participant via Call Control API and RingCentral Desktop app, then you need to un-hold both endpoints to remove Hold Music and bring media back."
+        },
+        {
+          "info": {
+            "name": "Pickup Call",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/pickup",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Picks up a call parked to the specified park location."
+        },
+        {
+          "info": {
+            "name": "Forward Call Party",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/parties/:partyId/forward",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "partyId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call party"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Forwards a non-answered incoming call to the specified call party. Applicable for a call session in \"Setup\" or \"Proceeding\" state."
+        },
+        {
+          "info": {
+            "name": "Supervise Call Session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/telephony/sessions/:telephonySessionId/supervise",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call session"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Allows monitoring a call session in 'Listen' mode. Input parameters should contain internal identifiers of a monitored user and a supervisor's device. Call session should be specified in path. Please note that this method supports single channel audio flow, which means that audio of both call participants is mixed and delivered to the supervisor in single audio channel. Currently this method is supported for Softphone/Hardphone only, since device IDs for WebRTC/Mobile apps cannot be obtained."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,218 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Extensions API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Extensions",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Update Multiple Extensions",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension-bulk-update",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates multiple extensions at once. Maximum 500 extensions can be updated per request.\n"
+        },
+        {
+          "info": {
+            "name": "Get Extension Update Task Status",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension-bulk-update/tasks/:taskId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "taskId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a task\n"
+              }
+            ]
+          },
+          "docs": "Returns a status of a task to update multiple extensions.\n"
+        },
+        {
+          "info": {
+            "name": "List User Templates",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/templates",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Type of template"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values\nare allowed. Default value is '1'\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items). If not specified, the value is '100' by default"
+              }
+            ]
+          },
+          "docs": "Returns the list of user templates for the current account.\n"
+        },
+        {
+          "info": {
+            "name": "Get User Template",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/templates/:templateId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "templateId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a template"
+              }
+            ]
+          },
+          "docs": "Returns the user template by ID.\n"
+        },
+        {
+          "info": {
+            "name": "List Extensions",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionNumber",
+                "value": "",
+                "type": "query",
+                "description": "Extension short number to filter records"
+              },
+              {
+                "name": "email",
+                "value": "alice.smith@example.com&email=bob.johnson@example.com",
+                "type": "query",
+                "description": "Extension email address. Multiple values are accepted\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values\nare allowed\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items)"
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Extension current state. Multiple values are supported. If 'Unassigned'\nis specified, then extensions without `extensionNumber` attribute are returned.\nIf not specified, then all extensions are returned\n"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Extension type. Multiple values are supported. Please note\nthat legacy 'Department' extension type corresponds to 'Call Queue'\nextensions in modern RingCentral product terminology\n"
+              }
+            ]
+          },
+          "docs": "Returns the list of extensions created for a particular account.\nAll types of extensions are included in this list.\n"
+        },
+        {
+          "info": {
+            "name": "Create Extension",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates an extension.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

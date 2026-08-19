@@ -1,0 +1,329 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Call Queues API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Call Queues",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Call Queues",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/call-queues",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values are accepted"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items)"
+              },
+              {
+                "name": "memberExtensionId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of an extension that is a member of every group within the result"
+              }
+            ]
+          },
+          "docs": "Returns a call queue list."
+        },
+        {
+          "info": {
+            "name": "Get Call Queue",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/call-queues/:groupId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "groupId",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Returns basic information on a call queue group extension."
+        },
+        {
+          "info": {
+            "name": "Update Call Queue",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/call-queues/:groupId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "groupId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call queue group"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates information on a call queue group extension.\n"
+        },
+        {
+          "info": {
+            "name": "Assign Multiple Call Queue Members",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/call-queues/:groupId/bulk-assign",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "groupId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call queue group"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Assigns multiple call queue members to call queue group.\n"
+        },
+        {
+          "info": {
+            "name": "List Call Queue Members",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/call-queues/:groupId/members",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "groupId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call queue group"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values\nare allowed\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items)"
+              }
+            ]
+          },
+          "docs": "Returns a list of call queue group members.\n"
+        },
+        {
+          "info": {
+            "name": "Get Department Member List",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/department/:departmentId/members",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "departmentId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a Department extension (same as extensionId\nbut only the ID of a department extension is valid). Please note that\nlegacy 'Department' extension type corresponds to 'Call Queue' extensions\nin modern RingCentral product terminology\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values\nare accepted\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items)"
+              }
+            ]
+          },
+          "docs": "Viewing user account information (including name, business name, address\nand phone number/account number). Please note, that this method is\ndeprecated and legacy 'Department' entity corresponds to 'Call Queue'\nin modern RingCentral product terminology. In order to retrieve call\nqueue members please use the following method\n`GET/restapi/v1.0/account/{accountId}/call-queues/{groupId}/members`.\n"
+        },
+        {
+          "info": {
+            "name": "Assign Multiple Department Members",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/department/bulk-assign",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Adds and/or removes multiple call queue members. Please note,\nthat this method is deprecated and legacy 'Department' entity\ncorresponds to 'Call Queue' in modern RingCentral product terminology.\nIn order to assign multiple call queue members please use the following\nmethod `POST/restapi/v1.0/account/{accountId}/call-queues/{groupId}/bulk-assign`.\n"
+        },
+        {
+          "info": {
+            "name": "Update User Call Queues",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/call-queues",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a list of call queues where the user is an agent. This\nis a full update request, which means that if any call queue where the user is\nan agent is not mentioned in request, then the user is automatically removed\nfrom this queue.\n"
+        },
+        {
+          "info": {
+            "name": "Get Call Queue Overflow Settings",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:callQueueId/overflow-settings",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "callQueueId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call queue"
+              }
+            ]
+          },
+          "docs": "Returns overflow settings for a call queue specified in path."
+        },
+        {
+          "info": {
+            "name": "Update Call Queue Overflow Settings",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:callQueueId/overflow-settings",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "callQueueId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call queue"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates overflow settings for a call queue specified in path."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

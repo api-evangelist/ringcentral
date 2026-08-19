@@ -1,0 +1,72 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Registration Management API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Registration Management",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Registration Session Info",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/registration/v1/sessions/:sessionId",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              }
+            ]
+          },
+          "docs": "Returns a registration Session information by ID.\n\nA caller must be an authorized user: either a host of the webinar or an IT Admin:\na user from host's account with \"WebinarSettings\" permission.\n"
+        },
+        {
+          "info": {
+            "name": "Update Registration Session",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/webinar/registration/v1/sessions/:sessionId",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a Session by ID.\n\nThis is a PARTIAL update (PATCH), client may call it providing only attributes which are to be changed.\n\nA caller must be an authorized user: either a host of the webinar or an IT Admin:\na user from host's account with \"WebinarSettings\" permission.\n\nIf a session record with given ID doesn't exist on Registration Service side the API should return HTTP 404.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

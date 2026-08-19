@@ -1,0 +1,539 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards User Settings API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "User Settings",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Scaled Profile Image",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/profile-image/:scaleSize",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "scaleSize",
+                "value": "",
+                "type": "path",
+                "description": "Dimensions of a profile image which will be returned in response.\n"
+              },
+              {
+                "name": "contentDisposition",
+                "value": "",
+                "type": "query",
+                "description": "Whether the content is expected to be displayed in the browser, or downloaded and saved locally"
+              },
+              {
+                "name": "contentDispositionFilename",
+                "value": "",
+                "type": "query",
+                "description": "The default filename of the file to be downloaded"
+              }
+            ]
+          },
+          "docs": "Returns the scaled profile image of an extension.\n\n**This API must be called via media API entry point, e.g. https://media.ringcentral.com**\n"
+        },
+        {
+          "info": {
+            "name": "Create Multiple User Extensions",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/batch-provisioning/users",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates multiple user extensions with BYOD (customer provided) devices.\nIf \"extensionNumber\" is not specified, the next available extension number will be assigned.\n"
+        },
+        {
+          "info": {
+            "name": "Delete User Extensions",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/extensions",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Deletes user extension(s) and either keeps or destroys the assets - numbers and devices.\nMultiple extensions can be deleted with a single API call.\n\n**Please note:** This API cannot be tested on Sandbox.\n"
+        },
+        {
+          "info": {
+            "name": "Get Extension",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ]
+          },
+          "docs": "Returns basic information about a particular extension of an account.\n"
+        },
+        {
+          "info": {
+            "name": "Update Extension",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the user settings."
+        },
+        {
+          "info": {
+            "name": "Delete Extension",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "savePhoneLines",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "savePhoneNumbers",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Deletes extension(s) by ID(s). When an extension is being deleted\nthe default API behavior is as follows:\n\n- user's direct numbers are preserved by becoming additional company numbers;\n- user's digital lines (both device & associated phone number) are deleted.\n\nYou can change this behavior using the filters:\n\n- create unassigned extensions for each digital line of the deleted extension by\n  setting the query parameter `savePhoneLines` to `true` in request path;\n- remove direct numbers of the del"
+        },
+        {
+          "info": {
+            "name": "List Extension Grants",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/grant",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionType",
+                "value": "",
+                "type": "query",
+                "description": "Type of extension to be returned. Multiple values are supported.\nPlease note that legacy 'Department' extension type corresponds\nto 'Call Queue' extensions in modern RingCentral product terminology\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values\nare allowed\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items)"
+              }
+            ]
+          },
+          "docs": "Returns the list of extensions with information on grants\ngiven to the current extension regarding them. Currently the list of grants\ninclude: picking up a call, monitoring, calling or receiving a call on behalf\nof somebody, call delegation and calling paging groups.\n"
+        },
+        {
+          "info": {
+            "name": "Get User Conferencing Settings",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/conferencing",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "countryId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a country. If not specified, the response\nis returned for the brand country\n"
+              }
+            ]
+          },
+          "docs": "Returns information on Free Conference Calling (FCC) feature\nfor a given extension.\n"
+        },
+        {
+          "info": {
+            "name": "Update User Conferencing Settings",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/conferencing",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the default conferencing number for the current extension.\nThe number can be selected from conferencing numbers of the current extension.\nUpdates the setting, allowing participants join the conference before host.\n"
+        },
+        {
+          "info": {
+            "name": "Get User Profile Image",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/profile-image",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ]
+          },
+          "docs": "Returns a profile image of an extension.\n"
+        },
+        {
+          "info": {
+            "name": "Upload User Profile Image",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/profile-image",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "image",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "docs": "Uploads the extension profile image.\n"
+        },
+        {
+          "info": {
+            "name": "Update User Profile Image",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/profile-image",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "image",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "docs": "Updates the extension profile image.\n"
+        },
+        {
+          "info": {
+            "name": "Delete User Profile Image",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/profile-image",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ]
+          },
+          "docs": "Deletes the user profile image.\n"
+        },
+        {
+          "info": {
+            "name": "Get Extension Caller ID",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/caller-id",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ]
+          },
+          "docs": "Returns information on an outbound caller ID of an extension.\n"
+        },
+        {
+          "info": {
+            "name": "Update Extension Caller ID",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/caller-id",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates outbound caller ID information of an extension.\n"
+        },
+        {
+          "info": {
+            "name": "Get Notification Settings",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/notification-settings",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ]
+          },
+          "docs": "Returns notification settings for the current extension.\n\nKnowledge Article: [User Settings - Set Up Message Notifications](https://success.ringcentral.com/articles/RC_Knowledge_Article/9740)\n"
+        },
+        {
+          "info": {
+            "name": "Update Notification Settings",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/notification-settings",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates notification settings for the current extension.\nKnowledge Article: [User Settings - Set Up Message Notifications](https://success.ringcentral.com/articles/RC_Knowledge_Article/9740)\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

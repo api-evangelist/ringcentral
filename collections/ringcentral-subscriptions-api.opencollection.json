@@ -1,0 +1,136 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Subscriptions API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Subscriptions",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Subscriptions",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/subscription"
+          },
+          "docs": "Returns a list of subscriptions created by the user for the current authorized client application.\n"
+        },
+        {
+          "info": {
+            "name": "Create Subscription",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/subscription",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "This API allows client applications to register a new subscription so that it\ncan be notified of events when they occur on the platform.\n\nA subscription relates to a set of events that a client application would like\nto be informed of and the delivery channel by which they will be notified of\nthose events. How subscriptions are established depends upon the notification\nchannel the client application would like to use to receive the event\nnotification. For example, to create a webhook a developer"
+        },
+        {
+          "info": {
+            "name": "Get Subscription",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/subscription/:subscriptionId",
+            "params": [
+              {
+                "name": "subscriptionId",
+                "value": "12345678",
+                "type": "path",
+                "description": "Internal identifier of a subscription"
+              }
+            ]
+          },
+          "docs": "Returns the existing subscription by ID."
+        },
+        {
+          "info": {
+            "name": "Update Subscription",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/subscription/:subscriptionId",
+            "params": [
+              {
+                "name": "subscriptionId",
+                "value": "12345678",
+                "type": "path",
+                "description": "Internal identifier of a subscription"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the existing subscription. The client application can extend or narrow\nthe list of events for which it receives notifications within the current subscription.\nIf event filters are specified, calling this method modifies them for the\nexisting subscription. The method also allows one to set an expiration time for the\nsubscription itself.\n\nIf parameters other than `events` and `expiresIn` are specified in the request they will be ignored.\nIf the request body is empty then the specified subs"
+        },
+        {
+          "info": {
+            "name": "Cancel Subscription",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/subscription/:subscriptionId",
+            "params": [
+              {
+                "name": "subscriptionId",
+                "value": "12345678",
+                "type": "path",
+                "description": "Internal identifier of a subscription"
+              }
+            ]
+          },
+          "docs": "Cancels the existing subscription."
+        },
+        {
+          "info": {
+            "name": "Renew Subscription",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/subscription/:subscriptionId/renew",
+            "params": [
+              {
+                "name": "subscriptionId",
+                "value": "12345678",
+                "type": "path",
+                "description": "Internal identifier of a subscription"
+              }
+            ]
+          },
+          "docs": "Renews the existing subscription (this request comes with empty body).\n\nPlease note that `WebSocket` subscriptions are renewed automatically while websocket session is alive.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

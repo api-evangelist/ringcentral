@@ -1,0 +1,136 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Contents API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Contents",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List All Contents",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/cx/social-messaging/v1/contents",
+            "params": [
+              {
+                "name": "intervention",
+                "value": "7f946431b6eebffafae642cc,re946431b6eebffafae642cc",
+                "type": "query",
+                "description": "Filter based on the specified intervention identifiers."
+              },
+              {
+                "name": "identity",
+                "value": "7f946431b6eebffafae642cc,re946431b6eebffafae642cc",
+                "type": "query",
+                "description": "Filter based on the specified identity identifiers."
+              },
+              {
+                "name": "identityGroup",
+                "value": "7f946431b6eebffafae642cc,re946431b6eebffafae642cc",
+                "type": "query",
+                "description": "Filter based on the specified identity group identifiers."
+              },
+              {
+                "name": "source",
+                "value": "7f946431b6eebffafae642cc",
+                "type": "query",
+                "description": "Filter based on the specified channel identifiers."
+              },
+              {
+                "name": "thread",
+                "value": "7f946431b6eebffafae642cc",
+                "type": "query",
+                "description": "Filter based on the specified thread identifiers."
+              },
+              {
+                "name": "text",
+                "value": "",
+                "type": "query",
+                "description": "Filter based on the specified text(s). Provided multiple times, the values are ANDed."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter for specified status."
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Order results by specified field."
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "The token indicating the particular page of the result set to be retrieved.\nIf omitted the first page will be returned.\n"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              }
+            ]
+          },
+          "docs": "List contents by creation date. The default creation order is descending.\n\nThe account context of this request is determined by the RC Account Id associated with the access token provided\nin the Authorization header.\n\nThe query parameters provided shall be considered an AND operation to filter the list.\n\nA query parameter not specified or a query parameter provided with no value is treated as not required for\nfiltering the list.\n"
+        },
+        {
+          "info": {
+            "name": "Create Content",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/cx/social-messaging/v1/contents",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates new content for use in discussions.\n\nThis request is used to reply to already-posted content or to initiate a discussion. If authorized, the\nauthenticated user will be used as the content author.\n\nContent will be created and pushed asynchronously to the channel. When the content is successfully pushed to\nthe channel, the Content.Exported event will be reported.\n\nThe account context of this request is determined by the RC Account Id associated with the access token provided\nin the Authori"
+        },
+        {
+          "info": {
+            "name": "Get Content",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/cx/social-messaging/v1/contents/:contentId",
+            "params": [
+              {
+                "name": "contentId",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Retrieves the content from the given id.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

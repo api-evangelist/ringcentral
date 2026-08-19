@@ -1,0 +1,384 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Phone Numbers API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Phone Numbers",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Account Phone Numbers",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/phone-numbers",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "page",
+                "value": "1",
+                "type": "query",
+                "description": "The result set page number (1-indexed) to return"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Types of phone numbers to be returned"
+              },
+              {
+                "name": "usageType",
+                "value": "",
+                "type": "query",
+                "description": "Usage type(s) of phone numbers to be returned"
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Status of the phone number(s) to be returned"
+              },
+              {
+                "name": "tollType",
+                "value": "",
+                "type": "query",
+                "description": "Toll type of phone numbers to return"
+              },
+              {
+                "name": "extensionStatus",
+                "value": "",
+                "type": "query",
+                "description": "Statuses of extensions to return phone numbers for"
+              },
+              {
+                "name": "byocNumber",
+                "value": "",
+                "type": "query",
+                "description": "The parameter reflects whether this number is BYOC or not"
+              },
+              {
+                "name": "phoneNumber",
+                "value": "",
+                "type": "query",
+                "description": "Phone number in e.164 format to be searched for.\nParameter value can include wildcards (e.g. \"+165012345**\")\nor be an exact number \"+16501234500\" - single number is searched in that case.\nMake sure you escape the \"+\" in the URL as \"%2B\"\n"
+              }
+            ]
+          },
+          "docs": "Returns the list of phone numbers assigned to RingCentral customer\naccount. Both company-level and extension-level numbers are returned.\nConferencing numbers, hot desk and ELIN numbers are not returned.\n"
+        },
+        {
+          "info": {
+            "name": "Delete Numbers from Inventory",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/phone-numbers",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "This method can only delete numbers that meet one of the following requirements:\n  - numbers that have `\"usageType\": \"Inventory\"`\n  - `\"Forwarded\"` numbers\n  - `\"Forwarded Company\"` numbers\n\nIn other words, this method will not delete numbers which are in use on the account - extension direct numbers,\nmain number, etc. It is possible to indicate phone numbers to be deleted using their IDs or exact string values\nin e.164 format. However, the same lookup method (by ID or by value) must be used for"
+        },
+        {
+          "info": {
+            "name": "Assign Phone Number",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/phone-numbers/:phoneNumberId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "phoneNumberId",
+                "value": "1162820004",
+                "type": "path",
+                "description": "Internal identifier of a phone number"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Assigns or reassigns a phone number as a company or extension number.\n\nAssign scenarios supported:\n- from Inventory to a company number;\n- from Inventory to an extension number.\n\nReassign scenarios supported:\n- from an extension to another extension;\n- from an extension to a company number;\n- from a company number to an extension.\n"
+        },
+        {
+          "info": {
+            "name": "Replace Phone Number",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/phone-numbers/:phoneNumberId/replace",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "phoneNumberId",
+                "value": "1162820004",
+                "type": "path",
+                "description": "Internal identifier of a phone number"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Replaces (swaps) phone numbers from Inventory with the main, company, direct or company fax numbers.\nThis method is used to replace temporary numbers when the porting process is complete.\n"
+        },
+        {
+          "info": {
+            "name": "Add Numbers to Inventory",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/phone-numbers/bulk-add",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Adds phone numbers to the account Inventory as unassigned. Currently, we support the following values: `Inventory`,\n`InventoryPartnerBusinessMobileNumber` and `PartnerBusinessMobileNumber`. Later we may support some other values like `ForwardedNumber`, etc.\n"
+        },
+        {
+          "info": {
+            "name": "Get Add Numbers Task Results",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/phone-numbers/bulk-add/:taskId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "taskId",
+                "value": "",
+                "type": "path",
+                "description": "Identifier of a task returned by asynchronous bulk add operation"
+              }
+            ]
+          },
+          "docs": "Returns the result of asynchronous operation which adds phone numbers to the account Inventory.\n"
+        },
+        {
+          "info": {
+            "name": "Get Extension Phone Number List",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/phone-number",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Status of a phone number"
+              },
+              {
+                "name": "usageType",
+                "value": "",
+                "type": "query",
+                "description": "Usage type of phone number"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values\nare allowed. Default value is '1'\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items). If not specified, the value is '100' by default"
+              }
+            ]
+          },
+          "docs": "Returns the list of phone numbers that are used by a particular extension,\ncan be filtered by the phone number type. The returned list contains all\nnumbers which are directly mapped to the given extension. Plus the features\nand company-level numbers that may be used when performing different operations\non behalf of this extension.\n"
+        },
+        {
+          "info": {
+            "name": "List Company Phone Numbers",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/phone-number",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values\nare accepted\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items)"
+              },
+              {
+                "name": "usageType",
+                "value": "",
+                "type": "query",
+                "description": "Usage type of phone number"
+              },
+              {
+                "name": "paymentType",
+                "value": "",
+                "type": "query",
+                "description": "Payment Type of the number"
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Status of a phone number"
+              }
+            ]
+          },
+          "docs": "Returns the list of phone numbers assigned to RingCentral customer\naccount. Both company-level and extension-level numbers are returned.\n"
+        },
+        {
+          "info": {
+            "name": "Get Phone Number",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/phone-number/:phoneNumberId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "phoneNumberId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a phone number"
+              }
+            ]
+          },
+          "docs": "Returns phone number(s) belonging to a certain account or extension by phoneNumberId(s).\n[Batch request syntax](https://developers.ringcentral.com/api-reference/Batch-Requests) is supported.\n"
+        },
+        {
+          "info": {
+            "name": "Parse Phone Number(s)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/number-parser/parse",
+            "params": [
+              {
+                "name": "homeCountry",
+                "value": "",
+                "type": "query",
+                "description": "ISO 3166 alpha2 code of the home country to be used if it is impossible to determine country from the number itself.\nBy default, this parameter is preset to the current user's home country or brand country if the user is undefined\n"
+              },
+              {
+                "name": "nationalAsPriority",
+                "value": "",
+                "type": "query",
+                "description": "The default value is `false`. If `true`, the numbers that are\ncloser to the home country are given higher priority\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Returns one or more parsed and/or formatted phone numbers that are passed as strings."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,1202 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Automatic Location Updates API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Automatic Location Updates",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Emergency Locations",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-locations",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "siteId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a site for filtering. To indicate company main\nsite `main-site` value should be specified. Supported only if multi-site feature\nis enabled for the account. Multiple values are supported.\n"
+              },
+              {
+                "name": "searchString",
+                "value": "",
+                "type": "query",
+                "description": "Filters entries containing the specified substring in 'address'\nand 'name' fields. The character range is 0-64; not case-sensitive.\nIf empty then the filter is ignored\n"
+              },
+              {
+                "name": "addressStatus",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "usageStatus",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "domesticCountryId",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of fields to order results, prefixed by\nplus sign '+' (ascending order) or minus sign '-' (descending order)\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items). The values\nsupported: `Max` or numeric value. If not specified,\n100 records are returned per one page\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates the page number to retrieve. Only positive number values\nare supported\n"
+              }
+            ]
+          },
+          "docs": "Returns emergency response locations for the current account."
+        },
+        {
+          "info": {
+            "name": "Add Emergency Location",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-locations",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new emergency response location for a company."
+        },
+        {
+          "info": {
+            "name": "Get Emergency Location",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-locations/:locationId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "locationId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of an emergency response location"
+              },
+              {
+                "name": "syncEmergencyAddress",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Returns emergency response location by ID. Available for Admin users only."
+        },
+        {
+          "info": {
+            "name": "Update Emergency Location",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-locations/:locationId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "locationId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of an emergency response location"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the specified emergency response location."
+        },
+        {
+          "info": {
+            "name": "Delete Emergency Location",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-locations/:locationId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "locationId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of an emergency response location"
+              },
+              {
+                "name": "validateOnly",
+                "value": "",
+                "type": "query",
+                "description": "Flag indicating that validation of emergency location(s) is required\nbefore deletion\n"
+              },
+              {
+                "name": "newLocationId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of an emergency response location\nthat should be used instead of a deleted one.\n"
+              }
+            ]
+          },
+          "docs": "Deletes the specified emergency response location."
+        },
+        {
+          "info": {
+            "name": "List User Emergency Locations",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/emergency-locations",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "siteId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a site for filtering. To indicate company main\nsite `main-site` value should be specified. Supported only if multi-site feature\nis enabled for the account. Multiple values are supported.\n"
+              },
+              {
+                "name": "searchString",
+                "value": "",
+                "type": "query",
+                "description": "Filters entries by the specified substring (search by chassis\nID, switch name or address) The characters range is 0-64 (if\nempty the filter is ignored)\n"
+              },
+              {
+                "name": "domesticCountryId",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of fields to order results prefixed by '+'\nsign (ascending order) or '-' sign (descending order). The default\nsorting is by `name`\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items). The values supported:\n`Max` or numeric value. If not specified, 100 records are returned\nper one page\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive\nnumber values are supported\n"
+              },
+              {
+                "name": "visibility",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Returns a list of emergency response locations available for the particular extension."
+        },
+        {
+          "info": {
+            "name": "Create User Emergency Location",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/emergency-locations",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a personal emergency response location for the current user."
+        },
+        {
+          "info": {
+            "name": "Get User Emergency Location",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/emergency-locations/:locationId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "locationId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of an emergency response location"
+              }
+            ]
+          },
+          "docs": "Returns a personal emergency response location for the current user."
+        },
+        {
+          "info": {
+            "name": "Update User Emergency Location",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/emergency-locations/:locationId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "locationId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of an emergency response location"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a personal emergency response location by the current user or admin.\n"
+        },
+        {
+          "info": {
+            "name": "Delete User Emergency Location",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/emergency-locations/:locationId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "locationId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of an emergency response location"
+              },
+              {
+                "name": "validateOnly",
+                "value": "",
+                "type": "query",
+                "description": "Flag indicating that only validation of Emergency Response Locations\nto be deleted is required\n"
+              }
+            ]
+          },
+          "docs": "Deletes a personal emergency response location by ID by\nthe current user or admin. Multiple personal emergency response\nlocations can be deleted by single API call.\n"
+        },
+        {
+          "info": {
+            "name": "Get Emergency Map Configuration Task",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/tasks/:taskId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "taskId",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Returns results of the task created within the frame of Automatic\nLocation Updates feature. Currently four task types are supported: 'Wireless\nPoints Bulk Create', 'Wireless Points Bulk Update', 'Switches Bulk Create',\n'Switches Bulk Update'.\n"
+        },
+        {
+          "info": {
+            "name": "List Users",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/users",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Extension type. Multiple values are supported"
+              },
+              {
+                "name": "searchString",
+                "value": "",
+                "type": "query",
+                "description": "Filters entries containing the specified substring in user name,\nextension or department. The characters range is 0-64; not case-sensitive.\nIf empty then the filter is ignored\n"
+              },
+              {
+                "name": "department",
+                "value": "",
+                "type": "query",
+                "description": "Department name to filter the users. The value range is 0-64;\nnot case-sensitive. If not specified then the parameter is ignored. Multiple\nvalues are supported\n"
+              },
+              {
+                "name": "siteId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a site for filtering. To indicate company main\nsite `main-site` value should be specified. Supported only if multi-site feature\nis enabled for the account. Multiple values are supported.\n"
+              },
+              {
+                "name": "featureEnabled",
+                "value": "",
+                "type": "query",
+                "description": "Filters entries by their status of Automatic Location Updates\nfeature\n"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of fields to order results prefixed by\nplus sign '+' (ascending order) or minus sign '-' (descending order).\nSupported values: 'name', 'modelName', 'siteName', 'featureEnabled'.\nThe default sorting is by `name`\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items). The values supported:\n`Max` or numeric value. If not specified, 100 records are returned per one\npage\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values\nare supported\n"
+              }
+            ]
+          },
+          "docs": "Returns a list of users with their status of Automatic Location\nUpdates feature.\n"
+        },
+        {
+          "info": {
+            "name": "Enable Automatic Location Updates for Users",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/users/bulk-assign",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables or disables Automatic Location Updates feature for multiple\naccount users.\n"
+        },
+        {
+          "info": {
+            "name": "Create Multiple Wireless Points",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/wireless-points-bulk-create",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates multiple wireless points in a corporate map. The maximum\nnumber of wireless points per request is 10 000; limitation for account is\n70 000.\n"
+        },
+        {
+          "info": {
+            "name": "Get Network Map",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/networks",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "siteId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a site for filtering. To indicate company main\nsite `main-site` value should be specified. Supported only if multi-site feature\nis enabled for the account. Multiple values are supported.\n"
+              },
+              {
+                "name": "searchString",
+                "value": "",
+                "type": "query",
+                "description": "Filters entries by the specified substring (search by chassis\nID, switch name or address) The characters range is 0-64 (if empty the filter\nis ignored)\n"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of fields to order results prefixed by '+'\nsign (ascending order) or '-' sign (descending order). The default\nsorting is by `name`\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items). The values supported:\n`Max` or numeric value. If not specified, 100 records are returned per one\npage'\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values\nare supported\n"
+              }
+            ]
+          },
+          "docs": "Returns a corporate network map with emergency addresses assigned\nto the current account.\n"
+        },
+        {
+          "info": {
+            "name": "Create Network",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/networks",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new network in a corporate ethernet map for assignment\nof emergency addresses to network access points.\n"
+        },
+        {
+          "info": {
+            "name": "Get Network",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/networks/:networkId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "networkId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a network"
+              }
+            ]
+          },
+          "docs": "Returns the specified network with emergency addresses assigned\nto the current account.\n"
+        },
+        {
+          "info": {
+            "name": "Update Network",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/networks/:networkId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "networkId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a network"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a network in a corporate ethernet map for assignment of emergency\naddresses to network access points.\n"
+        },
+        {
+          "info": {
+            "name": "Delete Network",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/networks/:networkId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "networkId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a network"
+              }
+            ]
+          },
+          "docs": "Deletes network(s) in a corporate ethernet map for Automatic Location\nUpdates feature.\n"
+        },
+        {
+          "info": {
+            "name": "Validate Multiple Switches",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/switches-bulk-validate",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Validates switches before creation or update. The maximum number\nof switches per request is 10 000.\n"
+        },
+        {
+          "info": {
+            "name": "List Account Switches",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/switches",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "siteId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a site for filtering. To indicate company main\nsite `main-site` value should be specified. Supported only if multi-site feature\nis enabled for the account. Multiple values are supported.\n"
+              },
+              {
+                "name": "searchString",
+                "value": "",
+                "type": "query",
+                "description": "Filters entries by the specified substring (search by chassis\nID, switch name or address) The characters range is 0-64 (if empty the filter\nis ignored)\n"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of fields to order results prefixed by '+'\nsign (ascending order) or '-' sign (descending order). The default\nsorting is by `name`\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items). The values supported:\n`Max` or numeric value. If not specified, 100 records are returned per one\npage'\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values\nare supported\n"
+              }
+            ]
+          },
+          "docs": "Returns a corporate map of configured network switches with the assigned\nemergency addresses for the logged-in account.\n"
+        },
+        {
+          "info": {
+            "name": "Create Switch",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/switches",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new switch in corporate map based on chassis ID and used\nfor Automatic Locations Update feature.\n"
+        },
+        {
+          "info": {
+            "name": "Get Switch",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/switches/:switchId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "switchId",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Returns the specified switch with the assigned emergency address."
+        },
+        {
+          "info": {
+            "name": "Update Switch",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/switches/:switchId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "switchId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates switch. Partial update is not supported, all switch parameters\nshould be specified. If null value is received or parameter is missing, its\nvalue is removed.\n"
+        },
+        {
+          "info": {
+            "name": "Delete Switch",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/switches/:switchId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "switchId",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Deletes wireless switch(es) in a network configuration for Automatic\nLocation Updates feature.\n"
+        },
+        {
+          "info": {
+            "name": "Validate Multiple Wireless Points",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/wireless-points-bulk-validate",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Validates wireless points before creation or update. The maximum\nnumber of wireless points per request is 10 000.\n"
+        },
+        {
+          "info": {
+            "name": "List Wireless Points",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/wireless-points",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "siteId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a site for filtering. To indicate company main\nsite `main-site` value should be specified. Supported only if multi-site feature\nis enabled for the account. Multiple values are supported.\n"
+              },
+              {
+                "name": "searchString",
+                "value": "",
+                "type": "query",
+                "description": "Filters entries by the specified substring (search by chassis\nID, switch name or address) The characters range is 0-64 (if empty the filter\nis ignored)\n"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of fields to order results prefixed by '+'\nsign (ascending order) or '-' sign (descending order).The default sorting\nis by `name`\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items). The values supported:\n`Max` or numeric value. If not specified, 100 records are returned per one\npage\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates the page number to retrieve. Only positive number values\nare supported\n"
+              }
+            ]
+          },
+          "docs": "Returns account wireless points configured and used for Automatic\nLocation Updates feature.\n"
+        },
+        {
+          "info": {
+            "name": "Create Wireless Point",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/wireless-points",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new wireless point in network configuration with the\nemergency address assigned.\n"
+        },
+        {
+          "info": {
+            "name": "Get Wireless Point",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/wireless-points/:pointId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "pointId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a point"
+              }
+            ]
+          },
+          "docs": "Returns the specified wireless access point of a corporate map\nwith the emergency address assigned.\n"
+        },
+        {
+          "info": {
+            "name": "Update Wireless Point",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/wireless-points/:pointId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "pointId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a wireless point"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the specified wireless access point of a corporate map\nby ID.\n"
+        },
+        {
+          "info": {
+            "name": "Delete Wireless Point",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/wireless-points/:pointId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "pointId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a wireless point"
+              }
+            ]
+          },
+          "docs": "Deletes wireless point(s) of a corporate map by ID(s)."
+        },
+        {
+          "info": {
+            "name": "List Devices",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/devices",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "siteId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a site for filtering. To indicate company main\nsite `main-site` value should be specified. Supported only if multi-site feature\nis enabled for the account. Multiple values are supported.\n"
+              },
+              {
+                "name": "featureEnabled",
+                "value": "",
+                "type": "query",
+                "description": "Filters entries by their status of Automatic Location Updates\nfeature\n"
+              },
+              {
+                "name": "modelId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a device model for filtering. Multiple\nvalues are supported\n"
+              },
+              {
+                "name": "compatibleOnly",
+                "value": "",
+                "type": "query",
+                "description": "Filters devices which support HELD protocol"
+              },
+              {
+                "name": "searchString",
+                "value": "",
+                "type": "query",
+                "description": "Filters entries which have device name or model name containing\nthe mentioned substring. The value should be split by spaces; the range\nis 0 - 64 characters, not case-sensitive. If empty the filter is ignored\n"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of fields to order results prefixed by\nplus sign '+' (ascending order) or minus sign '-' (descending order).\nSupported values: 'name', 'modelName', 'siteName', 'featureEnabled'.\nThe default sorting is by `name`\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page size (number of items). The values supported:\n`Max` or numeric value. If not specified, 100 records are returned per one\npage\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates a page number to retrieve. Only positive number values\nare supported\n"
+              }
+            ]
+          },
+          "docs": "Returns a list of common devices with their status of Automatic\nLocation Updates feature.\n"
+        },
+        {
+          "info": {
+            "name": "Enable Automatic Location Updates Feature",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/devices/bulk-assign",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables or disables Automatic Location Updates feature for the\nspecified common phones.\n"
+        },
+        {
+          "info": {
+            "name": "Create Multiple Switches",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/switches-bulk-create",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates multiple switches in corporate map. The maximum number\nof switches per request is 10 000; limitation for account is 10 000.\n"
+        },
+        {
+          "info": {
+            "name": "Update Multiple Wireless Points",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/wireless-points-bulk-update",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates wireless points in corporate map. The maximum number of\nwireless points per request is 10 000; limitation for account is 70 000.\n"
+        },
+        {
+          "info": {
+            "name": "Update Multiple Switches",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/emergency-address-auto-update/switches-bulk-update",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates multiple switches in corporate map. The maximum number\nof switches per request is 10 000; limitation for account is 10 000.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

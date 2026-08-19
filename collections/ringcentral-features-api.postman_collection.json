@@ -1,0 +1,205 @@
+{
+  "item": [
+    {
+      "id": "8515d592-c3de-41c8-9bca-3a3519a35244",
+      "name": "Features",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "c7e3b859-c776-41ad-a25a-9afe67b324f9",
+          "name": "Get User Features",
+          "request": {
+            "name": "Get User Features",
+            "description": {
+              "content": "Returns a list of supported features and the information on their\navailability for the current extension. Particular feature(s) can\nbe checked by providing `featureId` query parameter. Multiple values\nare supported in the format: `?featureId=Feature1&featureId=Feature2`.\nTo get only available features in order to decrease response size,\n`availableOnly=true` query param can be specified. If a feature\nis available for the current user, `\"available\": true` is returned in\nresponse for the record with the corresponding feature ID. Otherwise,\nthe additional attribute `reason` is returned with the appropriate code:\n- `ServicePlanLimitation` -  a feature is not included in account service plan;\n- `AccountLimitation` - a feature is turned off for account;\n- `ExtensionTypeLimitation` - a feature is not applicable for extension type;\n- `ExtensionLimitation` - a feature is not available for extension, e.g., additional license required;\n- `InsufficientPermissions` - required permission is not granted to the current user (not the one, who is specified in the URL, but the one who is calling this API);\n- `ConfigurationLimitation` - a feature is turned off for extension, e.g., by account administrator.\n\nAlso, some features may have additional parameters, e.g. limits, which are returned in `params` attribute as a name-value collection:\n\n    {\n      \"id\": \"HUD\",\n      \"available\": true,\n      \"params\": [\n        {\n          \"name\": \"limitMax\",\n          \"value\": \"100\"\n        }\n      ]\n    }\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "restapi",
+                "v1.0",
+                "account",
+                ":accountId",
+                "extension",
+                ":extensionId",
+                "features"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "availableOnly",
+                  "value": "false",
+                  "description": "Allows to filter features by availability for an extension\n"
+                },
+                {
+                  "disabled": false,
+                  "key": "featureId",
+                  "value": "<string>",
+                  "description": "Internal identifier(s) of the feature(s)"
+                },
+                {
+                  "disabled": false,
+                  "key": "featureId",
+                  "value": "<string>",
+                  "description": "Internal identifier(s) of the feature(s)"
+                }
+              ],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "~",
+                  "key": "accountId",
+                  "description": "(Required) Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "~",
+                  "key": "extensionId",
+                  "description": "(Required) Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "2dea5284-9667-47c3-855c-5a9cc06262fd",
+              "name": "Feature list",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "restapi",
+                    "v1.0",
+                    "account",
+                    ":accountId",
+                    "extension",
+                    ":extensionId",
+                    "features"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "availableOnly",
+                      "value": "false"
+                    },
+                    {
+                      "key": "featureId",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "featureId",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "~",
+                      "key": "accountId",
+                      "description": "(Required) Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "~",
+                      "key": "extensionId",
+                      "description": "(Required) Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: oauth2",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "<token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"records\": [\n    {\n      \"id\": \"string\",\n      \"available\": false,\n      \"params\": [\n        {\n          \"name\": \"string\",\n          \"value\": \"string\"\n        },\n        {\n          \"name\": \"string\",\n          \"value\": \"string\"\n        }\n      ],\n      \"reason\": {\n        \"code\": \"ExtensionTypeLimitation\",\n        \"message\": \"string\",\n        \"permission\": \"string\"\n      }\n    },\n    {\n      \"id\": \"string\",\n      \"available\": true,\n      \"params\": [\n        {\n          \"name\": \"string\",\n          \"value\": \"string\"\n        },\n        {\n          \"name\": \"string\",\n          \"value\": \"string\"\n        }\n      ],\n      \"reason\": {\n        \"code\": \"ExtensionTypeLimitation\",\n        \"message\": \"string\",\n        \"permission\": \"string\"\n      }\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://platform.ringcentral.com",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "redirect_uri",
+        "value": "https://platform.ringcentral.com/restapi/oauth/token"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "https://platform.ringcentral.com/restapi/oauth/token"
+      },
+      {
+        "key": "authUrl",
+        "value": "https://platform.ringcentral.com/restapi/oauth/authorize"
+      },
+      {
+        "key": "grant_type",
+        "value": "authorization_code"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "51b53e7b-544c-4a37-8416-bfdb03ee7414",
+    "name": "RingCentral Adaptive Cards Features API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "RingCentral API specification\n\nContact Support:\n Name: RingCentral Developers Support",
+      "type": "text/plain"
+    }
+  }
+}

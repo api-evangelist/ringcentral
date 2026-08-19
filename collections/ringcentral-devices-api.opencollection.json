@@ -1,0 +1,343 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Devices API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Devices",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Add Phone to Inventory",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/device-inventory",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Adds an existing phone (customer provided device - BYOD) as an unassigned device to the account inventory."
+        },
+        {
+          "info": {
+            "name": "Delete Device from Inventory",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/device-inventory",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Deletes an existing unassigned (without digital line or phone number) device or multiple devices\nfrom the account inventory. It is possible to delete up to 10 devices per request.\n"
+        },
+        {
+          "info": {
+            "name": "Remove phone line",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/devices/:deviceId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "deviceId",
+                "value": "65462346462",
+                "type": "path",
+                "description": "Internal identifier of a source device"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Disassociates a phone line (DL & Device) from an extension:\n\n - if the value of `keepAssetsInInventory` is `true`,\nthe given device is moved to unassigned devices and the number is moved to the number inventory;\n - if the value of `keepAssetsInInventory` is `false`, the given device and number is removed from the account;\n - if the parameter `keepAssetsInInventory` is not set (empty body), default value `true` is set.\n"
+        },
+        {
+          "info": {
+            "name": "Add BYOD Devices",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/devices/bulk-add",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Adds multiple BYOD (customer provided) devices to an account."
+        },
+        {
+          "info": {
+            "name": "Swap Devices",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v2/accounts/:accountId/extensions/:extensionId/devices/:deviceId/replace",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "deviceId",
+                "value": "65462346462",
+                "type": "path",
+                "description": "Internal identifier of a source device that is currently assigned to the given extension"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Replaces the user device with another device, which is assigned to an extension\nor is stored in the inventory of the same account.\nCurrently, the following device types can be swapped - `HardPhone` and `OtherPhone`.\n\nPlease note:\n\n - This method allows replacing a device itself, while a phone number,\n   a digital Line and an emergency address associated with this device remain unchanged\n   and will still work together in a chain with the replacement device.\n - If a target device is from the inve"
+        },
+        {
+          "info": {
+            "name": "Get Device",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/device/:deviceId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "deviceId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a device"
+              },
+              {
+                "name": "syncEmergencyAddress",
+                "value": "",
+                "type": "query",
+                "description": "Specifies if an emergency address should be synchronized or not"
+              }
+            ]
+          },
+          "docs": "Returns account device(s) by their ID(s)."
+        },
+        {
+          "info": {
+            "name": "Update Device",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/device/:deviceId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "deviceId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a device"
+              },
+              {
+                "name": "prestatement",
+                "value": "",
+                "type": "query"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates account device(s) by their ID(s)."
+        },
+        {
+          "info": {
+            "name": "Get Device SIP Info",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/device/:deviceId/sip-info",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "deviceId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a device"
+              }
+            ]
+          },
+          "docs": "Returns device SIP information."
+        },
+        {
+          "info": {
+            "name": "Update Device Emergency Info",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/device/:deviceId/emergency",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "deviceId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a device"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates account device emergency information."
+        },
+        {
+          "info": {
+            "name": "List Extension Devices",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/device",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "page",
+                "value": "1",
+                "type": "query",
+                "description": "The result set page number (1-indexed) to return"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "linePooling",
+                "value": "",
+                "type": "query",
+                "description": "Pooling type of device - Host - a device with standalone paid phone line which can be linked to a soft client instance - Guest - a device with a linked phone line - None - a device without a phone line or with specific line (free, BLA, etc.)"
+              },
+              {
+                "name": "feature",
+                "value": "",
+                "type": "query",
+                "description": "Device feature or multiple features supported"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Device type"
+              },
+              {
+                "name": "lineType",
+                "value": "",
+                "type": "query",
+                "description": "Phone line type"
+              }
+            ]
+          },
+          "docs": "Returns devices of an extension or multiple extensions by their ID(s). Batch request\nis supported.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

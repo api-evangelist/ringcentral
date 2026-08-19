@@ -1,0 +1,455 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Role Management API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Role Management",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Company Assigned Roles",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/assigned-role",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "showHidden",
+                "value": "",
+                "type": "query",
+                "description": "Specifies if hidden roles are shown or not"
+              }
+            ]
+          },
+          "docs": "Returns a list of roles assigned to the current account."
+        },
+        {
+          "info": {
+            "name": "List Company User Roles",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/user-role",
+            "params": [
+              {
+                "name": "custom",
+                "value": "",
+                "type": "query",
+                "description": "Specifies whether to return custom roles or predefined roles only.\nIf not specified, all roles are returned\n"
+              },
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "page",
+                "value": "1",
+                "type": "query",
+                "description": "The result set page number (1-indexed) to return"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              }
+            ]
+          },
+          "docs": "Returns a list of account user roles."
+        },
+        {
+          "info": {
+            "name": "Create Custom Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/user-role",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a custom user role."
+        },
+        {
+          "info": {
+            "name": "Get Default User Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/user-role/default",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ]
+          },
+          "docs": "Returns the default user role of the current account."
+        },
+        {
+          "info": {
+            "name": "Set Default User Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/user-role/default",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the account default user role."
+        },
+        {
+          "info": {
+            "name": "Get User Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/user-role/:roleId",
+            "params": [
+              {
+                "name": "roleId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a role"
+              },
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "advancedPermissions",
+                "value": "",
+                "type": "query",
+                "description": "Specifies whether to return advanced permissions capabilities within `permissionsCapabilities` resource.\nThe default value is false.\n"
+              }
+            ]
+          },
+          "docs": "Returns a user role assigned to the current account."
+        },
+        {
+          "info": {
+            "name": "Update User Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/user-role/:roleId",
+            "params": [
+              {
+                "name": "roleId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a role"
+              },
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a user role assigned to the current account by ID."
+        },
+        {
+          "info": {
+            "name": "Delete Custom Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/user-role/:roleId",
+            "params": [
+              {
+                "name": "roleId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a role"
+              },
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "validateOnly",
+                "value": "",
+                "type": "query",
+                "description": "Specifies that role should be validated prior to deletion, whether\nit can be deleted or not\n"
+              }
+            ]
+          },
+          "docs": "Deletes a custom user role by ID."
+        },
+        {
+          "info": {
+            "name": "Assign Multiple User Roles",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/user-role/:roleId/bulk-assign",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "roleId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a role"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Assigns multiple user roles."
+        },
+        {
+          "info": {
+            "name": "List Assignable Roles",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/assignable-roles",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "page",
+                "value": "1",
+                "type": "query",
+                "description": "The result set page number (1-indexed) to return"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              }
+            ]
+          },
+          "docs": "Returns a list of roles which can be assigned to a given extension."
+        },
+        {
+          "info": {
+            "name": "List User Assigned Roles",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/assigned-role",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "showHidden",
+                "value": "",
+                "type": "query",
+                "description": "Specifies if hidden roles are shown or not"
+              }
+            ]
+          },
+          "docs": "Returns a list of roles assigned to the current extension."
+        },
+        {
+          "info": {
+            "name": "Update User Assigned Roles",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/assigned-role",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a list of roles assigned to the current user."
+        },
+        {
+          "info": {
+            "name": "Assign Default Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/assigned-role/default",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ]
+          },
+          "docs": "Assigns the default role to the currently logged-in user extension."
+        },
+        {
+          "info": {
+            "name": "List Standard User Roles",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/dictionary/user-role",
+            "params": [
+              {
+                "name": "servicePlanId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a service plan."
+              },
+              {
+                "name": "page",
+                "value": "1",
+                "type": "query",
+                "description": "The result set page number (1-indexed) to return"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "advancedPermissions",
+                "value": "",
+                "type": "query",
+                "description": "Specifies whether to return advanced permissions capabilities within `permissionsCapabilities` resource.\nThe default value is false.\n"
+              }
+            ]
+          },
+          "docs": "Returns a list of standard user roles."
+        },
+        {
+          "info": {
+            "name": "Get Standard User Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/dictionary/user-role/:roleId",
+            "params": [
+              {
+                "name": "roleId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a role"
+              }
+            ]
+          },
+          "docs": "Returns a standard user role by ID."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

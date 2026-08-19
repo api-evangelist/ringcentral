@@ -1,0 +1,415 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards External Contacts API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "External Contacts",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Upload Multiple User Contacts",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/address-book-bulk-upload",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Uploads multiple contacts for multiple extensions at once.\nMaximum 500 extensions can be uploaded per request. Max amount\nof contacts that can be uploaded per extension is 10,000.\nEach contact uploaded for a certain extension is not visible\nto other extensions.\n"
+        },
+        {
+          "info": {
+            "name": "Get Contacts Upload Task",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/address-book-bulk-upload/tasks/:taskId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "taskId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a task"
+              }
+            ]
+          },
+          "docs": "Returns the status of a task on adding multiple contacts to multiple extensions.\n"
+        },
+        {
+          "info": {
+            "name": "List Favorite Contacts",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/favorite",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ]
+          },
+          "docs": "Returns the list of favorite contacts of the current extension.\nFavorite contacts include both company contacts (extensions) and personal\ncontacts (address book records).\n"
+        },
+        {
+          "info": {
+            "name": "Update Favorite Contact List",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/favorite",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the list of favorite contacts of the current extension.\nFavorite contacts include both company contacts (extensions) and personal\ncontacts (address book records).**Please note**: Currently personal address\nbook size is limited to 10 000 contacts.\n"
+        },
+        {
+          "info": {
+            "name": "List Contacts",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/address-book/contact",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "startsWith",
+                "value": "",
+                "type": "query",
+                "description": "If specified, only contacts which 'First name' or 'Last name' start\nwith the mentioned substring will be returned. Case-insensitive\n"
+              },
+              {
+                "name": "sortBy",
+                "value": "",
+                "type": "query",
+                "description": "Sorts results by the specified property"
+              },
+              {
+                "name": "page",
+                "value": "1",
+                "type": "query",
+                "description": "The result set page number (1-indexed) to return"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "phoneNumber",
+                "value": "",
+                "type": "query",
+                "description": "Phone number in e.164 format"
+              }
+            ]
+          },
+          "docs": "Returns the user personal contacts.\n"
+        },
+        {
+          "info": {
+            "name": "Create User Contact",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/address-book/contact",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "dialingPlan",
+                "value": "",
+                "type": "query",
+                "description": "Country code value complying with the [ISO 3166-1 alpha-2](https://ru.wikipedia.org/wiki/ISO_3166-1_alpha-2)\nformat. The default value is home country of the current extension\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates the user personal contact.\n"
+        },
+        {
+          "info": {
+            "name": "Get User Contact(s)",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/address-book/contact/:contactId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "contactId",
+                "value": "",
+                "type": "path",
+                "description": "The list of contact identifiers (comma-separated)"
+              }
+            ]
+          },
+          "docs": "Returns the user personal contact(s). \n[Batch request syntax](https://developers.ringcentral.com/api-reference/Batch-Requests) is supported.\n"
+        },
+        {
+          "info": {
+            "name": "Update User Contact(s)",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/address-book/contact/:contactId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "contactId",
+                "value": "",
+                "type": "path",
+                "description": "The list of contact identifiers (comma-separated)"
+              },
+              {
+                "name": "dialingPlan",
+                "value": "",
+                "type": "query",
+                "description": "Country code value complying with the [ISO 3166-1 alpha-2](https://ru.wikipedia.org/wiki/ISO_3166-1_alpha-2) format. \nThe default value is home country of the current extension\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the user personal contact(s) (full resource update). \n[Batch request syntax](https://developers.ringcentral.com/api-reference/Batch-Requests) is supported.\n"
+        },
+        {
+          "info": {
+            "name": "Update Contact Attributes",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/address-book/contact/:contactId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "contactId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a contact record in the RingCentral database\n"
+              },
+              {
+                "name": "dialingPlan",
+                "value": "",
+                "type": "query",
+                "description": "Country code value complying with the [ISO 3166-1 alpha-2](https://ru.wikipedia.org/wiki/ISO_3166-1_alpha-2)\nformat. The default value is home country of the current extension\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates particular values of a personal contact attributes specified in request (partial resource update). Omitted attributes will remain unchanged.\nIf any attribute is passed in request body with the null value, then this attribute value will be removed.\n"
+        },
+        {
+          "info": {
+            "name": "Delete User Contact(s)",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/address-book/contact/:contactId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "contactId",
+                "value": "",
+                "type": "path",
+                "description": "The list of contact identifiers (comma-separated)"
+              }
+            ]
+          },
+          "docs": "Deletes the user personal contact(s). \n[Batch request syntax](https://developers.ringcentral.com/api-reference/Batch-Requests) is supported.\n"
+        },
+        {
+          "info": {
+            "name": "Address Book Synchronization",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/address-book-sync",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "syncType",
+                "value": "",
+                "type": "query",
+                "description": "Type of synchronization"
+              },
+              {
+                "name": "syncToken",
+                "value": "",
+                "type": "query",
+                "description": "Value of syncToken property of the last sync request response\n"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Number of records per page to be returned. Max number of\nrecords is 250, which is also the default.\nFor 'FSync' - if the number of records exceeds the parameter value\n(either specified or default), all of the pages can be retrieved\nin several requests. For 'ISync' - if the number of records exceeds\npage size, then the number of incoming changes to this\nnumber is limited\n"
+              },
+              {
+                "name": "pageId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a page. It can be obtained from the 'nextPageId'\nparameter passed in response body\n"
+              }
+            ]
+          },
+          "docs": "Synchronizes user contacts.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

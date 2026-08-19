@@ -1,0 +1,279 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Teams API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Teams",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Everyone Chat",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/everyone"
+          },
+          "docs": "Returns information about \"Everyone\" chat (a company level chat which includes all employees)."
+        },
+        {
+          "info": {
+            "name": "Update Everyone Chat",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/everyone",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates \"Everyone\" chat information."
+        },
+        {
+          "info": {
+            "name": "List Teams",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/teams",
+            "params": [
+              {
+                "name": "recordCount",
+                "value": "",
+                "type": "query",
+                "description": "Number of teams to be fetched by one request. The maximum value is 250, by default - 30"
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "Pagination token."
+              }
+            ]
+          },
+          "docs": "Returns the list of teams where the user is a member (both archived and active) combined with a list of public teams that can be joined by the current user. All records in response are sorted by creation time of a chat in ascending order. A team is a chat between 2 and more (unlimited number) participants assigned with specific name."
+        },
+        {
+          "info": {
+            "name": "Create Team",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/teams",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a team, and adds a list of people to the team."
+        },
+        {
+          "info": {
+            "name": "Get Team",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/teams/:chatId",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a team to be returned."
+              }
+            ]
+          },
+          "docs": "Returns information about the specified team."
+        },
+        {
+          "info": {
+            "name": "Update Team",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/teams/:chatId",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a team to be updated."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the name and description of the specified team."
+        },
+        {
+          "info": {
+            "name": "Delete Team",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/teams/:chatId",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a team."
+              }
+            ]
+          },
+          "docs": "Deletes the specified team."
+        },
+        {
+          "info": {
+            "name": "Remove Team Members",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/teams/:chatId/remove",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a team to remove members from."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Removes members from the specified team."
+        },
+        {
+          "info": {
+            "name": "Join Team",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/teams/:chatId/join",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a team to be joined."
+              }
+            ]
+          },
+          "docs": "Adds the current user to the specified team."
+        },
+        {
+          "info": {
+            "name": "Archive Team",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/teams/:chatId/archive",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a team to be archived."
+              }
+            ]
+          },
+          "docs": "Changes the status of the specified team to 'Archived'."
+        },
+        {
+          "info": {
+            "name": "Unarchive Team",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/teams/:chatId/unarchive",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a team to be made active."
+              }
+            ]
+          },
+          "docs": "Changes the status of the specified team to 'Active'."
+        },
+        {
+          "info": {
+            "name": "Leave Team",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/teams/:chatId/leave",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a team to be left."
+              }
+            ]
+          },
+          "docs": "Removes the current user from the specified team."
+        },
+        {
+          "info": {
+            "name": "Add Team Members",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/teams/:chatId/add",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a team to add members to."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Adds members to the specified team."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

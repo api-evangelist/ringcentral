@@ -1,0 +1,186 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards OAuth 2.0 / OpenID Connect API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "OAuth 2.0 / OpenID Connect",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "OAuth 2.0 Token Endpoint",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/oauth/token",
+            "body": {
+              "type": "form-urlencoded",
+              "data": []
+            }
+          },
+          "docs": "Returns access (and potentially refresh) tokens for making API requests.\n\nFor confidential client application types\nthis endpoint requires client authentication using one of the supported\nmethods (`client_secret_basic`, `client_secret_jwt` or `private_key_jwt`)\n\nFor non-confidential client application types\nthe client identifier must be provided via `client_id` request attribute.\n"
+        },
+        {
+          "info": {
+            "name": "OAuth 2.0 Authorization Endpoint",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/oauth/authorize",
+            "params": [
+              {
+                "name": "client_id",
+                "value": "",
+                "type": "query",
+                "description": "The registered identifier of a client application"
+              },
+              {
+                "name": "response_type",
+                "value": "",
+                "type": "query",
+                "description": "Determines authorization flow type. The only supported value is `code` which corresponds to OAuth 2.0 \"Authorization Code Flow\"\n"
+              },
+              {
+                "name": "redirect_uri",
+                "value": "",
+                "type": "query",
+                "description": "This is the URI where the Authorization Server redirects the User Agent to at the end of the authorization flow.\nThe value of this parameter must exactly match one of the URIs registered for this client application.\nThis parameter is required if there are more than one redirect URIs registered for the app.\n"
+              },
+              {
+                "name": "state",
+                "value": "",
+                "type": "query",
+                "description": "An opaque value used by the client to maintain state between the request and callback.\nThe authorization server includes this value when redirecting the User Agent back\nto the client. The parameter SHOULD be used for preventing cross-site request forgery attacks.\n"
+              },
+              {
+                "name": "scope",
+                "value": "",
+                "type": "query",
+                "description": "The list of space separated application permissions (OAuth scopes)"
+              },
+              {
+                "name": "display",
+                "value": "",
+                "type": "query",
+                "description": "Specifies how the Authorization Server displays the authentication and consent user interface pages to the End-User.\n"
+              },
+              {
+                "name": "prompt",
+                "value": "",
+                "type": "query",
+                "description": "Space-delimited, case-sensitive list of ASCII string values that specifies whether the Authorization Server prompts the End-User for\nre-authentication and consent. The defined values are:\n\n- `login` - RingCentral native login form,\n- `sso` - Single Sign-On login form,\n- `consent` - form to show the requested scope and prompt user for consent.\n\nEither `login` or `sso` (or both) must be specified. The default\nvalue is `login sso`\n"
+              },
+              {
+                "name": "ui_locales",
+                "value": "",
+                "type": "query",
+                "description": "End-User's preferred languages and scripts for the user interface, represented as a space-separated list of\n[RFC-5646](https://datatracker.ietf.org/doc/html/rfc5646) language tag values, ordered by preference.\n\nIf this parameter is provided, its value overrides 'Accept-Language' header value and 'localeId' parameter value (if any)\n"
+              },
+              {
+                "name": "localeId",
+                "value": "",
+                "type": "query",
+                "description": "DEPRECATED: `ui_locales` parameter should be used instead"
+              },
+              {
+                "name": "code_challenge",
+                "value": "",
+                "type": "query",
+                "description": "The code challenge value as defined by the PKCE specification -\n[RFC-7636 \"Proof Key for Code Exchange by OAuth Public Clients\"](https://datatracker.ietf.org/doc/html/rfc7636)\n"
+              },
+              {
+                "name": "code_challenge_method",
+                "value": "",
+                "type": "query",
+                "description": "The code challenge method as defined by by the PKCE specification -\n[RFC-7636 \"Proof Key for Code Exchange by OAuth Public Clients\"](https://datatracker.ietf.org/doc/html/rfc7636)\n"
+              },
+              {
+                "name": "nonce",
+                "value": "",
+                "type": "query",
+                "description": "String value used to associate a Client session with an ID Token, and to mitigate replay attacks. The value is passed through unmodified from the Authentication Request to the ID Token.\n"
+              },
+              {
+                "name": "ui_options",
+                "value": "",
+                "type": "query",
+                "description": "Login form user interface options (space-separated). By default, the UI options that are registered for this client application will be used\n"
+              },
+              {
+                "name": "login_hint",
+                "value": "",
+                "type": "query",
+                "description": "Hint to the Authorization Server about the login identifier the End-User might use to log in."
+              },
+              {
+                "name": "brand_id",
+                "value": "",
+                "type": "query",
+                "description": "RingCentral Brand identifier. If it is not provided in the request,\nserver will try to determine brand from the client application profile.\n"
+              }
+            ]
+          },
+          "docs": "Performs Authentication of the End-User by sending the User Agent to the Authorization Server's\nAuthorization Endpoint for Authentication and Authorization,\nusing request parameters defined by OAuth 2.0 [RFC-6749](https://datatracker.ietf.org/doc/html/rfc6749#section-3.1)\nand additional parameters and parameter values defined by\n[OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html#AuthorizationEndpoint).\n\nThis is the version that uses HTTP `GET` method.\n"
+        },
+        {
+          "info": {
+            "name": "OAuth 2.0 Authorization Endpoint (POST)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/oauth/authorize",
+            "body": {
+              "type": "form-urlencoded",
+              "data": []
+            }
+          },
+          "docs": "Performs Authentication of the End-User by sending the User Agent to the Authorization Server's\nAuthorization Endpoint for Authentication and Authorization,\nusing request parameters defined by OAuth 2.0 [RFC-6749](https://datatracker.ietf.org/doc/html/rfc6749#section-3.1)\nand additional parameters and parameter values defined by\n[OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html#AuthorizationEndpoint).\n\nThis is the version that uses HTTP `POST` method.\n"
+        },
+        {
+          "info": {
+            "name": "OAuth 2.0 Token Revocation Endpoint",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/oauth/revoke",
+            "params": [
+              {
+                "name": "token",
+                "value": "",
+                "type": "query",
+                "description": "Access or refresh token to be revoked (along with the entire OAuth session)"
+              }
+            ],
+            "body": {
+              "type": "form-urlencoded",
+              "data": []
+            }
+          },
+          "docs": "Revokes all active access/refresh tokens and invalidates the OAuth session basing on token provided.\nThe `token` parameter may be passed in query string or body and may represent access or refresh token.\n\nThis endpoint is defined by [RFC-7009 \"OAuth 2.0 Token Revocation\"](https://datatracker.ietf.org/doc/html/rfc7009)\n\nFor confidential client application types\nthis endpoint requires client authentication using one of the supported\nmethods (`client_secret_basic`, `client_secret_jwt` or `private_k"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

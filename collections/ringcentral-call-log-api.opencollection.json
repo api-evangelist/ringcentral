@@ -1,0 +1,627 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Call Log API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Call Log",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Company Call Records",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/call-log",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionNumber",
+                "value": "101",
+                "type": "query",
+                "description": "Short extension number of a user. If specified, returns call log for this particular extension only.\nCannot be combined with `phoneNumber` filter\n"
+              },
+              {
+                "name": "phoneNumber",
+                "value": "12053320032",
+                "type": "query",
+                "description": "Phone number of a caller/callee in e.164 format without a '+' sign. If specified, all incoming/outgoing calls\nfrom/to this phone number are returned.\n"
+              },
+              {
+                "name": "direction",
+                "value": "",
+                "type": "query",
+                "description": "The direction of call records to be included in the result. If omitted, both\ninbound and outbound calls are returned. Multiple values are supported\n"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "The type of call records to be included in the result.\nIf omitted, all call types are returned. Multiple values are supported\n"
+              },
+              {
+                "name": "view",
+                "value": "",
+                "type": "query",
+                "description": "Defines the level of details for returned call records\n"
+              },
+              {
+                "name": "withRecording",
+                "value": "",
+                "type": "query",
+                "description": "Deprecated, replaced with `recordingType` filter, still supported for compatibility reasons.\nIndicates if only recorded calls should be returned.\n\nIf both `withRecording` and `recordingType` parameters are specified, then `withRecording` is ignored\n"
+              },
+              {
+                "name": "recordingType",
+                "value": "",
+                "type": "query",
+                "description": "Indicates that call records with recordings of particular type should be returned.\nIf omitted, then calls with and without recordings are returned\n"
+              },
+              {
+                "name": "dateFrom",
+                "value": "",
+                "type": "query",
+                "description": "The beginning of the time range to return call records in ISO 8601 format including timezone,\nfor example 2016-03-10T18:07:52.534Z. The default value is `dateTo` minus 24 hours\n"
+              },
+              {
+                "name": "dateTo",
+                "value": "",
+                "type": "query",
+                "description": "The end of the time range to return call records in ISO 8601 format including timezone,\nfor example 2016-03-10T18:07:52.534Z. The default value is current time\n"
+              },
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a telephony session"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates the page number to retrieve. Only positive number values are accepted"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates the page size (number of items)"
+              }
+            ]
+          },
+          "docs": "Returns call log records filtered by parameters specified."
+        },
+        {
+          "info": {
+            "name": "Get Company Call Record(s)",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/call-log/:callRecordId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "callRecordId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call log record. Multiple values are supported"
+              },
+              {
+                "name": "view",
+                "value": "",
+                "type": "query",
+                "description": "Defines the level of details for returned call records\n"
+              }
+            ]
+          },
+          "docs": "Returns individual call log record(s) by ID. Batch syntax is supported."
+        },
+        {
+          "info": {
+            "name": "Sync Company Call Log",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/call-log-sync",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "syncType",
+                "value": "",
+                "type": "query",
+                "description": "Type of call log synchronization request"
+              },
+              {
+                "name": "syncToken",
+                "value": "",
+                "type": "query",
+                "description": "Value of syncToken property of last sync request response. Mandatory parameter for 'ISync' sync type"
+              },
+              {
+                "name": "dateFrom",
+                "value": "",
+                "type": "query",
+                "description": "The start datetime for resulting records in ISO 8601 format including timezone, for example 2016-03-10T18:07:52.534Z. The default value is the current moment"
+              },
+              {
+                "name": "recordCount",
+                "value": "",
+                "type": "query",
+                "description": "For `FSync` mode this parameter is mandatory, it limits the number of records to be returned in response.\n\nFor `ISync` mode this parameter specifies the number of records to extend the sync frame with to the past\n(the maximum number of records is 250)\n"
+              },
+              {
+                "name": "statusGroup",
+                "value": "",
+                "type": "query",
+                "description": "Type of calls to be returned"
+              },
+              {
+                "name": "view",
+                "value": "",
+                "type": "query",
+                "description": "Defines the level of details for returned call records\n"
+              },
+              {
+                "name": "showDeleted",
+                "value": "",
+                "type": "query",
+                "description": "Supported for `ISync` mode. Indicates that deleted call records should be returned"
+              },
+              {
+                "name": "withRecording",
+                "value": "",
+                "type": "query",
+                "description": "Deprecated, replaced with `recordingType` filter, still supported for compatibility reasons.\nIndicates if only recorded calls should be returned.\n\nIf both `withRecording` and `recordingType` parameters are specified, then `withRecording` is ignored\n"
+              },
+              {
+                "name": "recordingType",
+                "value": "",
+                "type": "query",
+                "description": "Indicates that call records with recordings of particular type should be returned.\nIf omitted, then calls with and without recordings are returned\n"
+              }
+            ]
+          },
+          "docs": "Synchronizes company call log records."
+        },
+        {
+          "info": {
+            "name": "List Company Active Calls",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/active-calls",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "direction",
+                "value": "",
+                "type": "query",
+                "description": "The direction of call records to be included in the result. If omitted, both\ninbound and outbound calls are returned. Multiple values are supported\n"
+              },
+              {
+                "name": "view",
+                "value": "",
+                "type": "query",
+                "description": "Defines the level of details for returned call records\n"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "The type of call records to be included in the result.\nIf omitted, all call types are returned. Multiple values are supported\n"
+              },
+              {
+                "name": "transport",
+                "value": "",
+                "type": "query",
+                "description": "The type of call transport. Multiple values are supported. By default, this filter is disabled\n"
+              },
+              {
+                "name": "conferenceType",
+                "value": "",
+                "type": "query",
+                "description": "Conference call type: RCC or RC Meetings. If not specified, no conference call filter applied\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates the page number to retrieve. Only positive number values are accepted"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates the page size (number of items)"
+              }
+            ]
+          },
+          "docs": "Returns records of all calls that are in progress, ordered by start time in descending order."
+        },
+        {
+          "info": {
+            "name": "List User Call Records",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/call-log",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionNumber",
+                "value": "101",
+                "type": "query",
+                "description": "Short extension number of a user. If specified, returns call log for this particular extension only.\nCannot be combined with `phoneNumber` filter\n"
+              },
+              {
+                "name": "phoneNumber",
+                "value": "12053320032",
+                "type": "query",
+                "description": "Phone number of a caller/callee in e.164 format without a '+' sign. If specified, all incoming/outgoing calls\nfrom/to this phone number are returned.\n"
+              },
+              {
+                "name": "showBlocked",
+                "value": "",
+                "type": "query",
+                "description": "Indicates then calls from/to blocked numbers are returned"
+              },
+              {
+                "name": "direction",
+                "value": "",
+                "type": "query",
+                "description": "The direction of call records to be included in the result. If omitted, both\ninbound and outbound calls are returned. Multiple values are supported\n"
+              },
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a call session"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "The type of call records to be included in the result.\nIf omitted, all call types are returned. Multiple values are supported\n"
+              },
+              {
+                "name": "transport",
+                "value": "",
+                "type": "query",
+                "description": "The type of call transport. Multiple values are supported. By default, this filter is disabled\n"
+              },
+              {
+                "name": "view",
+                "value": "",
+                "type": "query",
+                "description": "Defines the level of details for returned call records\n"
+              },
+              {
+                "name": "withRecording",
+                "value": "",
+                "type": "query",
+                "description": "Deprecated, replaced with `recordingType` filter, still supported for compatibility reasons.\nIndicates if only recorded calls should be returned.\n\nIf both `withRecording` and `recordingType` parameters are specified, then `withRecording` is ignored\n"
+              },
+              {
+                "name": "recordingType",
+                "value": "",
+                "type": "query",
+                "description": "Indicates that call records with recordings of particular type should be returned.\nIf omitted, then calls with and without recordings are returned\n"
+              },
+              {
+                "name": "dateTo",
+                "value": "",
+                "type": "query",
+                "description": "The end of the time range to return call records in ISO 8601 format including timezone,\nfor example 2016-03-10T18:07:52.534Z. The default value is current time\n"
+              },
+              {
+                "name": "dateFrom",
+                "value": "",
+                "type": "query",
+                "description": "The beginning of the time range to return call records in ISO 8601 format including timezone,\nfor example 2016-03-10T18:07:52.534Z. The default value is `dateTo` minus 24 hours\n"
+              },
+              {
+                "name": "telephonySessionId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a telephony session"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates the page number to retrieve. Only positive number values are allowed"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates the page size (number of items). The default value is 100.\nThe maximum value for `Simple` view is 1000, for `Detailed` view - 250\n"
+              },
+              {
+                "name": "showDeleted",
+                "value": "",
+                "type": "query",
+                "description": "Indicates that deleted calls records should be returned"
+              }
+            ]
+          },
+          "docs": "Returns call log records filtered by parameters specified."
+        },
+        {
+          "info": {
+            "name": "Delete User Call Records",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/call-log",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "dateTo",
+                "value": "",
+                "type": "query",
+                "description": "The time boundary to delete all older records in ISO 8601 format including\ntimezone, for example *2016-03-10T18:07:52.534Z*. The default value is current time\n"
+              }
+            ]
+          },
+          "docs": "Deletes filtered call log records."
+        },
+        {
+          "info": {
+            "name": "Get User Call Record(s)",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/call-log/:callRecordId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "callRecordId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call log record. Multiple values are supported"
+              },
+              {
+                "name": "view",
+                "value": "",
+                "type": "query",
+                "description": "Defines the level of details for returned call records\n"
+              }
+            ]
+          },
+          "docs": "Returns call log records by ID."
+        },
+        {
+          "info": {
+            "name": "Sync User Call Log",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/call-log-sync",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "syncType",
+                "value": "",
+                "type": "query",
+                "description": "Type of call log synchronization request"
+              },
+              {
+                "name": "syncToken",
+                "value": "",
+                "type": "query",
+                "description": "A `syncToken` value from the previous sync response (for `ISync` mode only, mandatory)"
+              },
+              {
+                "name": "dateFrom",
+                "value": "",
+                "type": "query",
+                "description": "The start datetime for resulting records in ISO 8601 format including\ntimezone, for example 2016-03-10T18:07:52.534Z. The default value is the\ncurrent moment\n"
+              },
+              {
+                "name": "recordCount",
+                "value": "",
+                "type": "query",
+                "description": "For `FSync` mode this parameter is mandatory, it limits the number of records to be returned in response.\n\nFor `ISync` mode this parameter specifies the number of records to extend the sync frame with to the past\n(the maximum number of records is 250)\n"
+              },
+              {
+                "name": "statusGroup",
+                "value": "",
+                "type": "query",
+                "description": "Type of calls to be returned"
+              },
+              {
+                "name": "view",
+                "value": "",
+                "type": "query",
+                "description": "Defines the level of details for returned call records\n"
+              },
+              {
+                "name": "showDeleted",
+                "value": "",
+                "type": "query",
+                "description": "Supported for `ISync` mode. Indicates that deleted call records should be returned"
+              },
+              {
+                "name": "withRecording",
+                "value": "",
+                "type": "query",
+                "description": "Deprecated, replaced with `recordingType` filter, still supported for compatibility reasons.\nIndicates if only recorded calls should be returned.\n\nIf both `withRecording` and `recordingType` parameters are specified, then `withRecording` is ignored\n"
+              },
+              {
+                "name": "recordingType",
+                "value": "",
+                "type": "query",
+                "description": "Indicates that call records with recordings of particular type should be returned.\nIf omitted, then calls with and without recordings are returned\n"
+              }
+            ]
+          },
+          "docs": "Synchronizes the user call log records."
+        },
+        {
+          "info": {
+            "name": "List User Active Calls",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/active-calls",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "direction",
+                "value": "",
+                "type": "query",
+                "description": "The direction of call records to be included in the result. If omitted, both\ninbound and outbound calls are returned. Multiple values are supported\n"
+              },
+              {
+                "name": "view",
+                "value": "",
+                "type": "query",
+                "description": "Defines the level of details for returned call records\n"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "The type of call records to be included in the result.\nIf omitted, all call types are returned. Multiple values are supported\n"
+              },
+              {
+                "name": "transport",
+                "value": "",
+                "type": "query",
+                "description": "The type of call transport. Multiple values are supported. By default, this filter is disabled\n"
+              },
+              {
+                "name": "conferenceType",
+                "value": "",
+                "type": "query",
+                "description": "Conference call type: RCC or RC Meetings. If not specified, no conference call filter applied\n"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Indicates the page number to retrieve. Only positive number values are allowed"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Indicates the page size (number of items)"
+              }
+            ]
+          },
+          "docs": "Returns records of all extension calls that are in progress, ordered\nby start time in descending order.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

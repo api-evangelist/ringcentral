@@ -1,0 +1,200 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Internal Contacts API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Internal Contacts",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Company Directory Entries",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/directory/entries",
+            "headers": [
+              {
+                "name": "If-None-Match",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "showFederated",
+                "value": "",
+                "type": "query",
+                "description": "If `true` then contacts of all accounts in federation are returned. If `false` then only contacts of the current account are returned, and account section is eliminated in this case"
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Type of an extension. Please note that legacy 'Department' extension type corresponds to 'Call Queue' extensions in modern RingCentral product terminology"
+              },
+              {
+                "name": "typeGroup",
+                "value": "",
+                "type": "query",
+                "description": "Type of extension group"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Page number"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Records count to be returned per one page. It can be either integer or string with the specific keyword values:\n- `all` - all records are returned in one page\n- `max` - maximum count of records that can be returned in one page\n"
+              },
+              {
+                "name": "siteId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of the business site to which extensions belong"
+              }
+            ]
+          },
+          "docs": "Returns contact information on corporate users of federated accounts. Please note: 1. `User`, `DigitalUser`, `VirtualUser` and `FaxUser` types are returned as `User` type. 2. `ApplicationExtension` type is not returned. 3. Only extensions in `Enabled`, `Disabled` and `NotActivated` state are returned."
+        },
+        {
+          "info": {
+            "name": "Get Corporate Directory Entry",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/directory/entries/:entryId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "entryId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of extension to read information for"
+              }
+            ]
+          },
+          "docs": "Returns contact information on a particular corporate user of a federated account."
+        },
+        {
+          "info": {
+            "name": "Search Company Directory Entries",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/directory/entries/search",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "accountId",
+                "value": "",
+                "type": "query",
+                "description": "A list of Account IDs"
+              },
+              {
+                "name": "department",
+                "value": "",
+                "type": "query",
+                "description": "A list of department names"
+              },
+              {
+                "name": "siteId",
+                "value": "",
+                "type": "query",
+                "description": "A list of Site IDs"
+              },
+              {
+                "name": "extensionStatus",
+                "value": "",
+                "type": "query",
+                "description": "Extension current state"
+              },
+              {
+                "name": "extensionType",
+                "value": "",
+                "type": "query",
+                "description": "Extension types"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Returns contact information on corporate users of federated accounts according to the specified filtering and ordering."
+        },
+        {
+          "info": {
+            "name": "Get Account Federation",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/directory/federation",
+            "headers": [
+              {
+                "name": "RCExtensionId",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "types",
+                "value": "",
+                "type": "query",
+                "description": "Filter by federation types. Default is Regular"
+              }
+            ]
+          },
+          "docs": "Returns information on a federation and associated accounts."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -8,35 +8,42 @@ server:
   transport: http
   url: https://appconnect.labs.ringcentral.com/mcp/
   vendor: RingCentral Labs
-  notes: >-
-    RingCentral's own hosted MCP server ships under RingCentral Labs (App Connect),
-    currently in alpha. It bridges AI assistants/LLMs to the CRM connected through
-    an App Connect installation rather than exposing the full RingCentral platform
-    REST surface. There is no first-party MCP server for the full platform API yet;
-    the candidate tools below are DERIVED from marquee OpenAPI operations as a
+  notes: RingCentral's own hosted MCP server ships under RingCentral Labs (App Connect), currently in
+    alpha. It bridges AI assistants/LLMs to the CRM connected through an App Connect installation rather
+    than exposing the full RingCentral platform REST surface. There is no first-party MCP server for the
+    full platform API yet; the candidate tools below are DERIVED from marquee OpenAPI operations as a
     starting point for one.
 docs:
-  - https://appconnect.labs.ringcentral.com/mcp/
-  - https://appconnect.labs.ringcentral.com/mcp/codex/
+- https://appconnect.labs.ringcentral.com/mcp/
+- https://appconnect.labs.ringcentral.com/mcp/codex/
 candidate_tools:
-  - name: send_sms
-    description: Send an SMS/MMS message.
-    source_operation: openapi/ringcentral-platform-openapi.yml#createSMSMessage
-  - name: ring_out
-    description: Place a two-legged RingOut call.
-    source_operation: openapi/ringcentral-platform-openapi.yml#createRingOutCall
-  - name: read_call_log
-    description: Retrieve account/extension call log records.
-    source_operation: openapi/ringcentral-platform-openapi.yml#readUserCallLog
-  - name: get_presence
-    description: Read a user's presence/availability state.
-    source_operation: openapi/ringcentral-platform-openapi.yml#readUnifiedPresence
-  - name: send_fax
-    description: Send a fax with attachments.
-    source_operation: openapi/ringcentral-platform-openapi.yml#createFaxMessage
-  - name: list_messages
-    description: List message-store records (SMS, voicemail, fax, pager).
-    source_operation: openapi/ringcentral-platform-openapi.yml#listMessages
-  - name: create_subscription
-    description: Create a webhook/PubNub event subscription.
-    source_operation: openapi/ringcentral-platform-openapi.yml#createSubscription
+- name: send_sms
+  description: Send an SMS/MMS message.
+  source_operation: openapi/ringcentral-platform-openapi.yml#createSMSMessage
+- name: ring_out
+  description: Place a two-legged RingOut call.
+  source_operation: openapi/ringcentral-platform-openapi.yml#createRingOutCall
+- name: read_call_log
+  description: Retrieve account/extension call log records.
+  source_operation: openapi/ringcentral-platform-openapi.yml#readUserCallLog
+- name: get_presence
+  description: Read a user's presence/availability state.
+  source_operation: openapi/ringcentral-platform-openapi.yml#readUnifiedPresence
+- name: send_fax
+  description: Send a fax with attachments.
+  source_operation: openapi/ringcentral-platform-openapi.yml#createFaxMessage
+- name: list_messages
+  description: List message-store records (SMS, voicemail, fax, pager).
+  source_operation: openapi/ringcentral-platform-openapi.yml#listMessages
+- name: create_subscription
+  description: Create a webhook/PubNub event subscription.
+  source_operation: openapi/ringcentral-platform-openapi.yml#createSubscription
+deployment:
+  mode: none
+  endpoint: https://appconnect.labs.ringcentral.com/mcp/
+  verified: probed
+  probe: dead
+  note: the endpoint this manifest claimed did not answer; recorded as none rather than deleted so the
+    claim stays auditable
+  checked: '2026-08-12'
+  source: catalog MCP census

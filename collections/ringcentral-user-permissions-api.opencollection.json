@@ -1,0 +1,201 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards User Permissions API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "User Permissions",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Authorization Profile",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/authz-profile",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "targetExtensionId",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Returns a list of user permissions granted at authorization procedure.\nPlease note: Some permissions may be restricted by extension type.\n"
+        },
+        {
+          "info": {
+            "name": "Check User Permission",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/authz-profile/check",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "permissionId",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "targetExtensionId",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Checks if a certain user permission is activated for a particular extension."
+        },
+        {
+          "info": {
+            "name": "List Permissions",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/dictionary/permission",
+            "params": [
+              {
+                "name": "page",
+                "value": "1",
+                "type": "query",
+                "description": "The result set page number (1-indexed) to return"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "assignable",
+                "value": "",
+                "type": "query",
+                "description": "Specifies whether to return only assignable permissions"
+              },
+              {
+                "name": "servicePlanId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a service plan"
+              }
+            ]
+          },
+          "docs": "Returns a list of extension user permissions."
+        },
+        {
+          "info": {
+            "name": "Get Permission",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/dictionary/permission/:permissionId",
+            "params": [
+              {
+                "name": "permissionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a user permission"
+              }
+            ]
+          },
+          "docs": "Returns a user permission by ID."
+        },
+        {
+          "info": {
+            "name": "List Permission Categories",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/dictionary/permission-category",
+            "params": [
+              {
+                "name": "page",
+                "value": "1",
+                "type": "query",
+                "description": "The result set page number (1-indexed) to return"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "servicePlanId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a service plan"
+              }
+            ]
+          },
+          "docs": "Returns a list of permission categories."
+        },
+        {
+          "info": {
+            "name": "Get Permission Category",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/dictionary/permission-category/:permissionCategoryId",
+            "params": [
+              {
+                "name": "permissionCategoryId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a category"
+              }
+            ]
+          },
+          "docs": "Returns a permission category by ID."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

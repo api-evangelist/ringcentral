@@ -1,0 +1,191 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Historical Recordings API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Historical Recordings",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Webinar Recordings (Admin)",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/history/v1/company/recordings",
+            "params": [
+              {
+                "name": "nameFragment",
+                "value": "All-hands",
+                "type": "query",
+                "description": "Filter to return only webinar recordings containing particular substring within their names"
+              },
+              {
+                "name": "creationTimeFrom",
+                "value": "",
+                "type": "query",
+                "description": "The beginning of the time window by 'creationTime' ."
+              },
+              {
+                "name": "creationTimeTo",
+                "value": "",
+                "type": "query",
+                "description": "The end of the time window by 'creationTime' ."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "The status of the recording."
+              },
+              {
+                "name": "hostUserId",
+                "value": "77777777",
+                "type": "query",
+                "description": "Identifier of the user who hosts a webinar (if omitted, webinars hosted by all company users will be returned)"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "The token indicating the particular page of the result set to be retrieved.\nIf omitted the first page will be returned.\n"
+              }
+            ]
+          },
+          "docs": "Returns the list of webinar recordings (Administrator's interface).\nThe user must have \"WebinarSettings\" permission granted otherwise the API returns HTTP 403.\n"
+        },
+        {
+          "info": {
+            "name": "Get Webinar Recording (Admin)",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/history/v1/company/recordings/:recordingId",
+            "params": [
+              {
+                "name": "recordingId",
+                "value": "7637637682",
+                "type": "path",
+                "description": "Identifier of the Webinar recording."
+              }
+            ]
+          },
+          "docs": "Returns the webinar recording by ID (Administrator's interface).\n\nThe user must have \"WebinarSettings\" permission granted otherwise the API returns HTTP 403.\n"
+        },
+        {
+          "info": {
+            "name": "List Webinar Recordings",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/history/v1/recordings",
+            "params": [
+              {
+                "name": "creationTimeFrom",
+                "value": "",
+                "type": "query",
+                "description": "The beginning of the time window by 'creationTime' ."
+              },
+              {
+                "name": "creationTimeTo",
+                "value": "",
+                "type": "query",
+                "description": "The end of the time window by 'creationTime' ."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "The status of the recording."
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "The token indicating the particular page of the result set to be retrieved.\nIf omitted the first page will be returned.\n"
+              }
+            ]
+          },
+          "docs": "Returns the list of webinar recordings for a given webinar host user\n"
+        },
+        {
+          "info": {
+            "name": "Get Webinar Recording",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/history/v1/recordings/:recordingId",
+            "params": [
+              {
+                "name": "recordingId",
+                "value": "7637637682",
+                "type": "path",
+                "description": "Identifier of the Webinar recording."
+              }
+            ]
+          },
+          "docs": "Returns the webinar recording by ID (Webinar host's interface).\nThis API also returns sharing link if sharing is enabled.\n"
+        },
+        {
+          "info": {
+            "name": "Get Webinar Recording Download Resource",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/history/v1/recordings/:recordingId/download",
+            "params": [
+              {
+                "name": "recordingMediaType",
+                "value": "",
+                "type": "query",
+                "description": "Download file media type.\n- Type 'Video' refers to a multiplexed audio and video file.\n- Type 'Audio' refers to an audio only file.\n- Unless specified by this query parameter, a video file is returned by default when a recording is downloaded.\n"
+              },
+              {
+                "name": "recordingId",
+                "value": "7637637682",
+                "type": "path",
+                "description": "Identifier of the Webinar recording."
+              }
+            ]
+          },
+          "docs": "Returns the webinar recording download link (both Webinar host's and admin interface).\n\nIf called by a webinar host, the API returns error (403) if recording downloading is prohibited by company settings.\nThe admin user who has \"WebinarSettings\" permission should be able to download recording regardless of current company settings.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

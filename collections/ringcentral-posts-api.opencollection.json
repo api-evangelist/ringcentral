@@ -1,0 +1,198 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Posts API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Posts",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Upload File",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/files",
+            "params": [
+              {
+                "name": "groupId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of a group to which the post with attachment will be added to"
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Name of a file attached"
+              }
+            ],
+            "body": {
+              "type": "multipart-form",
+              "data": [
+                {
+                  "name": "body",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "docs": "Posts a file."
+        },
+        {
+          "info": {
+            "name": "List Posts",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/chats/:chatId/posts",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a chat"
+              },
+              {
+                "name": "recordCount",
+                "value": "",
+                "type": "query",
+                "description": "Max number of posts to be fetched by one request (not more than 250)"
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "Pagination token."
+              }
+            ]
+          },
+          "docs": "Returns a list of posts from the specified chat."
+        },
+        {
+          "info": {
+            "name": "Create Post",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/chats/:chatId/posts",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a chat."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a post in the chat specified in path. Any mention can be added within the `text` attribute of the request body in .md format - `![:Type](id)`, where `type` is one of (Person, Team, File, Note, Task, Event, Link, Card) and `id` is a unique identifier of the mentioned object of the specified type. Attachments of the following types (File, Card, Event, Note) can also be added to a post by passing type and ID of attachment(s) in request body."
+        },
+        {
+          "info": {
+            "name": "Get Post",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/chats/:chatId/posts/:postId",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a chat"
+              },
+              {
+                "name": "postId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a post"
+              }
+            ]
+          },
+          "docs": "Returns information about the specified post."
+        },
+        {
+          "info": {
+            "name": "Update Post",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/chats/:chatId/posts/:postId",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a chat"
+              },
+              {
+                "name": "postId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a post to be updated"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a specific post within a chat."
+        },
+        {
+          "info": {
+            "name": "Delete Post",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/chats/:chatId/posts/:postId",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a chat"
+              },
+              {
+                "name": "postId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a post to be deleted"
+              }
+            ]
+          },
+          "docs": "Deletes the specified post from the chat."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

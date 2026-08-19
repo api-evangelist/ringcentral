@@ -1,0 +1,115 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Call Recordings API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Call Recordings",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Call Recording Content",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/recording/:recordingId/content",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "recordingId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call recording (returned in Call Log)"
+              },
+              {
+                "name": "contentDisposition",
+                "value": "",
+                "type": "query",
+                "description": "Whether the content is expected to be displayed in the browser, or downloaded and saved locally"
+              },
+              {
+                "name": "contentDispositionFilename",
+                "value": "",
+                "type": "query",
+                "description": "The default filename of the file to be downloaded"
+              }
+            ]
+          },
+          "docs": "Returns media content of a call recording (`audio/mpeg` or `audio/wav`)\n\n**This API must be called via media API entry point, e.g. https://media.ringcentral.com**\n"
+        },
+        {
+          "info": {
+            "name": "Delete Company Call Recordings",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/call-recordings",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Deletes company call recordings by their IDs. *Please note:* This method deletes the recording file itself,\nnot the record of it in the call log.\n"
+        },
+        {
+          "info": {
+            "name": "Get Call Recording",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/recording/:recordingId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "recordingId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call recording (returned in Call Log)"
+              }
+            ]
+          },
+          "docs": "Returns call recordings by ID(s)."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

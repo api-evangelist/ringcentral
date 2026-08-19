@@ -1,0 +1,232 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Notes API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Notes",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Notes",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/chats/:chatId/notes",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a chat to fetch notes from."
+              },
+              {
+                "name": "creationTimeTo",
+                "value": "",
+                "type": "query",
+                "description": "The end datetime for resulting records in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)\nformat including timezone, e.g. 2019-03-10T18:23:45. The default value is\nNow.\n"
+              },
+              {
+                "name": "creationTimeFrom",
+                "value": "",
+                "type": "query",
+                "description": "The start datetime for resulting records in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)\nformat including timezone\n"
+              },
+              {
+                "name": "creatorId",
+                "value": "",
+                "type": "query",
+                "description": "Internal identifier of the user that created the note. Multiple\nvalues are supported\n"
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Status of notes to be fetched; if not specified all notes are\nfetched by default.\n"
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "Pagination token"
+              },
+              {
+                "name": "recordCount",
+                "value": "",
+                "type": "query",
+                "description": "Max number of notes to be fetched by one request; the value range is 1-250."
+              }
+            ]
+          },
+          "docs": "Returns the list of chat notes."
+        },
+        {
+          "info": {
+            "name": "Create Note",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/chats/:chatId/notes",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a chat to create a note in"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new note in the specified chat."
+        },
+        {
+          "info": {
+            "name": "Get Note",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/notes/:noteId",
+            "params": [
+              {
+                "name": "noteId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a note to be fetched"
+              }
+            ]
+          },
+          "docs": "Returns the specified note(s). It is possible to fetch up to 50 notes per request."
+        },
+        {
+          "info": {
+            "name": "Update Note",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/notes/:noteId",
+            "params": [
+              {
+                "name": "noteId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a note to be updated"
+              },
+              {
+                "name": "releaseLock",
+                "value": "",
+                "type": "query",
+                "description": "If true then note lock (if any) will be released upon request"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Edits a note. Notes can be edited by any user if posted to a chat. the user belongs to."
+        },
+        {
+          "info": {
+            "name": "Delete Note",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/notes/:noteId",
+            "params": [
+              {
+                "name": "noteId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a note to be deleted"
+              }
+            ]
+          },
+          "docs": "Deletes the specified note."
+        },
+        {
+          "info": {
+            "name": "Lock Note",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/notes/:noteId/lock",
+            "params": [
+              {
+                "name": "noteId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a note to be locked"
+              }
+            ]
+          },
+          "docs": "Locks a note providing the user with the unique write access for 5 hours."
+        },
+        {
+          "info": {
+            "name": "Publish Note",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/notes/:noteId/publish",
+            "params": [
+              {
+                "name": "noteId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a note to be published"
+              }
+            ]
+          },
+          "docs": "Publishes a note making it visible to other users."
+        },
+        {
+          "info": {
+            "name": "Unlock Note",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/notes/:noteId/unlock",
+            "params": [
+              {
+                "name": "noteId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a note to be unlocked"
+              }
+            ]
+          },
+          "docs": "Unlocks a note letting other users edit this note. Once the note is locked (by another user) it cannot be unlocked during 5 hours since the lock datetime."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

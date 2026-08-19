@@ -1,0 +1,325 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Webinars and Sessions API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Webinars and Sessions",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List User's Webinars",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars",
+            "params": [
+              {
+                "name": "creationTimeFrom",
+                "value": "",
+                "type": "query",
+                "description": "The beginning of the time window by 'creationTime' ."
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "The token indicating the particular page of the result set to be retrieved.\nIf omitted the first page will be returned.\n"
+              }
+            ]
+          },
+          "docs": "Returns the list of Webinars hosted by a current authorized user sorted by 'scheduledStartTime' or 'creationTime' in the ascending order.\n"
+        },
+        {
+          "info": {
+            "name": "Create Webinar",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new webinar.\n\nIf \"host\" parameter is NOT passed then the current authorized user will become a Host.\nIf \"host\" parameter is passed then the caller must be a company administrator and have \"WebinarSettings\" permission.\n\"host.linkedUser.accountId\" must be the same as authorized user's account ID.\n\nThe webinar settings which are not mandated at account level or are unlocked can be\nspecified. All other settings are defaulted according to account policy.\n"
+        },
+        {
+          "info": {
+            "name": "Get Webinar",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars/:webinarId",
+            "params": [
+              {
+                "name": "webinarId",
+                "value": "98989898",
+                "type": "path",
+                "description": "Identifier of the Webinar."
+              }
+            ]
+          },
+          "docs": "Returns a Webinar information by ID.\nSome webinar settings are returned basing on webinar-level overrides, other - from default settings defined at account level.\n"
+        },
+        {
+          "info": {
+            "name": "Update Webinar",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars/:webinarId",
+            "params": [
+              {
+                "name": "webinarId",
+                "value": "98989898",
+                "type": "path",
+                "description": "Identifier of the Webinar."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a Webinar. The payload may contain just changed fields of a Webinar resource (it is a partial update):\n- host cannot be changed, and host user information cannot be updated;\n- only the settings which are not mandated at account level or are unlocked can be\nchanged;\n- in order to reset a webinar password it should be passed as an empty string;\n- \"registrationStatus\" cannot be changed.\n"
+        },
+        {
+          "info": {
+            "name": "Delete Webinar",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars/:webinarId",
+            "params": [
+              {
+                "name": "webinarId",
+                "value": "98989898",
+                "type": "path",
+                "description": "Identifier of the Webinar."
+              }
+            ]
+          },
+          "docs": "Deletes a Webinar by ID. All child objects (Sessions, Invitees) will be also deleted.\nIt is disallowed to delete a Webinar which has at least one Session in 'Active' or 'Finished' state.\n"
+        },
+        {
+          "info": {
+            "name": "Create Webinar Session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars/:webinarId/sessions",
+            "params": [
+              {
+                "name": "webinarId",
+                "value": "98989898",
+                "type": "path",
+                "description": "Identifier of the Webinar."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new Session for a given Webinar"
+        },
+        {
+          "info": {
+            "name": "Get Webinar Session",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars/:webinarId/sessions/:sessionId",
+            "params": [
+              {
+                "name": "webinarId",
+                "value": "98989898",
+                "type": "path",
+                "description": "Identifier of the Webinar."
+              },
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              }
+            ]
+          },
+          "docs": "Returns a Webinar Session by ID."
+        },
+        {
+          "info": {
+            "name": "Update Webinar Session",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars/:webinarId/sessions/:sessionId",
+            "params": [
+              {
+                "name": "webinarId",
+                "value": "98989898",
+                "type": "path",
+                "description": "Identifier of the Webinar."
+              },
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a Webinar Session. The payload may contain certain attributes from the Session resource\n(it is a partial update). Changing the 'status' field usually invokes certain workflow actions.\nUpdating a Session in 'Active' or 'Finished' status is prohibited.\nSome status transitions (for example, to 'Active\" or 'Finished') may be prohibited.\n"
+        },
+        {
+          "info": {
+            "name": "Delete Webinar Session",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars/:webinarId/sessions/:sessionId",
+            "params": [
+              {
+                "name": "webinarId",
+                "value": "98989898",
+                "type": "path",
+                "description": "Identifier of the Webinar."
+              },
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              }
+            ]
+          },
+          "docs": "Deletes a Webinar Session. All child objects (Invitees) will be also deleted.\nIt is disallowed to delete a Session which is in 'Active' or 'Finished' state\n"
+        },
+        {
+          "info": {
+            "name": "List Sessions across Multiple Webinars/Hosts",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/company/sessions",
+            "params": [
+              {
+                "name": "status",
+                "value": "Scheduled",
+                "type": "query",
+                "description": "Filter to return only webinar sessions in certain status. Multiple values are supported."
+              },
+              {
+                "name": "endTimeFrom",
+                "value": "",
+                "type": "query",
+                "description": "The beginning of the time window by 'endTime' (it is calculated as scheduledStartTime+scheduledDuration)"
+              },
+              {
+                "name": "hostUserId",
+                "value": "77777777",
+                "type": "query",
+                "description": "Identifier of the user who hosts a webinar (if omitted, webinars hosted by all company users will be returned)"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "The token indicating the particular page of the result set to be retrieved.\nIf omitted the first page will be returned.\n"
+              }
+            ]
+          },
+          "docs": "Returns the list of Webinar Sessions hosted by all company users or particular user(s) sorted by\n'scheduledStartTime' or 'creationTime' (if 'scheduledStartTime' is not set) in the ascending ordered.\nThe user must have \"WebinarSettings\" permission granted otherwise the API returns HTTP 403.\n"
+        },
+        {
+          "info": {
+            "name": "List Sessions across Multiple Webinars",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/sessions",
+            "params": [
+              {
+                "name": "nameFragment",
+                "value": "All-hands",
+                "type": "query",
+                "description": "Filter to return only webinar sessions containing particular substring within their names"
+              },
+              {
+                "name": "status",
+                "value": "Scheduled",
+                "type": "query",
+                "description": "Filter to return only webinar sessions in certain status. Multiple values are supported."
+              },
+              {
+                "name": "endTimeFrom",
+                "value": "",
+                "type": "query",
+                "description": "The beginning of the time window by 'endTime' (it is calculated as scheduledStartTime+scheduledDuration)"
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "The token indicating the particular page of the result set to be retrieved.\nIf omitted the first page will be returned.\n"
+              }
+            ]
+          },
+          "docs": "Returns the list of Webinar Sessions hosted by a current authorized user sorted by\n'scheduledStartTime' or 'creationTime' (if 'scheduledStartTime' is not set) in the ascending order\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

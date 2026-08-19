@@ -1,0 +1,162 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Chats API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Chats",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Recent Chats",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/recent/chats",
+            "params": [
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Type of chats to be fetched. By default, all chat types are returned"
+              },
+              {
+                "name": "recordCount",
+                "value": "",
+                "type": "query",
+                "description": "Max number of chats to be fetched by one request (Not more than 250)."
+              }
+            ]
+          },
+          "docs": "Returns recent chats where the user is a member. All records in response are sorted by the `lastModifiedTime` in descending order (the latest changed chat is displayed first on page)"
+        },
+        {
+          "info": {
+            "name": "List Chats",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/chats",
+            "params": [
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Type of chats to be fetched. By default, all type of chats will be fetched"
+              },
+              {
+                "name": "recordCount",
+                "value": "",
+                "type": "query",
+                "description": "Number of chats to be fetched by one request. The maximum value is 250, by default - 30."
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "Pagination token."
+              }
+            ]
+          },
+          "docs": "Returns the list of chats where the user is a member and also public teams that can be joined.\n\nAll records in response are sorted by creation time of a chat in ascending order.\n\n**Chat types**\n\nThere are multiple types of chats, including:\n\n* **Personal** - each user is given a dedicated \"personal chat\" in which they are the only member.\n* **Direct** - a chat between two individuals.\n* **Group** - a chat between three or more named individuals. A \"group\" chat has no name.\n* **Team** - a chat re"
+        },
+        {
+          "info": {
+            "name": "Get Chat",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/chats/:chatId",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a chat. If tilde (~) is specified, then `/me` (Personal) chat will be returned"
+              }
+            ]
+          },
+          "docs": "Returns information about a chat by ID.\n\n**Note** 'Chat' is a general name for all types of threads including *Personal* (user's own me-chat), *Direct* (one on one chat), *Group* (chat of 3-15 participants without specific name), *Team* (chat of 2 and more participants, with a specific name), *Everyone* (company chat including all employees, with a specific name).\"\n"
+        },
+        {
+          "info": {
+            "name": "Remove Chat from Favorites",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/chats/:chatId/unfavorite",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a chat to remove from favorite list."
+              }
+            ]
+          },
+          "docs": "Removes the specified chat from the users's list of favorite chats."
+        },
+        {
+          "info": {
+            "name": "Add Chat to Favorites",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/chats/:chatId/favorite",
+            "params": [
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a chat to add to favorite list."
+              }
+            ]
+          },
+          "docs": "Adds the specified chat to the users's list of favorite chats."
+        },
+        {
+          "info": {
+            "name": "List Favorite Chats",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/team-messaging/v1/favorites",
+            "params": [
+              {
+                "name": "recordCount",
+                "value": "",
+                "type": "query",
+                "description": "Max number of chats to be fetched by one request (Not more than 250)."
+              }
+            ]
+          },
+          "docs": "Returns a list of the current user's favorite chats."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

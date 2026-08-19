@@ -1,0 +1,206 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Audio API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Audio",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Enrolled Speakers",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/ai/audio/v1/enrollments",
+            "params": [
+              {
+                "name": "partial",
+                "value": "",
+                "type": "query",
+                "description": "Indicates if partially enrolled speakers should be returned"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Number of enrollments to be returned per page"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Page number to be returned"
+              }
+            ]
+          },
+          "docs": "Returns the List of Enrolled Speakers"
+        },
+        {
+          "info": {
+            "name": "Create Speaker Enrollment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/ai/audio/v1/enrollments",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates Enrollment for the provided Speaker."
+        },
+        {
+          "info": {
+            "name": "Get Speaker Enrollment Status",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/ai/audio/v1/enrollments/:speakerId",
+            "params": [
+              {
+                "name": "speakerId",
+                "value": "JohnDoe",
+                "type": "path",
+                "description": "Speaker identifier of enrolled speaker"
+              }
+            ]
+          },
+          "docs": "Get The Status of Enrollment for the provided Speaker."
+        },
+        {
+          "info": {
+            "name": "Update Speaker Enrollment",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/ai/audio/v1/enrollments/:speakerId",
+            "params": [
+              {
+                "name": "speakerId",
+                "value": "JohnDoe",
+                "type": "path",
+                "description": "Speaker identifier of enrolled speaker"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Add newer audio data to improve an existing speaker enrollment"
+        },
+        {
+          "info": {
+            "name": "Delete Speaker Enrollment",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/ai/audio/v1/enrollments/:speakerId",
+            "params": [
+              {
+                "name": "speakerId",
+                "value": "JohnDoe",
+                "type": "path",
+                "description": "Speaker identifier of enrolled speaker"
+              }
+            ]
+          },
+          "docs": "Delete The Enrollment for the provided Speaker."
+        },
+        {
+          "info": {
+            "name": "Speech to Text Conversion",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/ai/audio/v1/async/speech-to-text",
+            "params": [
+              {
+                "name": "webhook",
+                "value": "",
+                "type": "query",
+                "description": "The webhook URI to which the job response will be returned"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Returns Speech to Text Conversion to the provided webhook URI."
+        },
+        {
+          "info": {
+            "name": "Speaker Diarization",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/ai/audio/v1/async/speaker-diarize",
+            "params": [
+              {
+                "name": "webhook",
+                "value": "",
+                "type": "query",
+                "description": "The webhook URI to which the job response will be returned"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Identifies who said what. Speaker diarization will identify the speaker for each segment\nso you can tell who spoke the sentence, paragraph, or phrase.\n"
+        },
+        {
+          "info": {
+            "name": "Speaker Identification",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/ai/audio/v1/async/speaker-identify",
+            "params": [
+              {
+                "name": "webhook",
+                "value": "",
+                "type": "query",
+                "description": "The webhook URI to which the job response will be returned"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Returns Speaker Identification to the provided webhook URI."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

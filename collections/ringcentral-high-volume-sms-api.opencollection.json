@@ -1,0 +1,346 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards High Volume SMS API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "High Volume SMS",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List A2P SMS Statuses",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/a2p-sms/statuses",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "batchId",
+                "value": "55577",
+                "type": "query",
+                "description": "Internal identifier of a message batch to filter the response"
+              },
+              {
+                "name": "direction",
+                "value": "Inbound",
+                "type": "query",
+                "description": "Direction of a message to filter the message list result.\nBy default, there is no filter applied - both Inbound and Outbound messages are returned\n"
+              },
+              {
+                "name": "dateFrom",
+                "value": "2020-11-09T16:07:52.597Z",
+                "type": "query",
+                "description": "The end of the time range to filter the results in ISO 8601 format including timezone. Default is the 'dateTo' minus 24 hours"
+              },
+              {
+                "name": "dateTo",
+                "value": "2020-11-25T16:07:52.597Z",
+                "type": "query",
+                "description": "The end of the time range to filter the results in ISO 8601 format including timezone. Default is the current time"
+              },
+              {
+                "name": "phoneNumber",
+                "value": "15551234455,15551235577",
+                "type": "query",
+                "description": "List of phone numbers (specified in 'to' or 'from' fields of a message) to filter the results. Maximum number of phone numbers allowed to be specified as filters is 15"
+              }
+            ]
+          },
+          "docs": "Retrieves a set of message counts by message status and error codes filtered by dates, batchId and message direction."
+        },
+        {
+          "info": {
+            "name": "List A2P SMS Messages",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/a2p-sms/messages",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "batchId",
+                "value": "55577",
+                "type": "query",
+                "description": "Internal identifier of a message batch to filter the response"
+              },
+              {
+                "name": "direction",
+                "value": "Inbound",
+                "type": "query",
+                "description": "Direction of a message to filter the message list result.\nBy default, there is no filter applied - both Inbound and Outbound messages are returned\n"
+              },
+              {
+                "name": "dateFrom",
+                "value": "2020-11-09T16:07:52.597Z",
+                "type": "query",
+                "description": "The end of the time range to filter the results in ISO 8601 format including timezone. Default is the 'dateTo' minus 24 hours"
+              },
+              {
+                "name": "dateTo",
+                "value": "2020-11-25T16:07:52.597Z",
+                "type": "query",
+                "description": "The end of the time range to filter the results in ISO 8601 format including timezone. Default is the current time"
+              },
+              {
+                "name": "view",
+                "value": "",
+                "type": "query",
+                "description": "Indicates if the response has to be detailed, includes text in the response if detailed"
+              },
+              {
+                "name": "phoneNumber",
+                "value": "15551234455,15551235577",
+                "type": "query",
+                "description": "List of phone numbers (specified in 'to' or 'from' fields of a message) to filter the results. Maximum number of phone numbers allowed to be specified as filters is 15"
+              },
+              {
+                "name": "pageToken",
+                "value": "pgt1",
+                "type": "query",
+                "description": "The page token of the page to be retrieved."
+              },
+              {
+                "name": "perPage",
+                "value": "1",
+                "type": "query",
+                "description": "The number of messages to be returned per request"
+              }
+            ]
+          },
+          "docs": "Returns the list of outbound/inbound A2P messages sent from/to A2P phone numbers of the current account. The list can be filtered by message batch ID and/or phone number."
+        },
+        {
+          "info": {
+            "name": "Get A2P SMS",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/a2p-sms/messages/:messageId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "messageId",
+                "value": "1234",
+                "type": "path",
+                "description": "Internal identifier of a message to be retrieved"
+              }
+            ]
+          },
+          "docs": "Returns the details of an A2P SMS message by ID."
+        },
+        {
+          "info": {
+            "name": "List Opted Out Numbers",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/a2p-sms/opt-outs",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "from",
+                "value": "15551234455",
+                "type": "query",
+                "description": "The sender's phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format for filtering messages.\nThe asterisk value \"*\" means any number in `from` field\n"
+              },
+              {
+                "name": "to",
+                "value": "15551237755",
+                "type": "query",
+                "description": "The receiver's phone number (`to` field) in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format for filtering messages\n"
+              },
+              {
+                "name": "status",
+                "value": "optout",
+                "type": "query",
+                "description": "The status (opted out, opted in, or both) to be used as the filter"
+              },
+              {
+                "name": "pageToken",
+                "value": "pgt1",
+                "type": "query",
+                "description": "The page token of the page to be retrieved"
+              },
+              {
+                "name": "perPage",
+                "value": "5",
+                "type": "query",
+                "description": "The number of records to be returned for the page"
+              }
+            ]
+          },
+          "docs": "Returns the list of numbers opted out from the account. The list\ncan be filtered by `to`/`from` phone number query parameters. Specifying `text/csv`\nin the `Accept` header lets download the data in the CSV format.\n"
+        },
+        {
+          "info": {
+            "name": "Add Opt-In/Out Numbers",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/a2p-sms/opt-outs/bulk-assign",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Adds multiple opt-outs and/or opt-ins for the specified sender number and a set of recipient numbers.\n"
+        },
+        {
+          "info": {
+            "name": "List A2P SMS Batches",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/a2p-sms/batches",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "dateFrom",
+                "value": "2020-11-09T16:07:52.597Z",
+                "type": "query",
+                "description": "The end of the time range to filter the results in ISO 8601 format including timezone. Default is the 'dateTo' minus 24 hours"
+              },
+              {
+                "name": "dateTo",
+                "value": "2020-11-25T16:07:52.597Z",
+                "type": "query",
+                "description": "The end of the time range to filter the results in ISO 8601 format including timezone. Default is the current time"
+              },
+              {
+                "name": "from",
+                "value": "15551234455",
+                "type": "query",
+                "description": "Phone number in E.164 format from which the messages are going to be sent"
+              },
+              {
+                "name": "status",
+                "value": "Queued,Processing",
+                "type": "query",
+                "description": "A list of batch statuses to filter the results"
+              },
+              {
+                "name": "pageToken",
+                "value": "pgt1",
+                "type": "query",
+                "description": "The page token of the page to be retrieved"
+              },
+              {
+                "name": "perPage",
+                "value": "1",
+                "type": "query",
+                "description": "The number of records to be returned per page"
+              }
+            ]
+          },
+          "docs": "Returns the list of A2P batches sent from the current account.\nThe list can be filtered by message batch ID and/or from phone number.\n"
+        },
+        {
+          "info": {
+            "name": "Send A2P SMS",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/a2p-sms/batches",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Allows to send high volume of A2P (Application-to-Person) SMS messages\n(in message batches). Only phone number with the `A2PSmsSender` feature can\nbe used as a sender.\n"
+        },
+        {
+          "info": {
+            "name": "Get A2P SMS Batch",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/a2p-sms/batches/:batchId",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "batchId",
+                "value": "55577",
+                "type": "path",
+                "description": "Internal identifier of a message batch to be retrieved"
+              }
+            ]
+          },
+          "docs": "Returns information on a message batch."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

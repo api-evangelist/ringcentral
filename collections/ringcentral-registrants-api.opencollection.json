@@ -1,0 +1,146 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Registrants API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Registrants",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Session Registrants",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/registration/v1/sessions/:sessionId/registrants",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "The token indicating the particular page of the result set to be retrieved.\nIf omitted the first page will be returned.\n"
+              },
+              {
+                "name": "includeQuestionnaire",
+                "value": "",
+                "type": "query",
+                "description": "Indicates if registrant's \"questionnaire\" should be returned"
+              }
+            ]
+          },
+          "docs": "Returns the list of Registrants ordered by \"id\" ascending.\n\nA caller must be an authorized user: either a host of the webinar or an IT Admin:\na user from host's account with \"WebinarSettings\" permission.\n"
+        },
+        {
+          "info": {
+            "name": "Create Registrant",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/webinar/registration/v1/sessions/:sessionId/registrants",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new Registrant for a given session.\n\nRegistration MUST be open for the session for this call to succeed (otherwise it should return HTTP 403).\n\nA caller must be an authorized user: either a host of the webinar or an IT Admin:\na user from host's account with \"WebinarSettings\" permission.\n"
+        },
+        {
+          "info": {
+            "name": "Get Registrant",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/registration/v1/sessions/:sessionId/registrants/:registrantId",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              },
+              {
+                "name": "registrantId",
+                "value": "77777777",
+                "type": "path",
+                "description": "Identifier of the Session Registrant"
+              },
+              {
+                "name": "includeQuestionnaire",
+                "value": "",
+                "type": "query",
+                "description": "Indicates if registrant's \"questionnaire\" should be returned"
+              }
+            ]
+          },
+          "docs": "Returns a Registrant by ID.\n\nA caller must be an authorized user: either a host of the webinar or an IT Admin:\na user from host's account with \"WebinarSettings\" permission.\n"
+        },
+        {
+          "info": {
+            "name": "Delete Registrant",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/webinar/registration/v1/sessions/:sessionId/registrants/:registrantId",
+            "params": [
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              },
+              {
+                "name": "registrantId",
+                "value": "77777777",
+                "type": "path",
+                "description": "Identifier of the Session Registrant"
+              }
+            ]
+          },
+          "docs": "Deletes a Registrant by ID.\n\nSession must not be in finished state (otherwise it should return HTTP 403).\n\nA caller must be an authorized user: either a host of the webinar or an IT Admin:\na user from host's account with \"WebinarSettings\" permission.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

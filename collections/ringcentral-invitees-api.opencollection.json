@@ -1,0 +1,193 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Invitees API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Invitees",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Session Invitees",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars/:webinarId/sessions/:sessionId/invitees",
+            "params": [
+              {
+                "name": "webinarId",
+                "value": "98989898",
+                "type": "path",
+                "description": "Identifier of the Webinar."
+              },
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              },
+              {
+                "name": "perPage",
+                "value": "100",
+                "type": "query",
+                "description": "The number of items per page. If provided value in the request\nis greater than a maximum, the maximum value is applied\n"
+              },
+              {
+                "name": "pageToken",
+                "value": "",
+                "type": "query",
+                "description": "The token indicating the particular page of the result set to be retrieved.\nIf omitted the first page will be returned.\n"
+              }
+            ]
+          },
+          "docs": "Returns the list of Invitees (co-hosts and panelists in phase 1\nand also invited attendees in subsequent phases) of a given Webinar Session.\nAn implicit record created for a Webinar 'Host' is always returned.\n"
+        },
+        {
+          "info": {
+            "name": "Bulk Add/Delete Session Invitees",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars/:webinarId/sessions/:sessionId/invitees",
+            "params": [
+              {
+                "name": "webinarId",
+                "value": "98989898",
+                "type": "path",
+                "description": "Identifier of the Webinar."
+              },
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Adds, updates and deletes Webinar Session invitees in bulk (co-hosts and panelists in phase 1\nand also invited attendees in subsequent phases).\nThe payload may contain multiple added, updated or deleted invitees.\nFor each added record 'role' and either 'firstName'/'lastName'/'email' (for non-authenticated users)\nor 'linkedUser.*' (for authenticated users) must be specified, but not both.\nFor updated invitees 'id'  and 'role' must be specified, 'linkedUser' change is not supported.\nFor deleted in"
+        },
+        {
+          "info": {
+            "name": "Get Session Invitee",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars/:webinarId/sessions/:sessionId/invitees/:inviteeId",
+            "params": [
+              {
+                "name": "webinarId",
+                "value": "98989898",
+                "type": "path",
+                "description": "Identifier of the Webinar."
+              },
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              },
+              {
+                "name": "inviteeId",
+                "value": "77777777",
+                "type": "path",
+                "description": "Identifier of the Session Invitee."
+              }
+            ]
+          },
+          "docs": "Returns a Session Invitee information by ID"
+        },
+        {
+          "info": {
+            "name": "Update Session Invitee",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars/:webinarId/sessions/:sessionId/invitees/:inviteeId",
+            "params": [
+              {
+                "name": "webinarId",
+                "value": "98989898",
+                "type": "path",
+                "description": "Identifier of the Webinar."
+              },
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              },
+              {
+                "name": "inviteeId",
+                "value": "77777777",
+                "type": "path",
+                "description": "Identifier of the Session Invitee."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a Session Invitee. 'role' is required (it can be changed from 'Panelist' to 'CoHost' or vise versa).\nIt is disallowed to update 'linkedUser': it should be done by deleting then adding an invitee.\nFor non-authenticated users 'firstName'/'lastName'/'email' can be specified, but not both.\nImplicit record created for a Webinar 'Host' cannot be modified.\nAlso it is disallowed to change any other role to 'Host'.\n"
+        },
+        {
+          "info": {
+            "name": "Delete Session Invitee",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/webinar/configuration/v1/webinars/:webinarId/sessions/:sessionId/invitees/:inviteeId",
+            "params": [
+              {
+                "name": "webinarId",
+                "value": "98989898",
+                "type": "path",
+                "description": "Identifier of the Webinar."
+              },
+              {
+                "name": "sessionId",
+                "value": "353535353",
+                "type": "path",
+                "description": "Identifier of the Session."
+              },
+              {
+                "name": "inviteeId",
+                "value": "77777777",
+                "type": "path",
+                "description": "Identifier of the Session Invitee."
+              }
+            ]
+          },
+          "docs": "Deletes a Session Invitee. Implicit record created for a Webinar 'Host' cannot be deleted.\nDeleting an invitee for a Session in 'Active' or 'Finished' status is prohibited (HTTP 403).\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

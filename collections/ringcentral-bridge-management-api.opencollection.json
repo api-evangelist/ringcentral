@@ -1,0 +1,207 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Bridge Management API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Bridge Management",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Create Bridge",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://platform.ringcentral.com/rcvideo/v2/account/:accountId/extension/:extensionId/bridges",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "",
+                "type": "path",
+                "description": "Account identifier"
+              },
+              {
+                "name": "extensionId",
+                "value": "",
+                "type": "path",
+                "description": "Extension identifier"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new bridge for the user specified by **accountId** and **extensionId** identifiers. The request body\nshould contain JSON object which describes properties of the new bridge.\nThe bridge can be created by a user himself, his delegate or any user who has the **Super Admin** privilege.\n"
+        },
+        {
+          "info": {
+            "name": "Get User's Default Bridge",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/rcvideo/v2/account/:accountId/extension/:extensionId/bridges/default",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "",
+                "type": "path",
+                "description": "Account identifier"
+              },
+              {
+                "name": "extensionId",
+                "value": "",
+                "type": "path",
+                "description": "Extension identifier"
+              }
+            ]
+          },
+          "docs": "Returns a default bridge (PMI) for the user specified by **accountId**\nand **extensionId** identifiers.\n"
+        },
+        {
+          "info": {
+            "name": "Search Bridge by PSTN PIN",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/rcvideo/v2/bridges/pin/pstn/:pin",
+            "params": [
+              {
+                "name": "pin",
+                "value": "",
+                "type": "path",
+                "description": "Host or Participant PSTN PIN"
+              },
+              {
+                "name": "phoneNumber",
+                "value": "",
+                "type": "query",
+                "description": "Phone number to find a phone group for PSTN PIN. If it is not specified, then the default phone group will be used.\n"
+              },
+              {
+                "name": "pw",
+                "value": "",
+                "type": "query",
+                "description": "Bridge hash password"
+              }
+            ]
+          },
+          "docs": "Finds a bridge by Host or Participant PSTN PIN."
+        },
+        {
+          "info": {
+            "name": "Search Bridge by Web PIN",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/rcvideo/v2/bridges/pin/web/:pin",
+            "params": [
+              {
+                "name": "pin",
+                "value": "",
+                "type": "path",
+                "description": "Bridge short identifier (Web PIN) or alias (personal meeting name)"
+              },
+              {
+                "name": "pw",
+                "value": "",
+                "type": "query",
+                "description": "Bridge hash password"
+              }
+            ]
+          },
+          "docs": "Finds a bridge by short identifier (Web PIN). Also it can be used to find a default bridge by the alias\n(personal meeting name).\n"
+        },
+        {
+          "info": {
+            "name": "Get Bridge",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/rcvideo/v2/bridges/:bridgeId",
+            "params": [
+              {
+                "name": "bridgeId",
+                "value": "",
+                "type": "path",
+                "description": "Bridge identifier"
+              },
+              {
+                "name": "pw",
+                "value": "",
+                "type": "query",
+                "description": "Bridge hash password"
+              }
+            ]
+          },
+          "docs": "Returns a bridge by **bridgeId** identifier."
+        },
+        {
+          "info": {
+            "name": "Update Bridge",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/rcvideo/v2/bridges/:bridgeId",
+            "params": [
+              {
+                "name": "bridgeId",
+                "value": "",
+                "type": "path",
+                "description": "Bridge identifier"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a bridge by **bridgeId** identifier. The request body should contain JSON object with updating properties.\nUpdate can only be done by bridge owner, his delegate or any user who has the **Super Admin** privilege.\n"
+        },
+        {
+          "info": {
+            "name": "Delete Bridge",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://platform.ringcentral.com/rcvideo/v2/bridges/:bridgeId",
+            "params": [
+              {
+                "name": "bridgeId",
+                "value": "",
+                "type": "path",
+                "description": "Bridge identifier"
+              }
+            ]
+          },
+          "docs": "Deletes a bridge by **bridgeId** identifier.\nDeletion can only be done by bridge owner, his delegate or any user who has the **Super Admin** privilege.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,307 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "RingCentral Adaptive Cards Presence API",
+    "version": "1.0.58-20240529-47eda8bd"
+  },
+  "request": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "authorization_code",
+      "authorizationUrl": "https://platform.ringcentral.com/restapi/oauth/authorize",
+      "accessTokenUrl": "https://platform.ringcentral.com/restapi/oauth/token",
+      "credentials": {
+        "clientId": "{{clientId}}",
+        "clientSecret": "{{clientSecret}}"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Presence",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Call Queue Presence",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/call-queues/:groupId/presence",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "groupId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call queue extension"
+              }
+            ]
+          },
+          "docs": "Returns presence status of the call queue members."
+        },
+        {
+          "info": {
+            "name": "Update Call Queue Presence",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/call-queues/:groupId/presence",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "groupId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a call queue extension"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates presence status of the call queue members in the specified queue."
+        },
+        {
+          "info": {
+            "name": "Get User Presence Status List",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/presence",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "detailedTelephonyState",
+                "value": "",
+                "type": "query",
+                "description": "Whether to return detailed telephony state"
+              },
+              {
+                "name": "sipData",
+                "value": "",
+                "type": "query",
+                "description": "Whether to return SIP data"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Page number for account presence information"
+              },
+              {
+                "name": "perPage",
+                "value": "",
+                "type": "query",
+                "description": "Number for account presence information items per page"
+              }
+            ]
+          },
+          "docs": "Returns presence status of all extensions of an account. Please note: The presenceStatus is returned as Offline (the parameters telephonyStatus, message, userStatus and dndStatus are not returned at all) for the following extension types: Department, Announcement Only, Voicemail (Take Messages Only), Fax User, Paging Only Group, Shared Lines Group, IVR Menu, Application Extension."
+        },
+        {
+          "info": {
+            "name": "Get Agent’s Call Queue Presence",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/call-queue-presence",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "editableMemberStatus",
+                "value": "",
+                "type": "query",
+                "description": "Filtering by the flag 'Allow members to change their Queue Status'. If 'true' only queues where user can change his availability status are returned"
+              }
+            ]
+          },
+          "docs": "Returns a list of agent's call queues with the agent presence status (per queue)."
+        },
+        {
+          "info": {
+            "name": "Update Call Queue Presence",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/call-queue-presence",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates availability of the agent for the call queues."
+        },
+        {
+          "info": {
+            "name": "Get User Presence Status",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/presence",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "detailedTelephonyState",
+                "value": "",
+                "type": "query",
+                "description": "Specifies whether to return a detailed telephony state or not"
+              },
+              {
+                "name": "sipData",
+                "value": "",
+                "type": "query",
+                "description": "Specifies whether to return SIP data or not"
+              }
+            ]
+          },
+          "docs": "Returns the presence status of an extension or several extensions by their ID(s). The `presenceStatus` is returned as Offline \n(the parameters `telephonyStatus`, `message`, `userStatus` and `dndStatus` are not returned at all) for the following extension types: \nDepartment/Announcement Only/Take Messages Only (Voicemail)/Fax User/Paging Only Group/Shared Lines Group/IVR Menu/Application Extension/Park Location.\nIf the user requests his/her own presence status, the response contains actual presen"
+        },
+        {
+          "info": {
+            "name": "Update User Presence Status",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/presence",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral account\n(can be set to \"~\" to indicate that the account associated with current authorization session should be used)\n"
+              },
+              {
+                "name": "extensionId",
+                "value": "~",
+                "type": "path",
+                "description": "Internal identifier of the RingCentral extension/user\n(can be set to \"~\" to indicate that the extension associated with current authorization session should be used)\n"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates user-defined extension presence status, status message and DnD status by extension ID. Supported for regular User extensions only. The extension types listed do not support presence status: Department, Announcement Only, Take Messages Only (Voicemail), Fax User, Paging Only Group, Shared Lines Group, IVR Menu, Application Extension."
+        },
+        {
+          "info": {
+            "name": "Get Unified Presence",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/unified-presence",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a RingCentral account or tilde (~) to indicate the account logged-in within the current session"
+              },
+              {
+                "name": "extensionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of an extension or tilde (~) to indicate the extension assigned to the account logged-in within the current session"
+              }
+            ]
+          },
+          "docs": "Returns the unified presence status of the requested user(s). The set of parameters returned by this method differs whether you return the requester's presence or any other user presence."
+        },
+        {
+          "info": {
+            "name": "Update Unified Presence",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://platform.ringcentral.com/restapi/v1.0/account/:accountId/extension/:extensionId/unified-presence",
+            "params": [
+              {
+                "name": "accountId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of a RingCentral account or tilde (~) to indicate the account logged-in within the current session"
+              },
+              {
+                "name": "extensionId",
+                "value": "",
+                "type": "path",
+                "description": "Internal identifier of an extension or tilde (~) to indicate the extension assigned to the account logged-in within the current session"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates the unified presence for the current user specified in path."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
