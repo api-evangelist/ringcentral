@@ -1,0 +1,91 @@
+slug: ringcentral
+provider: RingCentral
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Telecommunications
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 7
+edges:
+- tag: Role Management
+  spec_file: ringcentral-role-management-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.85
+  evidence: createCustomRole  Create Custom Role; assignMultipleUserRoles  Assign Multiple User Roles;
+    schemas RoleResource, PermissionIdResource, AssignedRoleResource
+  reason: Operations create, update and assign user roles and permissions for accounts and extensions
+    — role-based access administration, which is Identity & Access Management.
+- tag: Automatic Location Updates
+  spec_file: ringcentral-automatic-location-updates-api-openapi.yml
+  capability_id: BC-2700.40
+  capability_id_l1: BC-2700
+  capability_name: Emergency Services Management
+  confidence: 0.82
+  evidence: GET /restapi/v1.0/account/{accountId}/emergency-locations listEmergencyLocations List Emergency
+    Locations; schemas ERLLocationInfo, EmergencyAddressType, emergency-address-auto-update tasks
+  reason: The operations manage emergency response locations and automatic emergency-address updates per
+    user/device/switch — the E911 location-delivery obligation. That is squarely Emergency Services Management
+    under telecom regulatory compliance. Slight discount because part of the surface is device/switch
+    administration.
+- tag: SCIM
+  spec_file: ringcentral-scim-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.8
+  evidence: POST /scim/v2/Users  scimCreateUser2  Create User; DELETE /scim/v2/Users/{scimUserId}  scimDeleteUser2  Delete
+    User
+  reason: SCIM endpoints provide automated user account provisioning, update and deprovisioning from an
+    external identity provider — joiners-movers-leavers identity lifecycle. Some ambiguity between generic
+    IAM and tenant identity federation framing, hence 0.8.
+- tag: Subscriptions
+  spec_file: ringcentral-subscriptions-api-openapi.yml
+  capability_id: BC-4270.80
+  capability_id_l1: BC-4270
+  capability_name: Webhook & Event Subscription Management
+  confidence: 0.75
+  evidence: POST /restapi/v1.0/subscription  createSubscription  Create Subscription; schemas WebhookDeliveryMode,
+    NotificationDeliveryModeRequest, PubNubDeliveryMode
+  reason: Despite the commercial-sounding tag, the delivery-mode schemas show these are event-notification/webhook
+    subscriptions, matching Webhook & Event Subscription Management. Some risk that this is judged pure
+    plumbing rather than a capability.
+- tag: Webinar Subscriptions
+  spec_file: ringcentral-webinar-subscriptions-api-openapi.yml
+  capability_id: BC-4270.80
+  capability_id_l1: BC-4270
+  capability_name: Webhook & Event Subscription Management
+  confidence: 0.75
+  evidence: POST /webinar/notifications/v1/subscriptions  Create Webinar Subscription; schemas CreateWebhookSubscriptionRequest,
+    WebhookDeliveryMode, NotificationDeliveryMode
+  reason: Despite the business-sounding tag, these operations manage the lifecycle (create/renew/cancel)
+    of outbound event notification subscriptions with webhook, WebSocket and PubNub delivery modes — webhook
+    and event subscription management, not webinar commerce.
+- tag: Call Queues
+  spec_file: ringcentral-call-queues-api-openapi.yml
+  capability_id: BC-430.30
+  capability_id_l1: BC-430
+  capability_name: Contact Centre Operations Management
+  confidence: 0.7
+  evidence: '"Assign Multiple Call Queue Members", "Get Call Queue Overflow Settings", schema "CallQueueServiceLevelSettings"'
+  reason: ACD call queues with agent membership, service-level and overflow settings are the operational
+    configuration of contact-centre telephony routing, which BC-430.30 explicitly covers ('contact centre
+    running, workforce management, telephony').
+- tag: Phone Numbers
+  spec_file: ringcentral-phone-numbers-api-openapi.yml
+  capability_id: BC-2640.30
+  capability_id_l1: BC-2640
+  capability_name: Numbering Resource Management
+  confidence: 0.7
+  evidence: POST /restapi/v2/accounts/{accountId}/phone-numbers/bulk-add  addNumbersToInventoryV2  Add
+    Numbers to Inventory; PATCH .../phone-numbers/{phoneNumberId}  assignPhoneNumberV2  Assign Phone Number
+  reason: Operations maintain an inventory of telephone numbers and assign/replace/delete them against
+    accounts and extensions — stewardship and assignment of telephone numbering resources. Moderate confidence
+    because it is customer-account-level number administration rather than regulator-granted range management.
