@@ -1,77 +1,46 @@
-specification: API Commons Rate Limits
-specificationVersion: '0.1'
-schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
-provider: RingCentral
-providerId: ringcentral
-created: '2026-05-08'
-# Provenance stamped 2026-08-11: this artifact was written by the API Evangelist
-# bulk sweep dated 2026-05-08, not harvested from the provider. See roadmap#35.
-method: generated
-modified: '2026-05-08'
-reconciled: true
-tags:
-  - Communications
-  - UCaaS
-  - Voice
-  - Video
-  - Contact Center
-  - Rate Limiting
-  - Quotas
-  - Throttling
-description: >-
-  RingCentral applies per-user, per-application rate limits to every REST API call. Each operation is bucketed into one of four categories — Light, Medium, Heavy, or Auth — each with its own per-minute quota. Exceeding a quota returns HTTP 429 with a Retry-After header. Default per-app limits can be raised via the Developer Console for production-graded apps.
-notes: >-
-  Limits below are RingCentral's published defaults. Actual app limits may be higher (graduated apps) or lower (sandbox). Always check the X-Rate-Limit-* and Retry-After response headers at runtime.
+# Rate limits transcribed from the provider's own documentation — see provenance. Quoted, not derived.
+generated: '2026-09-20'
+method: searched
+source: https://developers.ringcentral.com/guide/basics/rate-limits
 sources:
-  - https://developers.ringcentral.com/guide/basics/rate-limits
-  - https://developers.ringcentral.com/guide/basics/throttling
-responseCodes:
-  throttled: 429
+- https://developers.ringcentral.com/guide/basics/rate-limits
+provenance:
+  tool: planning/api-economics/harvest_ratelimits.py
+  run: 20260920T133210
+  grounding: every limit_text was found verbatim in the fetched page text
+published: true
+note: Default user-level usage plan group limits; page notes they are examples and customizable per app.
+  Penalty interval 60 seconds default.
+limit_count: 4
 limits:
-  - name: Light Category
-    scope: user-per-app
-    metric: requests
-    limit: 50
-    timeFrame: minute
-    notes: >-
-      Read-mostly endpoints such as account lookups, fetching extensions, and reading message metadata.
-  - name: Medium Category
-    scope: user-per-app
-    metric: requests
-    limit: 40
-    timeFrame: minute
-    notes: >-
-      Standard REST operations including most sends, updates, and listings.
-  - name: Heavy Category
-    scope: user-per-app
-    metric: requests
-    limit: 10
-    timeFrame: minute
-    notes: >-
-      Expensive operations such as bulk messaging, fax sends, large reporting/analytics queries, and recording downloads.
-  - name: Authentication Category
-    scope: user-per-app
-    metric: requests
-    limit: 5
-    timeFrame: minute
-    notes: >-
-      Token issuance, refresh, and revocation endpoints (/restapi/oauth/*).
+- name: Light usage plan group
+  limit_text: 50 requests/user/minute
+  limit: 50
+  window: minute
+  scope: user
+  plan: Light
+- name: Medium usage plan group
+  limit_text: 40 requests/user/minute
+  limit: 40
+  window: minute
+  scope: user
+  plan: Medium
+- name: Heavy usage plan group
+  limit_text: 10 requests/user/minute
+  limit: 10
+  window: minute
+  scope: user
+  plan: Heavy
+- name: Auth usage plan group
+  limit_text: 5 requests/user/minute
+  limit: 5
+  window: minute
+  scope: user
+  plan: Auth
 headers:
-  - name: X-Rate-Limit-Limit
-    description: Requests allowed in the current window for the matching category.
-  - name: X-Rate-Limit-Remaining
-    description: Requests still available in the current window.
-  - name: X-Rate-Limit-Window
-    description: Length of the rolling rate-limit window (seconds).
-  - name: Retry-After
-    description: Seconds the client should wait before issuing the next request after a 429 response.
-policies:
-  - name: Backoff Strategy
-    description: >-
-      Clients must implement exponential backoff with jitter and honor the Retry-After header. Apps should also respect category-specific quotas by inspecting the X-Rate-Limit-* headers returned on every response.
-  - name: App Graduation
-    description: >-
-      Apps in sandbox have lower defaults than production. After graduation through the Developer Console, an app receives the standard production quotas above; further increases are negotiated with RingCentral.
-maintainers:
-  - FN: Kin Lane
-    email: kin@apievangelist.com
+- X-Rate-Limit-Group
+- X-Rate-Limit-Limit
+- X-Rate-Limit-Remaining
+- X-Rate-Limit-Window
+- Retry-After
+exceeded_status: 429
