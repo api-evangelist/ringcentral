@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Call Queues API
+  title: RingCentral Call Queues API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -94,9 +94,7 @@ paths:
       tags:
       - Call Queues
       summary: Update Call Queue
-      description: 'Updates information on a call queue group extension.
-
-        '
+      description: Updates information on a call queue group extension.
       operationId: updateCallQueueInfo
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -129,9 +127,7 @@ paths:
       tags:
       - Call Queues
       summary: Assign Multiple Call Queue Members
-      description: 'Assigns multiple call queue members to call queue group.
-
-        '
+      description: Assigns multiple call queue members to call queue group.
       operationId: assignMultipleCallQueueMembers
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -163,9 +159,7 @@ paths:
       tags:
       - Call Queues
       summary: List Call Queue Members
-      description: 'Returns a list of call queue group members.
-
-        '
+      description: Returns a list of call queue group members.
       operationId: listCallQueueMembers
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -220,9 +214,7 @@ paths:
 
         queue members please use the following method
 
-        `GET/restapi/v1.0/account/{accountId}/call-queues/{groupId}/members`.
-
-        '
+        `GET/restapi/v1.0/account/{accountId}/call-queues/{groupId}/members`.'
       operationId: listDepartmentMembers
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -285,9 +277,7 @@ paths:
 
         In order to assign multiple call queue members please use the following
 
-        method `POST/restapi/v1.0/account/{accountId}/call-queues/{groupId}/bulk-assign`.
-
-        '
+        method `POST/restapi/v1.0/account/{accountId}/call-queues/{groupId}/bulk-assign`.'
       operationId: assignMultipleDepartmentMembers
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -317,9 +307,7 @@ paths:
 
         an agent is not mentioned in request, then the user is automatically removed
 
-        from this queue.
-
-        '
+        from this queue.'
       operationId: updateUserCallQueues
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -402,43 +390,6 @@ paths:
       x-user-permission: CallQueueToCallQueue
 components:
   schemas:
-    QueueShortInfoResource:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Call queue extension identifier
-        name:
-          type: string
-          description: Call queue name (read-only)
-    CallQueueInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a call queue
-        id:
-          type: string
-          description: Internal identifier of a call queue
-        extensionNumber:
-          type: string
-          description: Extension number of a call queue
-        name:
-          type: string
-          description: Name of a call queue
-        status:
-          type: string
-          description: Call queue status
-          enum:
-          - Enabled
-          - Disabled
-          - NotActivated
-        subType:
-          type: string
-          description: Indicates whether it is an emergency call queue extension or not
-          enum:
-          - Emergency
     BulkAssignItem:
       type: object
       properties:
@@ -452,64 +403,47 @@ components:
           type: array
           items:
             type: string
-    DepartmentBulkAssignResource:
+    ExtensionInfo:
       type: object
-      description: 'Please note that legacy ''Department'' extension type corresponds to
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        name:
+          type: string
+          description: Extension name
+        extensionNumber:
+          type: string
+          description: Extension short number
+        partnerId:
+          type: string
+          description: 'For partner applications. Internal identifier of an extension
 
-        ''Call Queue'' extensions in modern RingCentral product terminology
+            created by partner. The RingCentral supports the mapping of accounts and
+
+            stores the corresponding account ID/extension ID for each partner ID of
+
+            a client application. In request URIs partner IDs are accepted instead
+
+            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
+
+            Though in response URIs contain the corresponding account IDs and extension
+
+            IDs. In all request and response bodies these values are reflected via
+
+            partnerId attributes of account and extension
+
+            '
+      description: 'Information on the extension, to which the phone number is assigned.
+
+        Returned only for the request of Account phone number list
 
         '
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/BulkAssignItem'
-    CallQueueServiceLevelSettings:
-      type: object
-      properties:
-        slaGoal:
-          type: integer
-          format: int32
-          description: 'Target percentage of calls that must be answered by agents
-
-            within the service level time threshold
-
-            '
-        slaThresholdSeconds:
-          type: integer
-          format: int32
-          description: 'The period of time in seconds that is considered to be an acceptable
-
-            service level
-
-            '
-        includeAbandonedCalls:
-          type: boolean
-          description: 'Includes abandoned calls (when callers hang up prior to being
-
-            served by an agent) into service-level calculation
-
-            '
-        abandonedThresholdSeconds:
-          type: integer
-          format: int32
-          description: 'Abandoned calls that are shorter than the defined period of
-
-            time in seconds will not be included into the calculation of Service Level
-
-            '
-      description: Call queue service level settings
-    CallQueueBulkAssignResource:
-      type: object
-      properties:
-        addedExtensionIds:
-          type: array
-          items:
-            type: string
-        removedExtensionIds:
-          type: array
-          items:
-            type: string
     EnumeratedPagingModel:
       type: object
       required:
@@ -580,14 +514,6 @@ components:
 
             '
           example: 25
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
     PageNavigationModel:
       type: object
       description: Links to other pages of the current result set
@@ -601,36 +527,47 @@ components:
           $ref: '#/components/schemas/PageNavigationUri'
         lastPage:
           $ref: '#/components/schemas/PageNavigationUri'
-    CallQueueIdResource:
+    CallQueueBulkAssignResource:
       type: object
       properties:
-        id:
-          type: string
-          description: Internal identifier of a call queue
-    CallQueueOverflowSettingsRequestResource:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          description: Call queue overflow status
-        items:
+        addedExtensionIds:
           type: array
           items:
-            $ref: '#/components/schemas/CallQueueIdResource'
-    CallQueueMemberInfo:
+            type: string
+        removedExtensionIds:
+          type: array
+          items:
+            type: string
+    CallQueues:
+      required:
+      - navigation
+      - paging
+      - records
+      - uri
       type: object
       properties:
         uri:
           type: string
           format: uri
-          description: Link to a call queue member
+          description: Link to a call queues resource
+        records:
+          type: array
+          description: List of call queues
+          items:
+            $ref: '#/components/schemas/CallQueueInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    QueueShortInfoResource:
+      type: object
+      properties:
         id:
-          type: integer
-          format: int64
-          description: Internal identifier of a call queue member
-        extensionNumber:
           type: string
-          description: Extension number of a call queue member
+          description: Call queue extension identifier
+        name:
+          type: string
+          description: Call queue name (read-only)
     CallQueueDetails:
       allOf:
       - $ref: '#/components/schemas/CallQueueInfo'
@@ -664,56 +601,87 @@ components:
             - 480
             - 540
             - 600
-    CallQueueMembers:
-      required:
-      - navigation
-      - paging
-      - records
-      - uri
+    CallQueueOverflowSettings:
       type: object
       properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a call queue members resource
-        records:
+        enabled:
+          type: boolean
+          description: Call queue overflow status
+        items:
           type: array
-          description: List of call queue members
-          items:
-            $ref: '#/components/schemas/CallQueueMemberInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    CallQueues:
-      required:
-      - navigation
-      - paging
-      - records
-      - uri
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a call queues resource
-        records:
-          type: array
-          description: List of call queues
           items:
             $ref: '#/components/schemas/CallQueueInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    UserCallQueues:
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    CallQueueOverflowSettingsRequestResource:
       type: object
       properties:
-        records:
+        enabled:
+          type: boolean
+          description: Call queue overflow status
+        items:
           type: array
-          description: List of queues where an extension is an agent
           items:
-            $ref: '#/components/schemas/QueueShortInfoResource'
+            $ref: '#/components/schemas/CallQueueIdResource'
+    CallQueueIdResource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a call queue
+    DepartmentBulkAssignResource:
+      type: object
+      description: 'Please note that legacy ''Department'' extension type corresponds to
+
+        ''Call Queue'' extensions in modern RingCentral product terminology
+
+        '
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkAssignItem'
+    CallQueueServiceLevelSettings:
+      type: object
+      properties:
+        slaGoal:
+          type: integer
+          format: int32
+          description: 'Target percentage of calls that must be answered by agents
+
+            within the service level time threshold
+
+            '
+        slaThresholdSeconds:
+          type: integer
+          format: int32
+          description: 'The period of time in seconds that is considered to be an acceptable
+
+            service level
+
+            '
+        includeAbandonedCalls:
+          type: boolean
+          description: 'Includes abandoned calls (when callers hang up prior to being
+
+            served by an agent) into service-level calculation
+
+            '
+        abandonedThresholdSeconds:
+          type: integer
+          format: int32
+          description: 'Abandoned calls that are shorter than the defined period of
+
+            time in seconds will not be included into the calculation of Service Level
+
+            '
+      description: Call queue service level settings
     DepartmentMemberList:
       type: object
       description: 'Please note that legacy ''Department'' extension type corresponds to
@@ -735,57 +703,77 @@ components:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
-    CallQueueOverflowSettings:
+    UserCallQueues:
       type: object
       properties:
-        enabled:
-          type: boolean
-          description: Call queue overflow status
-        items:
+        records:
           type: array
+          description: List of queues where an extension is an agent
           items:
-            $ref: '#/components/schemas/CallQueueInfo'
-    ExtensionInfo:
+            $ref: '#/components/schemas/QueueShortInfoResource'
+    CallQueueInfo:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
-          description: Internal identifier of an extension
         uri:
           type: string
           format: uri
-          description: Canonical URI of an extension
-        name:
+          description: Link to a call queue
+        id:
           type: string
-          description: Extension name
+          description: Internal identifier of a call queue
         extensionNumber:
           type: string
-          description: Extension short number
-        partnerId:
+          description: Extension number of a call queue
+        name:
           type: string
-          description: 'For partner applications. Internal identifier of an extension
-
-            created by partner. The RingCentral supports the mapping of accounts and
-
-            stores the corresponding account ID/extension ID for each partner ID of
-
-            a client application. In request URIs partner IDs are accepted instead
-
-            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
-
-            Though in response URIs contain the corresponding account IDs and extension
-
-            IDs. In all request and response bodies these values are reflected via
-
-            partnerId attributes of account and extension
-
-            '
-      description: 'Information on the extension, to which the phone number is assigned.
-
-        Returned only for the request of Account phone number list
-
-        '
+          description: Name of a call queue
+        status:
+          type: string
+          description: Call queue status
+          enum:
+          - Enabled
+          - Disabled
+          - NotActivated
+        subType:
+          type: string
+          description: Indicates whether it is an emergency call queue extension or not
+          enum:
+          - Emergency
+    CallQueueMembers:
+      required:
+      - navigation
+      - paging
+      - records
+      - uri
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call queue members resource
+        records:
+          type: array
+          description: List of call queue members
+          items:
+            $ref: '#/components/schemas/CallQueueMemberInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CallQueueMemberInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call queue member
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of a call queue member
+        extensionNumber:
+          type: string
+          description: Extension number of a call queue member
   parameters:
     AccountId:
       name: accountId

@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Call Handling Rules API
+  title: RingCentral Call Handling Rules API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -424,442 +424,6 @@ paths:
       x-user-permission: EditUserAnsweringRules
 components:
   schemas:
-    CreateAnsweringRuleForwardingNumberInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a forwarding number
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a forwarding/call flip phone number
-        phoneNumber:
-          type: string
-          description: Forwarding/Call flip phone number
-        label:
-          type: string
-          description: Forwarding/Call flip number title
-        type:
-          type: string
-          description: Type of forwarding number
-          enum:
-          - Home
-          - Mobile
-          - Work
-          - PhoneLine
-          - Outage
-          - Other
-          - BusinessMobilePhone
-          - ExternalCarrier
-          - ExtensionApps
-    IvrCallHandlingActionEnum:
-      type: string
-      description: 'Specifies how incoming calls are forwarded. The default value
-
-        is ''Operator'' ''Operator'' - play company greeting and forward to operator
-
-        extension ''Disconnect'' - play company greeting and disconnect ''Bypass''
-
-        - bypass greeting to go to selected extension = [''Operator'', ''Disconnect'',
-
-        ''Bypass'']
-
-        '
-      enum:
-      - Operator
-      - Disconnect
-      - Bypass
-    CompanyAnsweringRuleExtensionInfoRequest:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an extension
-      description: Extension to which the call is forwarded in 'Bypass' mode
-    SharedLinesInfo:
-      type: object
-      properties:
-        timeout:
-          type: integer
-          format: int32
-          minimum: 10
-          maximum: 80
-          description: 'Number of seconds to wait before forwarding unanswered calls. The value range is 10 - 80
-
-            '
-      description: SharedLines call handling action settings
-    CompanyAnsweringRuleCalledNumberInfoRequest:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an account phone number
-        phoneNumber:
-          type: string
-          description: Phone number of a callee
-    ScheduleInfo:
-      type: object
-      description: Schedule when an answering rule should be applied
-      properties:
-        weeklyRanges:
-          $ref: '#/components/schemas/WeeklyScheduleInfo'
-        ranges:
-          type: array
-          description: Specific data ranges
-          items:
-            $ref: '#/components/schemas/RangesInfo'
-        ref:
-          type: string
-          description: The user's schedule specified for business hours or after hours; it can also be set/retrieved calling the corresponding method
-          enum:
-          - BusinessHours
-          - AfterHours
-    VoicemailInfo:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          description: If `true` then voicemails are allowed to be received
-        recipient:
-          $ref: '#/components/schemas/RecipientInfo'
-      description: Specifies whether to take a voicemail and who should do it
-    CompanyAnsweringRuleRequest:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Name of an answering rule specified by user. Max number of symbols is 30. The default value is 'My Rule N' where 'N' is the first free number
-        enabled:
-          type: boolean
-          description: Specifies if the rule is active or inactive. The default value is `true`
-          default: true
-        type:
-          type: string
-          description: Type of an answering rule, the default value is 'Custom' = ['BusinessHours', 'AfterHours', 'Custom']
-          enum:
-          - BusinessHours
-          - AfterHours
-          - Custom
-        callers:
-          type: array
-          description: Answering rule will be applied when calls are received from the specified caller(s)
-          items:
-            $ref: '#/components/schemas/CompanyAnsweringRuleCallersInfoRequest'
-        calledNumbers:
-          type: array
-          description: Answering rule will be applied when calling the specified number(s)
-          items:
-            $ref: '#/components/schemas/CompanyAnsweringRuleCalledNumberInfo'
-        schedule:
-          $ref: '#/components/schemas/CompanyAnsweringRuleScheduleInfoRequest'
-        callHandlingAction:
-          type: string
-          description: Specifies how incoming calls are forwarded. The default value is 'Operator' 'Operator' - play company greeting and forward to operator extension 'Disconnect' - play company greeting and disconnect 'Bypass' - bypass greeting to go to selected extension = ['Operator', 'Disconnect', 'Bypass']
-          enum:
-          - Operator
-          - Disconnect
-          - Bypass
-        extension:
-          $ref: '#/components/schemas/CompanyAnsweringRuleExtensionInfoRequest'
-        greetings:
-          type: array
-          description: Greetings applied for an answering rule; only predefined greetings can be applied, see Dictionary Greeting List
-          items:
-            $ref: '#/components/schemas/GreetingInfo'
-    CompanyAnsweringRuleCallersInfoRequest:
-      type: object
-      properties:
-        callerId:
-          type: string
-          description: Phone number of a caller
-        name:
-          type: string
-          description: Displayed name for a caller ID
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    CompanyAnsweringRuleUpdate:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          description: Specifies if a rule is active or inactive. The default value is `true`
-          default: true
-        name:
-          type: string
-          description: 'Name of an answering rule specified by user. Max number of
-
-            symbols is 30. The default value is ''My Rule N'' where ''N'' is the first
-
-            free number
-
-            '
-        callers:
-          type: array
-          description: 'Answering rule will be applied when calls are received from
-
-            the specified caller(s)
-
-            '
-          items:
-            $ref: '#/components/schemas/CompanyAnsweringRuleCallersInfoRequest'
-        calledNumbers:
-          type: array
-          description: Answering rule will be applied when calling the specified number(s)
-          items:
-            $ref: '#/components/schemas/CompanyAnsweringRuleCalledNumberInfo'
-        schedule:
-          $ref: '#/components/schemas/CompanyAnsweringRuleScheduleInfoRequest'
-        callHandlingAction:
-          type: string
-          description: Specifies how incoming calls are forwarded. The default value is 'Operator' 'Operator' - play company greeting and forward to operator extension 'Disconnect' - play company greeting and disconnect 'Bypass' - bypass greeting to go to selected extension = ['Operator', 'Disconnect','Bypass']
-          enum:
-          - Operator
-          - Disconnect
-          - Bypass
-        type:
-          type: string
-          description: Type of an answering rule
-          default: Custom
-          enum:
-          - BusinessHours
-          - AfterHours
-          - Custom
-        extension:
-          $ref: '#/components/schemas/CompanyAnsweringRuleCallersInfoRequest'
-        greetings:
-          type: array
-          description: 'Greetings applied for an answering rule; only predefined greetings
-
-            can be applied, see Dictionary Greeting List
-
-            '
-          items:
-            $ref: '#/components/schemas/GreetingInfo'
-    FixedOrderAgents:
-      type: object
-      properties:
-        extension:
-          $ref: '#/components/schemas/FixedOrderAgentsExtensionInfo'
-        index:
-          type: integer
-          format: int32
-          description: Ordinal of an agent (call queue member)
-    UnconditionalForwardingInfo:
-      type: object
-      description: 'Unconditional forwarding parameters.
-
-        Returned if ''UnconditionalForwarding'' value is specified for the `callHandlingAction` parameter
-
-        '
-      properties:
-        phoneNumber:
-          type: string
-          description: 'Phone number to which the call is forwarded. In addition to
-
-            common e.164 format, the following number patterns are supported: 11xxxxxxxxxxx,
-
-            444xxxxxxxxxxx, 616xxxxxxxxxxx, 1700yyyy; where xxxxxxxxxxx is a phone number in
-
-            e.164 format (without ''+'' sign) and yyyy is an external short extension number.
-
-            Max number of digits is 15
-
-            '
-        action:
-          type: string
-          description: Event that initiates forwarding to the specified phone number
-          enum:
-          - HoldTimeExpiration
-          - MaxCallers
-          - NoAnswer
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    MissedCallExtensionInfo:
-      type: object
-      description: Specifies an extension (a calling group) which should be used for the missed call transfer. Returned only if the `actionType` is set to 'ConnectToExtension'
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an extension which should be used for the missed call transfer
-        externalNumber:
-          $ref: '#/components/schemas/MissedCallExtensionInfoExternalNumber'
-    CalledNumberInfo:
-      type: object
-      properties:
-        phoneNumber:
-          type: string
-          description: Called phone number
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    EnumeratedPagingModel:
-      type: object
-      required:
-      - perPage
-      additionalProperties: false
-      properties:
-        perPage:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'Current page size, describes how many items are in each page.
-
-            Matches "perPage" parameter from the request.
-
-            '
-          example: 50
-        page:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'The current page number. 1-indexed, so the first page is 1
-
-            by default. May be omitted if result is empty (because non-existent page
-
-            was specified or perPage=0 was requested)
-
-            '
-          example: 5
-        pageStart:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based number of the first element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 0
-        pageEnd:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based index of the last element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 5
-        totalPages:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of pages in a dataset. May be omitted for
-
-            some resources due to performance reasons
-
-            '
-          example: 25
-        totalElements:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of elements in a dataset. May be omitted for
-
-            some resource due to performance reasons
-
-            '
-          example: 25
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    WeeklyScheduleInfo:
-      type: object
-      properties:
-        monday:
-          type: array
-          description: Time intervals for a particular day
-          items:
-            $ref: '#/components/schemas/TimeInterval'
-        tuesday:
-          type: array
-          description: Time intervals for a particular day
-          items:
-            $ref: '#/components/schemas/TimeInterval'
-        wednesday:
-          type: array
-          description: Time intervals for a particular day
-          items:
-            $ref: '#/components/schemas/TimeInterval'
-        thursday:
-          type: array
-          description: Time intervals for a particular day
-          items:
-            $ref: '#/components/schemas/TimeInterval'
-        friday:
-          type: array
-          description: Time intervals for a particular day
-          items:
-            $ref: '#/components/schemas/TimeInterval'
-        saturday:
-          type: array
-          description: Time intervals for a particular day
-          items:
-            $ref: '#/components/schemas/TimeInterval'
-        sunday:
-          type: array
-          description: Time intervals for a particular day
-          items:
-            $ref: '#/components/schemas/TimeInterval'
-      description: Weekly schedule
-    MissedCallInfo:
-      type: object
-      description: Specifies behavior for the missed call scenario. Returned only if `enabled` parameter of a voicemail is set to 'false'
-      properties:
-        actionType:
-          type: string
-          description: Specifies the action that should be executed on a missed call. It can either be playing greeting message and disconnection, or sending call to a calling group. If 'ConnectToExtension' is set, then calling group extension should be specified
-          enum:
-          - PlayGreetingAndDisconnect
-          - ConnectToExtension
-          - ConnectToExternalNumber
-        extension:
-          $ref: '#/components/schemas/MissedCallExtensionInfo'
     ForwardingRuleCreateRequest:
       type: object
       properties:
@@ -883,96 +447,94 @@ components:
           description: Forwarding number (or group) data
           items:
             $ref: '#/components/schemas/ForwardingNumberInfoRulesCreateRuleRequest'
-    CompanyAnsweringRuleExtensionInfo:
+    RangesInfo:
       type: object
       properties:
-        id:
+        from:
           type: string
-          description: Internal identifier of an extension
-    CallersInfoRequest:
+          format: date-time
+          description: 'Beginning timestamp of the range in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601),
+
+            for example *2018-10-29T14:00:00*, *2018-10-29T14:00:00Z*, *2018-10-29T14:00:00+0100*
+
+            '
+        to:
+          type: string
+          format: date-time
+          description: 'Ending timestamp of the range in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601),
+
+            for example *2018-10-29T14:00:00*, *2018-10-29T14:00:00Z*, *2018-10-29T14:00:00+0100*
+
+            '
+    MissedCallInfo:
       type: object
+      description: Specifies behavior for the missed call scenario. Returned only if `enabled` parameter of a voicemail is set to 'false'
       properties:
-        callerId:
+        actionType:
           type: string
-          description: Phone number of a caller
-        name:
-          type: string
-          description: Contact name of a caller
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-    ForwardingInfo:
-      type: object
-      properties:
-        notifyMySoftPhones:
-          type: boolean
-          description: Specifies if the user's softphone(s) are notified before forwarding the incoming call to desk phones and forwarding numbers
-        notifyAdminSoftPhones:
-          type: boolean
-          description: Deprecated parameter. Specifies if the administrator's softphone is notified before forwarding the incoming call to desk phones and forwarding numbers. The default value is `false`
-          deprecated: true
-        softPhonesRingCount:
-          type: integer
-          format: int32
-          description: Number of rings before forwarding starts
-        softPhonesAlwaysRing:
-          type: boolean
-          description: Specifies that desktop and mobile applications of the user will ring till the end of their forwarding list. If set to `true` then `softPhonesRingCount` is ignored
-          default: true
-        ringingMode:
-          type: string
-          description: Specifies the order in which the forwarding numbers ring. 'Sequentially' means that forwarding numbers are ringing one at a time, in order of priority. 'Simultaneously' means that forwarding numbers are ring all at the same time
+          description: Specifies the action that should be executed on a missed call. It can either be playing greeting message and disconnection, or sending call to a calling group. If 'ConnectToExtension' is set, then calling group extension should be specified
           enum:
-          - Sequentially
-          - Simultaneously
-        rules:
+          - PlayGreetingAndDisconnect
+          - ConnectToExtension
+          - ConnectToExternalNumber
+        extension:
+          $ref: '#/components/schemas/MissedCallExtensionInfo'
+    CompanyAnsweringRuleScheduleInfoRequest:
+      type: object
+      properties:
+        weeklyRanges:
+          $ref: '#/components/schemas/CompanyAnsweringRuleWeeklyScheduleInfoRequest'
+        ranges:
           type: array
-          description: Information on a call forwarding rule
+          description: Specific data ranges. If specified, weeklyRanges cannot be specified
           items:
-            $ref: '#/components/schemas/ForwardingRuleInfo'
-        softPhonesPositionTop:
-          type: boolean
-          description: Specifies if desktop and mobile applications of the user are notified before (true) or after (false) forwarding the incoming call to desk phones and forwarding numbers. Applicable only if `notifyMySoftPhones` parameter is set to `true`
-        mobileTimeout:
-          type: boolean
-          description: Deprecated parameter. Specifies if mobile timeout is activated for the rule
-          deprecated: true
-      description: Forwarding parameters. Returned if 'ForwardCalls' is specified in 'callHandlingAction'. These settings determine the forwarding numbers to which the call will be forwarded
-    ForwardingNumberInfoRulesCreateRuleRequest:
+            $ref: '#/components/schemas/RangesInfo'
+        ref:
+          type: string
+          description: Reference to Business Hours or After Hours schedule
+          enum:
+          - BusinessHours
+          - AfterHours
+      description: Schedule when an answering rule should be applied
+    CompanyAnsweringRuleList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to an answering rule resource
+        records:
+          type: array
+          description: List of company answering rules
+          items:
+            $ref: '#/components/schemas/ListCompanyAnsweringRuleInfo'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+    CustomGreetingInfoRequest:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of a forwarding number
-        type:
+          description: Internal identifier of a custom user greeting
+    ScheduleInfo:
+      type: object
+      description: Schedule when an answering rule should be applied
+      properties:
+        weeklyRanges:
+          $ref: '#/components/schemas/WeeklyScheduleInfo'
+        ranges:
+          type: array
+          description: Specific data ranges
+          items:
+            $ref: '#/components/schemas/RangesInfo'
+        ref:
           type: string
-          description: Forwarding phone number type
+          description: The user's schedule specified for business hours or after hours; it can also be set/retrieved calling the corresponding method
           enum:
-          - Home
-          - Mobile
-          - Work
-          - PhoneLine
-          - Outage
-          - Other
-          - BusinessMobilePhone
-          - ExternalCarrier
-          - ExtensionApps
-        phoneNumber:
-          type: string
-          description: Forwarding/Call flip phone number
-        label:
-          type: string
-          description: Forwarding/Call flip number title
+          - BusinessHours
+          - AfterHours
     AnsweringRuleInfo:
       type: object
       properties:
@@ -1047,7 +609,263 @@ components:
           $ref: '#/components/schemas/SharedLinesInfo'
         missedCall:
           $ref: '#/components/schemas/MissedCallInfo'
-    CompanyAnsweringRuleScheduleInfoRequest:
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    MissedCallExtensionInfoExternalNumber:
+      type: object
+      description: Specifies an external PSTN number which should be used for the missed call transfer. Returned only if the actionType is set to `ConnectToExternalNumber`
+      properties:
+        phoneNumber:
+          type: string
+          description: 'Phone number to which the call is forwarded. In addition to common [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format, the following number patterns are supported: 11xxxxxxxxxxx, 444xxxxxxxxxxx, 616xxxxxxxxxxx, 1700yyyy; where `xxxxxxxxxxx` is a phone number in e.164 format (without ''+'' sign) and `yyyy` is an external short extension number. Maximum number of digits is 15'
+    CompanyAnsweringRuleUpdate:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specifies if a rule is active or inactive. The default value is `true`
+          default: true
+        name:
+          type: string
+          description: 'Name of an answering rule specified by user. Max number of
+
+            symbols is 30. The default value is ''My Rule N'' where ''N'' is the first
+
+            free number
+
+            '
+        callers:
+          type: array
+          description: 'Answering rule will be applied when calls are received from
+
+            the specified caller(s)
+
+            '
+          items:
+            $ref: '#/components/schemas/CompanyAnsweringRuleCallersInfoRequest'
+        calledNumbers:
+          type: array
+          description: Answering rule will be applied when calling the specified number(s)
+          items:
+            $ref: '#/components/schemas/CompanyAnsweringRuleCalledNumberInfo'
+        schedule:
+          $ref: '#/components/schemas/CompanyAnsweringRuleScheduleInfoRequest'
+        callHandlingAction:
+          type: string
+          description: Specifies how incoming calls are forwarded. The default value is 'Operator' 'Operator' - play company greeting and forward to operator extension 'Disconnect' - play company greeting and disconnect 'Bypass' - bypass greeting to go to selected extension = ['Operator', 'Disconnect','Bypass']
+          enum:
+          - Operator
+          - Disconnect
+          - Bypass
+        type:
+          type: string
+          description: Type of an answering rule
+          default: Custom
+          enum:
+          - BusinessHours
+          - AfterHours
+          - Custom
+        extension:
+          $ref: '#/components/schemas/CompanyAnsweringRuleCallersInfoRequest'
+        greetings:
+          type: array
+          description: 'Greetings applied for an answering rule; only predefined greetings
+
+            can be applied, see Dictionary Greeting List
+
+            '
+          items:
+            $ref: '#/components/schemas/GreetingInfo'
+    RecipientInfo:
+      type: object
+      description: Recipient data
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a voicemail recipient extension resource
+        id:
+          description: Internal identifier of a voicemail recipient
+          type: string
+    MissedCallExtensionInfo:
+      type: object
+      description: Specifies an extension (a calling group) which should be used for the missed call transfer. Returned only if the `actionType` is set to 'ConnectToExtension'
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension which should be used for the missed call transfer
+        externalNumber:
+          $ref: '#/components/schemas/MissedCallExtensionInfoExternalNumber'
+    CompanyAnsweringRuleExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    SharedLinesInfo:
+      type: object
+      properties:
+        timeout:
+          type: integer
+          format: int32
+          minimum: 10
+          maximum: 80
+          description: 'Number of seconds to wait before forwarding unanswered calls. The value range is 10 - 80
+
+            '
+      description: SharedLines call handling action settings
+    FixedOrderAgents:
+      type: object
+      properties:
+        extension:
+          $ref: '#/components/schemas/FixedOrderAgentsExtensionInfo'
+        index:
+          type: integer
+          format: int32
+          description: Ordinal of an agent (call queue member)
+    CreateAnsweringRuleForwardingNumberInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a forwarding number
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a forwarding/call flip phone number
+        phoneNumber:
+          type: string
+          description: Forwarding/Call flip phone number
+        label:
+          type: string
+          description: Forwarding/Call flip number title
+        type:
+          type: string
+          description: Type of forwarding number
+          enum:
+          - Home
+          - Mobile
+          - Work
+          - PhoneLine
+          - Outage
+          - Other
+          - BusinessMobilePhone
+          - ExternalCarrier
+          - ExtensionApps
+    CompanyAnsweringRuleScheduleInfo:
       type: object
       properties:
         weeklyRanges:
@@ -1059,50 +877,224 @@ components:
             $ref: '#/components/schemas/RangesInfo'
         ref:
           type: string
-          description: Reference to Business Hours or After Hours schedule
+          description: Reference to Business Hours or After Hours schedule = ['BusinessHours', 'AfterHours']
           enum:
           - BusinessHours
           - AfterHours
       description: Schedule when an answering rule should be applied
-    RangesInfo:
+    CalledNumberInfo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Called phone number
+    TransferredExtensionInfo:
+      type: object
+      properties:
+        extension:
+          $ref: '#/components/schemas/TransferredExtension'
+    CompanyAnsweringRuleCalledNumberInfoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an account phone number
+        phoneNumber:
+          type: string
+          description: Phone number of a callee
+    TransferInfo:
+      type: object
+      properties:
+        extension:
+          $ref: '#/components/schemas/TransferExtensionInfo'
+        action:
+          type: string
+          description: Event that initiates transferring to the specified extension
+          enum:
+          - HoldTimeExpiration
+          - MaxCallers
+          - NoAnswer
+    TransferredExtension:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          readOnly: true
+          description: Canonical URI of an extension resource
+      description: Transfer extension settings, set/returned if `callHandlingAction` is specified as `TransferToExtension`
+    TimeInterval:
       type: object
       properties:
         from:
           type: string
-          format: date-time
-          description: 'Beginning timestamp of the range in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601),
-
-            for example *2018-10-29T14:00:00*, *2018-10-29T14:00:00Z*, *2018-10-29T14:00:00+0100*
-
-            '
+          description: Time in format hh:mm
         to:
           type: string
-          format: date-time
-          description: 'Ending timestamp of the range in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601),
-
-            for example *2018-10-29T14:00:00*, *2018-10-29T14:00:00Z*, *2018-10-29T14:00:00+0100*
-
-            '
-    GreetingTypeEnum:
-      type: string
-      description: Type of greeting, specifying the case when the greeting is played.
-      enum:
-      - Introductory
-      - Announcement
-      - AutomaticRecording
-      - BlockedCallersAll
-      - BlockedCallersSpecific
-      - BlockedNoCallerId
-      - BlockedPayPhones
-      - ConnectingMessage
-      - ConnectingAudio
-      - StartRecording
-      - StopRecording
-      - Voicemail
-      - Unavailable
-      - InterruptPrompt
-      - HoldMusic
-      - Company
+          description: Time in format hh:mm
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    VoicemailInfo:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: If `true` then voicemails are allowed to be received
+        recipient:
+          $ref: '#/components/schemas/RecipientInfo'
+      description: Specifies whether to take a voicemail and who should do it
+    ForwardingInfoCreateRuleRequest:
+      type: object
+      properties:
+        notifyMySoftPhones:
+          type: boolean
+          description: Specifies if the first ring on desktop/mobile apps is enabled. The default value is `true`
+        notifyAdminSoftPhones:
+          type: boolean
+          description: Deprecated parameter. Specifies if the administrator's softphone (desktop application) is notified before forwarding the incoming call to desk phones and forwarding numbers. The default value is `true`.
+          deprecated: true
+        softPhonesRingCount:
+          type: integer
+          format: int32
+          description: Specifies delay between ring on apps and starting of a call forwarding. To activate this parameter use the value > 0, and turn off the `softPhonesAlwaysRing` setting. If the value is 1 or 0, the `softPhonesAlwaysRing` setting cannot be turned off
+        softPhonesAlwaysRing:
+          type: boolean
+          description: Specifies that desktop and mobile applications of the user will ring till the end of their forwarding list. If set to `true` then `softPhonesRingCount` is ignored
+          default: true
+        ringingMode:
+          type: string
+          description: Specifies the order in which forwarding numbers ring. 'Sequentially' means that forwarding numbers are ringing one at a time, in order of priority. 'Simultaneously' means that forwarding numbers are ringing all at the same time. The default value is 'Sequentially'
+          enum:
+          - Sequentially
+          - Simultaneously
+        rules:
+          type: array
+          description: Information on a call forwarding rule
+          items:
+            $ref: '#/components/schemas/ForwardingRuleCreateRequest'
+        mobileTimeout:
+          type: boolean
+          description: Deprecated parameter. Specifies if mobile timeout is activated for the rule
+          deprecated: true
+      description: Forwarding parameters. Returned if 'ForwardCalls' is specified in 'callHandlingAction'. These settings determine the forwarding numbers to which the call will be forwarded
+    CallersInfo:
+      type: object
+      properties:
+        callerId:
+          type: string
+          description: Phone number of a caller
+        name:
+          type: string
+          description: Contact name of a caller
+    CompanyAnsweringRuleWeeklyScheduleInfoRequest:
+      type: object
+      properties:
+        monday:
+          type: array
+          description: Time interval for a particular day
+          items:
+            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+        tuesday:
+          type: array
+          description: Time interval for a particular day
+          items:
+            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+        wednesday:
+          type: array
+          description: Time interval for a particular day
+          items:
+            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+        thursday:
+          type: array
+          description: Time interval for a particular day
+          items:
+            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+        friday:
+          type: array
+          description: Time interval for a particular day
+          items:
+            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+        saturday:
+          type: array
+          description: Time interval for a particular day
+          items:
+            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+        sunday:
+          type: array
+          description: Time interval for a particular day
+          items:
+            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+      description: Weekly schedule. If specified, ranges cannot be specified
+    CompanyAnsweringRuleRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of an answering rule specified by user. Max number of symbols is 30. The default value is 'My Rule N' where 'N' is the first free number
+        enabled:
+          type: boolean
+          description: Specifies if the rule is active or inactive. The default value is `true`
+          default: true
+        type:
+          type: string
+          description: Type of an answering rule, the default value is 'Custom' = ['BusinessHours', 'AfterHours', 'Custom']
+          enum:
+          - BusinessHours
+          - AfterHours
+          - Custom
+        callers:
+          type: array
+          description: Answering rule will be applied when calls are received from the specified caller(s)
+          items:
+            $ref: '#/components/schemas/CompanyAnsweringRuleCallersInfoRequest'
+        calledNumbers:
+          type: array
+          description: Answering rule will be applied when calling the specified number(s)
+          items:
+            $ref: '#/components/schemas/CompanyAnsweringRuleCalledNumberInfo'
+        schedule:
+          $ref: '#/components/schemas/CompanyAnsweringRuleScheduleInfoRequest'
+        callHandlingAction:
+          type: string
+          description: Specifies how incoming calls are forwarded. The default value is 'Operator' 'Operator' - play company greeting and forward to operator extension 'Disconnect' - play company greeting and disconnect 'Bypass' - bypass greeting to go to selected extension = ['Operator', 'Disconnect', 'Bypass']
+          enum:
+          - Operator
+          - Disconnect
+          - Bypass
+        extension:
+          $ref: '#/components/schemas/CompanyAnsweringRuleExtensionInfoRequest'
+        greetings:
+          type: array
+          description: Greetings applied for an answering rule; only predefined greetings can be applied, see Dictionary Greeting List
+          items:
+            $ref: '#/components/schemas/GreetingInfo'
+    ExtensionShortInfoResource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension
+        name:
+          type: string
+          description: Extension name
+        extensionNumber:
+          type: string
+          description: Extension number
+    CompanyAnsweringRuleExtensionInfoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension
+      description: Extension to which the call is forwarded in 'Bypass' mode
     ListCompanyAnsweringRuleInfo:
       type: object
       properties:
@@ -1134,73 +1126,35 @@ components:
             $ref: '#/components/schemas/CalledNumberInfo'
         extension:
           $ref: '#/components/schemas/CompanyAnsweringRuleExtensionInfo'
-    TimeInterval:
-      type: object
-      properties:
-        from:
-          type: string
-          description: Time in format hh:mm
-        to:
-          type: string
-          description: Time in format hh:mm
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    ForwardAllCompanyCallsInfo:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          description: Indicates whether the *Forward All Company Calls* feature is enabled or disabled for an account
-        ranges:
-          type: array
-          description: Specific data ranges. If specified, weeklyRanges cannot be specified
-          items:
-            $ref: '#/components/schemas/RangesInfo'
-        callHandlingAction:
-          $ref: '#/components/schemas/IvrCallHandlingActionEnum'
-        extension:
-          $ref: '#/components/schemas/ExtensionShortInfoResource'
-        reason:
-          $ref: '#/components/schemas/ForwardAllCallsReason'
-    TransferredExtensionInfo:
-      type: object
-      properties:
-        extension:
-          $ref: '#/components/schemas/TransferredExtension'
-    ForwardAllCompanyCallsRequest:
-      type: object
-      required:
-      - enabled
-      properties:
-        enabled:
-          type: boolean
-          description: Indicates whether the *Forward All Company Calls* feature is enabled or disabled for an account
-    CompanyAnsweringRuleList:
+    PresetInfo:
       type: object
       properties:
         uri:
           type: string
           format: uri
-          description: Link to an answering rule resource
-        records:
-          type: array
-          description: List of company answering rules
-          items:
-            $ref: '#/components/schemas/ListCompanyAnsweringRuleInfo'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
+          description: Link to a greeting resource
+        id:
+          type: string
+          description: Internal identifier of a greeting
+        name:
+          type: string
+          description: Name of a greeting
+    ForwardAllCallsReason:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+          - ExtensionLimitation
+          - FeatureLimitation
+          description: 'Specifies the type of limitation. `ExtensionLimitation` means that the feature is turned off for this particular extension.
+
+            `FeatureLimitation` means that the user may enable this feature and setup the rule via the Service Web UI
+
+            '
+        message:
+          type: string
+          description: Error message depending on the type of limitation
     QueueInfo:
       type: object
       properties:
@@ -1306,33 +1260,60 @@ components:
         with the ''AgentQueue'' value specified as a call handling action
 
         '
-    RecipientInfo:
-      type: object
-      description: Recipient data
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a voicemail recipient extension resource
-        id:
-          description: Internal identifier of a voicemail recipient
-          type: string
-    ForwardAllCallsReason:
+    CallersInfoRequest:
       type: object
       properties:
-        code:
+        callerId:
           type: string
-          enum:
-          - ExtensionLimitation
-          - FeatureLimitation
-          description: 'Specifies the type of limitation. `ExtensionLimitation` means that the feature is turned off for this particular extension.
-
-            `FeatureLimitation` means that the user may enable this feature and setup the rule via the Service Web UI
-
-            '
-        message:
+          description: Phone number of a caller
+        name:
           type: string
-          description: Error message depending on the type of limitation
+          description: Contact name of a caller
+    ForwardingRuleInfo:
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
+          description: Forwarding number (or group) ordinal
+        ringCount:
+          type: integer
+          format: int32
+          description: Number of rings for a forwarding number (or group)
+        enabled:
+          type: boolean
+          description: Forwarding number status. Returned only if `showInactiveNumbers` is set to `true`
+        forwardingNumbers:
+          type: array
+          description: Forwarding number (or group) data
+          items:
+            $ref: '#/components/schemas/CreateAnsweringRuleForwardingNumberInfo'
+    GreetingInfo:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/GreetingTypeEnum'
+        preset:
+          $ref: '#/components/schemas/PresetInfo'
+        custom:
+          $ref: '#/components/schemas/CustomGreetingInfoRequest'
+    ForwardAllCompanyCallsInfo:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Indicates whether the *Forward All Company Calls* feature is enabled or disabled for an account
+        ranges:
+          type: array
+          description: Specific data ranges. If specified, weeklyRanges cannot be specified
+          items:
+            $ref: '#/components/schemas/RangesInfo'
+        callHandlingAction:
+          $ref: '#/components/schemas/IvrCallHandlingActionEnum'
+        extension:
+          $ref: '#/components/schemas/ExtensionShortInfoResource'
+        reason:
+          $ref: '#/components/schemas/ForwardAllCallsReason'
     CompanyAnsweringRuleInfo:
       type: object
       properties:
@@ -1384,40 +1365,43 @@ components:
           description: Greetings applied for an answering rule; only predefined greetings can be applied, see Dictionary Greeting List
           items:
             $ref: '#/components/schemas/GreetingInfo'
-    FixedOrderAgentsExtensionInfo:
+    ForwardingInfo:
       type: object
       properties:
-        id:
+        notifyMySoftPhones:
+          type: boolean
+          description: Specifies if the user's softphone(s) are notified before forwarding the incoming call to desk phones and forwarding numbers
+        notifyAdminSoftPhones:
+          type: boolean
+          description: Deprecated parameter. Specifies if the administrator's softphone is notified before forwarding the incoming call to desk phones and forwarding numbers. The default value is `false`
+          deprecated: true
+        softPhonesRingCount:
+          type: integer
+          format: int32
+          description: Number of rings before forwarding starts
+        softPhonesAlwaysRing:
+          type: boolean
+          description: Specifies that desktop and mobile applications of the user will ring till the end of their forwarding list. If set to `true` then `softPhonesRingCount` is ignored
+          default: true
+        ringingMode:
           type: string
-          description: Internal identifier of an extension
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of an extension
-        extensionNumber:
-          type: string
-          description: Number of extension
-        name:
-          type: string
-          description: Name of agent extension
-    MissedCallExtensionInfoExternalNumber:
-      type: object
-      description: Specifies an external PSTN number which should be used for the missed call transfer. Returned only if the actionType is set to `ConnectToExternalNumber`
-      properties:
-        phoneNumber:
-          type: string
-          description: 'Phone number to which the call is forwarded. In addition to common [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format, the following number patterns are supported: 11xxxxxxxxxxx, 444xxxxxxxxxxx, 616xxxxxxxxxxx, 1700yyyy; where `xxxxxxxxxxx` is a phone number in e.164 format (without ''+'' sign) and `yyyy` is an external short extension number. Maximum number of digits is 15'
-    TransferExtensionInfo:
-      allOf:
-      - $ref: '#/components/schemas/TransferredExtension'
-      - type: object
-        properties:
-          name:
-            type: string
-            description: Extension name
-          extensionNumber:
-            type: string
-            description: Extension number
+          description: Specifies the order in which the forwarding numbers ring. 'Sequentially' means that forwarding numbers are ringing one at a time, in order of priority. 'Simultaneously' means that forwarding numbers are ring all at the same time
+          enum:
+          - Sequentially
+          - Simultaneously
+        rules:
+          type: array
+          description: Information on a call forwarding rule
+          items:
+            $ref: '#/components/schemas/ForwardingRuleInfo'
+        softPhonesPositionTop:
+          type: boolean
+          description: Specifies if desktop and mobile applications of the user are notified before (true) or after (false) forwarding the incoming call to desk phones and forwarding numbers. Applicable only if `notifyMySoftPhones` parameter is set to `true`
+        mobileTimeout:
+          type: boolean
+          description: Deprecated parameter. Specifies if mobile timeout is activated for the rule
+          deprecated: true
+      description: Forwarding parameters. Returned if 'ForwardCalls' is specified in 'callHandlingAction'. These settings determine the forwarding numbers to which the call will be forwarded
     UpdateAnsweringRuleRequest:
       type: object
       properties:
@@ -1505,6 +1489,89 @@ components:
           description: Indicates whether inactive numbers should be returned or not
         transfer:
           $ref: '#/components/schemas/TransferredExtensionInfo'
+    TransferExtensionInfo:
+      allOf:
+      - $ref: '#/components/schemas/TransferredExtension'
+      - type: object
+        properties:
+          name:
+            type: string
+            description: Extension name
+          extensionNumber:
+            type: string
+            description: Extension number
+    CustomAnsweringRuleInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI to an answering rule resource
+        id:
+          type: string
+          description: Internal identifier of an answering rule
+        type:
+          type: string
+          description: Type of an answering rule
+          enum:
+          - BusinessHours
+          - AfterHours
+          - Custom
+        name:
+          type: string
+          description: Name of an answering rule specified by user
+        enabled:
+          type: boolean
+          description: Specifies if an answering rule is active or inactive
+        schedule:
+          $ref: '#/components/schemas/ScheduleInfo'
+        calledNumbers:
+          type: array
+          description: Answering rules are applied when calling to selected number(s)
+          items:
+            $ref: '#/components/schemas/CalledNumberInfo'
+        callers:
+          type: array
+          description: Answering rules are applied when calls are received from specified caller(s)
+          items:
+            $ref: '#/components/schemas/CallersInfo'
+        callHandlingAction:
+          type: string
+          description: Specifies how incoming calls are forwarded
+          enum:
+          - ForwardCalls
+          - UnconditionalForwarding
+          - AgentQueue
+          - TransferToExtension
+          - TakeMessagesOnly
+          - PlayAnnouncementOnly
+          - SharedLines
+        forwarding:
+          $ref: '#/components/schemas/ForwardingInfo'
+        unconditionalForwarding:
+          $ref: '#/components/schemas/UnconditionalForwardingInfo'
+        queue:
+          $ref: '#/components/schemas/QueueInfo'
+        transfer:
+          $ref: '#/components/schemas/TransferredExtensionInfo'
+        voicemail:
+          $ref: '#/components/schemas/VoicemailInfo'
+        greetings:
+          type: array
+          description: Greetings applied for an answering rule; only predefined greetings can be applied, see Dictionary Greeting List
+          items:
+            $ref: '#/components/schemas/GreetingInfo'
+        screening:
+          type: string
+          description: Call screening status. 'Off' - no call screening; 'NoCallerId' - if caller ID is missing, then callers are asked to say their name before connecting; 'UnknownCallerId' - if caller ID is not in contact list, then callers are asked to say their name before connecting; 'Always' - the callers are always asked to say their name before connecting. The default value is 'Off'
+          enum:
+          - 'Off'
+          - NoCallerId
+          - UnknownCallerId
+          - Always
+          default: 'Off'
+        sharedLines:
+          $ref: '#/components/schemas/SharedLinesInfo'
     CreateAnsweringRuleRequest:
       required:
       - name
@@ -1589,78 +1656,91 @@ components:
           - UnknownCallerId
           - Always
           default: 'Off'
-    CompanyAnsweringRuleCalledNumberInfo:
+    ForwardAllCompanyCallsRequest:
+      type: object
+      required:
+      - enabled
+      properties:
+        enabled:
+          type: boolean
+          description: Indicates whether the *Forward All Company Calls* feature is enabled or disabled for an account
+    CompanyAnsweringRuleCallersInfoRequest:
       type: object
       properties:
-        id:
+        callerId:
           type: string
-          description: Internal identifier of an account phone number
-        phoneNumber:
+          description: Phone number of a caller
+        name:
           type: string
-          description: Phone number of a callee
-    CustomGreetingInfoRequest:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a custom user greeting
-    GreetingInfo:
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/GreetingTypeEnum'
-        preset:
-          $ref: '#/components/schemas/PresetInfo'
-        custom:
-          $ref: '#/components/schemas/CustomGreetingInfoRequest'
-    CompanyAnsweringRuleWeeklyScheduleInfoRequest:
+          description: Displayed name for a caller ID
+    IvrCallHandlingActionEnum:
+      type: string
+      description: 'Specifies how incoming calls are forwarded. The default value
+
+        is ''Operator'' ''Operator'' - play company greeting and forward to operator
+
+        extension ''Disconnect'' - play company greeting and disconnect ''Bypass''
+
+        - bypass greeting to go to selected extension = [''Operator'', ''Disconnect'',
+
+        ''Bypass'']
+
+        '
+      enum:
+      - Operator
+      - Disconnect
+      - Bypass
+    WeeklyScheduleInfo:
       type: object
       properties:
         monday:
           type: array
-          description: Time interval for a particular day
+          description: Time intervals for a particular day
           items:
-            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+            $ref: '#/components/schemas/TimeInterval'
         tuesday:
           type: array
-          description: Time interval for a particular day
+          description: Time intervals for a particular day
           items:
-            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+            $ref: '#/components/schemas/TimeInterval'
         wednesday:
           type: array
-          description: Time interval for a particular day
+          description: Time intervals for a particular day
           items:
-            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+            $ref: '#/components/schemas/TimeInterval'
         thursday:
           type: array
-          description: Time interval for a particular day
+          description: Time intervals for a particular day
           items:
-            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+            $ref: '#/components/schemas/TimeInterval'
         friday:
           type: array
-          description: Time interval for a particular day
+          description: Time intervals for a particular day
           items:
-            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+            $ref: '#/components/schemas/TimeInterval'
         saturday:
           type: array
-          description: Time interval for a particular day
+          description: Time intervals for a particular day
           items:
-            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
+            $ref: '#/components/schemas/TimeInterval'
         sunday:
           type: array
-          description: Time interval for a particular day
+          description: Time intervals for a particular day
           items:
-            $ref: '#/components/schemas/CompanyAnsweringRuleTimeIntervalRequest'
-      description: Weekly schedule. If specified, ranges cannot be specified
-    CompanyAnsweringRuleTimeIntervalRequest:
+            $ref: '#/components/schemas/TimeInterval'
+      description: Weekly schedule
+    ApiErrorResponseModel:
       type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
       properties:
-        from:
-          type: string
-          description: Time in format hh:mm
-        to:
-          type: string
-          description: Time in format hh:mm
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
     UserAnsweringRuleList:
       type: object
       properties:
@@ -1678,273 +1758,125 @@ components:
           $ref: '#/components/schemas/EnumeratedPagingModel'
         navigation:
           $ref: '#/components/schemas/PageNavigationModel'
-    ForwardingInfoCreateRuleRequest:
+    GreetingTypeEnum:
+      type: string
+      description: Type of greeting, specifying the case when the greeting is played.
+      enum:
+      - Introductory
+      - Announcement
+      - AutomaticRecording
+      - BlockedCallersAll
+      - BlockedCallersSpecific
+      - BlockedNoCallerId
+      - BlockedPayPhones
+      - ConnectingMessage
+      - ConnectingAudio
+      - StartRecording
+      - StopRecording
+      - Voicemail
+      - Unavailable
+      - InterruptPrompt
+      - HoldMusic
+      - Company
+    CompanyAnsweringRuleCalledNumberInfo:
       type: object
       properties:
-        notifyMySoftPhones:
-          type: boolean
-          description: Specifies if the first ring on desktop/mobile apps is enabled. The default value is `true`
-        notifyAdminSoftPhones:
-          type: boolean
-          description: Deprecated parameter. Specifies if the administrator's softphone (desktop application) is notified before forwarding the incoming call to desk phones and forwarding numbers. The default value is `true`.
-          deprecated: true
-        softPhonesRingCount:
-          type: integer
-          format: int32
-          description: Specifies delay between ring on apps and starting of a call forwarding. To activate this parameter use the value > 0, and turn off the `softPhonesAlwaysRing` setting. If the value is 1 or 0, the `softPhonesAlwaysRing` setting cannot be turned off
-        softPhonesAlwaysRing:
-          type: boolean
-          description: Specifies that desktop and mobile applications of the user will ring till the end of their forwarding list. If set to `true` then `softPhonesRingCount` is ignored
-          default: true
-        ringingMode:
+        id:
           type: string
-          description: Specifies the order in which forwarding numbers ring. 'Sequentially' means that forwarding numbers are ringing one at a time, in order of priority. 'Simultaneously' means that forwarding numbers are ringing all at the same time. The default value is 'Sequentially'
-          enum:
-          - Sequentially
-          - Simultaneously
-        rules:
+          description: Internal identifier of an account phone number
+        phoneNumber:
+          type: string
+          description: Phone number of a callee
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
           type: array
-          description: Information on a call forwarding rule
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
           items:
-            $ref: '#/components/schemas/ForwardingRuleCreateRequest'
-        mobileTimeout:
-          type: boolean
-          description: Deprecated parameter. Specifies if mobile timeout is activated for the rule
-          deprecated: true
-      description: Forwarding parameters. Returned if 'ForwardCalls' is specified in 'callHandlingAction'. These settings determine the forwarding numbers to which the call will be forwarded
-    TransferredExtension:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    CompanyAnsweringRuleTimeIntervalRequest:
+      type: object
+      properties:
+        from:
+          type: string
+          description: Time in format hh:mm
+        to:
+          type: string
+          description: Time in format hh:mm
+    ForwardingNumberInfoRulesCreateRuleRequest:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of an extension
-        uri:
-          type: string
-          readOnly: true
-          description: Canonical URI of an extension resource
-      description: Transfer extension settings, set/returned if `callHandlingAction` is specified as `TransferToExtension`
-    CustomAnsweringRuleInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI to an answering rule resource
-        id:
-          type: string
-          description: Internal identifier of an answering rule
+          description: Internal identifier of a forwarding number
         type:
           type: string
-          description: Type of an answering rule
+          description: Forwarding phone number type
           enum:
-          - BusinessHours
-          - AfterHours
-          - Custom
-        name:
+          - Home
+          - Mobile
+          - Work
+          - PhoneLine
+          - Outage
+          - Other
+          - BusinessMobilePhone
+          - ExternalCarrier
+          - ExtensionApps
+        phoneNumber:
           type: string
-          description: Name of an answering rule specified by user
-        enabled:
-          type: boolean
-          description: Specifies if an answering rule is active or inactive
-        schedule:
-          $ref: '#/components/schemas/ScheduleInfo'
-        calledNumbers:
-          type: array
-          description: Answering rules are applied when calling to selected number(s)
-          items:
-            $ref: '#/components/schemas/CalledNumberInfo'
-        callers:
-          type: array
-          description: Answering rules are applied when calls are received from specified caller(s)
-          items:
-            $ref: '#/components/schemas/CallersInfo'
-        callHandlingAction:
+          description: Forwarding/Call flip phone number
+        label:
           type: string
-          description: Specifies how incoming calls are forwarded
-          enum:
-          - ForwardCalls
-          - UnconditionalForwarding
-          - AgentQueue
-          - TransferToExtension
-          - TakeMessagesOnly
-          - PlayAnnouncementOnly
-          - SharedLines
-        forwarding:
-          $ref: '#/components/schemas/ForwardingInfo'
-        unconditionalForwarding:
-          $ref: '#/components/schemas/UnconditionalForwardingInfo'
-        queue:
-          $ref: '#/components/schemas/QueueInfo'
-        transfer:
-          $ref: '#/components/schemas/TransferredExtensionInfo'
-        voicemail:
-          $ref: '#/components/schemas/VoicemailInfo'
-        greetings:
-          type: array
-          description: Greetings applied for an answering rule; only predefined greetings can be applied, see Dictionary Greeting List
-          items:
-            $ref: '#/components/schemas/GreetingInfo'
-        screening:
-          type: string
-          description: Call screening status. 'Off' - no call screening; 'NoCallerId' - if caller ID is missing, then callers are asked to say their name before connecting; 'UnknownCallerId' - if caller ID is not in contact list, then callers are asked to say their name before connecting; 'Always' - the callers are always asked to say their name before connecting. The default value is 'Off'
-          enum:
-          - 'Off'
-          - NoCallerId
-          - UnknownCallerId
-          - Always
-          default: 'Off'
-        sharedLines:
-          $ref: '#/components/schemas/SharedLinesInfo'
-    CompanyAnsweringRuleScheduleInfo:
+          description: Forwarding/Call flip number title
+    UnconditionalForwardingInfo:
       type: object
+      description: 'Unconditional forwarding parameters.
+
+        Returned if ''UnconditionalForwarding'' value is specified for the `callHandlingAction` parameter
+
+        '
       properties:
-        weeklyRanges:
-          $ref: '#/components/schemas/CompanyAnsweringRuleWeeklyScheduleInfoRequest'
-        ranges:
-          type: array
-          description: Specific data ranges. If specified, weeklyRanges cannot be specified
-          items:
-            $ref: '#/components/schemas/RangesInfo'
-        ref:
+        phoneNumber:
           type: string
-          description: Reference to Business Hours or After Hours schedule = ['BusinessHours', 'AfterHours']
-          enum:
-          - BusinessHours
-          - AfterHours
-      description: Schedule when an answering rule should be applied
-    CallersInfo:
-      type: object
-      properties:
-        callerId:
-          type: string
-          description: Phone number of a caller
-        name:
-          type: string
-          description: Contact name of a caller
-    ExtensionShortInfoResource:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an extension
-        name:
-          type: string
-          description: Extension name
-        extensionNumber:
-          type: string
-          description: Extension number
-    ForwardingRuleInfo:
-      type: object
-      properties:
-        index:
-          type: integer
-          format: int32
-          description: Forwarding number (or group) ordinal
-        ringCount:
-          type: integer
-          format: int32
-          description: Number of rings for a forwarding number (or group)
-        enabled:
-          type: boolean
-          description: Forwarding number status. Returned only if `showInactiveNumbers` is set to `true`
-        forwardingNumbers:
-          type: array
-          description: Forwarding number (or group) data
-          items:
-            $ref: '#/components/schemas/CreateAnsweringRuleForwardingNumberInfo'
-    PresetInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a greeting resource
-        id:
-          type: string
-          description: Internal identifier of a greeting
-        name:
-          type: string
-          description: Name of a greeting
-    TransferInfo:
-      type: object
-      properties:
-        extension:
-          $ref: '#/components/schemas/TransferExtensionInfo'
+          description: 'Phone number to which the call is forwarded. In addition to
+
+            common e.164 format, the following number patterns are supported: 11xxxxxxxxxxx,
+
+            444xxxxxxxxxxx, 616xxxxxxxxxxx, 1700yyyy; where xxxxxxxxxxx is a phone number in
+
+            e.164 format (without ''+'' sign) and yyyy is an external short extension number.
+
+            Max number of digits is 15
+
+            '
         action:
           type: string
-          description: Event that initiates transferring to the specified extension
+          description: Event that initiates forwarding to the specified phone number
           enum:
           - HoldTimeExpiration
           - MaxCallers
           - NoAnswer
-  parameters:
-    Page:
-      name: page
-      in: query
-      description: The result set page number (1-indexed) to return
-      required: false
-      explode: false
-      schema:
-        type: integer
-        format: int32
-        minimum: 1
-        maximum: 1000
-        default: 1
-      example: 1
-    PerPage:
-      name: perPage
-      in: query
-      description: 'The number of items per page. If provided value in the request
-
-        is greater than a maximum, the maximum value is applied
-
-        '
-      required: false
-      explode: false
-      schema:
-        type: integer
-        format: int32
-        minimum: 1
-        maximum: 1000
-        default: 100
-      example: 100
-    CallHandlingRuleId:
-      name: ruleId
-      in: path
-      description: Internal identifier of a call handling rule
-      required: true
-      schema:
-        type: string
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
+    FixedOrderAgentsExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        extensionNumber:
+          type: string
+          description: Number of extension
+        name:
+          type: string
+          description: Name of agent extension
   responses:
     NotFound:
       description: 'General response with **HTTP 404 "Not found"** status.<br>
@@ -1956,6 +1888,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
     ServiceNotAvailable:
       description: 'General response with **HTTP 503 "Service not available"** status.<br>
 
@@ -1976,18 +1920,74 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: The result set page number (1-indexed) to return
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 1
+      example: 1
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
 
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    CallHandlingRuleId:
+      name: ruleId
+      in: path
+      description: Internal identifier of a call handling rule
+      required: true
+      schema:
+        type: string
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    PerPage:
+      name: perPage
+      in: query
+      description: 'The number of items per page. If provided value in the request
+
+        is greater than a maximum, the maximum value is applied
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 100
+      example: 100
   securitySchemes:
     OAuth2:
       type: oauth2

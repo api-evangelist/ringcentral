@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Bridge Management API
+  title: RingCentral Bridge Management API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -33,9 +33,7 @@ paths:
 
         should contain JSON object which describes properties of the new bridge.
 
-        The bridge can be created by a user himself, his delegate or any user who has the **Super Admin** privilege.
-
-        '
+        The bridge can be created by a user himself, his delegate or any user who has the **Super Admin** privilege.'
       operationId: createBridge
       parameters:
       - name: accountId
@@ -80,9 +78,7 @@ paths:
       summary: Get User's Default Bridge
       description: 'Returns a default bridge (PMI) for the user specified by **accountId**
 
-        and **extensionId** identifiers.
-
-        '
+        and **extensionId** identifiers.'
       operationId: getDefaultBridge
       parameters:
       - name: accountId
@@ -159,9 +155,7 @@ paths:
       summary: Search Bridge by Web PIN
       description: 'Finds a bridge by short identifier (Web PIN). Also it can be used to find a default bridge by the alias
 
-        (personal meeting name).
-
-        '
+        (personal meeting name).'
       operationId: getBridgeByWebPin
       parameters:
       - name: pin
@@ -230,9 +224,7 @@ paths:
       summary: Update Bridge
       description: 'Updates a bridge by **bridgeId** identifier. The request body should contain JSON object with updating properties.
 
-        Update can only be done by bridge owner, his delegate or any user who has the **Super Admin** privilege.
-
-        '
+        Update can only be done by bridge owner, his delegate or any user who has the **Super Admin** privilege.'
       operationId: updateBridge
       parameters:
       - name: bridgeId
@@ -274,9 +266,7 @@ paths:
       summary: Delete Bridge
       description: 'Deletes a bridge by **bridgeId** identifier.
 
-        Deletion can only be done by bridge owner, his delegate or any user who has the **Super Admin** privilege.
-
-        '
+        Deletion can only be done by bridge owner, his delegate or any user who has the **Super Admin** privilege.'
       operationId: deleteBridge
       parameters:
       - name: bridgeId
@@ -299,6 +289,245 @@ paths:
       x-app-permission: Video
 components:
   schemas:
+    BridgeResponseSecurity:
+      type: object
+      properties:
+        passwordProtected:
+          type: boolean
+          description: Specifies if a meeting is password protected.
+        password:
+          $ref: '#/components/schemas/BridgeResponseSecurityPassword'
+        noGuests:
+          type: boolean
+          description: If true, only authenticated users can join to a meeting.
+          example: false
+        sameAccount:
+          type: boolean
+          description: If true, only users have the same account can join to a meeting.
+          example: false
+        e2ee:
+          type: boolean
+          description: If true, end to end encryption will be enabled for a meeting.
+          default: false
+    RecordingsPreferences:
+      type: object
+      description: Recordings preferences
+      properties:
+        everyoneCanControl:
+          $ref: '#/components/schemas/EveryoneCanControl'
+        autoShared:
+          $ref: '#/components/schemas/AutoShared'
+    EveryoneCanControl:
+      type: object
+      description: Controls whether participants can start and pause recording
+      properties:
+        enabled:
+          type: boolean
+          description: Controls whether preference is enabled
+          example: true
+        locked:
+          type: boolean
+          description: Describes whether preference is locked on Service Web
+          example: false
+    BridgeJoinPreferences:
+      type: object
+      properties:
+        audioMuted:
+          type: boolean
+          description: Specifies if audio is muted for meeting participants (in the preset after joining)
+          default: false
+        videoMuted:
+          type: boolean
+          description: Specifies if video is muted for meeting participants (in the preset after joining)
+          default: false
+        waitingRoomRequired:
+          type: string
+          description: 'Specifies rules for the waiting room before the host starts the meeting.
+
+            1) Nobody - No waiting room. Participants are not waiting for meeting start.
+
+            2) Everybody - All participants are waiting for meeting start.
+
+            3) GuestsOnly - Only unauthenticated participants (guests) are waiting for meeting start.
+
+            4) OtherAccount - Only participants who have other account are waiting for meeting start.
+
+
+            Default value depends on the bridge type:
+
+            - PMI -> OtherAccount
+
+            - Instant, Scheduled -> Nobody
+
+            '
+          example: Nobody
+          enum:
+          - Nobody
+          - Everybody
+          - GuestsOnly
+          - OtherAccount
+        pstn:
+          $ref: '#/components/schemas/BridgeJoinPstnPreferences'
+    User:
+      required:
+      - accountId
+      - extensionId
+      type: object
+      properties:
+        accountId:
+          type: string
+          description: User account identifier
+          example: '664287016'
+        extensionId:
+          type: string
+          description: User extension identifier
+          example: '664307016'
+    BridgeJoinPstnPreferences:
+      type: object
+      properties:
+        promptAnnouncement:
+          type: boolean
+          description: Specifies whether to play 'Announce yourself' prompt
+          default: true
+        promptParticipants:
+          type: boolean
+          description: Specifies whether to play 'There are X participants' prompt
+          default: true
+    BridgeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique bridge identifier
+          example: iad41-c04-ndb256065cf14ae6a1832389d9c2e
+        name:
+          type: string
+          description: Custom name of a bridge
+          example: Weekly Meeting with Joseph
+        type:
+          type: string
+          description: 'Type of bridge. It specifies bridge life cycle.
+
+            1) Instant - The bridge will be used for a meeting only once immediately after creation. Then it will be deleted.
+
+            2) Scheduled - The bridge will be used for scheduled one or more meetings. If the bridge is not used for a long
+
+            time after the last meeting, then it will be deleted.
+
+            3) PMI - The bridge will contain Personal Meeting Identifier owned by a user. It is the default user bridge.
+
+            Each user may have only one default (PMI) bridge. Such bridge will be deleted only in case the user is deleted
+
+            from the system.
+
+            '
+          example: Instant
+          enum:
+          - Instant
+          - Scheduled
+          - PMI
+        host:
+          $ref: '#/components/schemas/User'
+        pins:
+          $ref: '#/components/schemas/BridgePinsWithAliases'
+        security:
+          $ref: '#/components/schemas/BridgeResponseSecurity'
+        preferences:
+          $ref: '#/components/schemas/BridgePreferences'
+        discovery:
+          $ref: '#/components/schemas/BridgeDiscovery'
+    BridgeRequestSecurity:
+      type: object
+      properties:
+        passwordProtected:
+          type: boolean
+          description: 'Specifies if a meeting is password protected.
+
+
+            By default, Instant and Scheduled bridges are not password protected. For default (PMI) bridge, password
+
+            protection will be turned on and the password will be generated if it is not specified while creation.
+
+
+            While creation to set password protection you should set this field to true and specify a password in the
+
+            **password** field. If you want to change password or set password protection for an unprotected bridge,
+
+            you should set this field to true and specify a password in the **password** field in the update operation.
+
+
+            To make protected bridge as unprotected you should set this field to false in the update operation.
+
+            '
+          example: true
+        password:
+          type: string
+          description: 'Specifies a password if bridge meetings should be password protected (passwordProtected field is true).
+
+            Besides that, if the field is specified in the request but **passwordProtected** field is missing then
+
+            it means that **passwordProtected** field is set to true.
+
+            '
+          example: Wq123ygs15
+        noGuests:
+          type: boolean
+          description: If true, only authenticated users can join to a meeting.
+          default: false
+        sameAccount:
+          type: boolean
+          description: If true, only users have the same account can join to a meeting.
+          default: false
+        e2ee:
+          type: boolean
+          description: If true, end to end encryption will be enabled for a meeting.
+          default: false
+    BridgeDiscovery:
+      type: object
+      properties:
+        web:
+          type: string
+          description: 'URI that can be used to join to the meeting.
+
+            It contains password parameter only if the request was done by bridge owner, his delegate or any user who has
+
+            the Super Admin privilege.
+
+            '
+          example: https://v.ringcentral.com/join/018209241352?pw=99e4f8e6a241fc71279449a9c8f46eef
+    BridgeResponseSecurityPassword:
+      type: object
+      properties:
+        plainText:
+          type: string
+          description: 'Meeting password.
+
+            This field will be returned only if the request was done by bridge owner, his delegate or any user who has
+
+            the Super Admin privilege.
+
+            '
+          example: Wq123ygs15
+        pstn:
+          type: string
+          description: 'Meeting password for PSTN users.
+
+            This field will be returned only if the request was done by bridge owner, his delegate or any user who has
+
+            the Super Admin privilege.
+
+            '
+          example: '7492486829'
+        joinQuery:
+          type: string
+          description: 'Meeting password hash.
+
+            This field will be returned only if the request was done by bridge owner, his delegate or any user who has
+
+            the Super Admin privilege.
+
+            '
+          example: 99e4f8e6a241fc71279449a9c8f46eef
     BridgePinsWithAliases:
       type: object
       properties:
@@ -318,18 +547,61 @@ components:
           - qa_team_2_lead
           items:
             type: string
-    AutoShared:
+    CreateBridgeRequest:
       type: object
-      description: Controls whether recording can be auto shared
       properties:
-        enabled:
-          type: boolean
-          description: Controls whether preference is enabled
-          example: true
-        locked:
-          type: boolean
-          description: Describes whether preference is locked on Service Web
-          example: false
+        name:
+          type: string
+          description: Custom name of a bridge
+          example: Weekly Meeting with Joseph
+        type:
+          type: string
+          description: 'Type of bridge. It specifies bridge life cycle.
+
+            1) Instant - The bridge will be used for a meeting only once immediately after creation. Then it will be deleted.
+
+            2) Scheduled - The bridge will be used for scheduled one or more meetings. If the bridge is not used for a long
+
+            time after the last meeting, then it will be deleted.
+
+            3) PMI - The bridge will contain Personal Meeting Identifier owned by a user. It is the default user bridge.
+
+            Each user may have only one default (PMI) bridge. Such bridge will be deleted only in case the user is deleted
+
+            from the system.
+
+            '
+          default: Instant
+          enum:
+          - Instant
+          - Scheduled
+          - PMI
+        pins:
+          $ref: '#/components/schemas/BridgePins'
+        security:
+          $ref: '#/components/schemas/BridgeRequestSecurity'
+        preferences:
+          $ref: '#/components/schemas/BridgePreferences'
+    UpdateBridgeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Custom name of a bridge
+          example: Weekly Meeting with Joseph
+        pins:
+          $ref: '#/components/schemas/BridgePinsWithoutPstn'
+        security:
+          $ref: '#/components/schemas/BridgeRequestSecurity'
+        preferences:
+          $ref: '#/components/schemas/BridgePreferences'
+    BridgePins:
+      type: object
+      properties:
+        pstn:
+          $ref: '#/components/schemas/BridgePstnPins'
+        web:
+          $ref: '#/components/schemas/WebPin'
     BridgePreferences:
       type: object
       properties:
@@ -396,142 +668,22 @@ components:
           type: boolean
           default: true
           description: Controls whether participants can start and pause transcription
-    RecordingsPreferences:
-      type: object
-      description: Recordings preferences
-      properties:
-        everyoneCanControl:
-          $ref: '#/components/schemas/EveryoneCanControl'
-        autoShared:
-          $ref: '#/components/schemas/AutoShared'
-    BridgeDiscovery:
+    BridgePstnPins:
       type: object
       properties:
-        web:
+        host:
           type: string
-          description: 'URI that can be used to join to the meeting.
-
-            It contains password parameter only if the request was done by bridge owner, his delegate or any user who has
-
-            the Super Admin privilege.
-
-            '
-          example: https://v.ringcentral.com/join/018209241352?pw=99e4f8e6a241fc71279449a9c8f46eef
-    BridgeResponseSecurity:
-      type: object
-      properties:
-        passwordProtected:
-          type: boolean
-          description: Specifies if a meeting is password protected.
-        password:
-          $ref: '#/components/schemas/BridgeResponseSecurityPassword'
-        noGuests:
-          type: boolean
-          description: If true, only authenticated users can join to a meeting.
-          example: false
-        sameAccount:
-          type: boolean
-          description: If true, only users have the same account can join to a meeting.
-          example: false
-        e2ee:
-          type: boolean
-          description: If true, end to end encryption will be enabled for a meeting.
-          default: false
-    BridgeJoinPstnPreferences:
-      type: object
-      properties:
-        promptAnnouncement:
-          type: boolean
-          description: Specifies whether to play 'Announce yourself' prompt
-          default: true
-        promptParticipants:
-          type: boolean
-          description: Specifies whether to play 'There are X participants' prompt
-          default: true
+          description: Host PSTN PIN. If it is not specified while creation, then a PIN will be generated.
+          example: '432331057631'
+        participant:
+          type: string
+          description: Participant PSTN PIN. If it is not specified while creation, then a PIN will be generated.
+          example: 013409241367
     BridgePinsWithoutPstn:
       type: object
       properties:
         web:
           $ref: '#/components/schemas/WebPin'
-    BridgeRequestSecurity:
-      type: object
-      properties:
-        passwordProtected:
-          type: boolean
-          description: 'Specifies if a meeting is password protected.
-
-
-            By default, Instant and Scheduled bridges are not password protected. For default (PMI) bridge, password
-
-            protection will be turned on and the password will be generated if it is not specified while creation.
-
-
-            While creation to set password protection you should set this field to true and specify a password in the
-
-            **password** field. If you want to change password or set password protection for an unprotected bridge,
-
-            you should set this field to true and specify a password in the **password** field in the update operation.
-
-
-            To make protected bridge as unprotected you should set this field to false in the update operation.
-
-            '
-          example: true
-        password:
-          type: string
-          description: 'Specifies a password if bridge meetings should be password protected (passwordProtected field is true).
-
-            Besides that, if the field is specified in the request but **passwordProtected** field is missing then
-
-            it means that **passwordProtected** field is set to true.
-
-            '
-          example: Wq123ygs15
-        noGuests:
-          type: boolean
-          description: If true, only authenticated users can join to a meeting.
-          default: false
-        sameAccount:
-          type: boolean
-          description: If true, only users have the same account can join to a meeting.
-          default: false
-        e2ee:
-          type: boolean
-          description: If true, end to end encryption will be enabled for a meeting.
-          default: false
-    BridgeResponseSecurityPassword:
-      type: object
-      properties:
-        plainText:
-          type: string
-          description: 'Meeting password.
-
-            This field will be returned only if the request was done by bridge owner, his delegate or any user who has
-
-            the Super Admin privilege.
-
-            '
-          example: Wq123ygs15
-        pstn:
-          type: string
-          description: 'Meeting password for PSTN users.
-
-            This field will be returned only if the request was done by bridge owner, his delegate or any user who has
-
-            the Super Admin privilege.
-
-            '
-          example: '7492486829'
-        joinQuery:
-          type: string
-          description: 'Meeting password hash.
-
-            This field will be returned only if the request was done by bridge owner, his delegate or any user who has
-
-            the Super Admin privilege.
-
-            '
-          example: 99e4f8e6a241fc71279449a9c8f46eef
     WebPin:
       type: string
       description: 'Bridge short identifier (Web PIN). The digital unique code which is used to join to a meeting. If it is not specified
@@ -547,9 +699,9 @@ components:
 
         '
       example: 018209241352
-    EveryoneCanControl:
+    AutoShared:
       type: object
-      description: Controls whether participants can start and pause recording
+      description: Controls whether recording can be auto shared
       properties:
         enabled:
           type: boolean
@@ -559,168 +711,6 @@ components:
           type: boolean
           description: Describes whether preference is locked on Service Web
           example: false
-    CreateBridgeRequest:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Custom name of a bridge
-          example: Weekly Meeting with Joseph
-        type:
-          type: string
-          description: 'Type of bridge. It specifies bridge life cycle.
-
-            1) Instant - The bridge will be used for a meeting only once immediately after creation. Then it will be deleted.
-
-            2) Scheduled - The bridge will be used for scheduled one or more meetings. If the bridge is not used for a long
-
-            time after the last meeting, then it will be deleted.
-
-            3) PMI - The bridge will contain Personal Meeting Identifier owned by a user. It is the default user bridge.
-
-            Each user may have only one default (PMI) bridge. Such bridge will be deleted only in case the user is deleted
-
-            from the system.
-
-            '
-          default: Instant
-          enum:
-          - Instant
-          - Scheduled
-          - PMI
-        pins:
-          $ref: '#/components/schemas/BridgePins'
-        security:
-          $ref: '#/components/schemas/BridgeRequestSecurity'
-        preferences:
-          $ref: '#/components/schemas/BridgePreferences'
-    BridgeJoinPreferences:
-      type: object
-      properties:
-        audioMuted:
-          type: boolean
-          description: Specifies if audio is muted for meeting participants (in the preset after joining)
-          default: false
-        videoMuted:
-          type: boolean
-          description: Specifies if video is muted for meeting participants (in the preset after joining)
-          default: false
-        waitingRoomRequired:
-          type: string
-          description: 'Specifies rules for the waiting room before the host starts the meeting.
-
-            1) Nobody - No waiting room. Participants are not waiting for meeting start.
-
-            2) Everybody - All participants are waiting for meeting start.
-
-            3) GuestsOnly - Only unauthenticated participants (guests) are waiting for meeting start.
-
-            4) OtherAccount - Only participants who have other account are waiting for meeting start.
-
-
-            Default value depends on the bridge type:
-
-            - PMI -> OtherAccount
-
-            - Instant, Scheduled -> Nobody
-
-            '
-          example: Nobody
-          enum:
-          - Nobody
-          - Everybody
-          - GuestsOnly
-          - OtherAccount
-        pstn:
-          $ref: '#/components/schemas/BridgeJoinPstnPreferences'
-    User:
-      required:
-      - accountId
-      - extensionId
-      type: object
-      properties:
-        accountId:
-          type: string
-          description: User account identifier
-          example: '664287016'
-        extensionId:
-          type: string
-          description: User extension identifier
-          example: '664307016'
-    BridgePstnPins:
-      type: object
-      properties:
-        host:
-          type: string
-          description: Host PSTN PIN. If it is not specified while creation, then a PIN will be generated.
-          example: '432331057631'
-        participant:
-          type: string
-          description: Participant PSTN PIN. If it is not specified while creation, then a PIN will be generated.
-          example: 013409241367
-    UpdateBridgeRequest:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Custom name of a bridge
-          example: Weekly Meeting with Joseph
-        pins:
-          $ref: '#/components/schemas/BridgePinsWithoutPstn'
-        security:
-          $ref: '#/components/schemas/BridgeRequestSecurity'
-        preferences:
-          $ref: '#/components/schemas/BridgePreferences'
-    BridgePins:
-      type: object
-      properties:
-        pstn:
-          $ref: '#/components/schemas/BridgePstnPins'
-        web:
-          $ref: '#/components/schemas/WebPin'
-    BridgeResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique bridge identifier
-          example: iad41-c04-ndb256065cf14ae6a1832389d9c2e
-        name:
-          type: string
-          description: Custom name of a bridge
-          example: Weekly Meeting with Joseph
-        type:
-          type: string
-          description: 'Type of bridge. It specifies bridge life cycle.
-
-            1) Instant - The bridge will be used for a meeting only once immediately after creation. Then it will be deleted.
-
-            2) Scheduled - The bridge will be used for scheduled one or more meetings. If the bridge is not used for a long
-
-            time after the last meeting, then it will be deleted.
-
-            3) PMI - The bridge will contain Personal Meeting Identifier owned by a user. It is the default user bridge.
-
-            Each user may have only one default (PMI) bridge. Such bridge will be deleted only in case the user is deleted
-
-            from the system.
-
-            '
-          example: Instant
-          enum:
-          - Instant
-          - Scheduled
-          - PMI
-        host:
-          $ref: '#/components/schemas/User'
-        pins:
-          $ref: '#/components/schemas/BridgePinsWithAliases'
-        security:
-          $ref: '#/components/schemas/BridgeResponseSecurity'
-        preferences:
-          $ref: '#/components/schemas/BridgePreferences'
-        discovery:
-          $ref: '#/components/schemas/BridgeDiscovery'
   securitySchemes:
     OAuth2:
       type: oauth2

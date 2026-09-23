@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
   title: RingCentral Adaptive Cards API
   description: RingCentral API specification
@@ -154,29 +154,27 @@ paths:
       x-app-permission: TeamMessaging
 components:
   schemas:
-    AdaptiveCardColumnInfo:
+    VerticalContentAlignment:
+      description: Defines how the content should be aligned vertically within the container. Only relevant for fixed-height cards, or cards with a `minHeight` specified
+      anyOf:
+      - type: string
+        enum:
+        - top
+        - center
+        - bottom
+      - type: string
+        pattern: ^([t|T][o|O][p|P])|([c|C][e|E][n|N][t|T][e|E][r|R])|([b|B][o|O][t|T][t|T][o|O][m|M])$
+    AdaptiveCardInfoRequest:
       type: object
-      properties:
-        type:
-          type: string
-        width:
-          type: string
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/AdaptiveCardColumnItemInfo'
-    AdaptiveCardSelectAction:
-      type: object
-      description: An action that will be invoked when the card is tapped or selected. `Action.ShowCard` is not supported
-      required:
-      - type
       properties:
         type:
           type: string
           enum:
-          - Action.Submit
-          - Action.OpenUrl
-          - Action.ToggleVisibility
+          - Container
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdaptiveCardInfoRequestItem'
     BackgroundImage:
       type: object
       required:
@@ -198,99 +196,65 @@ components:
           $ref: '#/components/schemas/HorizontalAlignment'
         verticalAlignment:
           $ref: '#/components/schemas/VerticalAlignment'
-    AdaptiveCardInfoRequestItem:
+    AdaptiveCardColumnItemInfo:
       type: object
       properties:
         type:
           type: string
-          enum:
-          - TextBlock
-          - ColumnSet
-          - Column
-          - FactSet
-        text:
+        url:
           type: string
-        weight:
-          type: string
+          format: uri
         size:
           type: string
-        columns:
-          type: array
-          items:
-            $ref: '#/components/schemas/AdaptiveCardColumnInfo'
-    AdaptiveCardRequest:
+        style:
+          type: string
+        wrap:
+          type: boolean
+        spacing:
+          type: string
+        text:
+          type: string
+        isSubtle:
+          type: boolean
+    AdaptiveCardAction:
       type: object
-      required:
-      - type
-      - version
       properties:
         type:
           type: string
-          description: 'Type of attachment. This field is mandatory and filled on server side -
-
-            will be ignored if set in request body
-
-            '
           enum:
-          - AdaptiveCard
-        version:
+          - Action.ShowCard
+          - Action.Submit
+          - Action.OpenUrl
+          - Action.ToggleVisibility
+        title:
           type: string
-          description: 'Version. This field is mandatory and filled on server side -
-
-            will be ignored if set in request body
-
-            '
-        body:
-          type: array
-          description: List of adaptive cards with the detailed information
-          items:
-            $ref: '#/components/schemas/AdaptiveCardInfoRequest'
-        actions:
-          type: array
-          items:
-            $ref: '#/components/schemas/AdaptiveCardAction'
-        selectAction:
-          $ref: '#/components/schemas/AdaptiveCardSelectAction'
-        fallbackText:
+        card:
+          $ref: '#/components/schemas/ActionAdaptiveCardInfo'
+        url:
           type: string
-        backgroundImage:
-          description: Specifies the background image of a card
-          oneOf:
-          - type: string
-          - $ref: '#/components/schemas/BackgroundImage'
-        minHeight:
-          type: string
-          description: Specifies the minimum height of the card in pixels
-          example: 50px
-        speak:
-          type: string
-          description: Specifies what should be spoken for this entire card. This is simple text or SSML fragment
-        lang:
-          type: string
-          description: The 2-letter ISO-639-1 language used in the card. Used to localize any date/time functions
-          enum:
-          - en
-          - fr
-          - es
-        verticalContentAlignment:
-          $ref: '#/components/schemas/VerticalContentAlignment'
-    AdaptiveCardCreator:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a creator
-    ImageFillMode:
-      description: Describes how the image should fill the area
+          format: uri
+    VerticalAlignment:
+      description: Describes how the image should be aligned if it must be cropped or if using repeat fill mode
       anyOf:
       - type: string
         enum:
-        - cover
-        - repeatHorizontally
-        - repeatVertically
-        - repeat
+        - top
+        - center
+        - bottom
       - type: string
-        pattern: ^([c|C][o|O][v|V][e|E][r|R])|([r|R][e|E][p|P][e|E][a|A][t|T][h|H][o|O][r|R][i|I][z|Z][o|O][n|N][t|T][a|A][l|L][l|L][y|Y])|([r|R][e|E][p|P][e|E][a|A][t|T][v|V][e|E][r|R][t|T][i|I][c|C][a|A][l|L][l|L][y|Y])|([r|R][e|E][p|P][e|E][a|A][t|T])$
+        pattern: ^([t|T][o|O][p|P])|([c|C][e|E][n|N][t|T][e|E][r|R])|([b|B][o|O][t|T][t|T][o|O][m|M])$
+    AdaptiveCardSelectAction:
+      type: object
+      description: An action that will be invoked when the card is tapped or selected. `Action.ShowCard` is not supported
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - Action.Submit
+          - Action.OpenUrl
+          - Action.ToggleVisibility
     HorizontalAlignment:
       description: Describes how the image should be aligned if it must be cropped or if using repeat fill mode
       anyOf:
@@ -368,54 +332,6 @@ components:
           - es
         verticalContentAlignment:
           $ref: '#/components/schemas/VerticalContentAlignment'
-    AdaptiveCardInfoRequest:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-          - Container
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/AdaptiveCardInfoRequestItem'
-    VerticalContentAlignment:
-      description: Defines how the content should be aligned vertically within the container. Only relevant for fixed-height cards, or cards with a `minHeight` specified
-      anyOf:
-      - type: string
-        enum:
-        - top
-        - center
-        - bottom
-      - type: string
-        pattern: ^([t|T][o|O][p|P])|([c|C][e|E][n|N][t|T][e|E][r|R])|([b|B][o|O][t|T][t|T][o|O][m|M])$
-    AdaptiveCardAction:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-          - Action.ShowCard
-          - Action.Submit
-          - Action.OpenUrl
-          - Action.ToggleVisibility
-        title:
-          type: string
-        card:
-          $ref: '#/components/schemas/ActionAdaptiveCardInfo'
-        url:
-          type: string
-          format: uri
-    VerticalAlignment:
-      description: Describes how the image should be aligned if it must be cropped or if using repeat fill mode
-      anyOf:
-      - type: string
-        enum:
-        - top
-        - center
-        - bottom
-      - type: string
-        pattern: ^([t|T][o|O][p|P])|([c|C][e|E][n|N][t|T][e|E][r|R])|([b|B][o|O][t|T][t|T][o|O][m|M])$
     AdaptiveCardShortInfo:
       type: object
       properties:
@@ -463,26 +379,6 @@ components:
         placeholder:
           type: string
           description: Description of the input desired. Displayed when no text has been input
-    AdaptiveCardColumnItemInfo:
-      type: object
-      properties:
-        type:
-          type: string
-        url:
-          type: string
-          format: uri
-        size:
-          type: string
-        style:
-          type: string
-        wrap:
-          type: boolean
-        spacing:
-          type: string
-        text:
-          type: string
-        isSubtle:
-          type: boolean
     ActionAdaptiveCardInfo:
       type: object
       properties:
@@ -494,6 +390,110 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ActionCardBody'
+    ImageFillMode:
+      description: Describes how the image should fill the area
+      anyOf:
+      - type: string
+        enum:
+        - cover
+        - repeatHorizontally
+        - repeatVertically
+        - repeat
+      - type: string
+        pattern: ^([c|C][o|O][v|V][e|E][r|R])|([r|R][e|E][p|P][e|E][a|A][t|T][h|H][o|O][r|R][i|I][z|Z][o|O][n|N][t|T][a|A][l|L][l|L][y|Y])|([r|R][e|E][p|P][e|E][a|A][t|T][v|V][e|E][r|R][t|T][i|I][c|C][a|A][l|L][l|L][y|Y])|([r|R][e|E][p|P][e|E][a|A][t|T])$
+    AdaptiveCardRequest:
+      type: object
+      required:
+      - type
+      - version
+      properties:
+        type:
+          type: string
+          description: 'Type of attachment. This field is mandatory and filled on server side -
+
+            will be ignored if set in request body
+
+            '
+          enum:
+          - AdaptiveCard
+        version:
+          type: string
+          description: 'Version. This field is mandatory and filled on server side -
+
+            will be ignored if set in request body
+
+            '
+        body:
+          type: array
+          description: List of adaptive cards with the detailed information
+          items:
+            $ref: '#/components/schemas/AdaptiveCardInfoRequest'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdaptiveCardAction'
+        selectAction:
+          $ref: '#/components/schemas/AdaptiveCardSelectAction'
+        fallbackText:
+          type: string
+        backgroundImage:
+          description: Specifies the background image of a card
+          oneOf:
+          - type: string
+          - $ref: '#/components/schemas/BackgroundImage'
+        minHeight:
+          type: string
+          description: Specifies the minimum height of the card in pixels
+          example: 50px
+        speak:
+          type: string
+          description: Specifies what should be spoken for this entire card. This is simple text or SSML fragment
+        lang:
+          type: string
+          description: The 2-letter ISO-639-1 language used in the card. Used to localize any date/time functions
+          enum:
+          - en
+          - fr
+          - es
+        verticalContentAlignment:
+          $ref: '#/components/schemas/VerticalContentAlignment'
+    AdaptiveCardCreator:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a creator
+    AdaptiveCardColumnInfo:
+      type: object
+      properties:
+        type:
+          type: string
+        width:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdaptiveCardColumnItemInfo'
+    AdaptiveCardInfoRequestItem:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - TextBlock
+          - ColumnSet
+          - Column
+          - FactSet
+        text:
+          type: string
+        weight:
+          type: string
+        size:
+          type: string
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdaptiveCardColumnInfo'
   securitySchemes:
     OAuth2:
       type: oauth2

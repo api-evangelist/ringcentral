@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Audit Trail API
+  title: RingCentral Audit Trail API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -31,9 +31,7 @@ paths:
       summary: Search Audit Trail Data
       description: 'Returns the audit trail data with specific filters applied.
 
-        Audit trail searching is limited to the last 10,000 records or last 180 days, whichever comes first.
-
-        '
+        Audit trail searching is limited to the last 10,000 records or last 180 days, whichever comes first.'
       operationId: auditTrailSearch
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -85,6 +83,16 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
     InvalidRequest:
       description: 'General response with **HTTP 400 "Bad request"** status.<br>
 
@@ -107,46 +115,79 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+  schemas:
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    AccountHistoryPublicRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal record identifier
+          example: 9835bead-397b-4ba8-b457-73f07ab79997
+        eventTime:
+          type: string
+          description: Timestamp of an event (provided by a client), RFC3339 date-time format, UTC time zone.
+          format: date-time
+        initiator:
+          $ref: '#/components/schemas/AccountHistoryRecordPublicInitiator'
+        actionId:
+          type: string
+          description: Action type
+          example: CHANGE_SECRET_INFO
+        eventType:
+          type: string
+          description: 'Operation: "CREATE", "UPDATE", "DELETE" or custom'
+          example: UPDATE
+        accountId:
+          type: string
+          description: Account identifier which is related with the particular record.
+          example: '403858014008'
+        accountName:
+          type: string
+          description: Account (company) name
+          example: Some Company
+        target:
+          $ref: '#/components/schemas/AccountHistoryRecordTarget'
+        clientIp:
+          type: string
+          description: IP-address of a client.
+          example: 192.168.42.6
+        comment:
+          type: string
+          description: Custom top-level comment
+        details:
+          $ref: '#/components/schemas/AccountHistoryRecordPublicDetails'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
 
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
 
         '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-  schemas:
-    AccountHistoryRecordTarget:
-      type: object
-      description: Action target object (company/extension)
-      properties:
-        objectId:
-          type: string
-          description: Extension identifier of the affected entity or "0" for Company level
-          example: '404611540004'
-        objectType:
-          type: string
-          description: Type of the entity.
-          example: Extension
-          enum:
-          - Extension
-          - Account
-          - Company
-          - Template
-        name:
-          type: string
-          description: Target extension name
-          example: Charlie Williams
-        extensionNumber:
-          type: string
-          description: Target extension (short) number  of the affected entity (if the objectType is EXTENSION).
-          example: '103'
-        siteId:
-          type: string
-          description: Target extension site identifier (if any)
-          example: '871836004'
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
     AccountHistoryRecordDetailsParameters:
       required:
       - key
@@ -199,6 +240,28 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ApiError'
+    AccountHistorySearchPublicResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of records
+          items:
+            $ref: '#/components/schemas/AccountHistoryPublicRecord'
+        paging:
+          $ref: '#/components/schemas/AccountHistoryPaging'
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
     AccountHistoryRecordPublicInitiator:
       type: object
       description: Event initiator info
@@ -219,58 +282,35 @@ components:
           type: string
           description: Current user role
           example: Super Admin
-    AccountHistoryPublicRecord:
+    AccountHistoryRecordTarget:
       type: object
+      description: Action target object (company/extension)
       properties:
-        id:
+        objectId:
           type: string
-          description: Internal record identifier
-          example: 9835bead-397b-4ba8-b457-73f07ab79997
-        eventTime:
+          description: Extension identifier of the affected entity or "0" for Company level
+          example: '404611540004'
+        objectType:
           type: string
-          description: Timestamp of an event (provided by a client), RFC3339 date-time format, UTC time zone.
-          format: date-time
-        initiator:
-          $ref: '#/components/schemas/AccountHistoryRecordPublicInitiator'
-        actionId:
+          description: Type of the entity.
+          example: Extension
+          enum:
+          - Extension
+          - Account
+          - Company
+          - Template
+        name:
           type: string
-          description: Action type
-          example: CHANGE_SECRET_INFO
-        eventType:
+          description: Target extension name
+          example: Charlie Williams
+        extensionNumber:
           type: string
-          description: 'Operation: "CREATE", "UPDATE", "DELETE" or custom'
-          example: UPDATE
-        accountId:
+          description: Target extension (short) number  of the affected entity (if the objectType is EXTENSION).
+          example: '103'
+        siteId:
           type: string
-          description: Account identifier which is related with the particular record.
-          example: '403858014008'
-        accountName:
-          type: string
-          description: Account (company) name
-          example: Some Company
-        target:
-          $ref: '#/components/schemas/AccountHistoryRecordTarget'
-        clientIp:
-          type: string
-          description: IP-address of a client.
-          example: 192.168.42.6
-        comment:
-          type: string
-          description: Custom top-level comment
-        details:
-          $ref: '#/components/schemas/AccountHistoryRecordPublicDetails'
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
+          description: Target extension site identifier (if any)
+          example: '871836004'
     AccountHistoryRecordPublicDetails:
       type: object
       properties:
@@ -357,48 +397,6 @@ components:
             enum:
             - CHANGE_SECRET_INFO
             - CHANGE_USER_INFO
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    AccountHistorySearchPublicResponse:
-      type: object
-      properties:
-        records:
-          type: array
-          description: List of records
-          items:
-            $ref: '#/components/schemas/AccountHistoryPublicRecord'
-        paging:
-          $ref: '#/components/schemas/AccountHistoryPaging'
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
   parameters:
     AccountId:
       name: accountId

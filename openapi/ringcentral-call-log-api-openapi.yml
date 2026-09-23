@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Call Log API
+  title: RingCentral Call Log API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -456,9 +456,7 @@ paths:
       summary: List User Active Calls
       description: 'Returns records of all extension calls that are in progress, ordered
 
-        by start time in descending order.
-
-        '
+        by start time in descending order.'
       operationId: listExtensionActiveCalls
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -505,7 +503,332 @@ paths:
       x-app-permission: ReadCallLog
       x-user-permission: ReadCallLog
 components:
+  parameters:
+    CallLogSyncType:
+      name: syncType
+      in: query
+      description: Type of call log synchronization request
+      schema:
+        allOf:
+        - $ref: '#/components/schemas/CallLogSyncTypeEnum'
+        - default: FSync
+    CallDirection:
+      name: direction
+      in: query
+      description: 'The direction of call records to be included in the result. If omitted, both
+
+        inbound and outbound calls are returned. Multiple values are supported
+
+        '
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/CallDirectionEnum'
+    CallTransportType:
+      name: transport
+      in: query
+      description: 'The type of call transport. Multiple values are supported. By default, this filter is disabled
+
+        '
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/CallTransportEnum'
+    CallRecordId:
+      name: callRecordId
+      in: path
+      description: Internal identifier of a call log record. Multiple values are supported
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    CallLogStatusGroup:
+      name: statusGroup
+      in: query
+      description: Type of calls to be returned
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+          - Missed
+          - All
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    CallLogTelephonySessionId:
+      name: telephonySessionId
+      in: query
+      description: Internal identifier of a telephony session
+      schema:
+        type: string
+    CallLogWithRecording:
+      name: withRecording
+      in: query
+      deprecated: true
+      description: 'Deprecated, replaced with `recordingType` filter, still supported for compatibility reasons.
+
+        Indicates if only recorded calls should be returned.
+
+
+        If both `withRecording` and `recordingType` parameters are specified, then `withRecording` is ignored
+
+        '
+      schema:
+        type: boolean
+        default: false
+    CallLogExtensionNumber:
+      name: extensionNumber
+      in: query
+      description: 'Short extension number of a user. If specified, returns call log for this particular extension only.
+
+        Cannot be combined with `phoneNumber` filter
+
+        '
+      schema:
+        type: string
+      example: '101'
+    CallType:
+      name: type
+      in: query
+      description: 'The type of call records to be included in the result.
+
+        If omitted, all call types are returned. Multiple values are supported
+
+        '
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/CallTypeEnum'
+    CallLogShowBlocked:
+      name: showBlocked
+      in: query
+      description: Indicates then calls from/to blocked numbers are returned
+      schema:
+        type: boolean
+        default: true
+    CallLogPhoneNumber:
+      name: phoneNumber
+      in: query
+      description: 'Phone number of a caller/callee in e.164 format without a ''+'' sign. If specified, all incoming/outgoing calls
+
+        from/to this phone number are returned.
+
+        '
+      schema:
+        type: string
+      example: '12053320032'
+    CallLogView:
+      name: view
+      in: query
+      description: 'Defines the level of details for returned call records
+
+        '
+      schema:
+        type: string
+        default: Simple
+        enum:
+        - Simple
+        - Detailed
+    ConferenceCallType:
+      name: conferenceType
+      in: query
+      description: 'Conference call type: RCC or RC Meetings. If not specified, no conference call filter applied
+
+        '
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+          - AudioConferencing
+          - Meetings
+    CallLogSessionId:
+      name: sessionId
+      in: query
+      description: Internal identifier of a call session
+      schema:
+        type: string
+    CallLogDateTo:
+      name: dateTo
+      in: query
+      description: 'The end of the time range to return call records in ISO 8601 format including timezone,
+
+        for example 2016-03-10T18:07:52.534Z. The default value is current time
+
+        '
+      schema:
+        type: string
+        format: date-time
+    CallRecordingType:
+      name: recordingType
+      in: query
+      description: 'Indicates that call records with recordings of particular type should be returned.
+
+        If omitted, then calls with and without recordings are returned
+
+        '
+      schema:
+        type: string
+        enum:
+        - Automatic
+        - OnDemand
+        - All
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    CallLogDateFrom:
+      name: dateFrom
+      in: query
+      description: 'The beginning of the time range to return call records in ISO 8601 format including timezone,
+
+        for example 2016-03-10T18:07:52.534Z. The default value is `dateTo` minus 24 hours
+
+        '
+      schema:
+        type: string
+        format: date-time
+  responses:
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
+
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
   schemas:
+    CallLogRecordingInfo:
+      type: object
+      required:
+      - id
+      - uri
+      - type
+      - contentUri
+      properties:
+        id:
+          type: string
+          description: Internal identifier of the call recording
+        uri:
+          type: string
+          format: uri
+          description: Link to the call recording metadata resource
+        type:
+          type: string
+          description: Indicates recording mode used
+          enum:
+          - Automatic
+          - OnDemand
+        contentUri:
+          type: string
+          format: uri
+          description: 'Link to a call recording binary content. Has to be retrieved with proper authorization
+
+            (access token must be passed via `Authorization` header or query parameter)
+
+            '
+      description: Call recording data. Returned if the call was recorded
+    CallLogToParty:
+      allOf:
+      - $ref: '#/components/schemas/CallLogParty'
+      - $ref: '#/components/schemas/BaseCallLogToParty'
+    CallLogSyncInfo:
+      type: object
+      required:
+      - syncTime
+      - syncToken
+      - syncType
+      properties:
+        syncType:
+          $ref: '#/components/schemas/CallLogSyncTypeEnum'
+        syncToken:
+          type: string
+          description: Synchronization token
+        syncTime:
+          type: string
+          format: date-time
+          description: Time of the last synchronization in (ISO 8601)[https://en.wikipedia.org/wiki/ISO_8601] format including timezone, for example *2016-03-10T18:07:52.534Z*
     CallLogResponse:
       required:
       - navigation
@@ -526,173 +849,25 @@ components:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
-    CallResultReasonEnum:
-      type: string
-      description: "The reason of the call result:\n  * `Accepted` - The call was connected to and accepted by this number\n  * `Connected` - The call was answered, but there was no response on how to handle the call (for example, a voice mail system answered the call and did not push \"1\" to accept)\n  * `Line Busy` - The phone number you dialed was busy\n  * `Not Answered` - The phone number you dialed was not answered\n  * `No Answer` - You did not answer the call\n  * `Hang Up` - The caller hung up before the call was answered\n  * `Stopped` - This attempt was stopped because the call was answered by another phone\n  * `Internal Error` - An internal error occurred when making the call. Please try again\n  * `No Credit` - There was not enough Calling Credit on your account to make this call\n  * `Restricted Number` - The number you dialed is restricted by RingCentral\n  * `Wrong Number` - The number you dialed has either been disconnected or is not a valid phone number. Please check the number and try again\n  * `International Disabled` - International calling is not enabled on your account. Contact customer service to activate International Calling\n  * `International Restricted` - The country and/or area you attempted to call has been prohibited by your administrator\n  * `Bad Number` - An error occurred when making the call. Please check the number before trying again\n  * `Info 411 Restricted` - Calling to 411 Information Services is restricted\n  * `Customer 611 Restricted` - 611 customer service is not supported. Please contact customer service at <(888) 555-1212>\n  * `No Digital Line` - This DigitalLine was either not plugged in or did not have an internet connection\n  * `Failed Try Again` - Call failed. Please try again\n  * `Max Call Limit` - The number of simultaneous calls to your account has reached its limit\n  * `Too Many Calls` - The number of simultaneous calls for per DigitalLine associated with Other Phone has reached its limit. Please contact customer service\n  * `Calls Not Accepted` - Your account was not accepting calls at this time\n  * `Number Not Allowed` - The number that was dialed to access your account is not allowed\n  * `Number Blocked` - This number is in your Blocked Numbers list\n  * `Number Disabled` - The phone number and/or area you attempted to call has been prohibited by your administrator\n  * `Resource Error` - An error occurred when making the call. Please try again\n  * `Call Loop` - A call loop occurred due to an incorrect call forwarding configuration. Please check that you are not forwarding calls back to your own account\n  * `Fax Not Received` - An incoming fax could not be received because a proper connection with the sender's fax machine could not be established\n  * `Fax Partially Sent` - The fax was only partially sent. Possible explanations include phone line quality to poor to maintain the connection or the call was dropped\n  * `Fax Not Sent` - An attempt to send the fax was made, but could not connect with the receiving fax machine\n  * `Fax Poor Line` - An attempt to send the fax was made, but the phone line quality was too poor to send the fax\n  * `Fax Prepare Error` - An internal error occurred when preparing the fax. Please try again\n  * `Fax Save Error` - An internal error occurred when saving the fax. Please try again\n  * `Fax Send Error` - An error occurred when sending the fax. Please try again\n  * `Emergency Address not defined` - The call was rejected due to no E911 address\n  * `Carrier is not active` - The call was rejected due to carrier inactivity\n  * `EDGE trunk misconfigured` - The call was rejected due to error in EDGE trunk configuration\n  * `Internal Call Error` - An internal error occurred when making the call. Please try again\n  * `Receive Error` - Fax receive error\n"
-      enum:
-      - Accepted
-      - Bad Number
-      - Call Loop
-      - Calls Not Accepted
-      - Carrier is not active
-      - Connected
-      - Customer 611 Restricted
-      - EDGE trunk misconfigured
-      - Emergency Address not defined
-      - Failed Try Again
-      - Fax Not Received
-      - Fax Not Sent
-      - Fax Partially Sent
-      - Fax Poor Line
-      - Fax Prepare Error
-      - Fax Save Error
-      - Fax Send Error
-      - Hang Up
-      - Info 411 Restricted
-      - Internal Call Error
-      - Internal Error
-      - International Disabled
-      - International Restricted
-      - Line Busy
-      - Max Call Limit
-      - No Answer
-      - No Credit
-      - No Digital Line
-      - Not Answered
-      - Number Blocked
-      - Number Disabled
-      - Number Not Allowed
-      - Receive Error
-      - Resource Error
-      - Restricted Number
-      - Stopped
-      - Too Many Calls
-      - Unknown
-      - Wrong Number
-    BaseCallLogFromParty:
-      type: object
-      properties:
-        dialerPhoneNumber:
-          type: string
-          description: Dialer phone number without any format modifications. Returned for inbound calls
-      description: Sender/initiator caller information
-    CallLogDelegateInfo:
+    CallLogRecordDeviceInfo:
       type: object
       required:
       - id
+      - uri
       properties:
         id:
           type: string
-          description: Internal identifier of a Secretary extension
-        name:
-          type: string
-          description: Custom name of a Secretary extension
-      description: Information on a delegate extension that actually implemented a call action. For Secretary call log the field is returned if the current extension implemented a call. For Boss call log the field contains information on a Secretary extension which actually implemented a call on behalf of the current extension
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    CallResultEnum:
-      type: string
-      description: The result of the call operation
-      enum:
-      - '911'
-      - '933'
-      - Abandoned
-      - Accepted
-      - Answered Not Accepted
-      - Blocked
-      - Busy
-      - Call Failed
-      - Call Failure
-      - Call connected
-      - Carrier is not active
-      - Declined
-      - EDGE trunk misconfigured
-      - Fax Not Sent
-      - Fax Partially Sent
-      - Fax Poor Line
-      - Fax Receipt Error
-      - Fax on Demand
-      - Hang Up
-      - IP Phone Offline
-      - In Progress
-      - Internal Error
-      - International Disabled
-      - International Restricted
-      - Missed
-      - No Answer
-      - No Calling Credit
-      - Not Allowed
-      - Partial Receive
-      - Phone Login
-      - Receive Error
-      - Received
-      - Rejected
-      - Reply
-      - Restricted Number
-      - Send Error
-      - Sent
-      - Sent to Voicemail
-      - Stopped
-      - Suspended account
-      - Unknown
-      - Voicemail
-      - Wrong Number
-    CallLogSyncTypeEnum:
-      type: string
-      description: 'Type of call log synchronization request: full or incremental sync'
-      enum:
-      - FSync
-      - ISync
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
+          description: Internal identifier of a device
         uri:
           type: string
-          description: Canonical URI to retrieve the particular page of the result set
           format: uri
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
+          description: Canonical URI of a device resource
+    CallDirectionEnum:
+      description: The direction of a call
+      type: string
+      enum:
+      - Inbound
+      - Outbound
     EnumeratedPagingModel:
       type: object
       required:
@@ -763,97 +938,6 @@ components:
 
             '
           example: 25
-    CallLogSyncInfo:
-      type: object
-      required:
-      - syncTime
-      - syncToken
-      - syncType
-      properties:
-        syncType:
-          $ref: '#/components/schemas/CallLogSyncTypeEnum'
-        syncToken:
-          type: string
-          description: Synchronization token
-        syncTime:
-          type: string
-          format: date-time
-          description: Time of the last synchronization in (ISO 8601)[https://en.wikipedia.org/wiki/ISO_8601] format including timezone, for example *2016-03-10T18:07:52.534Z*
-    CallLogRecordLegInfo:
-      allOf:
-      - $ref: '#/components/schemas/BaseCallLogRecord'
-      - description: Call leg record
-        type: object
-        required:
-        - legType
-        properties:
-          legType:
-            $ref: '#/components/schemas/CallLegTypeEnum'
-          master:
-            type: boolean
-            description: Returned for 'Detailed' call log. Specifies if the leg is master-leg
-    BillingInfo:
-      type: object
-      properties:
-        costIncluded:
-          type: number
-          format: double
-          description: 'Cost per minute, paid and already included in your RingCentral service plan.
-
-            For example International Calls
-
-            '
-        costPurchased:
-          type: number
-          format: double
-          description: Cost per minute, paid and not included in your RingCentral service plan
-      description: Billing information related to the call. Returned for 'Detailed' view only
-    CallLogRecordingInfo:
-      type: object
-      required:
-      - id
-      - uri
-      - type
-      - contentUri
-      properties:
-        id:
-          type: string
-          description: Internal identifier of the call recording
-        uri:
-          type: string
-          format: uri
-          description: Link to the call recording metadata resource
-        type:
-          type: string
-          description: Indicates recording mode used
-          enum:
-          - Automatic
-          - OnDemand
-        contentUri:
-          type: string
-          format: uri
-          description: 'Link to a call recording binary content. Has to be retrieved with proper authorization
-
-            (access token must be passed via `Authorization` header or query parameter)
-
-            '
-      description: Call recording data. Returned if the call was recorded
-    BaseCallLogParty:
-      type: object
-      properties:
-        phoneNumber:
-          type: string
-          description: Phone number of a party. Usually it is a plain number including country and area code like 18661234567. But sometimes it could be returned from database with some formatting applied, for example (866)123-4567. This property is filled in all cases where parties communicate by means of global phone numbers, for example when calling to direct numbers or sending/receiving SMS
-        extensionNumber:
-          type: string
-          description: Extension short number (usually 3 or 4 digits). This property is filled when parties communicate by means of short internal numbers, for example when calling to other extension or sending/receiving Company Pager message
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-        name:
-          type: string
-          description: Symbolic name associated with a party. If the phone does not belong to the known extension, only the location is returned, the name is not determined then
-      description: Base schema for call log parties and history call log parties
     PageNavigationModel:
       type: object
       description: Links to other pages of the current result set
@@ -867,152 +951,23 @@ components:
           $ref: '#/components/schemas/PageNavigationUri'
         lastPage:
           $ref: '#/components/schemas/PageNavigationUri'
-    CallLogParty:
-      allOf:
-      - $ref: '#/components/schemas/BaseCallLogParty'
-      - type: object
-        properties:
-          location:
-            type: string
-            description: Contains party location (city, state) if one can be determined from phoneNumber. This property is filled only when phoneNumber is not empty and server can calculate location information from it (for example, this information is unavailable for US toll-free numbers)
-          device:
-            $ref: '#/components/schemas/CallLogRecordDeviceInfo'
-        description: Base schema for CallLogFromParty and CallLogToParty
-    BaseCallLogToParty:
-      type: object
-      properties:
-        dialedPhoneNumber:
-          type: string
-          description: Dialed phone number without any format modifications. Returned for outbound calls
-      description: Target caller information
-    CallLegTypeEnum:
+    CallInternalTypeEnum:
       type: string
-      description: Leg type
+      description: The internal type of the call
       enum:
-      - SipForwarding
-      - ServiceMinus2
-      - ServiceMinus3
-      - PstnToSip
-      - Accept
-      - FindMe
-      - FollowMe
-      - TestCall
-      - FaxSent
-      - CallBack
-      - CallingCard
-      - RingDirectly
-      - RingOutWebToSubscriber
-      - RingOutWebToCaller
-      - SipToPstnMetered
-      - RingOutClientToSubscriber
-      - RingOutClientToCaller
+      - Local
+      - LongDistance
+      - International
+      - Sip
       - RingMe
-      - TransferCall
-      - SipToPstnUnmetered
-      - RingOutDeviceToSubscriber
-      - RingOutDeviceToCaller
-      - RingOutOneLegToCaller
-      - ExtensionToExtension
-      - CallPark
-      - PagingServer
-      - Hunting
-      - OutgoingFreeSpDl
-      - ParkLocation
-      - ConferenceCall
-      - MobileApp
-      - MoveToConference
-      - Unknown
-      - MeetingsCall
-      - SilentMonitoring
-      - Monitoring
-      - Pickup
-      - ImsCall
-      - JoinCall
-      - TextRelay
-    ExtensionInfoCallLog:
-      type: object
-      required:
-      - id
-      - uri
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: Internal identifier of an extension
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of an extension
-      description: Information about extension on whose behalf a call is initiated. For Secretary call log the Boss extension info is returned
-    CallTypeEnum:
-      type: string
-      description: The type of call
-      enum:
-      - Voice
-      - Fax
-    CallLogRecordDeviceInfo:
-      type: object
-      required:
-      - id
-      - uri
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a device
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a device resource
-    CallLogRecord:
-      allOf:
-      - $ref: '#/components/schemas/BaseCallLogRecord'
-      - description: Call log record
-        type: object
-        required:
-        - id
-        - uri
-        - sessionId
-        properties:
-          id:
-            type: string
-            description: Internal identifier of a call log record
-          uri:
-            type: string
-            format: uri
-            description: Canonical URI of a call log record
-          sessionId:
-            type: string
-            description: Internal identifier of a call session
-          deleted:
-            type: boolean
-            description: Indicates whether the record is deleted. Returned for deleted records, for ISync requests
-          legs:
-            type: array
-            description: For 'Detailed' view only. Leg description
-            items:
-              $ref: '#/components/schemas/CallLogRecordLegInfo'
-          lastModifiedTime:
-            type: string
-            description: 'For ''Detailed'' view only. The datetime when the call log record
-
-              was modified in (ISO 8601)[https://en.wikipedia.org/wiki/ISO_8601] format
-
-              including timezone, for example *2016-03-10T18:07:52.534Z*
-
-              '
-            format: date-time
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
+      - RingOut
+      - Usual
+      - TollFreeNumber
+      - VerificationNumber
+      - Vma
+      - LocalNumber
+      - ImsOutgoing
+      - ImsIncoming
     CallActionEnum:
       type: string
       description: The internal action corresponding to the call operation
@@ -1052,12 +1007,33 @@ components:
       - Transfer
       - Unknown
       - VoIP Call
-    DelegationTypeEnum:
-      type: string
-      description: Call delegation type
-      enum:
-      - Coworker
-      - Unknown
+    CallLogParty:
+      allOf:
+      - $ref: '#/components/schemas/BaseCallLogParty'
+      - type: object
+        properties:
+          location:
+            type: string
+            description: Contains party location (city, state) if one can be determined from phoneNumber. This property is filled only when phoneNumber is not empty and server can calculate location information from it (for example, this information is unavailable for US toll-free numbers)
+          device:
+            $ref: '#/components/schemas/CallLogRecordDeviceInfo'
+        description: Base schema for CallLogFromParty and CallLogToParty
+    BaseCallLogParty:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number of a party. Usually it is a plain number including country and area code like 18661234567. But sometimes it could be returned from database with some formatting applied, for example (866)123-4567. This property is filled in all cases where parties communicate by means of global phone numbers, for example when calling to direct numbers or sending/receiving SMS
+        extensionNumber:
+          type: string
+          description: Extension short number (usually 3 or 4 digits). This property is filled when parties communicate by means of short internal numbers, for example when calling to other extension or sending/receiving Company Pager message
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        name:
+          type: string
+          description: Symbolic name associated with a party. If the phone does not belong to the known extension, only the location is returned, the name is not determined then
+      description: Base schema for call log parties and history call log parties
     CallTransportEnum:
       type: string
       description: 'The type of call transport. ''PSTN'' indicates that a call leg was initiated
@@ -1068,59 +1044,109 @@ components:
       enum:
       - PSTN
       - VoIP
-    CallLogSyncResponse:
+    CallResultEnum:
+      type: string
+      description: The result of the call operation
+      enum:
+      - '911'
+      - '933'
+      - Abandoned
+      - Accepted
+      - Answered Not Accepted
+      - Blocked
+      - Busy
+      - Call Failed
+      - Call Failure
+      - Call connected
+      - Carrier is not active
+      - Declined
+      - EDGE trunk misconfigured
+      - Fax Not Sent
+      - Fax Partially Sent
+      - Fax Poor Line
+      - Fax Receipt Error
+      - Fax on Demand
+      - Hang Up
+      - IP Phone Offline
+      - In Progress
+      - Internal Error
+      - International Disabled
+      - International Restricted
+      - Missed
+      - No Answer
+      - No Calling Credit
+      - Not Allowed
+      - Partial Receive
+      - Phone Login
+      - Receive Error
+      - Received
+      - Rejected
+      - Reply
+      - Restricted Number
+      - Send Error
+      - Sent
+      - Sent to Voicemail
+      - Stopped
+      - Suspended account
+      - Unknown
+      - Voicemail
+      - Wrong Number
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    DelegationTypeEnum:
+      type: string
+      description: Call delegation type
+      enum:
+      - Coworker
+      - Unknown
+    CallLogRecordMessage:
       type: object
       required:
+      - id
+      - type
       - uri
-      - records
-      - syncInfo
       properties:
+        id:
+          type: string
+          description: Internal identifier of a message
+        type:
+          type: string
+          description: Type of message
         uri:
           type: string
           format: uri
-          description: Link to the list of call log records with sync information
-        records:
-          type: array
-          description: 'List of call log records with synchronization information. For `ISync` the total number of returned records is limited to 250;
-
-            this includes both new records and the old ones, specified by the recordCount parameter
-
-            '
-          items:
-            $ref: '#/components/schemas/CallLogRecord'
-        syncInfo:
-          $ref: '#/components/schemas/CallLogSyncInfo'
-    CallInternalTypeEnum:
-      type: string
-      description: The internal type of the call
-      enum:
-      - Local
-      - LongDistance
-      - International
-      - Sip
-      - RingMe
-      - RingOut
-      - Usual
-      - TollFreeNumber
-      - VerificationNumber
-      - Vma
-      - LocalNumber
-      - ImsOutgoing
-      - ImsIncoming
-    CallLogToParty:
-      allOf:
-      - $ref: '#/components/schemas/CallLogParty'
-      - $ref: '#/components/schemas/BaseCallLogToParty'
-    CallLogFromParty:
-      allOf:
-      - $ref: '#/components/schemas/CallLogParty'
-      - $ref: '#/components/schemas/BaseCallLogFromParty'
-    CallDirectionEnum:
-      description: The direction of a call
-      type: string
-      enum:
-      - Inbound
-      - Outbound
+          description: Link to a message resource
+      description: Linked message (Fax/Voicemail)
     BaseCallLogRecord:
       description: Base schema for CallLogRecord and CallLogRecordLegInfo
       type: object
@@ -1201,299 +1227,271 @@ components:
           $ref: '#/components/schemas/BillingInfo'
         internalType:
           $ref: '#/components/schemas/CallInternalTypeEnum'
-    CallLogRecordMessage:
+    CallLogSyncResponse:
       type: object
       required:
-      - id
-      - type
       - uri
+      - records
+      - syncInfo
       properties:
-        id:
-          type: string
-          description: Internal identifier of a message
-        type:
-          type: string
-          description: Type of message
         uri:
           type: string
           format: uri
-          description: Link to a message resource
-      description: Linked message (Fax/Voicemail)
-  parameters:
-    CallLogPhoneNumber:
-      name: phoneNumber
-      in: query
-      description: 'Phone number of a caller/callee in e.164 format without a ''+'' sign. If specified, all incoming/outgoing calls
+          description: Link to the list of call log records with sync information
+        records:
+          type: array
+          description: 'List of call log records with synchronization information. For `ISync` the total number of returned records is limited to 250;
 
-        from/to this phone number are returned.
+            this includes both new records and the old ones, specified by the recordCount parameter
 
-        '
-      schema:
-        type: string
-      example: '12053320032'
-    CallRecordingType:
-      name: recordingType
-      in: query
-      description: 'Indicates that call records with recordings of particular type should be returned.
+            '
+          items:
+            $ref: '#/components/schemas/CallLogRecord'
+        syncInfo:
+          $ref: '#/components/schemas/CallLogSyncInfo'
+    BillingInfo:
+      type: object
+      properties:
+        costIncluded:
+          type: number
+          format: double
+          description: 'Cost per minute, paid and already included in your RingCentral service plan.
 
-        If omitted, then calls with and without recordings are returned
+            For example International Calls
 
-        '
-      schema:
-        type: string
-        enum:
-        - Automatic
-        - OnDemand
-        - All
-    CallLogWithRecording:
-      name: withRecording
-      in: query
-      deprecated: true
-      description: 'Deprecated, replaced with `recordingType` filter, still supported for compatibility reasons.
-
-        Indicates if only recorded calls should be returned.
-
-
-        If both `withRecording` and `recordingType` parameters are specified, then `withRecording` is ignored
-
-        '
-      schema:
-        type: boolean
-        default: false
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    CallTransportType:
-      name: transport
-      in: query
-      description: 'The type of call transport. Multiple values are supported. By default, this filter is disabled
-
-        '
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          $ref: '#/components/schemas/CallTransportEnum'
-    ConferenceCallType:
-      name: conferenceType
-      in: query
-      description: 'Conference call type: RCC or RC Meetings. If not specified, no conference call filter applied
-
-        '
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
+            '
+        costPurchased:
+          type: number
+          format: double
+          description: Cost per minute, paid and not included in your RingCentral service plan
+      description: Billing information related to the call. Returned for 'Detailed' view only
+    BaseCallLogFromParty:
+      type: object
+      properties:
+        dialerPhoneNumber:
           type: string
-          enum:
-          - AudioConferencing
-          - Meetings
-    CallType:
-      name: type
-      in: query
-      description: 'The type of call records to be included in the result.
-
-        If omitted, all call types are returned. Multiple values are supported
-
-        '
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          $ref: '#/components/schemas/CallTypeEnum'
-    CallRecordId:
-      name: callRecordId
-      in: path
-      description: Internal identifier of a call log record. Multiple values are supported
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: array
-        items:
+          description: Dialer phone number without any format modifications. Returned for inbound calls
+      description: Sender/initiator caller information
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
           type: string
-    CallLogShowBlocked:
-      name: showBlocked
-      in: query
-      description: Indicates then calls from/to blocked numbers are returned
-      schema:
-        type: boolean
-        default: true
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    CallLogRecord:
+      allOf:
+      - $ref: '#/components/schemas/BaseCallLogRecord'
+      - description: Call log record
+        type: object
+        required:
+        - id
+        - uri
+        - sessionId
+        properties:
+          id:
+            type: string
+            description: Internal identifier of a call log record
+          uri:
+            type: string
+            format: uri
+            description: Canonical URI of a call log record
+          sessionId:
+            type: string
+            description: Internal identifier of a call session
+          deleted:
+            type: boolean
+            description: Indicates whether the record is deleted. Returned for deleted records, for ISync requests
+          legs:
+            type: array
+            description: For 'Detailed' view only. Leg description
+            items:
+              $ref: '#/components/schemas/CallLogRecordLegInfo'
+          lastModifiedTime:
+            type: string
+            description: 'For ''Detailed'' view only. The datetime when the call log record
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+              was modified in (ISO 8601)[https://en.wikipedia.org/wiki/ISO_8601] format
 
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    CallLogSessionId:
-      name: sessionId
-      in: query
-      description: Internal identifier of a call session
-      schema:
-        type: string
-    CallLogView:
-      name: view
-      in: query
-      description: 'Defines the level of details for returned call records
+              including timezone, for example *2016-03-10T18:07:52.534Z*
 
-        '
-      schema:
-        type: string
-        default: Simple
-        enum:
-        - Simple
-        - Detailed
-    CallLogDateTo:
-      name: dateTo
-      in: query
-      description: 'The end of the time range to return call records in ISO 8601 format including timezone,
-
-        for example 2016-03-10T18:07:52.534Z. The default value is current time
-
-        '
-      schema:
-        type: string
-        format: date-time
-    CallLogDateFrom:
-      name: dateFrom
-      in: query
-      description: 'The beginning of the time range to return call records in ISO 8601 format including timezone,
-
-        for example 2016-03-10T18:07:52.534Z. The default value is `dateTo` minus 24 hours
-
-        '
-      schema:
-        type: string
-        format: date-time
-    CallLogStatusGroup:
-      name: statusGroup
-      in: query
-      description: Type of calls to be returned
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
+              '
+            format: date-time
+    CallLegTypeEnum:
+      type: string
+      description: Leg type
+      enum:
+      - SipForwarding
+      - ServiceMinus2
+      - ServiceMinus3
+      - PstnToSip
+      - Accept
+      - FindMe
+      - FollowMe
+      - TestCall
+      - FaxSent
+      - CallBack
+      - CallingCard
+      - RingDirectly
+      - RingOutWebToSubscriber
+      - RingOutWebToCaller
+      - SipToPstnMetered
+      - RingOutClientToSubscriber
+      - RingOutClientToCaller
+      - RingMe
+      - TransferCall
+      - SipToPstnUnmetered
+      - RingOutDeviceToSubscriber
+      - RingOutDeviceToCaller
+      - RingOutOneLegToCaller
+      - ExtensionToExtension
+      - CallPark
+      - PagingServer
+      - Hunting
+      - OutgoingFreeSpDl
+      - ParkLocation
+      - ConferenceCall
+      - MobileApp
+      - MoveToConference
+      - Unknown
+      - MeetingsCall
+      - SilentMonitoring
+      - Monitoring
+      - Pickup
+      - ImsCall
+      - JoinCall
+      - TextRelay
+    CallLogFromParty:
+      allOf:
+      - $ref: '#/components/schemas/CallLogParty'
+      - $ref: '#/components/schemas/BaseCallLogFromParty'
+    CallLogSyncTypeEnum:
+      type: string
+      description: 'Type of call log synchronization request: full or incremental sync'
+      enum:
+      - FSync
+      - ISync
+    ExtensionInfoCallLog:
+      type: object
+      required:
+      - id
+      - uri
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of an extension
+        uri:
           type: string
-          enum:
-          - Missed
-          - All
-    CallLogSyncType:
-      name: syncType
-      in: query
-      description: Type of call log synchronization request
-      schema:
-        allOf:
-        - $ref: '#/components/schemas/CallLogSyncTypeEnum'
-        - default: FSync
-    CallLogExtensionNumber:
-      name: extensionNumber
-      in: query
-      description: 'Short extension number of a user. If specified, returns call log for this particular extension only.
-
-        Cannot be combined with `phoneNumber` filter
-
-        '
-      schema:
-        type: string
-      example: '101'
-    CallDirection:
-      name: direction
-      in: query
-      description: 'The direction of call records to be included in the result. If omitted, both
-
-        inbound and outbound calls are returned. Multiple values are supported
-
-        '
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          $ref: '#/components/schemas/CallDirectionEnum'
-    CallLogTelephonySessionId:
-      name: telephonySessionId
-      in: query
-      description: Internal identifier of a telephony session
-      schema:
-        type: string
-  responses:
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
-
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    Forbidden:
-      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
-
-        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
-
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+          format: uri
+          description: Canonical URI of an extension
+      description: Information about extension on whose behalf a call is initiated. For Secretary call log the Boss extension info is returned
+    BaseCallLogToParty:
+      type: object
+      properties:
+        dialedPhoneNumber:
+          type: string
+          description: Dialed phone number without any format modifications. Returned for outbound calls
+      description: Target caller information
+    CallTypeEnum:
+      type: string
+      description: The type of call
+      enum:
+      - Voice
+      - Fax
+    CallResultReasonEnum:
+      type: string
+      description: "The reason of the call result:\n  * `Accepted` - The call was connected to and accepted by this number\n  * `Connected` - The call was answered, but there was no response on how to handle the call (for example, a voice mail system answered the call and did not push \"1\" to accept)\n  * `Line Busy` - The phone number you dialed was busy\n  * `Not Answered` - The phone number you dialed was not answered\n  * `No Answer` - You did not answer the call\n  * `Hang Up` - The caller hung up before the call was answered\n  * `Stopped` - This attempt was stopped because the call was answered by another phone\n  * `Internal Error` - An internal error occurred when making the call. Please try again\n  * `No Credit` - There was not enough Calling Credit on your account to make this call\n  * `Restricted Number` - The number you dialed is restricted by RingCentral\n  * `Wrong Number` - The number you dialed has either been disconnected or is not a valid phone number. Please check the number and try again\n  * `International Disabled` - International calling is not enabled on your account. Contact customer service to activate International Calling\n  * `International Restricted` - The country and/or area you attempted to call has been prohibited by your administrator\n  * `Bad Number` - An error occurred when making the call. Please check the number before trying again\n  * `Info 411 Restricted` - Calling to 411 Information Services is restricted\n  * `Customer 611 Restricted` - 611 customer service is not supported. Please contact customer service at <(888) 555-1212>\n  * `No Digital Line` - This DigitalLine was either not plugged in or did not have an internet connection\n  * `Failed Try Again` - Call failed. Please try again\n  * `Max Call Limit` - The number of simultaneous calls to your account has reached its limit\n  * `Too Many Calls` - The number of simultaneous calls for per DigitalLine associated with Other Phone has reached its limit. Please contact customer service\n  * `Calls Not Accepted` - Your account was not accepting calls at this time\n  * `Number Not Allowed` - The number that was dialed to access your account is not allowed\n  * `Number Blocked` - This number is in your Blocked Numbers list\n  * `Number Disabled` - The phone number and/or area you attempted to call has been prohibited by your administrator\n  * `Resource Error` - An error occurred when making the call. Please try again\n  * `Call Loop` - A call loop occurred due to an incorrect call forwarding configuration. Please check that you are not forwarding calls back to your own account\n  * `Fax Not Received` - An incoming fax could not be received because a proper connection with the sender's fax machine could not be established\n  * `Fax Partially Sent` - The fax was only partially sent. Possible explanations include phone line quality to poor to maintain the connection or the call was dropped\n  * `Fax Not Sent` - An attempt to send the fax was made, but could not connect with the receiving fax machine\n  * `Fax Poor Line` - An attempt to send the fax was made, but the phone line quality was too poor to send the fax\n  * `Fax Prepare Error` - An internal error occurred when preparing the fax. Please try again\n  * `Fax Save Error` - An internal error occurred when saving the fax. Please try again\n  * `Fax Send Error` - An error occurred when sending the fax. Please try again\n  * `Emergency Address not defined` - The call was rejected due to no E911 address\n  * `Carrier is not active` - The call was rejected due to carrier inactivity\n  * `EDGE trunk misconfigured` - The call was rejected due to error in EDGE trunk configuration\n  * `Internal Call Error` - An internal error occurred when making the call. Please try again\n  * `Receive Error` - Fax receive error\n"
+      enum:
+      - Accepted
+      - Bad Number
+      - Call Loop
+      - Calls Not Accepted
+      - Carrier is not active
+      - Connected
+      - Customer 611 Restricted
+      - EDGE trunk misconfigured
+      - Emergency Address not defined
+      - Failed Try Again
+      - Fax Not Received
+      - Fax Not Sent
+      - Fax Partially Sent
+      - Fax Poor Line
+      - Fax Prepare Error
+      - Fax Save Error
+      - Fax Send Error
+      - Hang Up
+      - Info 411 Restricted
+      - Internal Call Error
+      - Internal Error
+      - International Disabled
+      - International Restricted
+      - Line Busy
+      - Max Call Limit
+      - No Answer
+      - No Credit
+      - No Digital Line
+      - Not Answered
+      - Number Blocked
+      - Number Disabled
+      - Number Not Allowed
+      - Receive Error
+      - Resource Error
+      - Restricted Number
+      - Stopped
+      - Too Many Calls
+      - Unknown
+      - Wrong Number
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    CallLogDelegateInfo:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a Secretary extension
+        name:
+          type: string
+          description: Custom name of a Secretary extension
+      description: Information on a delegate extension that actually implemented a call action. For Secretary call log the field is returned if the current extension implemented a call. For Boss call log the field contains information on a Secretary extension which actually implemented a call on behalf of the current extension
+    CallLogRecordLegInfo:
+      allOf:
+      - $ref: '#/components/schemas/BaseCallLogRecord'
+      - description: Call leg record
+        type: object
+        required:
+        - legType
+        properties:
+          legType:
+            $ref: '#/components/schemas/CallLegTypeEnum'
+          master:
+            type: boolean
+            description: Returned for 'Detailed' call log. Specifies if the leg is master-leg
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
   securitySchemes:
     OAuth2:
       type: oauth2

@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Meeting Recordings API
+  title: RingCentral Meeting Recordings API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -31,9 +31,7 @@ paths:
       summary: List Account Recordings
       description: 'Returns all account recordings.
 
-        This endpoint is used in Admin recording service, not regular web
-
-        '
+        This endpoint is used in Admin recording service, not regular web'
       operationId: getAccountRecordings
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -61,9 +59,7 @@ paths:
       summary: List User Recordings
       description: 'Returns all recordings available for specific extension.
 
-        This endpoint is used in admin recording service, not regular web
-
-        '
+        This endpoint is used in admin recording service, not regular web'
       operationId: getExtensionRecordings
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -87,27 +83,70 @@ paths:
       x-app-permission: Video
 components:
   responses:
-    RcvNotFound:
-      description: Resource not found
     RcvInternalError:
       description: Error processing data
     RcvAccessForbidden:
       description: Access forbidden
+    RcvNotFound:
+      description: Resource not found
+  parameters:
+    RcvPerPage:
+      name: perPage
+      in: query
+      description: Number of records returned
+      schema:
+        type: integer
+        format: int32
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    RcvPageToken:
+      name: pageToken
+      in: query
+      description: Token to get the next page
+      schema:
+        type: string
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
   schemas:
-    CloudRecordings:
-      required:
-      - paging
-      - recordings
+    Host:
       type: object
       properties:
-        recordings:
-          type: array
-          description: Recordings array
-          items:
-            $ref: '#/components/schemas/CloudRecording'
-        paging:
-          $ref: '#/components/schemas/Paging'
-      description: Recordings page
+        accountId:
+          type: string
+          description: Account id
+        extensionId:
+          type: string
+          description: Extension id
+        displayName:
+          type: string
+          description: Display name
+      description: Meeting host
     CloudRecording:
       required:
       - displayName
@@ -149,19 +188,6 @@ components:
           type: string
           description: Date after which recording will be deleted
       description: Recording information
-    Host:
-      type: object
-      properties:
-        accountId:
-          type: string
-          description: Account id
-        extensionId:
-          type: string
-          description: Extension id
-        displayName:
-          type: string
-          description: Display name
-      description: Meeting host
     Paging:
       required:
       - currentPageToken
@@ -174,50 +200,20 @@ components:
           type: string
           description: Next page offset token
       description: Paging information
-  parameters:
-    RcvPerPage:
-      name: perPage
-      in: query
-      description: Number of records returned
-      schema:
-        type: integer
-        format: int32
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    RcvPageToken:
-      name: pageToken
-      in: query
-      description: Token to get the next page
-      schema:
-        type: string
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
+    CloudRecordings:
+      required:
+      - paging
+      - recordings
+      type: object
+      properties:
+        recordings:
+          type: array
+          description: Recordings array
+          items:
+            $ref: '#/components/schemas/CloudRecording'
+        paging:
+          $ref: '#/components/schemas/Paging'
+      description: Recordings page
   securitySchemes:
     OAuth2:
       type: oauth2

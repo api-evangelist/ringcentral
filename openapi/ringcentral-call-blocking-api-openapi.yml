@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Call Blocking API
+  title: RingCentral Call Blocking API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -163,7 +163,9 @@ paths:
       tags:
       - Call Blocking
       summary: Get Blocked/Allowed Number
-      description: "Returns blocked or allowed phone number(s) by their ID(s). \n[Batch request syntax](https://developers.ringcentral.com/api-reference/Batch-Requests) is supported.\n"
+      description: 'Returns blocked or allowed phone number(s) by their ID(s).
+
+        Batch request syntax is supported.'
       operationId: readBlockedAllowedNumber
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -190,7 +192,9 @@ paths:
       tags:
       - Call Blocking
       summary: Update Blocked/Allowed Number
-      description: "Updates blocked or allowed phone number(s) by their ID(s). \n[Batch request syntax](https://developers.ringcentral.com/api-reference/Batch-Requests) is supported.\n"
+      description: 'Updates blocked or allowed phone number(s) by their ID(s).
+
+        Batch request syntax is supported.'
       operationId: updateBlockedAllowedNumber
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -245,75 +249,85 @@ paths:
       x-app-permission: EditExtensions
       x-user-permission: EditBlockedNumbers
 components:
-  schemas:
-    BlockedAllowedPhoneNumbersList:
-      type: object
-      description: List of blocked or allowed phone numbers
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a list of blocked/allowed phone numbers resource
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/BlockedAllowedPhoneNumberInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
+  responses:
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
 
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
 
         '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    ApiError:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+  schemas:
+    BlockedNumberStatusEnum:
+      type: string
+      description: Status of a phone number
+      default: Blocked
+      enum:
+      - Blocked
+      - Allowed
+    CallerBlockingSettingsUpdate:
       type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
+      description: Returns the lists of blocked and allowed phone numbers
       properties:
-        errorCode:
+        mode:
           type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
+          description: 'Call blocking options: either specific or all calls and faxes'
+          enum:
+          - Specific
+          - All
+        noCallerId:
           type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
+          description: Determines how to handle calls with no caller ID in 'Specific' mode
+          enum:
+          - BlockCallsAndFaxes
+          - BlockFaxes
+          - Allow
+        payPhones:
           type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
+          description: Blocking settings for pay phones
+          enum:
+          - Block
+          - Allow
+        greetings:
           type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
+          description: List of greetings played for blocked callers
           items:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/BlockedCallerGreetingInfo'
     EnumeratedPagingModel:
       type: object
       required:
@@ -397,25 +411,46 @@ components:
           $ref: '#/components/schemas/PageNavigationUri'
         lastPage:
           $ref: '#/components/schemas/PageNavigationUri'
-    BlockedAllowedPhoneNumberInfo:
+    ApiError:
       type: object
-      description: Information on a blocked/allowed phone number
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
       properties:
         uri:
           type: string
+          description: Canonical URI to retrieve the particular page of the result set
           format: uri
-          description: Link to a blocked/allowed phone number
-        id:
-          type: string
-          description: Internal identifier of a blocked/allowed phone number
-        phoneNumber:
-          type: string
-          description: A blocked/allowed phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format
-        label:
-          type: string
-          description: Custom name of a blocked/allowed phone number
-        status:
-          $ref: '#/components/schemas/BlockedNumberStatusEnum'
     AddBlockedAllowedPhoneNumber:
       type: object
       description: Updates either blocked or allowed phone number list with a new phone number.
@@ -428,54 +463,6 @@ components:
           description: Custom name of a blocked/allowed phone number
         status:
           $ref: '#/components/schemas/BlockedNumberStatusEnum'
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    BlockedCallerGreetingInfo:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Type of greeting
-        preset:
-          $ref: '#/components/schemas/PresetInfo'
-    CallerBlockingSettingsUpdate:
-      type: object
-      description: Returns the lists of blocked and allowed phone numbers
-      properties:
-        mode:
-          type: string
-          description: 'Call blocking options: either specific or all calls and faxes'
-          enum:
-          - Specific
-          - All
-        noCallerId:
-          type: string
-          description: Determines how to handle calls with no caller ID in 'Specific' mode
-          enum:
-          - BlockCallsAndFaxes
-          - BlockFaxes
-          - Allow
-        payPhones:
-          type: string
-          description: Blocking settings for pay phones
-          enum:
-          - Block
-          - Allow
-        greetings:
-          type: array
-          description: List of greetings played for blocked callers
-          items:
-            $ref: '#/components/schemas/BlockedCallerGreetingInfo'
     CallerBlockingSettings:
       type: object
       properties:
@@ -504,13 +491,30 @@ components:
           items:
             $ref: '#/components/schemas/BlockedCallerGreetingInfo'
       description: Returns the lists of blocked and allowed phone numbers
-    BlockedNumberStatusEnum:
-      type: string
-      description: Status of a phone number
-      default: Blocked
-      enum:
-      - Blocked
-      - Allowed
+    BlockedCallerGreetingInfo:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of greeting
+        preset:
+          $ref: '#/components/schemas/PresetInfo'
+    BlockedAllowedPhoneNumbersList:
+      type: object
+      description: List of blocked or allowed phone numbers
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a list of blocked/allowed phone numbers resource
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/BlockedAllowedPhoneNumberInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
     PresetInfo:
       type: object
       properties:
@@ -524,6 +528,49 @@ components:
         name:
           type: string
           description: Name of a greeting
+    BlockedAllowedPhoneNumberInfo:
+      type: object
+      description: Information on a blocked/allowed phone number
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a blocked/allowed phone number
+        id:
+          type: string
+          description: Internal identifier of a blocked/allowed phone number
+        phoneNumber:
+          type: string
+          description: A blocked/allowed phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format
+        label:
+          type: string
+          description: Custom name of a blocked/allowed phone number
+        status:
+          $ref: '#/components/schemas/BlockedNumberStatusEnum'
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
   parameters:
     Page:
       name: page
@@ -538,6 +585,43 @@ components:
         maximum: 1000
         default: 1
       example: 1
+    BlockedNumberId:
+      name: blockedNumberId
+      description: Internal identifier of a blocked number entry
+      in: path
+      required: true
+      schema:
+        type: string
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
     PerPage:
       name: perPage
       in: query
@@ -555,86 +639,6 @@ components:
         maximum: 1000
         default: 100
       example: 100
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    BlockedNumberId:
-      name: blockedNumberId
-      description: Internal identifier of a blocked number entry
-      in: path
-      required: true
-      schema:
-        type: string
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-  responses:
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
-
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
-
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
   securitySchemes:
     OAuth2:
       type: oauth2

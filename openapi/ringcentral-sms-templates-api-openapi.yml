@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards SMS Templates API
+  title: RingCentral SMS Templates API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -165,7 +165,11 @@ paths:
       tags:
       - SMS Templates
       summary: Create User Message Template
-      description: "Creates a user personal text message template. \nMaximum number of personal templates is 25 per user. \nMax length of the `body` property is 1000 symbols (2-byte UTF-16 encoded).\n"
+      description: 'Creates a user personal text message template.
+
+        Maximum number of personal templates is 25 per user.
+
+        Max length of the `body` property is 1000 symbols (2-byte UTF-16 encoded).'
       operationId: createUserMessageTemplate
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -309,6 +313,60 @@ paths:
       x-app-permission: EditExtensions
 components:
   schemas:
+    MessageTemplateRequest:
+      type: object
+      required:
+      - displayName
+      properties:
+        displayName:
+          type: string
+          description: Name of a template
+        body:
+          $ref: '#/components/schemas/TemplateInfo'
+        site:
+          $ref: '#/components/schemas/Site'
+    Site:
+      type: object
+      description: "Specifies a site that message template is associated with. Supported only if the Sites feature is enabled. \nThe default is `main-site` value.\n"
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a site
+        name:
+          type: string
+          description: Custom name of a site
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
     ApiErrorResponseModel:
       type: object
       description: Standard error response model which is returned in case of any unsuccessful operation
@@ -321,6 +379,15 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ApiError'
+    TemplateInfo:
+      type: object
+      description: Text message template information
+      required:
+      - text
+      properties:
+        text:
+          type: string
+          description: "Text of the message template. Maximum length is 1000 symbols (2-byte UTF-16 encoded). \nIf a character is encoded in 4 bytes in UTF-16 it is treated as 2 characters, \nthus limiting the maximum message length up to 500 symbols\n"
     MessageTemplatesListResponse:
       type: object
       properties:
@@ -341,31 +408,6 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ApiErrorWithParameter'
-    TemplateInfo:
-      type: object
-      description: Text message template information
-      required:
-      - text
-      properties:
-        text:
-          type: string
-          description: "Text of the message template. Maximum length is 1000 symbols (2-byte UTF-16 encoded). \nIf a character is encoded in 4 bytes in UTF-16 it is treated as 2 characters, \nthus limiting the maximum message length up to 500 symbols\n"
-    VisibilityType:
-      type: string
-      description: Specifies if a template is available on a user (Personal) or a company (Company) level
-      enum:
-      - Company
-      - Personal
-    Site:
-      type: object
-      description: "Specifies a site that message template is associated with. Supported only if the Sites feature is enabled. \nThe default is `main-site` value.\n"
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a site
-        name:
-          type: string
-          description: Custom name of a site
     MessageTemplateResponse:
       type: object
       properties:
@@ -381,50 +423,12 @@ components:
           $ref: '#/components/schemas/VisibilityType'
         site:
           $ref: '#/components/schemas/Site'
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    MessageTemplateRequest:
-      type: object
-      required:
-      - displayName
-      properties:
-        displayName:
-          type: string
-          description: Name of a template
-        body:
-          $ref: '#/components/schemas/TemplateInfo'
-        site:
-          $ref: '#/components/schemas/Site'
+    VisibilityType:
+      type: string
+      description: Specifies if a template is available on a user (Personal) or a company (Company) level
+      enum:
+      - Company
+      - Personal
   responses:
     NotFound:
       description: 'General response with **HTTP 404 "Not found"** status.<br>
@@ -449,6 +453,21 @@ components:
           schema:
             $ref: '#/components/schemas/ParameterizedErrorResponseModel'
   parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
     TemplateId:
       name: templateId
       in: path
@@ -462,21 +481,6 @@ components:
       description: 'Internal identifier of the RingCentral extension/user
 
         (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true

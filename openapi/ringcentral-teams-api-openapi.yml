@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Teams API
+  title: RingCentral Teams API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -381,25 +381,27 @@ paths:
       x-app-permission: TeamMessaging
 components:
   schemas:
-    TMAddTeamMembersRequest:
-      required:
-      - members
+    TMUpdateTeamRequest:
       type: object
       properties:
-        members:
-          type: array
-          description: Identifier(s) of chat member(s)
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: Internal identifier of a person
-              email:
-                type: string
-                format: email
-                description: Email of a person
-            description: Conversation is opened
+        public:
+          type: boolean
+          description: Team access level
+        name:
+          type: string
+          description: Team name. Maximum number of characters supported is 250
+        description:
+          type: string
+          description: Team description. Maximum number of characters supported is 1000
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
     EveryoneTeamInfo:
       type: object
       properties:
@@ -425,6 +427,61 @@ components:
           type: string
           description: Chat last change datetime in ISO 8601 format
           format: date-time
+    TMCreateTeamRequest:
+      required:
+      - name
+      type: object
+      properties:
+        public:
+          type: boolean
+          description: Team access level.
+        name:
+          type: string
+          description: Team name.
+        description:
+          type: string
+          description: Team description.
+        members:
+          type: array
+          description: Identifier(s) of team members.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of a person
+              email:
+                type: string
+                format: email
+                description: Email of a person
+    TMAddTeamMembersRequest:
+      required:
+      - members
+      type: object
+      properties:
+        members:
+          type: array
+          description: Identifier(s) of chat member(s)
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of a person
+              email:
+                type: string
+                format: email
+                description: Email of a person
+            description: Conversation is opened
+    UpdateEveryoneTeamRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Everyone chat name. Maximum number of characters supported is 250
+        description:
+          type: string
+          description: Everyone chat description. Maximum number of characters supported is 1000
     TMTeamList:
       required:
       - records
@@ -437,6 +494,20 @@ components:
             $ref: '#/components/schemas/TMTeamInfo'
         navigation:
           $ref: '#/components/schemas/TMNavigationInfo'
+    TMRemoveTeamMembersRequest:
+      required:
+      - members
+      type: object
+      properties:
+        members:
+          type: array
+          description: Identifier(s) of chat members.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of a person
     TMTeamInfo:
       type: object
       properties:
@@ -471,77 +542,6 @@ components:
           type: string
           description: Team last change datetime in ISO 8601 format
           format: date-time
-    TMNavigationInfo:
-      type: object
-      properties:
-        prevPageToken:
-          type: string
-          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-        nextPageToken:
-          type: string
-          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-    UpdateEveryoneTeamRequest:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Everyone chat name. Maximum number of characters supported is 250
-        description:
-          type: string
-          description: Everyone chat description. Maximum number of characters supported is 1000
-    TMUpdateTeamRequest:
-      type: object
-      properties:
-        public:
-          type: boolean
-          description: Team access level
-        name:
-          type: string
-          description: Team name. Maximum number of characters supported is 250
-        description:
-          type: string
-          description: Team description. Maximum number of characters supported is 1000
-    TMCreateTeamRequest:
-      required:
-      - name
-      type: object
-      properties:
-        public:
-          type: boolean
-          description: Team access level.
-        name:
-          type: string
-          description: Team name.
-        description:
-          type: string
-          description: Team description.
-        members:
-          type: array
-          description: Identifier(s) of team members.
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: Internal identifier of a person
-              email:
-                type: string
-                format: email
-                description: Email of a person
-    TMRemoveTeamMembersRequest:
-      required:
-      - members
-      type: object
-      properties:
-        members:
-          type: array
-          description: Identifier(s) of chat members.
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: Internal identifier of a person
   securitySchemes:
     OAuth2:
       type: oauth2

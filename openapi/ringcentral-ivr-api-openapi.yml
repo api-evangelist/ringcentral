@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards IVR API
+  title: RingCentral IVR API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -334,82 +334,29 @@ paths:
       x-user-permission: AutoReceptionist
 components:
   schemas:
-    AudioPromptInfo:
+    UpdateIVRPromptRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+          description: Name of a file to be uploaded as a prompt
+    PromptLanguageInfo:
       type: object
       properties:
         uri:
           type: string
           format: uri
-          description: Link to a prompt audio file
+          description: Link to a prompt language
         id:
           type: string
-          description: Internal identifier of a prompt
-      description: For 'Audio' mode only. Prompt media reference
-    IvrMenuPromptInfo:
-      type: object
-      properties:
-        mode:
+          description: Internal identifier of a language
+        name:
           type: string
-          description: 'Prompt mode: custom media or text'
-          enum:
-          - Audio
-          - TextToSpeech
-        audio:
-          $ref: '#/components/schemas/AudioPromptInfo'
-        text:
+          description: Language name
+        localeCode:
           type: string
-          description: For 'TextToSpeech' mode only. Prompt text
-        language:
-          $ref: '#/components/schemas/PromptLanguageInfo'
-      description: Prompt metadata
-    IvrPrompts:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to prompts library resource
-        records:
-          type: array
-          description: List of Prompts
-          items:
-            $ref: '#/components/schemas/PromptInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
+          description: Language locale code
+      description: For 'TextToSpeech' mode only. Prompt language metadata
     EnumeratedPagingModel:
       type: object
       required:
@@ -480,26 +427,6 @@ components:
 
             '
           example: 25
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
     PageNavigationModel:
       type: object
       description: Links to other pages of the current result set
@@ -513,43 +440,23 @@ components:
           $ref: '#/components/schemas/PageNavigationUri'
         lastPage:
           $ref: '#/components/schemas/PageNavigationUri'
-    IVRMenuList:
+    IvrMenuPromptInfo:
       type: object
       properties:
-        uri:
+        mode:
           type: string
-          format: uri
-          description: Link to an IVR Menu list
-        records:
-          type: array
-          description: List of ivr menus
-          items:
-            $ref: '#/components/schemas/IVRMenuListInfo'
-    IVRMenuInfo:
-      type: object
-      properties:
-        id:
+          description: 'Prompt mode: custom media or text'
+          enum:
+          - Audio
+          - TextToSpeech
+        audio:
+          $ref: '#/components/schemas/AudioPromptInfo'
+        text:
           type: string
-          description: Internal identifier of an IVR Menu extension
-        uri:
-          type: string
-          format: uri
-          description: Link to an IVR Menu extension resource
-        name:
-          type: string
-          description: First name of an IVR Menu user
-        extensionNumber:
-          type: string
-          description: Number of an IVR Menu extension
-        site:
-          $ref: '#/components/schemas/IvrMenuSiteInfo'
-        prompt:
-          $ref: '#/components/schemas/IvrMenuPromptInfo'
-        actions:
-          type: array
-          description: Keys handling settings
-          items:
-            $ref: '#/components/schemas/IVRMenuActionsInfo'
+          description: For 'TextToSpeech' mode only. Prompt text
+        language:
+          $ref: '#/components/schemas/PromptLanguageInfo'
+      description: Prompt metadata
     IVRMenuActionsInfo:
       type: object
       properties:
@@ -576,20 +483,77 @@ components:
         phoneNumber:
           type: string
           description: For 'Transfer' action only. PSTN number in E.164 format
-    IVRMenuExtensionInfo:
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    IVRMenuListInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an IVR Menu extension
+          example: '7258440006'
+        uri:
+          type: string
+          format: uri
+          description: Link to an IVR Menu extension resource
+          example: https://api-example.rincentral.com/restapi/v1.0/account/5936989006/ivr-menus/7258440006
+        name:
+          type: string
+          description: First name of an IVR Menu user
+          example: IVR Menu 1001
+        extensionNumber:
+          type: string
+          description: Number of an IVR Menu extension
+          example: '1001'
+    AudioPromptInfo:
       type: object
       properties:
         uri:
           type: string
           format: uri
-          description: Link to an extension resource
+          description: Link to a prompt audio file
         id:
           type: string
-          description: Internal identifier of an extension
-        name:
+          description: Internal identifier of a prompt
+      description: For 'Audio' mode only. Prompt media reference
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
           type: string
-          description: Name of an extension
-      description: For 'Connect' or 'Voicemail' actions only. Extension reference
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
     PromptInfo:
       type: object
       properties:
@@ -610,6 +574,85 @@ components:
         filename:
           type: string
           description: Name of a prompt
+    IVRMenuExtensionInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to an extension resource
+        id:
+          type: string
+          description: Internal identifier of an extension
+        name:
+          type: string
+          description: Name of an extension
+      description: For 'Connect' or 'Voicemail' actions only. Extension reference
+    IVRMenuList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to an IVR Menu list
+        records:
+          type: array
+          description: List of ivr menus
+          items:
+            $ref: '#/components/schemas/IVRMenuListInfo'
+    IvrPrompts:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to prompts library resource
+        records:
+          type: array
+          description: List of Prompts
+          items:
+            $ref: '#/components/schemas/PromptInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    IVRMenuInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an IVR Menu extension
+        uri:
+          type: string
+          format: uri
+          description: Link to an IVR Menu extension resource
+        name:
+          type: string
+          description: First name of an IVR Menu user
+        extensionNumber:
+          type: string
+          description: Number of an IVR Menu extension
+        site:
+          $ref: '#/components/schemas/IvrMenuSiteInfo'
+        prompt:
+          $ref: '#/components/schemas/IvrMenuPromptInfo'
+        actions:
+          type: array
+          description: Keys handling settings
+          items:
+            $ref: '#/components/schemas/IVRMenuActionsInfo'
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
     IvrMenuSiteInfo:
       type: object
       properties:
@@ -632,96 +675,6 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ApiErrorWithParameter'
-    UpdateIVRPromptRequest:
-      type: object
-      properties:
-        filename:
-          type: string
-          description: Name of a file to be uploaded as a prompt
-    PromptLanguageInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a prompt language
-        id:
-          type: string
-          description: Internal identifier of a language
-        name:
-          type: string
-          description: Language name
-        localeCode:
-          type: string
-          description: Language locale code
-      description: For 'TextToSpeech' mode only. Prompt language metadata
-    IVRMenuListInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an IVR Menu extension
-          example: '7258440006'
-        uri:
-          type: string
-          format: uri
-          description: Link to an IVR Menu extension resource
-          example: https://api-example.rincentral.com/restapi/v1.0/account/5936989006/ivr-menus/7258440006
-        name:
-          type: string
-          description: First name of an IVR Menu user
-          example: IVR Menu 1001
-        extensionNumber:
-          type: string
-          description: Number of an IVR Menu extension
-          example: '1001'
-  parameters:
-    IvrMenuId:
-      name: ivrMenuId
-      description: Internal identifier of an IVR menu
-      in: path
-      required: true
-      schema:
-        type: string
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    ContentDispositionFilename:
-      name: contentDispositionFilename
-      in: query
-      description: The default filename of the file to be downloaded
-      required: false
-      schema:
-        type: string
-    IvrPromptId:
-      name: promptId
-      in: path
-      description: Internal identifier of an IVR prompt
-      required: true
-      schema:
-        type: string
-    ContentDisposition:
-      name: contentDisposition
-      in: query
-      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
-      required: false
-      schema:
-        type: string
-        enum:
-        - Inline
-        - Attachment
   responses:
     NotFound:
       description: 'General response with **HTTP 404 "Not found"** status.<br>
@@ -743,16 +696,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
     InvalidRequest:
       description: 'General response with **HTTP 400 "Bad request"** status.<br>
 
@@ -765,6 +708,63 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+  parameters:
+    IvrMenuId:
+      name: ivrMenuId
+      description: Internal identifier of an IVR menu
+      in: path
+      required: true
+      schema:
+        type: string
+    ContentDisposition:
+      name: contentDisposition
+      in: query
+      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
+      required: false
+      schema:
+        type: string
+        enum:
+        - Inline
+        - Attachment
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    IvrPromptId:
+      name: promptId
+      in: path
+      description: Internal identifier of an IVR prompt
+      required: true
+      schema:
+        type: string
+    ContentDispositionFilename:
+      name: contentDispositionFilename
+      in: query
+      description: The default filename of the file to be downloaded
+      required: false
+      schema:
+        type: string
   securitySchemes:
     OAuth2:
       type: oauth2

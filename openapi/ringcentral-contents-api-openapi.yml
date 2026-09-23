@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Contents API
+  title: RingCentral Contents API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -42,9 +42,7 @@ paths:
 
         A query parameter not specified or a query parameter provided with no value is treated as not required for
 
-        filtering the list.
-
-        '
+        filtering the list.'
       operationId: socMsgListContents
       parameters:
       - $ref: '#/components/parameters/InterventionFilter'
@@ -105,9 +103,7 @@ paths:
 
         for email, customer_id, etc.) to be able to create content. This is channel-specific and detailed under the
 
-        generic parameters.
-
-        '
+        generic parameters.'
       operationId: socMsgCreateContent
       requestBody:
         required: true
@@ -152,9 +148,7 @@ paths:
       tags:
       - Contents
       summary: Get Content
-      description: 'Retrieves the content from the given id.
-
-        '
+      description: Retrieves the content from the given id.
       operationId: socMsgGetContent
       parameters:
       - $ref: '#/components/parameters/ContentId'
@@ -166,53 +160,207 @@ paths:
       x-throttling-group: Light
       x-app-permission: SocialMessaging
 components:
+  responses:
+    SocMsgCreateContentResponse403:
+      description: Error 403 on content creation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+          examples:
+            EDI-013:
+              $ref: '#/components/examples/EDI-013'
+            EDI-014:
+              $ref: '#/components/examples/EDI-014'
+            EDI-015:
+              $ref: '#/components/examples/EDI-015'
+            EDI-016:
+              $ref: '#/components/examples/EDI-016'
+            EDI-017:
+              $ref: '#/components/examples/EDI-017'
+            EDI-018:
+              $ref: '#/components/examples/EDI-018'
+            EDI-019:
+              $ref: '#/components/examples/EDI-019'
+            EDI-020:
+              $ref: '#/components/examples/EDI-020'
+            EDI-021:
+              $ref: '#/components/examples/EDI-021'
+            EDI-022:
+              $ref: '#/components/examples/EDI-022'
+            EDI-023:
+              $ref: '#/components/examples/EDI-023'
+            EDI-024:
+              $ref: '#/components/examples/EDI-024'
+    SocMsgGetContentResponse200:
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContentModel'
+    SocMsgListContentsResponse400:
+      description: Error 400 on content creation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+          examples:
+            EDI-028:
+              $ref: '#/components/examples/EDI-028'
+    SocMsgCreateContentResponse400:
+      description: Error 400 on content creation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+          examples:
+            EDI-009:
+              $ref: '#/components/examples/EDI-009'
+            EDI-025:
+              $ref: '#/components/examples/EDI-025'
+            EDI-030:
+              $ref: '#/components/examples/EDI-030'
+            EDI-031:
+              $ref: '#/components/examples/EDI-031'
+            EDI-037:
+              $ref: '#/components/examples/EDI-037'
+            EDI-038:
+              $ref: '#/components/examples/EDI-038'
+            EDI-040:
+              $ref: '#/components/examples/EDI-040'
+    SocMsgListContentsResponse200:
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContentList'
+    SocMsgCreateContentResponse422:
+      description: Error 422 on content creation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+          examples:
+            EDI-010:
+              $ref: '#/components/examples/EDI-010'
+            EDI-011:
+              $ref: '#/components/examples/EDI-011'
+            EDI-012:
+              $ref: '#/components/examples/EDI-012'
+            EDI-027:
+              $ref: '#/components/examples/EDI-027'
+            EDI-001:
+              $ref: '#/components/examples/EDI-001'
+            EDI-002:
+              $ref: '#/components/examples/EDI-002'
+            EDI-003:
+              $ref: '#/components/examples/EDI-003'
+            EDI-004:
+              $ref: '#/components/examples/EDI-004'
+            EDI-005:
+              $ref: '#/components/examples/EDI-005'
+            EDI-006:
+              $ref: '#/components/examples/EDI-006'
+            EDI-007:
+              $ref: '#/components/examples/EDI-007'
+            EDI-008:
+              $ref: '#/components/examples/EDI-008'
+            EDI-033:
+              $ref: '#/components/examples/EDI-033'
+    SocMsgResponse404:
+      description: Error 404
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+          examples:
+            EDI-029:
+              $ref: '#/components/examples/EDI-029'
+            EDI-032:
+              $ref: '#/components/examples/EDI-032'
+    SocMsgListContentsResponse422:
+      description: Error 422 on content list
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+          examples:
+            EDI-034:
+              $ref: '#/components/examples/EDI-034'
+            EDI-035:
+              $ref: '#/components/examples/EDI-035'
+            EDI-036:
+              $ref: '#/components/examples/EDI-036'
+    SocCreateContentResponse201:
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContentModel'
   schemas:
-    ContentRemotelyDeleted:
-      description: True if the content has been deleted on the remote channel.
-      type: boolean
-      example: false
-    ContentType:
-      description: Type of the content.
+    ContentComponents:
+      type: array
+      minItems: 0
+      description: 'Applicable to WhatsApp channels only.
+
+
+        Component configuration of the Whatsapp template to use for the content.
+
+
+        All available components are visible on the Whatsapp Business Manager interface.
+
+        '
+      items:
+        type: object
+        properties:
+          type:
+            type: string
+          parameters:
+            type: array
+            minItems: 0
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                text:
+                  type: string
+      example:
+      - Message1:
+        - param11:
+            type: Name
+            text: John
+        - param12:
+            type: Message
+            text: Product rocks!
+      - Message2:
+        - param21:
+            type: Agent Name
+            text: Alice
+        - param22:
+            type: Message
+            text: Thank you
+    ContentInReplyToContentId:
+      description: 'The content identifier to which this content is a reply to.
+
+
+        On creation, if omitted, a new discussion will be created. If the channel does not support to initiate discussion this parameter is mandatory.
+
+        '
       type: string
-      enum:
-      - Album
-      - AuthenticateMessage
-      - AuthenticateResponse
-      - Carousel
-      - CarouselMessage
-      - Comment
-      - ContactMessage
-      - Content
-      - Email
-      - FormMessage
-      - FormResponse
-      - HsmMessage
-      - Link
-      - ListMessage
-      - Media
-      - Message
-      - OutboundMessage
-      - PaymentMessage
-      - Photo
-      - PostbackMessage
-      - PrivateTweet
-      - PromptMessage
-      - Question
-      - Review
-      - ReviewResponse
-      - RichLinkMessage
-      - SelectMessage
-      - Status
-      - TemplateMessage
-      - TimePickerMessage
-      - Tweet
-      - Video
-      - VideoCallRequestMessage
-      example: Email
-    AttachmentId:
+      example: 123414e17asdd8ccf000023
+    ContentTemplateLanguage:
       type: string
-      description: Attachment identifier.
-      example: 506d9e817aa58d1259000f12
+      description: 'Applicable to WhatsApp channels only.
+
+
+        Language of the Whatsapp template to use for the content. All available template languages are visible on the Whatsapp Business Manager interface.
+
+
+        Language specified must conform to the ISO 639-1 alpha-2 codes for representing the names of languages.
+
+        '
+      example: fr
     ApiError:
       type: object
       description: Generalized API error structure suitable for any error type
@@ -229,6 +377,30 @@ components:
           description: User-friendly error message
           example: Something went wrong
       additionalProperties: true
+    ContentAttachmentIds:
+      description: 'An array containing the attachment identifiers that need to be attached to the content.
+
+        '
+      type: array
+      minItems: 0
+      items:
+        $ref: '#/components/schemas/AttachmentId'
+      example:
+      - 541014e17aa58d8ccf000023
+      - 541014e17aa58d8ccf000023
+    ContentSourceId:
+      description: 'Identifier of the channel.
+
+
+        On creation if `inReplyToContentId` is specified, the channel will be determined from it. Otherwise, this parameter is mandatory.
+
+        '
+      type: string
+      example: fff415437asdd8ccf000023
+    ContentStatuses:
+      type: array
+      items:
+        $ref: '#/components/schemas/ContentStatus'
     ContentAttachments:
       description: 'An array containing the attachments that are attached to the content.
 
@@ -237,81 +409,37 @@ components:
       minItems: 0
       items:
         $ref: '#/components/schemas/ContentAttachment'
-    ContentTitle:
-      description: 'Applicable to Email channels only.
-
-
-        The subject of the email.
-
-
-        This field is mandatory when initiating a discussion.
-
-        '
-      type: string
-      example: An email title
-    ContentForeignCategories:
-      description: 'External categories of the content.
-
-
-        Present only if the content has foreignCategories.
-
-        '
+    ContentCapabilitiesSupported:
+      description: Types of structured messages that can be used to reply to this type of message.
       items:
         type: string
       type: array
+    ContentEmailAddresses:
+      type: array
       minItems: 0
-      example:
-      - foreign_category_id
-    NonEnumeratedPagingModel:
-      type: object
-      required:
-      - perPage
-      additionalProperties: false
-      properties:
-        perPage:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'Current page size, describes how many items are in each page.
+      items:
+        $ref: '#/components/schemas/SocMsgEmailAddress'
+      description: 'Applicable on Email channels only.
 
-            Matches "perPage" parameter from the request.
 
-            '
-          example: 50
-        pageToken:
-          type: string
-          description: 'Current page token. May be omitted if result is empty (because non-existent page
+        An array containing the email addresses used in sections of the email.
 
-            was specified or perPage=0 was requested)
 
-            '
-        nextPageToken:
-          type: string
-          description: A page token to be used to fetch the next page of the result set. May be omitted if the current page is the last one.
-        previousPageToken:
-          type: string
-          description: 'A page token to be used to fetch the previous page of the result set.
+        This parameter is mandatory when initiating a discussion.
 
-            May be omitted if the current page is the first one or if the result set does not support backward navigation.
-
-            '
-        firstPageToken:
-          type: string
-          description: A page token to be used to fetch the first page of the result set.
-    SocMsgCreationTimeOrder:
-      description: Ordering by creationTime is descending by default.
+        '
+    ContentSynchronizationStatus:
+      description: Synchronization status.
       type: string
-      enum:
-      - -creationTime
-      - +creationTime
-      - creationTime
-      default: -creationTime
-      example: +creationTime
-    ContentLanguage:
-      description: Language of the content.
+      example: success
+    ContentPublished:
+      description: True if the content is published on the remote channel.
+      type: boolean
+      example: true
+    ContentBody:
+      description: "The content's body.\n\nOn creation this field is mandatory except for WhatsApp content using templates.\n\nThe following are the max length restrictions for the different channels supported.\nChannel and max length\n  * Apple Messages For Business (max length 10000)\n  * Email (max length 262144)\n  * RingCX Digital Messaging (max length 1024)\n  * Facebook (max length 8000)\n  * GoogleBusinessMessages (max length 3000)\n  * Google My Business (max length 4000)\n  * Instagram (max length 950)\n  * Instagram Messaging (max length 1000)\n  * LinkedIn (max length 3000)\n  * Messenger (max length 2000)\n  * Twitter (max length 280)\n  * Viber (max length 7000)\n  * WhatsApp (max length 3800)\n  * Youtube (max length 8000)\n"
       type: string
-      example: En
+      example: Body of the content
     ContentModel:
       type: object
       required:
@@ -410,158 +538,92 @@ components:
           $ref: '#/components/schemas/SocMsgLastModifiedTime'
         capabilitiesSupported:
           $ref: '#/components/schemas/ContentCapabilitiesSupported'
-    ContentCategoryIds:
-      description: 'List of the category identifiers of the content.
-
-        '
-      items:
-        type: string
-      type: array
-      example:
-      - 541014e17aa58d8ccf000023
-      - 541014e17aa58d8ccf002023
-    ContentRating:
-      description: 'Rating of the content.
-
-
-        Present only if the content supports rating and rating is filled.
-
-        '
-      type: integer
-      format: int32
-      example: 4
-    ContentCreatedFrom:
-      description: Created from of the content.
+    ContentType:
+      description: Type of the content.
       type: string
       enum:
-      - Synchronizer
-      - Interface
-      - Api
-      - AutoSurvey
-      - AutoResponseTrigger
-      - AutoRequestEmail
-    ContentTemplateLanguage:
-      type: string
-      description: 'Applicable to WhatsApp channels only.
-
-
-        Language of the Whatsapp template to use for the content. All available template languages are visible on the Whatsapp Business Manager interface.
-
-
-        Language specified must conform to the ISO 639-1 alpha-2 codes for representing the names of languages.
-
-        '
-      example: fr
-    ContentBodyFormatted:
-      description: Text and HTML formatted versions of the content body.
-      type: object
-      properties:
-        html:
-          type: string
-        text:
-          type: string
-    ContentCapabilitiesSupported:
-      description: Types of structured messages that can be used to reply to this type of message.
-      items:
-        type: string
-      type: array
-    ContentComponents:
-      type: array
-      minItems: 0
-      description: 'Applicable to WhatsApp channels only.
-
-
-        Component configuration of the Whatsapp template to use for the content.
-
-
-        All available components are visible on the Whatsapp Business Manager interface.
-
-        '
-      items:
-        type: object
-        properties:
-          type:
-            type: string
-          parameters:
-            type: array
-            minItems: 0
-            items:
-              type: object
-              properties:
-                type:
-                  type: string
-                text:
-                  type: string
-      example:
-      - Message1:
-        - param11:
-            type: Name
-            text: John
-        - param12:
-            type: Message
-            text: Product rocks!
-      - Message2:
-        - param21:
-            type: Agent Name
-            text: Alice
-        - param22:
-            type: Message
-            text: Thank you
-    ContentAutoSubmittedField:
-      description: "Auto submitted content:\n  - won't reopen tasks or interventions\n  - can be used to send automatic messages like asking an user to follow on twitter, sending a survey, etc,\n  - doesn't get included in statistics\n"
-      type: boolean
-    ContentSourceType:
-      description: Type of the channel.
-      type: string
-      enum:
-      - AppleMessagesForBusiness
+      - Album
+      - AuthenticateMessage
+      - AuthenticateResponse
+      - Carousel
+      - CarouselMessage
+      - Comment
+      - ContactMessage
+      - Content
       - Email
-      - EngageMessaging
-      - Facebook
-      - GoogleBusinessMessages
-      - GoogleMyBusiness
-      - Instagram
-      - InstagramMessaging
-      - Linkedin
-      - Messenger
-      - Twitter
-      - Viber
-      - WhatsApp
-      - Youtube
-    ContentSynchronizationError:
-      description: Synchronization error details.
+      - FormMessage
+      - FormResponse
+      - HsmMessage
+      - Link
+      - ListMessage
+      - Media
+      - Message
+      - OutboundMessage
+      - PaymentMessage
+      - Photo
+      - PostbackMessage
+      - PrivateTweet
+      - PromptMessage
+      - Question
+      - Review
+      - ReviewResponse
+      - RichLinkMessage
+      - SelectMessage
+      - Status
+      - TemplateMessage
+      - TimePickerMessage
+      - Tweet
+      - Video
+      - VideoCallRequestMessage
+      example: Email
+    ContentInterventionId:
+      description: The intervention identifier of the content.
+      type: string
+      example: 123415437asdd8ccf000023
+    ContentInReplyToAuthorIdentityId:
+      description: The identity identifier of the content to which this content is a reply to.
+      type: string
+      example: 541014e17asdd8ccf000023
+    ContentBodyInputFormat:
+      description: Values can be Text or Html.
+      enum:
+      - Text
+      - Html
       type: string
     SocMsgCreationTime:
       description: Creation time of the resource.
       format: date-time
       type: string
       example: '2023-02-04T12:43:07Z'
-    ContentPublic:
-      description: 'True if the content is publicly visible on the remote channel (default).
-
-
-        Private content is NOT supported on every channel.
-
-        '
+    ContentRemotelyDeleted:
+      description: True if the content has been deleted on the remote channel.
       type: boolean
-      default: true
-    ContentTemplateName:
+      example: false
+    SocMsgPhoneNumber:
+      description: Phone number.
       type: string
-      description: 'Applicable to WhatsApp channels only.
-
-
-        Name of the Whatsapp template to use for the content.
-
-
-        All available template names are visible on the Whatsapp Business Manager interface.
-
-        '
-      example: customer_order_shipment_template
-    SocMsgEmailAddress:
-      description: Email address.
+      example: '+33634231224'
+    SocMsgLastModifiedTime:
+      description: The time when the last modification was completed.
+      format: date-time
       type: string
-      format: email
-      example: user@example.com
+      example: '2023-02-04T12:43:07Z'
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    ContentCreatorId:
+      description: RC user id of the creator
+      type: string
+      example: '2683222036'
     CreateContentRequest:
       type: object
       properties:
@@ -597,85 +659,6 @@ components:
           $ref: '#/components/schemas/ContentContextData'
         autoSubmitted:
           $ref: '#/components/schemas/ContentAutoSubmittedField'
-    ContentAttachmentIds:
-      description: 'An array containing the attachment identifiers that need to be attached to the content.
-
-        '
-      type: array
-      minItems: 0
-      items:
-        $ref: '#/components/schemas/AttachmentId'
-      example:
-      - 541014e17aa58d8ccf000023
-      - 541014e17aa58d8ccf000023
-    ContentBody:
-      description: "The content's body.\n\nOn creation this field is mandatory except for WhatsApp content using templates.\n\nThe following are the max length restrictions for the different channels supported.\nChannel and max length\n  * Apple Messages For Business (max length 10000)\n  * Email (max length 262144)\n  * RingCX Digital Messaging (max length 1024)\n  * Facebook (max length 8000)\n  * GoogleBusinessMessages (max length 3000)\n  * Google My Business (max length 4000)\n  * Instagram (max length 950)\n  * Instagram Messaging (max length 1000)\n  * LinkedIn (max length 3000)\n  * Messenger (max length 2000)\n  * Twitter (max length 280)\n  * Viber (max length 7000)\n  * WhatsApp (max length 3800)\n  * Youtube (max length 8000)\n"
-      type: string
-      example: Body of the content
-    ContentPhoneNumbers:
-      type: array
-      minItems: 0
-      items:
-        $ref: '#/components/schemas/SocMsgPhoneNumber'
-      description: 'Applicable on SMS/WhatsApp channels only.
-
-
-        Must be a phone number to which the message will be sent. It must be in the E.164 format. For example: +33634231224.
-
-
-        This parameter is mandatory when initiating a discussion.
-
-        '
-    SocMsgPhoneNumber:
-      description: Phone number.
-      type: string
-      example: '+33634231224'
-    ContentList:
-      type: object
-      required:
-      - records
-      - paging
-      properties:
-        records:
-          type: array
-          minItems: 0
-          items:
-            $ref: '#/components/schemas/ContentModel'
-        paging:
-          $ref: '#/components/schemas/NonEnumeratedPagingModel'
-    ContentThreadId:
-      description: Content thread identifier of the content.
-      type: string
-    ContentCreatorId:
-      description: RC user id of the creator
-      type: string
-      example: '2683222036'
-    SocMsgLastModifiedTime:
-      description: The time when the last modification was completed.
-      format: date-time
-      type: string
-      example: '2023-02-04T12:43:07Z'
-    ContentContextData:
-      description: 'Additional data of the content.
-
-
-        The contextData hash keys are the custom fields keys.
-
-        '
-      type: object
-      additionalProperties:
-        type: string
-      example:
-        test1: value1
-        test2: value2
-    ContentInReplyToAuthorIdentityId:
-      description: The identity identifier of the content to which this content is a reply to.
-      type: string
-      example: 541014e17asdd8ccf000023
-    ContentId:
-      description: Identifier of the content.
-      type: string
-      example: 541014e17aa58d8ccf000023
     ContentAttachment:
       type: object
       properties:
@@ -767,59 +750,183 @@ components:
           type: string
           format: uri
           example: https://example.digital.ringcentral.com/files/attachments/54085e5b7aa58d8b5d00006c
-    ContentPublished:
-      description: True if the content is published on the remote channel.
-      type: boolean
-      example: true
-    ContentSourceUri:
-      description: External Uri of the content channel.
-      type: string
-      format: uri
-    ContentSynchronizationStatus:
-      description: Synchronization status.
-      type: string
-      example: success
-    ContentSourceId:
-      description: 'Identifier of the channel.
+    ContentAuthorIdentityId:
+      description: 'Identity identifier of the author of content.
 
 
-        On creation if `inReplyToContentId` is specified, the channel will be determined from it. Otherwise, this parameter is mandatory.
+        Not mandatory on creation, by default it uses the token''s user first identity on channel.
 
         '
       type: string
-      example: fff415437asdd8ccf000023
-    ContentEmailAddresses:
+      example: 541014e17aa58d8ccf000023
+    ContentSourceType:
+      description: Type of the channel.
+      type: string
+      enum:
+      - AppleMessagesForBusiness
+      - Email
+      - EngageMessaging
+      - Facebook
+      - GoogleBusinessMessages
+      - GoogleMyBusiness
+      - Instagram
+      - InstagramMessaging
+      - Linkedin
+      - Messenger
+      - Twitter
+      - Viber
+      - WhatsApp
+      - Youtube
+    ContentThreadId:
+      description: Content thread identifier of the content.
+      type: string
+    ContentTitle:
+      description: 'Applicable to Email channels only.
+
+
+        The subject of the email.
+
+
+        This field is mandatory when initiating a discussion.
+
+        '
+      type: string
+      example: An email title
+    ContentPublic:
+      description: 'True if the content is publicly visible on the remote channel (default).
+
+
+        Private content is NOT supported on every channel.
+
+        '
+      type: boolean
+      default: true
+    ContentTemplateName:
+      type: string
+      description: 'Applicable to WhatsApp channels only.
+
+
+        Name of the Whatsapp template to use for the content.
+
+
+        All available template names are visible on the Whatsapp Business Manager interface.
+
+        '
+      example: customer_order_shipment_template
+    ContentAutoSubmittedField:
+      description: "Auto submitted content:\n  - won't reopen tasks or interventions\n  - can be used to send automatic messages like asking an user to follow on twitter, sending a survey, etc,\n  - doesn't get included in statistics\n"
+      type: boolean
+    ContentPhoneNumbers:
       type: array
       minItems: 0
       items:
-        $ref: '#/components/schemas/SocMsgEmailAddress'
-      description: 'Applicable on Email channels only.
+        $ref: '#/components/schemas/SocMsgPhoneNumber'
+      description: 'Applicable on SMS/WhatsApp channels only.
 
 
-        An array containing the email addresses used in sections of the email.
+        Must be a phone number to which the message will be sent. It must be in the E.164 format. For example: +33634231224.
 
 
         This parameter is mandatory when initiating a discussion.
 
         '
-    ContentBodyInputFormat:
-      description: Values can be Text or Html.
-      enum:
-      - Text
-      - Html
-      type: string
-    ApiErrorResponseModel:
+    NonEnumeratedPagingModel:
       type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
       required:
-      - errors
+      - perPage
+      additionalProperties: false
       properties:
-        errors:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        pageToken:
+          type: string
+          description: 'Current page token. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+        nextPageToken:
+          type: string
+          description: A page token to be used to fetch the next page of the result set. May be omitted if the current page is the last one.
+        previousPageToken:
+          type: string
+          description: 'A page token to be used to fetch the previous page of the result set.
+
+            May be omitted if the current page is the first one or if the result set does not support backward navigation.
+
+            '
+        firstPageToken:
+          type: string
+          description: A page token to be used to fetch the first page of the result set.
+    ContentLanguage:
+      description: Language of the content.
+      type: string
+      example: En
+    ContentBodyFormatted:
+      description: Text and HTML formatted versions of the content body.
+      type: object
+      properties:
+        html:
+          type: string
+        text:
+          type: string
+    ContentCreatedFrom:
+      description: Created from of the content.
+      type: string
+      enum:
+      - Synchronizer
+      - Interface
+      - Api
+      - AutoSurvey
+      - AutoResponseTrigger
+      - AutoRequestEmail
+    AttachmentId:
+      type: string
+      description: Attachment identifier.
+      example: 506d9e817aa58d1259000f12
+    ContentId:
+      description: Identifier of the content.
+      type: string
+      example: 541014e17aa58d8ccf000023
+    ContentContextData:
+      description: 'Additional data of the content.
+
+
+        The contextData hash keys are the custom fields keys.
+
+        '
+      type: object
+      additionalProperties:
+        type: string
+      example:
+        test1: value1
+        test2: value2
+    ContentSourceUri:
+      description: External Uri of the content channel.
+      type: string
+      format: uri
+    ContentList:
+      type: object
+      required:
+      - records
+      - paging
+      properties:
+        records:
           type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
+          minItems: 0
           items:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/ContentModel'
+        paging:
+          $ref: '#/components/schemas/NonEnumeratedPagingModel'
     ContentStatus:
       description: Content status.
       type: string
@@ -830,371 +937,57 @@ components:
       - UserReply
       - UserInitiated
       - Ignored
-    ContentInterventionId:
-      description: The intervention identifier of the content.
+    SocMsgCreationTimeOrder:
+      description: Ordering by creationTime is descending by default.
       type: string
-      example: 123415437asdd8ccf000023
-    ContentInReplyToContentId:
-      description: 'The content identifier to which this content is a reply to.
-
-
-        On creation, if omitted, a new discussion will be created. If the channel does not support to initiate discussion this parameter is mandatory.
+      enum:
+      - -creationTime
+      - +creationTime
+      - creationTime
+      default: -creationTime
+      example: +creationTime
+    ContentCategoryIds:
+      description: 'List of the category identifiers of the content.
 
         '
-      type: string
-      example: 123414e17asdd8ccf000023
-    ContentStatuses:
-      type: array
       items:
-        $ref: '#/components/schemas/ContentStatus'
-    ContentAuthorIdentityId:
-      description: 'Identity identifier of the author of content.
+        type: string
+      type: array
+      example:
+      - 541014e17aa58d8ccf000023
+      - 541014e17aa58d8ccf002023
+    ContentRating:
+      description: 'Rating of the content.
 
 
-        Not mandatory on creation, by default it uses the token''s user first identity on channel.
+        Present only if the content supports rating and rating is filled.
 
         '
+      type: integer
+      format: int32
+      example: 4
+    ContentSynchronizationError:
+      description: Synchronization error details.
       type: string
-      example: 541014e17aa58d8ccf000023
-  responses:
-    SocCreateContentResponse201:
-      description: Successful response.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ContentModel'
-    SocMsgGetContentResponse200:
-      description: Successful response.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ContentModel'
-    SocMsgResponse404:
-      description: Error 404
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-          examples:
-            EDI-029:
-              $ref: '#/components/examples/EDI-029'
-            EDI-032:
-              $ref: '#/components/examples/EDI-032'
-    SocMsgListContentsResponse422:
-      description: Error 422 on content list
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-          examples:
-            EDI-034:
-              $ref: '#/components/examples/EDI-034'
-            EDI-035:
-              $ref: '#/components/examples/EDI-035'
-            EDI-036:
-              $ref: '#/components/examples/EDI-036'
-    SocMsgListContentsResponse400:
-      description: Error 400 on content creation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-          examples:
-            EDI-028:
-              $ref: '#/components/examples/EDI-028'
-    SocMsgCreateContentResponse400:
-      description: Error 400 on content creation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-          examples:
-            EDI-009:
-              $ref: '#/components/examples/EDI-009'
-            EDI-025:
-              $ref: '#/components/examples/EDI-025'
-            EDI-030:
-              $ref: '#/components/examples/EDI-030'
-            EDI-031:
-              $ref: '#/components/examples/EDI-031'
-            EDI-037:
-              $ref: '#/components/examples/EDI-037'
-            EDI-038:
-              $ref: '#/components/examples/EDI-038'
-            EDI-040:
-              $ref: '#/components/examples/EDI-040'
-    SocMsgListContentsResponse200:
-      description: Successful response.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ContentList'
-    SocMsgCreateContentResponse422:
-      description: Error 422 on content creation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-          examples:
-            EDI-010:
-              $ref: '#/components/examples/EDI-010'
-            EDI-011:
-              $ref: '#/components/examples/EDI-011'
-            EDI-012:
-              $ref: '#/components/examples/EDI-012'
-            EDI-027:
-              $ref: '#/components/examples/EDI-027'
-            EDI-001:
-              $ref: '#/components/examples/EDI-001'
-            EDI-002:
-              $ref: '#/components/examples/EDI-002'
-            EDI-003:
-              $ref: '#/components/examples/EDI-003'
-            EDI-004:
-              $ref: '#/components/examples/EDI-004'
-            EDI-005:
-              $ref: '#/components/examples/EDI-005'
-            EDI-006:
-              $ref: '#/components/examples/EDI-006'
-            EDI-007:
-              $ref: '#/components/examples/EDI-007'
-            EDI-008:
-              $ref: '#/components/examples/EDI-008'
-            EDI-033:
-              $ref: '#/components/examples/EDI-033'
-    SocMsgCreateContentResponse403:
-      description: Error 403 on content creation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-          examples:
-            EDI-013:
-              $ref: '#/components/examples/EDI-013'
-            EDI-014:
-              $ref: '#/components/examples/EDI-014'
-            EDI-015:
-              $ref: '#/components/examples/EDI-015'
-            EDI-016:
-              $ref: '#/components/examples/EDI-016'
-            EDI-017:
-              $ref: '#/components/examples/EDI-017'
-            EDI-018:
-              $ref: '#/components/examples/EDI-018'
-            EDI-019:
-              $ref: '#/components/examples/EDI-019'
-            EDI-020:
-              $ref: '#/components/examples/EDI-020'
-            EDI-021:
-              $ref: '#/components/examples/EDI-021'
-            EDI-022:
-              $ref: '#/components/examples/EDI-022'
-            EDI-023:
-              $ref: '#/components/examples/EDI-023'
-            EDI-024:
-              $ref: '#/components/examples/EDI-024'
+    SocMsgEmailAddress:
+      description: Email address.
+      type: string
+      format: email
+      example: user@example.com
+    ContentForeignCategories:
+      description: 'External categories of the content.
+
+
+        Present only if the content has foreignCategories.
+
+        '
+      items:
+        type: string
+      type: array
+      minItems: 0
+      example:
+      - foreign_category_id
   examples:
-    EDI-003:
-      summary: Private compose is not supported on the channel
-      value:
-        errors:
-        - errorCode: EDI-003
-          message: Private compose is not supported on this source, try adding public=true parameter
-    EDI-009:
-      summary: An attribute is missing
-      value:
-        errors:
-        - errorCode: EDI-009
-          message: '[${parameterName}] is required'
-    EDI-001:
-      summary: Privacy attribute error
-      value:
-        errors:
-        - errorCode: EDI-001
-          message: Public and private parameters must not be used at the same time, use public parameter only
-    ReplyContentOnEmailChannel:
-      summary: Reply to a content on an Email channel
-      value:
-        inReplyToContentId: 541014e17aa58d8ccf001023
-        title: Reply to the message
-        to:
-        - test@example.com
-        cc:
-        - test.cc@test.com
-        bcc:
-        - test.bcc@test.com
-        body: Sample email content
-    EDI-038:
-      summary: A pagination attribute is invalid
-      value:
-        errors:
-        - errorCode: EDI-038
-          message: '"[${parameterName}]" param is invalid'
-    EDI-037:
-      summary: Impersonation error
-      value:
-        errors:
-        - errorCode: EDI-037
-          message: Impersonation error
-    EDI-014:
-      summary: Reply to the content is not possible
-      value:
-        errors:
-        - errorCode: EDI-014
-          message: You cannot reply to ${messageType}.
-    EDI-012:
-      summary: Allowed parameters are limited when sending an outbound message
-      value:
-        errors:
-        - errorCode: EDI-012
-          message: Only allowed parameters when sending an outbound message are [${parameterNames}]
-    EDI-022:
-      summary: Recipient does not allow private messages
-      value:
-        errors:
-        - errorCode: EDI-022
-          message: Recipient does not allow private messages.
-    EDI-035:
-      summary: Inefficient query
-      value:
-        errors:
-        - errorCode: EDI-035
-          message: Inefficient query
-    EDI-040:
-      summary: Some attributes are invalid
-      value:
-        errors:
-        - errorCode: EDI-040
-          message: Invalid parameters provided
-    EDI-013:
-      summary: A conversation cannot be open on an agent message
-      value:
-        errors:
-        - errorCode: EDI-013
-          message: Cannot open a conversation on agent message.
-    CreateContentWithAuthorIdentityId:
-      summary: An example for Create content with authorIdentityId
-      value:
-        authorIdentityId: 541014e17aa58d8ccf000023
-        inReplyToContentId: 541014e17aa58d8ccf000063
-        body: This is a sample content body for a private content with authorIdentityId specified
-        public: false
-    EDI-024:
-      summary: Content creation is not permitted (channel-specific validations)
-      value:
-        errors:
-        - errorCode: EDI-024
-          message: You cannot create the content (channel-specific validations).
-    CreateOutboundContentOnWhatsappChannel:
-      summary: An example for Create outbound content for WhatsApp channel
-      value:
-        sourceId: 5c1bd9c7d6cb0053da1e9d78
-        to:
-        - '+33620202020'
-        templateName: test_template_name
-        templateLanguage: en
-    EDI-030:
-      summary: The format of the payload is invalid
-      value:
-        errors:
-        - errorCode: EDI-030
-          message: Invalid format
-    EDI-031:
-      summary: A value in the payload is invalid
-      value:
-        errors:
-        - errorCode: EDI-031
-          message: Invalid value
-          details: Value of type Array cannot be written to a field of type Hash
-    EDI-016:
-      summary: The channel does not support creation of new discussions
-      value:
-        errors:
-        - errorCode: EDI-016
-          message: Channel does not support creation of new discussions.
-    EDI-027:
-      summary: Attribute array format error
-      value:
-        errors:
-        - errorCode: EDI-027
-          message: 'parameters [${brokenParameters}] should be arrays and need to be formatted like this: [${formattedParameters}]'
-    EDI-015:
-      summary: The content already has an open conversation
-      value:
-        errors:
-        - errorCode: EDI-015
-          message: Content already has an open conversation.
-    CreateContentWithContextData:
-      summary: An example for Create content with contextData
-      value:
-        inReplyToContentId: 541014e17aa58d8ccf000093
-        body: This is a sample content body for a content with contextData
-        contextData:
-          additionalContextData1: context data 1
-          additionalContextData2: context data 2
-    EDI-023:
-      summary: Private messages cannot be sent without a recipient
-      value:
-        errors:
-        - errorCode: EDI-023
-          message: Cannot send private messages without a recipient.
-    CreateContentWithAttachments:
-      summary: An example for Create content with attachments
-      value:
-        authorIdentityId: 541014e17aa58d8ccf000023
-        inReplyToContentId: 541014e17aa58d8ccf000023
-        body: This is a sample body for a private content with attachments
-        public: false
-        attachmentIds:
-        - 541014e17aa58d8ccf000023
-        - 541014e17aa58d8ccf000043
-    ReplyContentOnWhatsappChannel:
-      summary: A reply example to a WhatsApp channel content
-      value:
-        body: test whatsapp content
-        inReplyToContentId: 63e664a9713368687b6ef4e4
-    EDI-034:
-      summary: Invalid offset
-      value:
-        errors:
-        - errorCode: EDI-034
-          message: Invalid offset
-    EDI-010:
-      summary: Attachments are not supported for this type of content
-      value:
-        errors:
-        - errorCode: EDI-010
-          message: Attachments are not supported for this type of content
-    EDI-019:
-      summary: The agent is not authorized to reply on this channel
-      value:
-        errors:
-        - errorCode: EDI-019
-          message: Agent is not authorized to reply on this channel.
-    EDI-006:
-      summary: Invalid content type
-      value:
-        errors:
-        - errorCode: EDI-006
-          message: 'Cannot find a content class corresponding to the requested action: [${requestActionType}]'
-    EDI-020:
-      summary: A channel is required to create this message
-      value:
-        errors:
-        - errorCode: EDI-020
-          message: You need a channel to create this message.
-    EDI-011:
-      summary: A parameter must be an array
-      value:
-        errors:
-        - errorCode: EDI-011
-          message: '[${parameterName}] needs to be an array'
-    EDI-017:
-      summary: The agent is not authorized to create a new discussion on this channel
-      value:
-        errors:
-        - errorCode: EDI-017
-          message: Agent is not authorized to create a new discussion on this channel.
     EDI-033:
       summary: Validation error
       value:
@@ -1211,35 +1004,12 @@ components:
         - errorCode: EDI-033
           message: '[${resourceType}] cannot be saved'
           details: File is invalid
-    EDI-005:
-      summary: Structured content type is not supported on the channel
+    EDI-010:
+      summary: Attachments are not supported for this type of content
       value:
         errors:
-        - errorCode: EDI-005
-          message: Source does not support this type of structured content
-    EDI-025:
-      summary: An attribute is missing
-      value:
-        errors:
-        - errorCode: EDI-025
-          message: 'Missing required parameter: "[${parameterName}]"'
-    EDI-008:
-      summary: Parameter type is invalid
-      value:
-        errors:
-        - errorCode: EDI-008
-          message: '[${parameterName}] must be a hash, got [${extraValuesClass}]'
-    EDI-004:
-      summary: Compose not supported on the channel
-      value:
-        errors:
-        - errorCode: EDI-004
-          message: Compose is not supported on this source
-    CreateContentWithInReplyToContentId:
-      summary: An example for Create content with inReplyToContentId
-      value:
-        inReplyToContentId: 541014e17aa58d8ccf000023
-        body: content body
+        - errorCode: EDI-010
+          message: Attachments are not supported for this type of content
     EDI-028:
       summary: Search query is invalid
       value:
@@ -1248,41 +1018,46 @@ components:
           message: Search query is invalid
         - errorCode: EDI-028
           message: Searching identity groups by "firstname" only is disabled, please provide "lastname"
-    EDI-036:
-      summary: Inefficient sort
+    EDI-017:
+      summary: The agent is not authorized to create a new discussion on this channel
       value:
         errors:
-        - errorCode: EDI-036
-          message: Inefficient sort
-    EDI-029:
-      summary: Resource not found
+        - errorCode: EDI-017
+          message: Agent is not authorized to create a new discussion on this channel.
+    EDI-034:
+      summary: Invalid offset
       value:
         errors:
-        - errorCode: EDI-029
-          message: Resource not found
-    CreateContentWithSourceId:
-      summary: An example for Create content with sourceId
+        - errorCode: EDI-034
+          message: Invalid offset
+    CreateContentWithAttachments:
+      summary: An example for Create content with attachments
       value:
-        sourceId: 541014e17aa58d8ccf000023
-        body: This is a sample content body
+        authorIdentityId: 541014e17aa58d8ccf000023
+        inReplyToContentId: 541014e17aa58d8ccf000023
+        body: This is a sample body for a private content with attachments
+        public: false
+        attachmentIds:
+        - 541014e17aa58d8ccf000023
+        - 541014e17aa58d8ccf000043
     EDI-018:
       summary: An identity is required to reply to this message
       value:
         errors:
         - errorCode: EDI-018
           message: You need an identity to reply to this message.
-    EDI-032:
-      summary: Invalid id
+    ReplyContentOnEmailChannel:
+      summary: Reply to a content on an Email channel
       value:
-        errors:
-        - errorCode: EDI-032
-          message: 'Invalid id: [${invalidId}]'
-    EDI-021:
-      summary: Replying to this content is not possible for the moment
-      value:
-        errors:
-        - errorCode: EDI-021
-          message: It is not possible to reply to this content right now.
+        inReplyToContentId: 541014e17aa58d8ccf001023
+        title: Reply to the message
+        to:
+        - test@example.com
+        cc:
+        - test.cc@test.com
+        bcc:
+        - test.bcc@test.com
+        body: Sample email content
     CreateContentOnEmailChannel:
       summary: An example for Create content on an Email channel
       value:
@@ -1295,19 +1070,280 @@ components:
         - test.bcc@test.com
         body: Sample email content
         sourceId: 541014e17aa58d8ccf000093
+    CreateContentWithContextData:
+      summary: An example for Create content with contextData
+      value:
+        inReplyToContentId: 541014e17aa58d8ccf000093
+        body: This is a sample content body for a content with contextData
+        contextData:
+          additionalContextData1: context data 1
+          additionalContextData2: context data 2
+    ReplyContentOnWhatsappChannel:
+      summary: A reply example to a WhatsApp channel content
+      value:
+        body: test whatsapp content
+        inReplyToContentId: 63e664a9713368687b6ef4e4
+    EDI-019:
+      summary: The agent is not authorized to reply on this channel
+      value:
+        errors:
+        - errorCode: EDI-019
+          message: Agent is not authorized to reply on this channel.
+    EDI-035:
+      summary: Inefficient query
+      value:
+        errors:
+        - errorCode: EDI-035
+          message: Inefficient query
+    CreateContentWithAuthorIdentityId:
+      summary: An example for Create content with authorIdentityId
+      value:
+        authorIdentityId: 541014e17aa58d8ccf000023
+        inReplyToContentId: 541014e17aa58d8ccf000063
+        body: This is a sample content body for a private content with authorIdentityId specified
+        public: false
+    CreateContentWithSourceId:
+      summary: An example for Create content with sourceId
+      value:
+        sourceId: 541014e17aa58d8ccf000023
+        body: This is a sample content body
+    EDI-025:
+      summary: An attribute is missing
+      value:
+        errors:
+        - errorCode: EDI-025
+          message: 'Missing required parameter: "[${parameterName}]"'
+    EDI-001:
+      summary: Privacy attribute error
+      value:
+        errors:
+        - errorCode: EDI-001
+          message: Public and private parameters must not be used at the same time, use public parameter only
+    EDI-004:
+      summary: Compose not supported on the channel
+      value:
+        errors:
+        - errorCode: EDI-004
+          message: Compose is not supported on this source
+    EDI-011:
+      summary: A parameter must be an array
+      value:
+        errors:
+        - errorCode: EDI-011
+          message: '[${parameterName}] needs to be an array'
     EDI-007:
       summary: Attachment already used on another content
       value:
         errors:
         - errorCode: EDI-007
           message: Attachment is already used by an other content
+    EDI-005:
+      summary: Structured content type is not supported on the channel
+      value:
+        errors:
+        - errorCode: EDI-005
+          message: Source does not support this type of structured content
+    CreateContentWithInReplyToContentId:
+      summary: An example for Create content with inReplyToContentId
+      value:
+        inReplyToContentId: 541014e17aa58d8ccf000023
+        body: content body
+    EDI-012:
+      summary: Allowed parameters are limited when sending an outbound message
+      value:
+        errors:
+        - errorCode: EDI-012
+          message: Only allowed parameters when sending an outbound message are [${parameterNames}]
+    EDI-032:
+      summary: Invalid id
+      value:
+        errors:
+        - errorCode: EDI-032
+          message: 'Invalid id: [${invalidId}]'
+    EDI-015:
+      summary: The content already has an open conversation
+      value:
+        errors:
+        - errorCode: EDI-015
+          message: Content already has an open conversation.
+    EDI-029:
+      summary: Resource not found
+      value:
+        errors:
+        - errorCode: EDI-029
+          message: Resource not found
+    EDI-014:
+      summary: Reply to the content is not possible
+      value:
+        errors:
+        - errorCode: EDI-014
+          message: You cannot reply to ${messageType}.
+    EDI-016:
+      summary: The channel does not support creation of new discussions
+      value:
+        errors:
+        - errorCode: EDI-016
+          message: Channel does not support creation of new discussions.
+    EDI-030:
+      summary: The format of the payload is invalid
+      value:
+        errors:
+        - errorCode: EDI-030
+          message: Invalid format
+    CreateOutboundContentOnWhatsappChannel:
+      summary: An example for Create outbound content for WhatsApp channel
+      value:
+        sourceId: 5c1bd9c7d6cb0053da1e9d78
+        to:
+        - '+33620202020'
+        templateName: test_template_name
+        templateLanguage: en
+    EDI-038:
+      summary: A pagination attribute is invalid
+      value:
+        errors:
+        - errorCode: EDI-038
+          message: '"[${parameterName}]" param is invalid'
+    EDI-023:
+      summary: Private messages cannot be sent without a recipient
+      value:
+        errors:
+        - errorCode: EDI-023
+          message: Cannot send private messages without a recipient.
+    EDI-003:
+      summary: Private compose is not supported on the channel
+      value:
+        errors:
+        - errorCode: EDI-003
+          message: Private compose is not supported on this source, try adding public=true parameter
+    EDI-036:
+      summary: Inefficient sort
+      value:
+        errors:
+        - errorCode: EDI-036
+          message: Inefficient sort
+    EDI-006:
+      summary: Invalid content type
+      value:
+        errors:
+        - errorCode: EDI-006
+          message: 'Cannot find a content class corresponding to the requested action: [${requestActionType}]'
+    EDI-037:
+      summary: Impersonation error
+      value:
+        errors:
+        - errorCode: EDI-037
+          message: Impersonation error
+    EDI-022:
+      summary: Recipient does not allow private messages
+      value:
+        errors:
+        - errorCode: EDI-022
+          message: Recipient does not allow private messages.
+    EDI-021:
+      summary: Replying to this content is not possible for the moment
+      value:
+        errors:
+        - errorCode: EDI-021
+          message: It is not possible to reply to this content right now.
+    EDI-013:
+      summary: A conversation cannot be open on an agent message
+      value:
+        errors:
+        - errorCode: EDI-013
+          message: Cannot open a conversation on agent message.
+    EDI-008:
+      summary: Parameter type is invalid
+      value:
+        errors:
+        - errorCode: EDI-008
+          message: '[${parameterName}] must be a hash, got [${extraValuesClass}]'
     EDI-002:
       summary: Structured contents require a type attribute
       value:
         errors:
         - errorCode: EDI-002
           message: type is required for structured contents
+    EDI-031:
+      summary: A value in the payload is invalid
+      value:
+        errors:
+        - errorCode: EDI-031
+          message: Invalid value
+          details: Value of type Array cannot be written to a field of type Hash
+    EDI-040:
+      summary: Some attributes are invalid
+      value:
+        errors:
+        - errorCode: EDI-040
+          message: Invalid parameters provided
+    EDI-024:
+      summary: Content creation is not permitted (channel-specific validations)
+      value:
+        errors:
+        - errorCode: EDI-024
+          message: You cannot create the content (channel-specific validations).
+    EDI-020:
+      summary: A channel is required to create this message
+      value:
+        errors:
+        - errorCode: EDI-020
+          message: You need a channel to create this message.
+    EDI-009:
+      summary: An attribute is missing
+      value:
+        errors:
+        - errorCode: EDI-009
+          message: '[${parameterName}] is required'
+    EDI-027:
+      summary: Attribute array format error
+      value:
+        errors:
+        - errorCode: EDI-027
+          message: 'parameters [${brokenParameters}] should be arrays and need to be formatted like this: [${formattedParameters}]'
   parameters:
+    PageToken:
+      name: pageToken
+      in: query
+      description: 'The token indicating the particular page of the result set to be retrieved.
+
+        If omitted the first page will be returned.
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: string
+    InterventionFilter:
+      in: query
+      name: intervention
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+      description: Filter based on the specified intervention identifiers.
+      example:
+      - 7f946431b6eebffafae642cc
+      - re946431b6eebffafae642cc
+    ThreadFilter:
+      in: query
+      name: thread
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+      description: Filter based on the specified thread identifiers.
+      example:
+      - 7f946431b6eebffafae642cc
+    SocMsgOrderBy:
+      in: query
+      name: orderBy
+      required: false
+      description: Order results by specified field.
+      schema:
+        $ref: '#/components/schemas/SocMsgCreationTimeOrder'
     IdentityFilter:
       in: query
       name: identity
@@ -1354,36 +1390,13 @@ components:
       required: true
       schema:
         type: string
-    PageToken:
-      name: pageToken
+    StatusFilter:
       in: query
-      description: 'The token indicating the particular page of the result set to be retrieved.
-
-        If omitted the first page will be returned.
-
-        '
+      name: status
       required: false
-      explode: false
+      description: Filter for specified status.
       schema:
-        type: string
-    ThreadFilter:
-      in: query
-      name: thread
-      required: false
-      schema:
-        type: array
-        items:
-          type: string
-      description: Filter based on the specified thread identifiers.
-      example:
-      - 7f946431b6eebffafae642cc
-    SocMsgOrderBy:
-      in: query
-      name: orderBy
-      required: false
-      description: Order results by specified field.
-      schema:
-        $ref: '#/components/schemas/SocMsgCreationTimeOrder'
+        $ref: '#/components/schemas/ContentStatuses'
     TextFilter:
       in: query
       name: text
@@ -1393,25 +1406,6 @@ components:
         items:
           type: string
       description: Filter based on the specified text(s). Provided multiple times, the values are ANDed.
-    InterventionFilter:
-      in: query
-      name: intervention
-      required: false
-      schema:
-        type: array
-        items:
-          type: string
-      description: Filter based on the specified intervention identifiers.
-      example:
-      - 7f946431b6eebffafae642cc
-      - re946431b6eebffafae642cc
-    StatusFilter:
-      in: query
-      name: status
-      required: false
-      description: Filter for specified status.
-      schema:
-        $ref: '#/components/schemas/ContentStatuses'
     IdentityGroupFilter:
       in: query
       name: identityGroup

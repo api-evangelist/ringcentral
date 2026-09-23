@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Text API
+  title: RingCentral Text API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -32,9 +32,7 @@ paths:
       summary: Conversational Summarization
       description: 'Returns Conversational Summarization to the webhook URI for segmented transcript of audios
 
-        with start, end, speakerId, text(alphanumeric and punctuations).
-
-        '
+        with start, end, speakerId, text(alphanumeric and punctuations).'
       operationId: caiSummarize
       parameters:
       - $ref: '#/components/parameters/Webhook'
@@ -105,20 +103,19 @@ paths:
       x-app-permission: AI
 components:
   schemas:
-    SummaryApiOutput:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          $ref: '#/components/schemas/SummaryApiResponse'
     SummaryApiResponse:
       oneOf:
       - $ref: '#/components/schemas/SummaryOutput'
       - $ref: '#/components/schemas/CaiErrorResponse'
+    PunctuateOutput:
+      required:
+      - texts
+      type: object
+      properties:
+        texts:
+          type: array
+          items:
+            type: string
     CaiErrorCodeResponse:
       required:
       - errorCode
@@ -144,11 +141,13 @@ components:
         parameterName:
           type: string
           description: Name of parameter if specified in the message
-    CaiAsyncApiResponse:
+    CaiErrorResponse:
       type: object
       properties:
-        jobId:
-          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaiErrorCodeResponse'
     SummaryUnit:
       required:
       - text
@@ -171,33 +170,6 @@ components:
           type: number
           format: float
           example: 5.1
-    CaiErrorResponse:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/CaiErrorCodeResponse'
-    SummaryOutputUnit:
-      type: object
-      properties:
-        name:
-          type: string
-          example: AbstractiveShort
-          enum:
-          - Extractive
-          - AbstractiveLong
-          - AbstractiveShort
-          - All
-        values:
-          type: array
-          description: Summary output units sorted by their occurrence in the conversation
-          items:
-            $ref: '#/components/schemas/SummaryTimingsUnit'
-    PunctuateApiResponse:
-      oneOf:
-      - $ref: '#/components/schemas/PunctuateOutput'
-      - $ref: '#/components/schemas/CaiErrorResponse'
     PunctuateInput:
       required:
       - texts
@@ -207,26 +179,21 @@ components:
           type: array
           items:
             type: string
-    SummaryTimingsUnit:
-      required:
-      - value
+    CaiAsyncApiResponse:
       type: object
       properties:
-        confidence:
-          type: number
-          format: float
-          example: 0.97
-        value:
+        jobId:
           type: string
-          example: This meeting is focussed on rise of on demand marketplaces, online marketplaces and regulated services
-        start:
-          type: number
-          format: float
-          example: 0.3
-        end:
-          type: number
-          format: float
-          example: 3600.1
+    SummaryApiOutput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          $ref: '#/components/schemas/SummaryApiResponse'
     PunctuateApiOutput:
       type: object
       properties:
@@ -237,22 +204,6 @@ components:
           - Fail
         response:
           $ref: '#/components/schemas/PunctuateApiResponse'
-    PunctuateOutput:
-      required:
-      - texts
-      type: object
-      properties:
-        texts:
-          type: array
-          items:
-            type: string
-    SummaryOutput:
-      type: object
-      properties:
-        summaries:
-          type: array
-          items:
-            $ref: '#/components/schemas/SummaryOutputUnit'
     SummaryInput:
       required:
       - summaryType
@@ -273,7 +224,82 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SummaryUnit'
+    SummaryTimingsUnit:
+      required:
+      - value
+      type: object
+      properties:
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        value:
+          type: string
+          example: This meeting is focussed on rise of on demand marketplaces, online marketplaces and regulated services
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 3600.1
+    SummaryOutputUnit:
+      type: object
+      properties:
+        name:
+          type: string
+          example: AbstractiveShort
+          enum:
+          - Extractive
+          - AbstractiveLong
+          - AbstractiveShort
+          - All
+        values:
+          type: array
+          description: Summary output units sorted by their occurrence in the conversation
+          items:
+            $ref: '#/components/schemas/SummaryTimingsUnit'
+    PunctuateApiResponse:
+      oneOf:
+      - $ref: '#/components/schemas/PunctuateOutput'
+      - $ref: '#/components/schemas/CaiErrorResponse'
+    SummaryOutput:
+      type: object
+      properties:
+        summaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/SummaryOutputUnit'
   requestBodies:
+    SummaryCallbackRequest:
+      description: Summary Callback Output
+      content:
+        application/json:
+          schema:
+            allOf:
+            - type: object
+              properties:
+                jobId:
+                  type: string
+                creationTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time
+                expirationTime:
+                  type: string
+                  format: date-time
+            - $ref: '#/components/schemas/SummaryApiOutput'
+      required: true
+    PunctuateRequest:
+      description: Punctuation API Input Format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PunctuateInput'
+      required: true
     PunctuateCallbackRequest:
       description: Punctuate Callback Output
       content:
@@ -295,40 +321,12 @@ components:
                   format: date-time
             - $ref: '#/components/schemas/PunctuateApiOutput'
       required: true
-    PunctuateRequest:
-      description: Punctuation API Input Format
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PunctuateInput'
-      required: true
     SummaryRequest:
       description: Summary Input Format
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SummaryInput'
-      required: true
-    SummaryCallbackRequest:
-      description: Summary Callback Output
-      content:
-        application/json:
-          schema:
-            allOf:
-            - type: object
-              properties:
-                jobId:
-                  type: string
-                creationTime:
-                  type: string
-                  format: date-time
-                completionTime:
-                  type: string
-                  format: date-time
-                expirationTime:
-                  type: string
-                  format: date-time
-            - $ref: '#/components/schemas/SummaryApiOutput'
       required: true
   parameters:
     CallbackRequestId:

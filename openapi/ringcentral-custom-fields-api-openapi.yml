@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Custom Fields API
+  title: RingCentral Custom Fields API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -118,6 +118,17 @@ paths:
       x-user-permission: Users
 components:
   schemas:
+    CustomFieldCreateRequest:
+      type: object
+      properties:
+        category:
+          type: string
+          description: Object category to attach custom fields
+          enum:
+          - User
+        displayName:
+          type: string
+          description: Custom field display name
     CustomFieldList:
       type: object
       properties:
@@ -128,17 +139,6 @@ components:
     CustomFieldUpdateRequest:
       type: object
       properties:
-        displayName:
-          type: string
-          description: Custom field display name
-    CustomFieldCreateRequest:
-      type: object
-      properties:
-        category:
-          type: string
-          description: Object category to attach custom fields
-          enum:
-          - User
         displayName:
           type: string
           description: Custom field display name
@@ -157,13 +157,6 @@ components:
           type: string
           description: Custom field display name
   parameters:
-    FieldId:
-      name: fieldId
-      in: path
-      description: Custom field identifier
-      required: true
-      schema:
-        type: string
     AccountId:
       name: accountId
       in: path
@@ -179,6 +172,13 @@ components:
         type: string
         default: '~'
       example: '~'
+    FieldId:
+      name: fieldId
+      in: path
+      description: Custom field identifier
+      required: true
+      schema:
+        type: string
   securitySchemes:
     OAuth2:
       type: oauth2

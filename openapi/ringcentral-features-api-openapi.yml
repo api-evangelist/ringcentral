@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Features API
+  title: RingCentral Features API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -29,7 +29,59 @@ paths:
       tags:
       - Features
       summary: Get User Features
-      description: "Returns a list of supported features and the information on their\navailability for the current extension. Particular feature(s) can\nbe checked by providing `featureId` query parameter. Multiple values\nare supported in the format: `?featureId=Feature1&featureId=Feature2`.\nTo get only available features in order to decrease response size,\n`availableOnly=true` query param can be specified. If a feature\nis available for the current user, `\"available\": true` is returned in\nresponse for the record with the corresponding feature ID. Otherwise,\nthe additional attribute `reason` is returned with the appropriate code:\n- `ServicePlanLimitation` -  a feature is not included in account service plan;\n- `AccountLimitation` - a feature is turned off for account;\n- `ExtensionTypeLimitation` - a feature is not applicable for extension type;\n- `ExtensionLimitation` - a feature is not available for extension, e.g., additional license required;\n- `InsufficientPermissions` - required permission is not granted to the current user (not the one, who is specified in the URL, but the one who is calling this API);\n- `ConfigurationLimitation` - a feature is turned off for extension, e.g., by account administrator.\n\nAlso, some features may have additional parameters, e.g. limits, which are returned in `params` attribute as a name-value collection:\n\n    {\n      \"id\": \"HUD\",\n      \"available\": true,\n      \"params\": [\n        {\n          \"name\": \"limitMax\",\n          \"value\": \"100\"\n        }\n      ]\n    }\n"
+      description: 'Returns a list of supported features and the information on their
+
+        availability for the current extension. Particular feature(s) can
+
+        be checked by providing `featureId` query parameter. Multiple values
+
+        are supported in the format: `?featureId=Feature1&featureId=Feature2`.
+
+        To get only available features in order to decrease response size,
+
+        `availableOnly=true` query param can be specified. If a feature
+
+        is available for the current user, `"available": true` is returned in
+
+        response for the record with the corresponding feature ID. Otherwise,
+
+        the additional attribute `reason` is returned with the appropriate code:
+
+        - `ServicePlanLimitation` - a feature is not included in account service plan;
+
+        - `AccountLimitation` - a feature is turned off for account;
+
+        - `ExtensionTypeLimitation` - a feature is not applicable for extension type;
+
+        - `ExtensionLimitation` - a feature is not available for extension, e.g., additional license required;
+
+        - `InsufficientPermissions` - required permission is not granted to the current user (not the one, who is specified in the URL, but the one who is calling this API);
+
+        - `ConfigurationLimitation` - a feature is turned off for extension, e.g., by account administrator.
+
+
+        Also, some features may have additional parameters, e.g. limits, which are returned in `params` attribute as a name-value collection:
+
+
+        {
+
+        "id": "HUD",
+
+        "available": true,
+
+        "params": [
+
+        {
+
+        "name": "limitMax",
+
+        "value": "100"
+
+        }
+
+        ]
+
+        }'
       operationId: readExtensionFeatures
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -65,22 +117,6 @@ paths:
       x-user-permission: ReadExtensions
 components:
   schemas:
-    FeatureList:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/FeatureInfo'
-    ParamsInfo:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Parameter name
-        value:
-          type: string
-          description: Parameter value
     FeatureInfo:
       type: object
       properties:
@@ -106,6 +142,22 @@ components:
             $ref: '#/components/schemas/ParamsInfo'
         reason:
           $ref: '#/components/schemas/ReasonInfo'
+    ParamsInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Parameter name
+        value:
+          type: string
+          description: Parameter value
+    FeatureList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureInfo'
     ReasonInfo:
       type: object
       properties:
@@ -130,12 +182,12 @@ components:
 
         '
   parameters:
-    ExtensionId:
-      name: extensionId
+    AccountId:
+      name: accountId
       in: path
-      description: 'Internal identifier of the RingCentral extension/user
+      description: 'Internal identifier of the RingCentral account
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true
@@ -145,12 +197,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Chats API
+  title: RingCentral Chats API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -92,9 +92,7 @@ paths:
 
         * **Team** - a chat related to a specific topic. Members can come and go freely from this chat type.
 
-        * **Everyone** - a special chat containing every individual in a company.
-
-        '
+        * **Everyone** - a special chat containing every individual in a company.'
       operationId: listGlipChatsNew
       parameters:
       - name: type
@@ -143,9 +141,7 @@ paths:
       description: 'Returns information about a chat by ID.
 
 
-        **Note** ''Chat'' is a general name for all types of threads including *Personal* (user''s own me-chat), *Direct* (one on one chat), *Group* (chat of 3-15 participants without specific name), *Team* (chat of 2 and more participants, with a specific name), *Everyone* (company chat including all employees, with a specific name)."
-
-        '
+        **Note** ''Chat'' is a general name for all types of threads including *Personal* (user''s own me-chat), *Direct* (one on one chat), *Group* (chat of 3-15 participants without specific name), *Team* (chat of 2 and more participants, with a specific name), *Everyone* (company chat including all employees, with a specific name)."'
       operationId: readGlipChatNew
       parameters:
       - name: chatId
@@ -244,6 +240,43 @@ paths:
       x-app-permission: TeamMessaging
 components:
   schemas:
+    TMChatListWithoutNavigation:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of chats
+          items:
+            $ref: '#/components/schemas/TMChatInfo'
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+    TMChatMemberInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user
+    TMChatList:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of chats
+          items:
+            $ref: '#/components/schemas/TMChatInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
     TMChatInfo:
       type: object
       properties:
@@ -286,43 +319,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TMChatMemberInfo'
-    TMChatListWithoutNavigation:
-      required:
-      - records
-      type: object
-      properties:
-        records:
-          type: array
-          description: List of chats
-          items:
-            $ref: '#/components/schemas/TMChatInfo'
-    TMChatList:
-      required:
-      - records
-      type: object
-      properties:
-        records:
-          type: array
-          description: List of chats
-          items:
-            $ref: '#/components/schemas/TMChatInfo'
-        navigation:
-          $ref: '#/components/schemas/TMNavigationInfo'
-    TMNavigationInfo:
-      type: object
-      properties:
-        prevPageToken:
-          type: string
-          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-        nextPageToken:
-          type: string
-          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-    TMChatMemberInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a user
   securitySchemes:
     OAuth2:
       type: oauth2

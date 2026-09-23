@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Fax API
+  title: RingCentral Fax API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -33,9 +33,7 @@ paths:
 
         if sending has failed. Fax attachment size (both single and total) is
 
-        limited to 50Mb.
-
-        '
+        limited to 50Mb.'
       operationId: createFaxMessage
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -143,157 +141,6 @@ paths:
       x-throttling-group: Light
 components:
   schemas:
-    MessageDirectionEnum:
-      type: string
-      enum:
-      - Inbound
-      - Outbound
-      description: 'Text message direction. Note that for some message types not all
-
-        directions are allowed. For example voicemail messages can
-
-        be only inbound
-
-        '
-    MessageAvailabilityEnum:
-      type: string
-      enum:
-      - Alive
-      - Deleted
-      - Purged
-      description: 'Message availability status. Message in ''Deleted'' state is still
-
-        preserved with all its attachments and can be restored. ''Purged'' means
-
-        that all attachments are already deleted and the message itself is about
-
-        to be physically deleted shortly
-
-        '
-    MessageAttachmentInfoIntId:
-      type: object
-      properties:
-        id:
-          type: integer
-          description: Internal identifier of a message attachment
-          format: int64
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a message attachment
-        type:
-          type: string
-          description: Type of message attachment
-          enum:
-          - AudioRecording
-          - AudioTranscription
-          - Text
-          - SourceDocument
-          - RenderedDocument
-          - MmsAttachment
-        contentType:
-          type: string
-          description: MIME type for a given attachment, for instance 'audio/wav'
-        filename:
-          type: string
-          description: Name of a file attached
-        size:
-          type: integer
-          format: int32
-          description: Size of an attachment in bytes
-    EnumeratedPagingModel:
-      type: object
-      required:
-      - perPage
-      additionalProperties: false
-      properties:
-        perPage:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'Current page size, describes how many items are in each page.
-
-            Matches "perPage" parameter from the request.
-
-            '
-          example: 50
-        page:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'The current page number. 1-indexed, so the first page is 1
-
-            by default. May be omitted if result is empty (because non-existent page
-
-            was specified or perPage=0 was requested)
-
-            '
-          example: 5
-        pageStart:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based number of the first element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 0
-        pageEnd:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based index of the last element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 5
-        totalPages:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of pages in a dataset. May be omitted for
-
-            some resources due to performance reasons
-
-            '
-          example: 25
-        totalElements:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of elements in a dataset. May be omitted for
-
-            some resource due to performance reasons
-
-            '
-          example: 25
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    FaxCoverPageInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: 'Internal identifier of a fax cover page. The supported value
-
-            range is 0-13 (for language setting en-US) and 0, 15-28
-
-            (for all other languages)
-
-            '
-        name:
-          type: string
-          description: Name of a fax cover page pattern
     ListFaxCoverPagesResponse:
       type: object
       properties:
@@ -308,106 +155,12 @@ components:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
-    MessageStoreCallerInfoResponseFrom:
-      type: object
-      properties:
-        extensionNumber:
-          type: string
-          description: 'Extension short number (usually 3 or 4 digits). This property
-
-            is filled when parties communicate by means of short internal numbers,
-
-            for example when calling to other extension or sending/receiving Company
-
-            Pager message
-
-            '
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-        location:
-          type: string
-          description: 'Contains party location (city, state) if one can be determined
-
-            from phoneNumber. This property is filled only when phoneNumber is not
-
-            empty and server can calculate location information from it (for example,
-
-            this information is unavailable for US toll-free numbers)
-
-            '
-        name:
-          type: string
-          description: 'Symbolic name associated with a party. If the phone does not
-
-            belong to the known extension, only the location is returned, the name
-
-            is not determined then
-
-            '
-        phoneNumber:
-          type: string
-          description: 'Phone number of a party. Usually it is a plain number including
-
-            country and area code like 18661234567. But sometimes it could be returned
-
-            from database with some formatting applied, for example (866)123-4567.
-
-            This property is filled in all cases where parties communicate by means
-
-            of global phone numbers, for example when calling to direct numbers or
-
-            sending/receiving SMS
-
-            '
-      description: Sender information
-    MessageStatusEnum:
-      type: string
-      description: 'Message status. Different message types may have different
-
-        allowed status values. For outbound faxes the aggregated message status
-
-        is returned. If, for outbound message, a status for at least one recipient is ''Queued'', then
-
-        the ''Queued'' value is returned. If a status for at least one recipient is
-
-        ''SendingFailed'', then the ''SendingFailed'' value is returned. In other cases
-
-        the ''Sent'' status is returned
-
-        '
-      enum:
-      - Queued
-      - Sent
-      - Delivered
-      - DeliveryFailed
-      - SendingFailed
-      - Received
     MessagePriorityEnum:
       type: string
       description: Message priority
       enum:
       - Normal
       - High
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-    MessageReadStatusEnum:
-      description: Message read status
-      type: string
-      enum:
-      - Read
-      - Unread
     FaxResponseTo:
       type: object
       properties:
@@ -435,6 +188,34 @@ components:
             this information is unavailable for US toll-free numbers)
 
             '
+    MessageReadStatusEnum:
+      description: Message read status
+      type: string
+      enum:
+      - Read
+      - Unread
+    MessageStatusEnum:
+      type: string
+      description: 'Message status. Different message types may have different
+
+        allowed status values. For outbound faxes the aggregated message status
+
+        is returned. If, for outbound message, a status for at least one recipient is ''Queued'', then
+
+        the ''Queued'' value is returned. If a status for at least one recipient is
+
+        ''SendingFailed'', then the ''SendingFailed'' value is returned. In other cases
+
+        the ''Sent'' status is returned
+
+        '
+      enum:
+      - Queued
+      - Sent
+      - Delivered
+      - DeliveryFailed
+      - SendingFailed
+      - Received
     FaxResponse:
       type: object
       properties:
@@ -516,16 +297,52 @@ components:
             cover page. Maximum length is limited to 1024 symbols
 
             '
-    FaxRequestTo:
+    MessageAttachmentInfoIntId:
       type: object
       properties:
-        phoneNumber:
+        id:
+          type: integer
+          description: Internal identifier of a message attachment
+          format: int64
+        uri:
           type: string
-          description: Phone number in E.164 (with '+' sign) format
-          example: '+18661234567'
-        name:
+          format: uri
+          description: Canonical URI of a message attachment
+        type:
           type: string
-          description: Name of a fax recipient that will be listed on a fax cover page
+          description: Type of message attachment
+          enum:
+          - AudioRecording
+          - AudioTranscription
+          - Text
+          - SourceDocument
+          - RenderedDocument
+          - MmsAttachment
+        contentType:
+          type: string
+          description: MIME type for a given attachment, for instance 'audio/wav'
+        filename:
+          type: string
+          description: Name of a file attached
+        size:
+          type: integer
+          format: int32
+          description: Size of an attachment in bytes
+    MessageAvailabilityEnum:
+      type: string
+      enum:
+      - Alive
+      - Deleted
+      - Purged
+      description: 'Message availability status. Message in ''Deleted'' state is still
+
+        preserved with all its attachments and can be restored. ''Purged'' means
+
+        that all attachments are already deleted and the message itself is about
+
+        to be physically deleted shortly
+
+        '
     FaxResolutionEnum:
       type: string
       description: 'Fax only. Resolution of a fax message. ''High'' for black and
@@ -538,13 +355,194 @@ components:
       enum:
       - High
       - Low
-  parameters:
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
+    FaxRequestTo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number in E.164 (with '+' sign) format
+          example: '+18661234567'
+        name:
+          type: string
+          description: Name of a fax recipient that will be listed on a fax cover page
+    MessageDirectionEnum:
+      type: string
+      enum:
+      - Inbound
+      - Outbound
+      description: 'Text message direction. Note that for some message types not all
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+        directions are allowed. For example voicemail messages can
+
+        be only inbound
+
+        '
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    FaxCoverPageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Internal identifier of a fax cover page. The supported value
+
+            range is 0-13 (for language setting en-US) and 0, 15-28
+
+            (for all other languages)
+
+            '
+        name:
+          type: string
+          description: Name of a fax cover page pattern
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    MessageStoreCallerInfoResponseFrom:
+      type: object
+      properties:
+        extensionNumber:
+          type: string
+          description: 'Extension short number (usually 3 or 4 digits). This property
+
+            is filled when parties communicate by means of short internal numbers,
+
+            for example when calling to other extension or sending/receiving Company
+
+            Pager message
+
+            '
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        location:
+          type: string
+          description: 'Contains party location (city, state) if one can be determined
+
+            from phoneNumber. This property is filled only when phoneNumber is not
+
+            empty and server can calculate location information from it (for example,
+
+            this information is unavailable for US toll-free numbers)
+
+            '
+        name:
+          type: string
+          description: 'Symbolic name associated with a party. If the phone does not
+
+            belong to the known extension, only the location is returned, the name
+
+            is not determined then
+
+            '
+        phoneNumber:
+          type: string
+          description: 'Phone number of a party. Usually it is a plain number including
+
+            country and area code like 18661234567. But sometimes it could be returned
+
+            from database with some formatting applied, for example (866)123-4567.
+
+            This property is filled in all cases where parties communicate by means
+
+            of global phone numbers, for example when calling to direct numbers or
+
+            sending/receiving SMS
+
+            '
+      description: Sender information
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true
@@ -554,12 +552,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

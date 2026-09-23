@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Call Recordings API
+  title: RingCentral Call Recordings API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -32,9 +32,7 @@ paths:
       description: 'Returns media content of a call recording (`audio/mpeg` or `audio/wav`)
 
 
-        **This API must be called via media API entry point, e.g. https://media.ringcentral.com**
-
-        '
+        **This API must be called via media API entry point, e.g. https://media.ringcentral.com**'
       operationId: readCallRecordingContent
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -64,9 +62,7 @@ paths:
       summary: Delete Company Call Recordings
       description: 'Deletes company call recordings by their IDs. *Please note:* This method deletes the recording file itself,
 
-        not the record of it in the call log.
-
-        '
+        not the record of it in the call log.'
       operationId: deleteCompanyCallRecordings
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -125,16 +121,6 @@ paths:
       x-user-permission: ReadCallRecording
 components:
   responses:
-    Forbidden:
-      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
-
-        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
     NotFound:
       description: 'General response with **HTTP 404 "Not found"** status.<br>
 
@@ -145,10 +131,10 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
 
-        Reasons: general server-side error.
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
 
         '
       content:
@@ -167,10 +153,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
 
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
+
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
 
         '
       content:
@@ -178,6 +174,62 @@ components:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
   schemas:
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
     GetCallRecordingResponse:
       type: object
       required:
@@ -205,46 +257,6 @@ components:
           type: integer
           format: int32
           description: Recorded call duration
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
     CallRecordingIds:
       type: object
       required:
@@ -257,22 +269,6 @@ components:
             type: string
           minItems: 1
           maxItems: 100
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
   parameters:
     AccountId:
       name: accountId
@@ -289,6 +285,16 @@ components:
         type: string
         default: '~'
       example: '~'
+    ContentDisposition:
+      name: contentDisposition
+      in: query
+      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
+      required: false
+      schema:
+        type: string
+        enum:
+        - Inline
+        - Attachment
     ContentDispositionFilename:
       name: contentDispositionFilename
       in: query
@@ -304,16 +310,6 @@ components:
       schema:
         type: string
         example: '625387632786'
-    ContentDisposition:
-      name: contentDisposition
-      in: query
-      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
-      required: false
-      schema:
-        type: string
-        enum:
-        - Inline
-        - Attachment
   securitySchemes:
     OAuth2:
       type: oauth2

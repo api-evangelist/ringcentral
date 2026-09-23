@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Paging Only Groups API
+  title: RingCentral Paging Only Groups API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -29,9 +29,7 @@ paths:
       tags:
       - Paging Only Groups
       summary: Get Paging Group Users
-      description: 'Returns a list of users allowed to page this group.
-
-        '
+      description: Returns a list of users allowed to page this group.
       operationId: listPagingGroupUsers
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -78,9 +76,7 @@ paths:
       tags:
       - Paging Only Groups
       summary: Assign Paging Group Users and Devices
-      description: 'Adds and/or removes paging group users and devices.
-
-        '
+      description: Adds and/or removes paging group users and devices.
       operationId: assignMultiplePagingGroupUsersDevices
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -111,9 +107,7 @@ paths:
       tags:
       - Paging Only Groups
       summary: Get Paging Group Devices
-      description: 'Returns a list of paging devices assigned to this group.
-
-        '
+      description: Returns a list of paging devices assigned to this group.
       operationId: listPagingGroupDevices
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -159,22 +153,75 @@ paths:
       x-user-permission: ReadCompanyDevices
 components:
   schemas:
-    PagingGroupExtensionInfo:
+    PagingOnlyGroupDevices:
       type: object
       properties:
-        id:
-          type: string
-          description: Internal identifier of a paging group user extension
         uri:
           type: string
           format: uri
-          description: Link to a paging group user extension
-        extensionNumber:
+          description: Link to a list of devices assigned to the paging only group
+        records:
+          type: array
+          description: List of paging devices assigned to this group
+          items:
+            $ref: '#/components/schemas/PagingDeviceInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    EditPagingGroupRequest:
+      type: object
+      properties:
+        addedUserIds:
+          type: array
+          description: 'List of users that will be allowed to page a group specified
+
+            '
+          items:
+            type: string
+        removedUserIds:
+          type: array
+          description: 'List of users that will be disallowed to page a group specified
+
+            '
+          items:
+            type: string
+        addedDeviceIds:
+          type: array
+          description: 'List of account devices that will be assigned to a paging group
+
+            specified
+
+            '
+          items:
+            type: string
+        removedDeviceIds:
+          type: array
+          description: 'List of account devices that will be unassigned from a paging
+
+            group specified
+
+            '
+          items:
+            type: string
+    PagingOnlyGroupUsers:
+      type: object
+      properties:
+        uri:
           type: string
-          description: Extension number of a paging group user
-        name:
-          type: string
-          description: Name of a paging group user
+          format: uri
+          description: 'Link to a list of users allowed to page the Paging Only group
+
+            '
+        records:
+          type: array
+          description: List of users allowed to page the Paging Only group
+          items:
+            $ref: '#/components/schemas/PagingGroupExtensionInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
     EnumeratedPagingModel:
       type: object
       required:
@@ -245,62 +292,6 @@ components:
 
             '
           example: 25
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    EditPagingGroupRequest:
-      type: object
-      properties:
-        addedUserIds:
-          type: array
-          description: 'List of users that will be allowed to page a group specified
-
-            '
-          items:
-            type: string
-        removedUserIds:
-          type: array
-          description: 'List of users that will be disallowed to page a group specified
-
-            '
-          items:
-            type: string
-        addedDeviceIds:
-          type: array
-          description: 'List of account devices that will be assigned to a paging group
-
-            specified
-
-            '
-          items:
-            type: string
-        removedDeviceIds:
-          type: array
-          description: 'List of account devices that will be unassigned from a paging
-
-            group specified
-
-            '
-          items:
-            type: string
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
     PagingDeviceInfo:
       type: object
       properties:
@@ -314,40 +305,43 @@ components:
         name:
           type: string
           description: Name of a paging device
-    PagingOnlyGroupDevices:
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    PagingGroupExtensionInfo:
       type: object
       properties:
+        id:
+          type: string
+          description: Internal identifier of a paging group user extension
         uri:
           type: string
           format: uri
-          description: Link to a list of devices assigned to the paging only group
-        records:
-          type: array
-          description: List of paging devices assigned to this group
-          items:
-            $ref: '#/components/schemas/PagingDeviceInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    PagingOnlyGroupUsers:
+          description: Link to a paging group user extension
+        extensionNumber:
+          type: string
+          description: Extension number of a paging group user
+        name:
+          type: string
+          description: Name of a paging group user
+    PageNavigationUri:
       type: object
+      additionalProperties: false
       properties:
         uri:
           type: string
+          description: Canonical URI to retrieve the particular page of the result set
           format: uri
-          description: 'Link to a list of users allowed to page the Paging Only group
-
-            '
-        records:
-          type: array
-          description: List of users allowed to page the Paging Only group
-          items:
-            $ref: '#/components/schemas/PagingGroupExtensionInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
   parameters:
     AccountId:
       name: accountId

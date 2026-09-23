@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Registrants API
+  title: RingCentral Registrants API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -35,9 +35,7 @@ paths:
 
         A caller must be an authorized user: either a host of the webinar or an IT Admin:
 
-        a user from host''s account with "WebinarSettings" permission.
-
-        '
+        a user from host''s account with "WebinarSettings" permission.'
       operationId: rcwRegListRegistrants
       parameters:
       - $ref: '#/components/parameters/RcwSessionId'
@@ -73,9 +71,7 @@ paths:
 
         A caller must be an authorized user: either a host of the webinar or an IT Admin:
 
-        a user from host''s account with "WebinarSettings" permission.
-
-        '
+        a user from host''s account with "WebinarSettings" permission.'
       operationId: rcwRegCreateRegistrant
       parameters:
       - $ref: '#/components/parameters/RcwSessionId'
@@ -114,9 +110,7 @@ paths:
 
         A caller must be an authorized user: either a host of the webinar or an IT Admin:
 
-        a user from host''s account with "WebinarSettings" permission.
-
-        '
+        a user from host''s account with "WebinarSettings" permission.'
       operationId: rcwRegGetRegistrant
       parameters:
       - $ref: '#/components/parameters/RcwSessionId'
@@ -149,9 +143,7 @@ paths:
 
         A caller must be an authorized user: either a host of the webinar or an IT Admin:
 
-        a user from host''s account with "WebinarSettings" permission.
-
-        '
+        a user from host''s account with "WebinarSettings" permission.'
       operationId: rcwRegDeleteRegistrant
       parameters:
       - $ref: '#/components/parameters/RcwSessionId'
@@ -169,31 +161,47 @@ paths:
       x-app-permission: EditWebinars
 components:
   schemas:
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
+    RcwResourceBaseModel:
       allOf:
-      - $ref: '#/components/schemas/ApiError'
+      - $ref: '#/components/schemas/RcwImmutableResourceIdModel'
+      - type: object
+        required:
+        - creationTime
+        - lastModifiedTime
+        properties:
+          creationTime:
+            type: string
+            description: Object creation time
+            format: date-time
+            readOnly: true
+          lastModifiedTime:
+            type: string
+            description: Object last modification time
+            format: date-time
+            readOnly: true
+    RegistrantModelResponsePostWithQuestionnaire:
+      allOf:
+      - $ref: '#/components/schemas/RegistrantModelWithQuestionnaire'
       - type: object
         properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    RegQuestionBaseModel:
-      type: object
-      required:
-      - questionId
-      properties:
-        questionId:
-          type: string
-          description: ID of the custom question
-          example: '123456789'
+          icalendarSequence:
+            type: integer
+            format: int32
+            minimum: 0
+            readOnly: true
+            description: Sequence number for iCalendar email attachments
+    RcwEmailModel:
+      type: string
+      format: email
+      minLength: 1
+      maxLength: 256
+      example: john.doe@example.com
+      description: User's contact email
+      x-sensitive-data: normalized-anonymized
+    RegistrantModelWithQuestionnaire:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - $ref: '#/components/schemas/RegistrantBaseModelWithQuestionnaire'
     ApiError:
       type: object
       description: Generalized API error structure suitable for any error type
@@ -221,60 +229,69 @@ components:
             type: string
             x-sensitive-data: normalized-anonymized
             description: Answer text
-    RegistrantListResource:
-      type: object
-      required:
-      - records
-      - paging
-      properties:
-        records:
-          type: array
-          minItems: 0
-          items:
-            $ref: '#/components/schemas/RegistrantModelWithQuestionnaire'
-        paging:
-          $ref: '#/components/schemas/RcwPagingForwardModel'
-    RcwEmailModel:
-      type: string
-      format: email
-      minLength: 1
-      maxLength: 256
-      example: john.doe@example.com
-      description: User's contact email
-      x-sensitive-data: normalized-anonymized
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    RegistrantModelWithQuestionnaire:
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
       allOf:
-      - $ref: '#/components/schemas/RcwResourceBaseModel'
-      - $ref: '#/components/schemas/RegistrantBaseModelWithQuestionnaire'
-    RcwResourceBaseModel:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    RegistrantBaseModelWithQuestionnaire:
       allOf:
-      - $ref: '#/components/schemas/RcwImmutableResourceIdModel'
+      - $ref: '#/components/schemas/RegistrantBaseModel'
+      - type: object
+        properties:
+          questionnaire:
+            type: array
+            description: Answers on custom registration questions
+            minItems: 0
+            items:
+              $ref: '#/components/schemas/RegAnswerModel'
+    RegAnswerModel:
+      anyOf:
+      - $ref: '#/components/schemas/FixedAnswerModel'
+      - $ref: '#/components/schemas/VariableAnswerModel'
+    RegistrantMinimalModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwBaseContactModel'
       - type: object
         required:
-        - creationTime
-        - lastModifiedTime
+        - firstName
+        - lastName
+        - email
         properties:
-          creationTime:
+          email:
+            $ref: '#/components/schemas/RcwEmailModel'
+          joinUri:
             type: string
-            description: Object creation time
-            format: date-time
+            format: uri
             readOnly: true
-          lastModifiedTime:
+            maxLength: 256
+            minLength: 5
+            description: The personalized URI for this registrant to join the Webinar
+            example: https://v.ringcentral.com/w/a/join/iuyef77fsj473wn10ashjfk34
+          cancellationUri:
             type: string
-            description: Object last modification time
-            format: date-time
+            format: uri
+            readOnly: true
+            maxLength: 256
+            minLength: 5
+            description: The personalized URI for this registrant to cancel the registration
+            example: https://abcde12345.webinar.ringcentral.com/register?jlt=iuyef77fsj473wn10ashjfk34&action=cancel
+          registeredPostWebinar:
+            type:
+            - boolean
+            - 'null'
+            description: Indicates if the registrant was registered to on-demand webinar
             readOnly: true
     RcwPagingForwardModel:
       type: object
@@ -312,44 +329,15 @@ components:
           maxLength: 20
           example: '78654321'
           readOnly: true
-    ParameterizedErrorResponseModel:
+    RegQuestionBaseModel:
       type: object
-      description: Standard error response which may include parameterized errors
       required:
-      - errors
+      - questionId
       properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    RegAnswerModel:
-      anyOf:
-      - $ref: '#/components/schemas/FixedAnswerModel'
-      - $ref: '#/components/schemas/VariableAnswerModel'
-    RegistrantModelResponsePostWithQuestionnaire:
-      allOf:
-      - $ref: '#/components/schemas/RegistrantModelWithQuestionnaire'
-      - type: object
-        properties:
-          icalendarSequence:
-            type: integer
-            format: int32
-            minimum: 0
-            readOnly: true
-            description: Sequence number for iCalendar email attachments
-    RegistrantBaseModelWithQuestionnaire:
-      allOf:
-      - $ref: '#/components/schemas/RegistrantBaseModel'
-      - type: object
-        properties:
-          questionnaire:
-            type: array
-            description: Answers on custom registration questions
-            minItems: 0
-            items:
-              $ref: '#/components/schemas/RegAnswerModel'
+        questionId:
+          type: string
+          description: ID of the custom question
+          example: '123456789'
     RcwBaseContactModel:
       type: object
       properties:
@@ -365,38 +353,6 @@ components:
           maxLength: 64
           example: Doe
           x-sensitive-data: masked
-    RegistrantMinimalModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwBaseContactModel'
-      - type: object
-        required:
-        - firstName
-        - lastName
-        - email
-        properties:
-          email:
-            $ref: '#/components/schemas/RcwEmailModel'
-          joinUri:
-            type: string
-            format: uri
-            readOnly: true
-            maxLength: 256
-            minLength: 5
-            description: The personalized URI for this registrant to join the Webinar
-            example: https://v.ringcentral.com/w/a/join/iuyef77fsj473wn10ashjfk34
-          cancellationUri:
-            type: string
-            format: uri
-            readOnly: true
-            maxLength: 256
-            minLength: 5
-            description: The personalized URI for this registrant to cancel the registration
-            example: https://abcde12345.webinar.ringcentral.com/register?jlt=iuyef77fsj473wn10ashjfk34&action=cancel
-          registeredPostWebinar:
-            type: boolean
-            description: Indicates if the registrant was registered to on-demand webinar
-            readOnly: true
-            nullable: true
     FixedAnswerModel:
       allOf:
       - $ref: '#/components/schemas/RegQuestionBaseModel'
@@ -410,6 +366,18 @@ components:
             minItems: 1
             items:
               type: string
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
     RegistrantBaseModel:
       allOf:
       - $ref: '#/components/schemas/RegistrantMinimalModel'
@@ -437,69 +405,31 @@ components:
           participantId:
             type: string
             description: ID of session participant (from Runtime Service - if this registrant attended the webinar)
-  parameters:
-    PerPage:
-      name: perPage
-      in: query
-      description: 'The number of items per page. If provided value in the request
-
-        is greater than a maximum, the maximum value is applied
-
-        '
-      required: false
-      explode: false
-      schema:
-        type: integer
-        format: int32
-        minimum: 1
-        maximum: 1000
-        default: 100
-      example: 100
-    RegistrantId:
-      name: registrantId
-      in: path
-      description: Identifier of the Session Registrant
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 20
-      example: '77777777'
-    IncludeQuestionnaire:
-      name: includeQuestionnaire
-      in: query
-      description: Indicates if registrant's "questionnaire" should be returned
-      required: false
-      explode: false
-      schema:
-        type: boolean
-        default: false
-    RcwSessionId:
-      name: sessionId
-      in: path
-      description: Identifier of the Session.
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 20
-      example: '353535353'
-    PageToken:
-      name: pageToken
-      in: query
-      description: 'The token indicating the particular page of the result set to be retrieved.
-
-        If omitted the first page will be returned.
-
-        '
-      required: false
-      explode: false
-      schema:
-        type: string
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    RegistrantListResource:
+      type: object
+      required:
+      - records
+      - paging
+      properties:
+        records:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/RegistrantModelWithQuestionnaire'
+        paging:
+          $ref: '#/components/schemas/RcwPagingForwardModel'
   responses:
     NotFound:
       description: 'General response with **HTTP 404 "Not found"** status.<br>
@@ -521,12 +451,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
-    Conflict:
-      description: 'General response with **HTTP 409 "Conflict"** status.<br>
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
 
-        Reasons: the requested modification operation causes a conflict (for example, unique constraint violation).
+        Reasons: unparsable request, path, query or body parameters are invalid.
 
-        The error definition may contain reference to particular parameter(s) which caused the conflict.
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
 
         '
       content:
@@ -543,18 +473,81 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+    Conflict:
+      description: 'General response with **HTTP 409 "Conflict"** status.<br>
 
-        Reasons: unparsable request, path, query or body parameters are invalid.
+        Reasons: the requested modification operation causes a conflict (for example, unique constraint violation).
 
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+        The error definition may contain reference to particular parameter(s) which caused the conflict.
 
         '
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+  parameters:
+    PageToken:
+      name: pageToken
+      in: query
+      description: 'The token indicating the particular page of the result set to be retrieved.
+
+        If omitted the first page will be returned.
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: string
+    IncludeQuestionnaire:
+      name: includeQuestionnaire
+      in: query
+      description: Indicates if registrant's "questionnaire" should be returned
+      required: false
+      explode: false
+      schema:
+        type: boolean
+        default: false
+    RegistrantId:
+      name: registrantId
+      in: path
+      description: Identifier of the Session Registrant
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 20
+      example: '77777777'
+    RcwSessionId:
+      name: sessionId
+      in: path
+      description: Identifier of the Session.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 20
+      example: '353535353'
+    PerPage:
+      name: perPage
+      in: query
+      description: 'The number of items per page. If provided value in the request
+
+        is greater than a maximum, the maximum value is applied
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 100
+      example: 100
   securitySchemes:
     OAuth2:
       type: oauth2

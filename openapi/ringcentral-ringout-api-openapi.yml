@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards RingOut API
+  title: RingCentral Ring Out API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -100,6 +100,38 @@ paths:
       x-app-permission: RingOut
 components:
   schemas:
+    MakeRingOutRequest:
+      required:
+      - from
+      - to
+      type: object
+      properties:
+        from:
+          $ref: '#/components/schemas/MakeRingOutCallerInfoRequestFrom'
+        to:
+          $ref: '#/components/schemas/MakeRingOutCallerInfoRequestTo'
+        callerId:
+          $ref: '#/components/schemas/MakeRingOutCallerIdInfo'
+        playPrompt:
+          type: boolean
+          description: 'Audio prompt that a calling party hears when a call
+
+            is connected
+
+            '
+        country:
+          $ref: '#/components/schemas/MakeRingOutCountryInfo'
+    MakeRingOutCountryInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Dialing plan country identifier
+      description: 'Optional. Dialing plan country data. If not specified, then an extension
+
+        home country is applied by default
+
+        '
     MakeRingOutCallerInfoRequestFrom:
       type: object
       properties:
@@ -120,13 +152,17 @@ components:
         numbers or an arbitrary number
 
         '
-    MakeRingOutCallerIdInfo:
+    MakeRingOutCallerInfoRequestTo:
       type: object
       properties:
         phoneNumber:
           type: string
           description: Phone number in E.164 format
-      description: Phone number which will be displayed to the called party
+      description: 'Phone number of a called party. This number corresponds to the
+
+        2nd leg of a RingOut call
+
+        '
     RingOutStatusInfo:
       type: object
       properties:
@@ -191,56 +227,20 @@ components:
           format: uri
         status:
           $ref: '#/components/schemas/RingOutStatusInfo'
-    MakeRingOutRequest:
-      required:
-      - from
-      - to
-      type: object
-      properties:
-        from:
-          $ref: '#/components/schemas/MakeRingOutCallerInfoRequestFrom'
-        to:
-          $ref: '#/components/schemas/MakeRingOutCallerInfoRequestTo'
-        callerId:
-          $ref: '#/components/schemas/MakeRingOutCallerIdInfo'
-        playPrompt:
-          type: boolean
-          description: 'Audio prompt that a calling party hears when a call
-
-            is connected
-
-            '
-        country:
-          $ref: '#/components/schemas/MakeRingOutCountryInfo'
-    MakeRingOutCallerInfoRequestTo:
+    MakeRingOutCallerIdInfo:
       type: object
       properties:
         phoneNumber:
           type: string
           description: Phone number in E.164 format
-      description: 'Phone number of a called party. This number corresponds to the
-
-        2nd leg of a RingOut call
-
-        '
-    MakeRingOutCountryInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Dialing plan country identifier
-      description: 'Optional. Dialing plan country data. If not specified, then an extension
-
-        home country is applied by default
-
-        '
+      description: Phone number which will be displayed to the called party
   parameters:
-    ExtensionId:
-      name: extensionId
+    AccountId:
+      name: accountId
       in: path
-      description: 'Internal identifier of the RingCentral extension/user
+      description: 'Internal identifier of the RingCentral account
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true
@@ -250,12 +250,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

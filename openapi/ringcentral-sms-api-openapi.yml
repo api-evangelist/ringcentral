@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards SMS API
+  title: RingCentral SMS API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -39,9 +39,7 @@ paths:
 
         10 attachments in a single MMS message; the size of all attachments linked
 
-        is limited up to 1500000 bytes.
-
-        '
+        is limited up to 1500000 bytes.'
       operationId: createSMSMessage
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -81,9 +79,7 @@ paths:
 
         messages simultaneously to different recipients is limited up to 50
 
-        requests per minute; relevant for all client applications.
-
-        '
+        requests per minute; relevant for all client applications.'
       operationId: createMMS
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -113,194 +109,29 @@ paths:
       x-user-permission: OutboundSMS
 components:
   schemas:
-    MessageDirectionEnum:
-      type: string
-      enum:
-      - Inbound
-      - Outbound
-      description: 'Text message direction. Note that for some message types not all
-
-        directions are allowed. For example voicemail messages can
-
-        be only inbound
-
-        '
-    MessageAvailabilityEnum:
-      type: string
-      enum:
-      - Alive
-      - Deleted
-      - Purged
-      description: 'Message availability status. Message in ''Deleted'' state is still
-
-        preserved with all its attachments and can be restored. ''Purged'' means
-
-        that all attachments are already deleted and the message itself is about
-
-        to be physically deleted shortly
-
-        '
-    MessageStoreCallerInfoRequest:
-      type: object
-      required:
-      - phoneNumber
-      properties:
-        phoneNumber:
-          type: string
-          description: Phone number in E.164 format
-      description: 'Message sender information. The `phoneNumber` value should be one
-
-        the account phone numbers allowed to send the current type of messages
-
-        '
-    MessageStoreCallerInfoResponseTo:
-      type: object
-      properties:
-        extensionNumber:
-          type: string
-          description: 'Extension short number (usually 3 or 4 digits). This property
-
-            is filled when parties communicate by means of short internal numbers,
-
-            for example when calling to other extension or sending/receiving Company
-
-            Pager messages
-
-            '
-        extensionId:
-          type: string
-        location:
-          type: string
-          description: 'Contains party location (city, state) if one can be determined
-
-            from a phone number. This property is filled only when `phoneNumber` is not
-
-            empty and a server can calculate location information from it (for example,
-
-            this information is unavailable for US toll-free numbers)
-
-            '
-        target:
-          type: boolean
-          description: 'The `true` value specifies that message is sent exactly to this recipient.
-
-            Returned in the `to` field for group MMS. Useful if one extension has several
-
-            phone numbers''
-
-            '
-        messageStatus:
-          $ref: '#/components/schemas/MessageStatusEnum'
-        faxErrorCode:
-          $ref: '#/components/schemas/FaxErrorCodeEnum'
-        name:
-          type: string
-          description: 'Symbolic name associated with a party. If the phone does not
-
-            belong to the known extension, only the location is returned, the name
-
-            is not determined then
-
-            '
-        phoneNumber:
-          type: string
-          description: 'Phone number of a party. Usually it is a plain number including
-
-            country and area code like 18661234567. But sometimes it could be returned
-
-            from database with some formatting applied, for example (866)123-4567.
-
-            This property is filled in all cases where parties communicate by means
-
-            of global phone numbers, for example when calling to direct numbers or
-
-            sending/receiving SMS
-
-            '
-        recipientId:
-          type: string
-          description: Internal identifier of a message recipient
-    MessageAttachmentTypeEnum:
-      type: string
-      description: Type of message attachment
-      enum:
-      - AudioRecording
-      - AudioTranscription
-      - Text
-      - SourceDocument
-      - RenderedDocument
-      - MmsAttachment
-    SmsRequestCountryInfo:
-      type: object
-      description: Target number country information. Either `id` or `isoCode` can be specified.
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a country
-        isoCode:
-          type: string
-          minLength: 2
-          maxLength: 2
-          description: ISO 3166-1 alpha-2 code of a country
-    MessageStoreCallerInfoResponseFrom:
-      type: object
-      properties:
-        extensionNumber:
-          type: string
-          description: 'Extension short number (usually 3 or 4 digits). This property
-
-            is filled when parties communicate by means of short internal numbers,
-
-            for example when calling to other extension or sending/receiving Company
-
-            Pager message
-
-            '
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-        location:
-          type: string
-          description: 'Contains party location (city, state) if one can be determined
-
-            from phoneNumber. This property is filled only when phoneNumber is not
-
-            empty and server can calculate location information from it (for example,
-
-            this information is unavailable for US toll-free numbers)
-
-            '
-        name:
-          type: string
-          description: 'Symbolic name associated with a party. If the phone does not
-
-            belong to the known extension, only the location is returned, the name
-
-            is not determined then
-
-            '
-        phoneNumber:
-          type: string
-          description: 'Phone number of a party. Usually it is a plain number including
-
-            country and area code like 18661234567. But sometimes it could be returned
-
-            from database with some formatting applied, for example (866)123-4567.
-
-            This property is filled in all cases where parties communicate by means
-
-            of global phone numbers, for example when calling to direct numbers or
-
-            sending/receiving SMS
-
-            '
-      description: Sender information
     MessagePriorityEnum:
       type: string
       description: Message priority
       enum:
       - Normal
       - High
+    MessageReadStatusEnum:
+      description: Message read status
+      type: string
+      enum:
+      - Read
+      - Unread
+    ConversationInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a conversation
+        uri:
+          type: string
+          format: uri
+          description: Deprecated. Link to a conversation resource
+      description: SMS and Pager only. Information about a conversation the message belongs to
     MessageStatusEnum:
       type: string
       description: 'Message status. Different message types may have different
@@ -354,88 +185,21 @@ components:
           items:
             type: string
             format: binary
-    MessageAttachmentInfo:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: Internal identifier of a message attachment
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a message attachment
-        type:
-          $ref: '#/components/schemas/MessageAttachmentTypeEnum'
-        contentType:
-          type: string
-          description: MIME type for a given attachment, for instance 'audio/wav'
-        vmDuration:
-          type: integer
-          format: int32
-          description: 'Supported for `Voicemail` only. Duration of a voicemail in
-
-            seconds
-
-            '
-        fileName:
-          type: string
-          description: Name of a file attached
-        size:
-          type: integer
-          format: int32
-          description: Size of attachment in bytes
-        height:
-          type: integer
-          format: int32
-          description: Attachment height in pixels if available
-        width:
-          type: integer
-          format: int32
-          description: Attachment width in pixels if available
-    FaxErrorCodeEnum:
+    MessageAvailabilityEnum:
       type: string
       enum:
-      - AllLinesInUse
-      - Undefined
-      - NoFaxSendPermission
-      - NoInternationalPermission
-      - NoFaxMachine
-      - NoAnswer
-      - LineBusy
-      - CallerHungUp
-      - NotEnoughCredits
-      - SentPartially
-      - InternationalCallingDisabled
-      - DestinationCountryDisabled
-      - UnknownCountryCode
-      - NotAccepted
-      - InvalidNumber
-      - CallDeclined
-      - TooManyCallsPerLine
-      - CallFailed
-      - RenderingFailed
-      - TooManyPages
-      - ReturnToDBQueue
-      - NoCallTime
-      - WrongNumber
-      - ProhibitedNumber
-      - InternalError
-      - FaxSendingProhibited
-      - ThePhoneIsBlacklisted
-      - UserNotFound
-      - ConvertError
-      - DBGeneralError
-      - SkypeBillingFailed
-      - AccountSuspended
-      - ProhibitedDestination
-      - InternationalDisabled
-    MessageReadStatusEnum:
-      description: Message read status
-      type: string
-      enum:
-      - Read
-      - Unread
+      - Alive
+      - Deleted
+      - Purged
+      description: 'Message availability status. Message in ''Deleted'' state is still
+
+        preserved with all its attachments and can be restored. ''Purged'' means
+
+        that all attachments are already deleted and the message itself is about
+
+        to be physically deleted shortly
+
+        '
     GetSMSMessageInfoResponse:
       type: object
       properties:
@@ -534,6 +298,45 @@ components:
           - VoiceMail
           - Pager
           - Text
+    MessageAttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of a message attachment
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a message attachment
+        type:
+          $ref: '#/components/schemas/MessageAttachmentTypeEnum'
+        contentType:
+          type: string
+          description: MIME type for a given attachment, for instance 'audio/wav'
+        vmDuration:
+          type: integer
+          format: int32
+          description: 'Supported for `Voicemail` only. Duration of a voicemail in
+
+            seconds
+
+            '
+        fileName:
+          type: string
+          description: Name of a file attached
+        size:
+          type: integer
+          format: int32
+          description: Size of attachment in bytes
+        height:
+          type: integer
+          format: int32
+          description: Attachment height in pixels if available
+        width:
+          type: integer
+          format: int32
+          description: Attachment width in pixels if available
     CreateSMSMessage:
       required:
       - from
@@ -559,24 +362,217 @@ components:
             '
         country:
           $ref: '#/components/schemas/SmsRequestCountryInfo'
-    ConversationInfo:
+    MessageStoreCallerInfoResponseTo:
       type: object
+      properties:
+        extensionNumber:
+          type: string
+          description: 'Extension short number (usually 3 or 4 digits). This property
+
+            is filled when parties communicate by means of short internal numbers,
+
+            for example when calling to other extension or sending/receiving Company
+
+            Pager messages
+
+            '
+        extensionId:
+          type: string
+        location:
+          type: string
+          description: 'Contains party location (city, state) if one can be determined
+
+            from a phone number. This property is filled only when `phoneNumber` is not
+
+            empty and a server can calculate location information from it (for example,
+
+            this information is unavailable for US toll-free numbers)
+
+            '
+        target:
+          type: boolean
+          description: 'The `true` value specifies that message is sent exactly to this recipient.
+
+            Returned in the `to` field for group MMS. Useful if one extension has several
+
+            phone numbers''
+
+            '
+        messageStatus:
+          $ref: '#/components/schemas/MessageStatusEnum'
+        faxErrorCode:
+          $ref: '#/components/schemas/FaxErrorCodeEnum'
+        name:
+          type: string
+          description: 'Symbolic name associated with a party. If the phone does not
+
+            belong to the known extension, only the location is returned, the name
+
+            is not determined then
+
+            '
+        phoneNumber:
+          type: string
+          description: 'Phone number of a party. Usually it is a plain number including
+
+            country and area code like 18661234567. But sometimes it could be returned
+
+            from database with some formatting applied, for example (866)123-4567.
+
+            This property is filled in all cases where parties communicate by means
+
+            of global phone numbers, for example when calling to direct numbers or
+
+            sending/receiving SMS
+
+            '
+        recipientId:
+          type: string
+          description: Internal identifier of a message recipient
+    MessageStoreCallerInfoRequest:
+      type: object
+      required:
+      - phoneNumber
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number in E.164 format
+      description: 'Message sender information. The `phoneNumber` value should be one
+
+        the account phone numbers allowed to send the current type of messages
+
+        '
+    FaxErrorCodeEnum:
+      type: string
+      enum:
+      - AllLinesInUse
+      - Undefined
+      - NoFaxSendPermission
+      - NoInternationalPermission
+      - NoFaxMachine
+      - NoAnswer
+      - LineBusy
+      - CallerHungUp
+      - NotEnoughCredits
+      - SentPartially
+      - InternationalCallingDisabled
+      - DestinationCountryDisabled
+      - UnknownCountryCode
+      - NotAccepted
+      - InvalidNumber
+      - CallDeclined
+      - TooManyCallsPerLine
+      - CallFailed
+      - RenderingFailed
+      - TooManyPages
+      - ReturnToDBQueue
+      - NoCallTime
+      - WrongNumber
+      - ProhibitedNumber
+      - InternalError
+      - FaxSendingProhibited
+      - ThePhoneIsBlacklisted
+      - UserNotFound
+      - ConvertError
+      - DBGeneralError
+      - SkypeBillingFailed
+      - AccountSuspended
+      - ProhibitedDestination
+      - InternationalDisabled
+    MessageDirectionEnum:
+      type: string
+      enum:
+      - Inbound
+      - Outbound
+      description: 'Text message direction. Note that for some message types not all
+
+        directions are allowed. For example voicemail messages can
+
+        be only inbound
+
+        '
+    SmsRequestCountryInfo:
+      type: object
+      description: Target number country information. Either `id` or `isoCode` can be specified.
       properties:
         id:
           type: string
-          description: Internal identifier of a conversation
-        uri:
+          description: Internal identifier of a country
+        isoCode:
           type: string
-          format: uri
-          description: Deprecated. Link to a conversation resource
-      description: SMS and Pager only. Information about a conversation the message belongs to
-  parameters:
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
+          minLength: 2
+          maxLength: 2
+          description: ISO 3166-1 alpha-2 code of a country
+    MessageAttachmentTypeEnum:
+      type: string
+      description: Type of message attachment
+      enum:
+      - AudioRecording
+      - AudioTranscription
+      - Text
+      - SourceDocument
+      - RenderedDocument
+      - MmsAttachment
+    MessageStoreCallerInfoResponseFrom:
+      type: object
+      properties:
+        extensionNumber:
+          type: string
+          description: 'Extension short number (usually 3 or 4 digits). This property
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+            is filled when parties communicate by means of short internal numbers,
+
+            for example when calling to other extension or sending/receiving Company
+
+            Pager message
+
+            '
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        location:
+          type: string
+          description: 'Contains party location (city, state) if one can be determined
+
+            from phoneNumber. This property is filled only when phoneNumber is not
+
+            empty and server can calculate location information from it (for example,
+
+            this information is unavailable for US toll-free numbers)
+
+            '
+        name:
+          type: string
+          description: 'Symbolic name associated with a party. If the phone does not
+
+            belong to the known extension, only the location is returned, the name
+
+            is not determined then
+
+            '
+        phoneNumber:
+          type: string
+          description: 'Phone number of a party. Usually it is a plain number including
+
+            country and area code like 18661234567. But sometimes it could be returned
+
+            from database with some formatting applied, for example (866)123-4567.
+
+            This property is filled in all cases where parties communicate by means
+
+            of global phone numbers, for example when calling to direct numbers or
+
+            sending/receiving SMS
+
+            '
+      description: Sender information
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true
@@ -586,12 +582,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Regional Settings API
+  title: RingCentral Regional Settings API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -29,9 +29,7 @@ paths:
       tags:
       - Regional Settings
       summary: List States
-      description: 'Returns all states of a certain country.
-
-        '
+      description: Returns all states of a certain country.
       operationId: listStates
       parameters:
       - name: allCountries
@@ -93,9 +91,7 @@ paths:
       tags:
       - Regional Settings
       summary: Get State
-      description: 'Returns information on a specific state by ID.
-
-        '
+      description: Returns information on a specific state by ID.
       operationId: readState
       parameters:
       - name: stateId
@@ -119,9 +115,7 @@ paths:
       tags:
       - Regional Settings
       summary: List Locations
-      description: 'Returns all available locations for a certain state.
-
-        '
+      description: Returns all available locations for a certain state.
       operationId: listLocations
       parameters:
       - name: orderBy
@@ -175,9 +169,7 @@ paths:
       tags:
       - Regional Settings
       summary: List Languages
-      description: 'Returns information about the supported languages.
-
-        '
+      description: Returns information about the supported languages.
       operationId: listLanguages
       responses:
         '200':
@@ -193,9 +185,7 @@ paths:
       tags:
       - Regional Settings
       summary: Get Language
-      description: 'Returns a language by ID.
-
-        '
+      description: Returns a language by ID.
       operationId: readLanguage
       parameters:
       - name: languageId
@@ -219,9 +209,7 @@ paths:
       tags:
       - Regional Settings
       summary: List Timezones
-      description: 'Returns all available timezones.
-
-        '
+      description: Returns all available timezones.
       operationId: listTimezones
       parameters:
       - name: page
@@ -256,9 +244,7 @@ paths:
       tags:
       - Regional Settings
       summary: Get Timezone
-      description: 'Returns information on a certain timezone.
-
-        '
+      description: Returns information on a certain timezone.
       operationId: readTimezone
       parameters:
       - name: timezoneId
@@ -282,9 +268,7 @@ paths:
       tags:
       - Regional Settings
       summary: List Countries
-      description: 'Returns all countries available for calling.
-
-        '
+      description: Returns all countries available for calling.
       operationId: listCountries
       parameters:
       - name: loginAllowed
@@ -357,9 +341,7 @@ paths:
       tags:
       - Regional Settings
       summary: Get Country
-      description: 'Returns information on a specific country.
-
-        '
+      description: Returns information on a specific country.
       operationId: readCountry
       parameters:
       - name: countryId
@@ -380,6 +362,255 @@ paths:
       x-throttling-group: Light
 components:
   schemas:
+    GetTimezoneListResponse:
+      required:
+      - navigation
+      - paging
+      - records
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the timezone list resource
+        records:
+          type: array
+          description: List of timezones
+          items:
+            $ref: '#/components/schemas/GetTimezoneInfoResponse'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CountryInfoDictionaryModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoShortModel'
+      - type: object
+        properties:
+          emergencyCalling:
+            type: boolean
+            description: 'Emergency calling feature availability/emergency address requirement indicator
+
+              '
+          isoCode:
+            type: string
+            description: 'Country code according to the ISO standard, see
+
+              [ISO 3166](https://www.iso.org/iso-3166-country-codes.html)
+
+              '
+          name:
+            type: string
+            description: The official name of a country
+          numberSelling:
+            type: boolean
+            description: Indicates that phone numbers are available for this country
+          loginAllowed:
+            type: boolean
+            description: Indicates that login with the phone number of this country is allowed
+          signupAllowed:
+            type: boolean
+            description: Indicates that signup/billing is allowed for this country
+          freeSoftphoneLine:
+            type: boolean
+            description: Indicates that free phone line for softphone is available for this country
+          localDialing:
+            type: boolean
+            description: Indicates that the local dialing is supported in this country and default area code can be set
+    CountryInfoMinimalModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a country
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a country resource
+    GetLocationListResponse:
+      required:
+      - navigation
+      - paging
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the location list resource
+        records:
+          type: array
+          description: List of locations
+          items:
+            $ref: '#/components/schemas/LocationInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    LanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a language
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a language
+        greeting:
+          type: boolean
+          description: 'Indicates whether a language is available as
+
+            greeting language
+
+            '
+        formattingLocale:
+          type: boolean
+          description: 'Indicates whether a language is available as
+
+            formatting locale
+
+            '
+        localeCode:
+          type: string
+          description: Localization code of a language
+        isoCode:
+          type: string
+          description: Country code according to the ISO standard, see [ISO 3166](https://www.iso.org/iso-3166-country-codes.html)
+        name:
+          type: string
+          description: Official name of a language
+        ui:
+          type: boolean
+          description: 'Indicates whether a language is available as UI language
+
+            '
+        timeFormat:
+          type: string
+          description: Time format
+        dateFormat:
+          type: string
+          description: Date format
+      description: User interface language data
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    CountryInfoBasicModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoMinimalModel'
+      - type: object
+        properties:
+          name:
+            type: string
+            description: The official name of a country
+    LocationStateInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a state
+        uri:
+          type: string
+          format: uri
+          description: Link to a state resource
+      description: Information on a state this location belongs to
+    GetStateListResponse:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a states list resource
+        records:
+          type: array
+          description: List of states
+          items:
+            $ref: '#/components/schemas/GetStateInfoResponse'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    GetStateInfoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a state
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a state
+        country:
+          $ref: '#/components/schemas/CountryInfoMinimalModel'
+        isoCode:
+          type: string
+          description: Short code for a state (2-letter usually)
+        name:
+          type: string
+          description: Official name of a state
+    LanguageList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of the language list resource
+        records:
+          type: array
+          description: Language data
+          items:
+            $ref: '#/components/schemas/LanguageInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    GetTimezoneInfoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a timezone
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a timezone
+        name:
+          type: string
+          description: Short name of a timezone
+        description:
+          type: string
+          description: Description of a timezone
+        bias:
+          type: string
+    CountryInfoShortModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoBasicModel'
+      - type: object
+        properties:
+          isoCode:
+            type: string
+            description: 'A ISO country code value complying with the
+
+              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+
+              format.
+
+              '
+          callingCode:
+            type: string
+            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
+
+              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
+
+              [E.164](http://en.wikipedia.org/wiki/E.164),
+
+              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
+
+              '
     EnumeratedPagingModel:
       type: object
       required:
@@ -450,14 +681,19 @@ components:
 
             '
           example: 25
-    PageNavigationUri:
+    PageNavigationModel:
       type: object
+      description: Links to other pages of the current result set
       additionalProperties: false
       properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
     CountryListDictionaryModel:
       required:
       - navigation
@@ -474,57 +710,6 @@ components:
           description: List of countries with the country data
           items:
             $ref: '#/components/schemas/CountryInfoDictionaryModel'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    LanguageList:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of the language list resource
-        records:
-          type: array
-          description: Language data
-          items:
-            $ref: '#/components/schemas/LanguageInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    GetLocationListResponse:
-      required:
-      - navigation
-      - paging
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the location list resource
-        records:
-          type: array
-          description: List of locations
-          items:
-            $ref: '#/components/schemas/LocationInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    GetStateListResponse:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a states list resource
-        records:
-          type: array
-          description: List of states
-          items:
-            $ref: '#/components/schemas/GetStateInfoResponse'
         navigation:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
@@ -568,209 +753,6 @@ components:
             '
         state:
           $ref: '#/components/schemas/LocationStateInfo'
-    LocationStateInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a state
-        uri:
-          type: string
-          format: uri
-          description: Link to a state resource
-      description: Information on a state this location belongs to
-    CountryInfoShortModel:
-      allOf:
-      - $ref: '#/components/schemas/CountryInfoBasicModel'
-      - type: object
-        properties:
-          isoCode:
-            type: string
-            description: 'A ISO country code value complying with the
-
-              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
-
-              format.
-
-              '
-          callingCode:
-            type: string
-            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
-
-              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
-
-              [E.164](http://en.wikipedia.org/wiki/E.164),
-
-              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
-
-              '
-    CountryInfoBasicModel:
-      allOf:
-      - $ref: '#/components/schemas/CountryInfoMinimalModel'
-      - type: object
-        properties:
-          name:
-            type: string
-            description: The official name of a country
-    GetTimezoneInfoResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a timezone
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a timezone
-        name:
-          type: string
-          description: Short name of a timezone
-        description:
-          type: string
-          description: Description of a timezone
-        bias:
-          type: string
-    GetTimezoneListResponse:
-      required:
-      - navigation
-      - paging
-      - records
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the timezone list resource
-        records:
-          type: array
-          description: List of timezones
-          items:
-            $ref: '#/components/schemas/GetTimezoneInfoResponse'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    CountryInfoDictionaryModel:
-      allOf:
-      - $ref: '#/components/schemas/CountryInfoShortModel'
-      - type: object
-        properties:
-          emergencyCalling:
-            type: boolean
-            description: 'Emergency calling feature availability/emergency address requirement indicator
-
-              '
-          isoCode:
-            type: string
-            description: 'Country code according to the ISO standard, see
-
-              [ISO 3166](https://www.iso.org/iso-3166-country-codes.html)
-
-              '
-          name:
-            type: string
-            description: The official name of a country
-          numberSelling:
-            type: boolean
-            description: Indicates that phone numbers are available for this country
-          loginAllowed:
-            type: boolean
-            description: Indicates that login with the phone number of this country is allowed
-          signupAllowed:
-            type: boolean
-            description: Indicates that signup/billing is allowed for this country
-          freeSoftphoneLine:
-            type: boolean
-            description: Indicates that free phone line for softphone is available for this country
-          localDialing:
-            type: boolean
-            description: Indicates that the local dialing is supported in this country and default area code can be set
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-    LanguageInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a language
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a language
-        greeting:
-          type: boolean
-          description: 'Indicates whether a language is available as
-
-            greeting language
-
-            '
-        formattingLocale:
-          type: boolean
-          description: 'Indicates whether a language is available as
-
-            formatting locale
-
-            '
-        localeCode:
-          type: string
-          description: Localization code of a language
-        isoCode:
-          type: string
-          description: Country code according to the ISO standard, see [ISO 3166](https://www.iso.org/iso-3166-country-codes.html)
-        name:
-          type: string
-          description: Official name of a language
-        ui:
-          type: boolean
-          description: 'Indicates whether a language is available as UI language
-
-            '
-        timeFormat:
-          type: string
-          description: Time format
-        dateFormat:
-          type: string
-          description: Date format
-      description: User interface language data
-    CountryInfoMinimalModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a country
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a country resource
-    GetStateInfoResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a state
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a state
-        country:
-          $ref: '#/components/schemas/CountryInfoMinimalModel'
-        isoCode:
-          type: string
-          description: Short code for a state (2-letter usually)
-        name:
-          type: string
-          description: Official name of a state
   securitySchemes:
     OAuth2:
       type: oauth2

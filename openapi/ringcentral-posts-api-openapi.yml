@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Posts API
+  title: RingCentral Posts API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -112,7 +112,7 @@ paths:
       tags:
       - Posts
       summary: Create Post
-      description: Creates a post in the chat specified in path. Any mention can be added within the `text` attribute of the request body in .md format - `![:Type](id)`, where `type` is one of (Person, Team, File, Note, Task, Event, Link, Card) and `id` is a unique identifier of the mentioned object of the specified type. Attachments of the following types (File, Card, Event, Note) can also be added to a post by passing type and ID of attachment(s) in request body.
+      description: Creates a post in the chat specified in path. Any mention can be added within the `text` attribute of the request body in .md format - `!:Type`, where `type` is one of (Person, Team, File, Note, Task, Event, Link, Card) and `id` is a unique identifier of the mentioned object of the specified type. Attachments of the following types (File, Card, Event, Note) can also be added to a post by passing type and ID of attachment(s) in request body.
       operationId: createGlipPostNew
       parameters:
       - name: chatId
@@ -275,63 +275,15 @@ components:
           type: string
           description: "Iterations ending datetime for periodic events in \n[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format\n"
           format: date-time
-    TMPostInfo:
+    TMNavigationInfo:
       type: object
       properties:
-        id:
+        prevPageToken:
           type: string
-          description: Internal identifier of a post
-        groupId:
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
           type: string
-          description: Internal identifier of a group a post belongs to
-        type:
-          type: string
-          description: Type of post
-          enum:
-          - TextMessage
-          - PersonJoined
-          - PersonsAdded
-        text:
-          type: string
-          description: For 'TextMessage' post type only. Text of a message
-        creatorId:
-          type: string
-          description: Internal identifier of a user - author of a post
-        addedPersonIds:
-          type: array
-          description: For 'PersonsAdded' post type only. Identifiers of persons added to a group
-          items:
-            type: string
-        creationTime:
-          type: string
-          description: Post creation datetime in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
-          format: date-time
-        lastModifiedTime:
-          type: string
-          description: Post last modification datetime in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
-          format: date-time
-        attachments:
-          type: array
-          description: List of posted attachments
-          items:
-            $ref: '#/components/schemas/TMMessageAttachmentInfo'
-        mentions:
-          type: array
-          items:
-            $ref: '#/components/schemas/TMMentionsInfo'
-        activity:
-          type: string
-          description: Label of activity type
-        title:
-          type: string
-          description: Title of a message. (Can be set for bot's messages only)
-        iconUri:
-          type: string
-          format: uri
-          description: Link to an image used as an icon for this message
-        iconEmoji:
-          type: string
-          description: Emoji used as an icon for this message
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
     TMMentionsInfo:
       type: object
       properties:
@@ -434,15 +386,83 @@ components:
         description:
           type: string
           description: Event details
-    TMNavigationInfo:
+    TMAttachmentAuthorInfo:
       type: object
       properties:
-        prevPageToken:
+        name:
           type: string
-          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-        nextPageToken:
+          description: Name of a message author
+        uri:
           type: string
-          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+          format: uri
+          description: Link to an author's name
+        iconUri:
+          type: string
+          format: uri
+          description: Link to an image displayed to the left of an author's name; sized 82x82px
+    TMPostsList:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of posts
+          items:
+            $ref: '#/components/schemas/TMPostInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+    TMAttachmentFieldsInfo:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of an individual field
+        value:
+          type: string
+          description: Value of an individual field (supports Markdown)
+        style:
+          type: string
+          description: Style of width span applied to a field
+          default: Short
+          enum:
+          - Short
+          - Long
+    TMAttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an attachment
+        type:
+          type: string
+          description: Type of an attachment
+          enum:
+          - File
+          - Note
+          - Event
+          - Card
+    TMAttachmentFootnoteInfo:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Text of a footer
+        iconUri:
+          type: string
+          format: uri
+          description: Link to an icon displayed to the left of a footer; sized 32x32px
+        time:
+          type: string
+          description: Message creation datetime in ISO 8601 format including timezone
+          format: date-time
+          example: '2016-03-10T18:07:52.534Z'
+    TMUpdatePostRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Post text.
     TMAddFileRequest:
       required:
       - contentUri
@@ -471,83 +491,63 @@ components:
           description: Identifier(s) of attachments. Maximum number of attachments is 25
           items:
             $ref: '#/components/schemas/TMAttachmentInfo'
-    TMAttachmentFootnoteInfo:
-      type: object
-      properties:
-        text:
-          type: string
-          description: Text of a footer
-        iconUri:
-          type: string
-          format: uri
-          description: Link to an icon displayed to the left of a footer; sized 32x32px
-        time:
-          type: string
-          description: Message creation datetime in ISO 8601 format including timezone
-          format: date-time
-          example: '2016-03-10T18:07:52.534Z'
-    TMUpdatePostRequest:
-      type: object
-      properties:
-        text:
-          type: string
-          description: Post text.
-    TMAttachmentInfo:
+    TMPostInfo:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of an attachment
+          description: Internal identifier of a post
+        groupId:
+          type: string
+          description: Internal identifier of a group a post belongs to
         type:
           type: string
-          description: Type of an attachment
+          description: Type of post
           enum:
-          - File
-          - Note
-          - Event
-          - Card
-    TMAttachmentAuthorInfo:
-      type: object
-      properties:
-        name:
+          - TextMessage
+          - PersonJoined
+          - PersonsAdded
+        text:
           type: string
-          description: Name of a message author
-        uri:
+          description: For 'TextMessage' post type only. Text of a message
+        creatorId:
           type: string
-          format: uri
-          description: Link to an author's name
+          description: Internal identifier of a user - author of a post
+        addedPersonIds:
+          type: array
+          description: For 'PersonsAdded' post type only. Identifiers of persons added to a group
+          items:
+            type: string
+        creationTime:
+          type: string
+          description: Post creation datetime in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
+          format: date-time
+        lastModifiedTime:
+          type: string
+          description: Post last modification datetime in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
+          format: date-time
+        attachments:
+          type: array
+          description: List of posted attachments
+          items:
+            $ref: '#/components/schemas/TMMessageAttachmentInfo'
+        mentions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMMentionsInfo'
+        activity:
+          type: string
+          description: Label of activity type
+        title:
+          type: string
+          description: Title of a message. (Can be set for bot's messages only)
         iconUri:
           type: string
           format: uri
-          description: Link to an image displayed to the left of an author's name; sized 82x82px
-    TMAttachmentFieldsInfo:
-      type: object
-      properties:
-        title:
+          description: Link to an image used as an icon for this message
+        iconEmoji:
           type: string
-          description: Title of an individual field
-        value:
-          type: string
-          description: Value of an individual field (supports Markdown)
-        style:
-          type: string
-          description: Style of width span applied to a field
-          default: Short
-          enum:
-          - Short
-          - Long
-    TMPostsList:
-      required:
-      - records
-      type: object
-      properties:
-        records:
-          type: array
-          description: List of posts
-          items:
-            $ref: '#/components/schemas/TMPostInfo'
-        navigation:
-          $ref: '#/components/schemas/TMNavigationInfo'
+          description: Emoji used as an icon for this message
   securitySchemes:
     OAuth2:
       type: oauth2

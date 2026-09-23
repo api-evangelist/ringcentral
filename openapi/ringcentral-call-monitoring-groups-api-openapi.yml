@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Call Monitoring Groups API
+  title: RingCentral Call Monitoring Groups API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -29,9 +29,7 @@ paths:
       tags:
       - Call Monitoring Groups
       summary: List Call Monitoring Groups
-      description: 'Returns a list of call monitoring groups filtered by an extension.
-
-        '
+      description: Returns a list of call monitoring groups filtered by an extension.
       operationId: listCallMonitoringGroups
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -78,9 +76,7 @@ paths:
       tags:
       - Call Monitoring Groups
       summary: Create Call Monitoring Group
-      description: 'Creates a new call monitoring group.
-
-        '
+      description: Creates a new call monitoring group.
       operationId: createCallMonitoringGroup
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -108,9 +104,7 @@ paths:
       tags:
       - Call Monitoring Groups
       summary: Update Call Monitoring Group
-      description: 'Updates a call monitoring group name.
-
-        '
+      description: Updates a call monitoring group name.
       operationId: updateCallMonitoringGroup
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -153,9 +147,7 @@ paths:
       tags:
       - Call Monitoring Groups
       summary: Delete Call Monitoring Group
-      description: 'Removes information about a call monitoring group specified in path.
-
-        '
+      description: Removes information about a call monitoring group specified in path.
       operationId: deleteCallMonitoringGroup
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -180,9 +172,7 @@ paths:
       tags:
       - Call Monitoring Groups
       summary: Update Call Monitoring Group List
-      description: 'Updates a list of call monitoring groups.
-
-        '
+      description: Updates a list of call monitoring groups.
       operationId: updateCallMonitoringGroupList
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -220,9 +210,7 @@ paths:
       tags:
       - Call Monitoring Groups
       summary: List Call Monitoring Group Members
-      description: 'Returns a list of members for a call monitoring group specified in path.
-
-        '
+      description: Returns a list of members for a call monitoring group specified in path.
       operationId: listCallMonitoringGroupMembers
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -266,6 +254,30 @@ paths:
       x-user-permission: ReadExtensions
 components:
   schemas:
+    CallMonitoringExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Internal identifier of an extension. Only the following extension
+
+            types are allowed: User, DigitalUser, VirtualUser, FaxUser, Limited
+
+            '
+        permissions:
+          type: array
+          description: 'Set of call monitoring group permissions granted to a specified
+
+            extension. In order to remove a specified extension from a call monitoring
+
+            group use an empty value
+
+            '
+          items:
+            type: string
+            enum:
+            - Monitoring
+            - Monitored
     CallMonitoringGroup:
       type: object
       properties:
@@ -279,6 +291,66 @@ components:
         name:
           type: string
           description: Name of a group
+    CreateCallMonitoringGroupRequest:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of a group
+    CallMonitoringGroupMemberInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call monitoring group member
+        id:
+          type: string
+          description: 'Internal identifier of a call monitoring group member
+
+            '
+        extensionNumber:
+          type: string
+          description: 'Extension number of a call monitoring group member
+
+            '
+        permissions:
+          type: array
+          items:
+            type: string
+            description: 'Call monitoring permission; multiple values are allowed:
+
+              - `Monitoring` - User can monitor a group;
+
+              - `Monitored` - User can be monitored.
+
+              '
+            enum:
+            - Monitoring
+            - Monitored
+    CallMonitoringGroups:
+      required:
+      - navigation
+      - paging
+      - records
+      - uri
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call monitoring groups resource
+        records:
+          type: array
+          description: List of call monitoring group members
+          items:
+            $ref: '#/components/schemas/CallMonitoringGroup'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
     EnumeratedPagingModel:
       type: object
       required:
@@ -349,38 +421,6 @@ components:
 
             '
           example: 25
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    CallMonitoringExtensionInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: 'Internal identifier of an extension. Only the following extension
-
-            types are allowed: User, DigitalUser, VirtualUser, FaxUser, Limited
-
-            '
-        permissions:
-          type: array
-          description: 'Set of call monitoring group permissions granted to a specified
-
-            extension. In order to remove a specified extension from a call monitoring
-
-            group use an empty value
-
-            '
-          items:
-            type: string
-            enum:
-            - Monitoring
-            - Monitored
     CallMonitoringGroupMemberList:
       required:
       - navigation
@@ -402,48 +442,14 @@ components:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
-    CreateCallMonitoringGroupRequest:
-      required:
-      - name
+    PageNavigationUri:
       type: object
-      properties:
-        name:
-          type: string
-          description: Name of a group
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
       additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-    CallMonitoringGroups:
-      required:
-      - navigation
-      - paging
-      - records
-      - uri
-      type: object
       properties:
         uri:
           type: string
+          description: Canonical URI to retrieve the particular page of the result set
           format: uri
-          description: Link to a call monitoring groups resource
-        records:
-          type: array
-          description: List of call monitoring group members
-          items:
-            $ref: '#/components/schemas/CallMonitoringGroup'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
     CallMonitoringBulkAssign:
       type: object
       properties:
@@ -459,37 +465,19 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CallMonitoringExtensionInfo'
-    CallMonitoringGroupMemberInfo:
+    PageNavigationModel:
       type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
       properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a call monitoring group member
-        id:
-          type: string
-          description: 'Internal identifier of a call monitoring group member
-
-            '
-        extensionNumber:
-          type: string
-          description: 'Extension number of a call monitoring group member
-
-            '
-        permissions:
-          type: array
-          items:
-            type: string
-            description: 'Call monitoring permission; multiple values are allowed:
-
-              - `Monitoring` - User can monitor a group;
-
-              - `Monitored` - User can be monitored.
-
-              '
-            enum:
-            - Monitoring
-            - Monitored
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
   parameters:
     AccountId:
       name: accountId

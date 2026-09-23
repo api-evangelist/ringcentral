@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Presence API
+  title: RingCentral Presence API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -187,7 +187,19 @@ paths:
       tags:
       - Presence
       summary: Get User Presence Status
-      description: "Returns the presence status of an extension or several extensions by their ID(s). The `presenceStatus` is returned as Offline \n(the parameters `telephonyStatus`, `message`, `userStatus` and `dndStatus` are not returned at all) for the following extension types: \nDepartment/Announcement Only/Take Messages Only (Voicemail)/Fax User/Paging Only Group/Shared Lines Group/IVR Menu/Application Extension/Park Location.\nIf the user requests his/her own presence status, the response contains actual presence status even if the status publication is turned off.\n[Batch request syntax](https://developers.ringcentral.com/api-reference/Batch-Requests) is supported. For batch requests the number of extensions \nin one request is limited to 30. If more extensions are included in the request, the error code 400 Bad Request is returned with the logical error\ncode InvalidMultipartRequest and the corresponding message Extension Presence Info multipart request is limited to 30 extensions.\n"
+      description: 'Returns the presence status of an extension or several extensions by their ID(s). The `presenceStatus` is returned as Offline
+
+        (the parameters `telephonyStatus`, `message`, `userStatus` and `dndStatus` are not returned at all) for the following extension types:
+
+        Department/Announcement Only/Take Messages Only (Voicemail)/Fax User/Paging Only Group/Shared Lines Group/IVR Menu/Application Extension/Park Location.
+
+        If the user requests his/her own presence status, the response contains actual presence status even if the status publication is turned off.
+
+        Batch request syntax is supported. For batch requests the number of extensions
+
+        in one request is limited to 30. If more extensions are included in the request, the error code 400 Bad Request is returned with the logical error
+
+        code InvalidMultipartRequest and the corresponding message Extension Presence Info multipart request is limited to 30 extensions.'
       operationId: readUserPresenceStatus
       parameters:
       - $ref: '#/components/parameters/AccountId'
@@ -335,6 +347,822 @@ paths:
       x-user-permission: EditPresenceStatus
 components:
   schemas:
+    CallInfoCQ:
+      type: object
+      description: Primary/additional CQ information
+      properties:
+        primary:
+          $ref: '#/components/schemas/PrimaryCQInfo'
+        additional:
+          $ref: '#/components/schemas/AdditionalCQInfo'
+    AccountPresenceInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of account presence resource
+        records:
+          type: array
+          description: List of Prompts
+          items:
+            $ref: '#/components/schemas/GetPresenceInfo'
+        navigation:
+          $ref: '#/components/schemas/PresenceNavigationInfo'
+        paging:
+          $ref: '#/components/schemas/PresencePagingInfo'
+    PresenceInfoResponse:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the presence resource
+        userStatus:
+          type: string
+          enum:
+          - Offline
+          - Busy
+          - Available
+        dndStatus:
+          type: string
+          enum:
+          - TakeAllCalls
+          - DoNotAcceptDepartmentCalls
+          - TakeDepartmentCallsOnly
+          - DoNotAcceptAnyCalls
+          - Unknown
+        message:
+          maxLength: 75
+          minLength: 0
+          type: string
+        allowSeeMyPresence:
+          type: boolean
+          default: false
+        callerIdVisibility:
+          type: string
+          description: "Configures the user presence visibility. When the `allowSeeMyPresence` parameter is set to `true`, \nthe following visibility options are supported via this parameter - All, None, PermittedUsers\n"
+          enum:
+          - All
+          - None
+          - PermittedUsers
+        ringOnMonitoredCall:
+          type: boolean
+          default: false
+        pickUpCallsOnHold:
+          type: boolean
+          default: false
+        activeCalls:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActiveCallInfo'
+        extension:
+          $ref: '#/components/schemas/GetPresenceExtensionInfo'
+        meetingStatus:
+          type: string
+          description: Meetings presence status
+          enum:
+          - Connected
+          - Disconnected
+        telephonyStatus:
+          type: string
+          description: Telephony presence status. Returned if telephony status is changed
+          enum:
+          - NoCall
+          - CallConnected
+          - Ringing
+          - OnHold
+          - ParkedCall
+        presenceStatus:
+          type: string
+          description: Aggregated presence status, calculated from a number of sources
+          enum:
+          - Offline
+          - Busy
+          - Available
+    AdditionalCQInfo:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Call information to be displayed as 'Line 2' for a call queue call session
+          enum:
+          - PhoneNumberLabel
+          - PhoneNumber
+          - QueueExtension
+          - QueueName
+          - CallerIdName
+          - CallerIdNumber
+          - None
+        value:
+          type: string
+          description: Call information value
+      description: Additional call session information. Supported for Call Queues only
+    CallQueuePresenceEventBody:
+      type: object
+      description: Notification payload body
+      properties:
+        extensionId:
+          type: string
+          description: Agent extension ID
+        callQueueId:
+          type: string
+          description: Call queue extension ID
+        acceptCalls:
+          type: boolean
+          description: Call queue agent availability for calls of this queue
+    DetailedExtensionPresenceWithSIPEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        event:
+          type: string
+          description: Event filter name
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when this notification was sent in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example *2016-03-10T18:07:52.534Z*
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        body:
+          $ref: '#/components/schemas/DetailedExtensionPresenceWithSIPEventBody'
+    CallQueueUpdateMemberPresence:
+      type: object
+      properties:
+        member:
+          $ref: '#/components/schemas/CallQueueMemberId'
+        acceptCurrentQueueCalls:
+          type: boolean
+          description: Call queue member availability for calls of this queue
+    UpdateUnifiedPresence:
+      type: object
+      properties:
+        glip:
+          $ref: '#/components/schemas/UpdateUnifiedPresenceGlip'
+        telephony:
+          $ref: '#/components/schemas/UpdateUnifiedPresenceTelephony'
+    ExtensionPresenceEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        event:
+          type: string
+          description: Event filter name
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when this notification was sent in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example *2016-03-10T18:07:52.534Z*
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        body:
+          $ref: '#/components/schemas/ExtensionPresenceEventBody'
+    UnifiedPresenceTelephony:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Telephony status calculated from all user's phone numbers. Returned always for the requester's extension; returned for another users if their telephony visibility is set to 'Visible'
+          enum:
+          - NoCall
+          - Ringing
+          - CallConnected
+          - OnHold
+          - ParkedCall
+        visibility:
+          type: string
+          description: Specifies if the user's phone presence status is visible to other users; returned only for requester's extension
+          enum:
+          - Visible
+          - Invisible
+        availability:
+          type: string
+          description: Telephony DND status. Returned if *DND* feature is switched on
+          enum:
+          - TakeAllCalls
+          - DoNotAcceptAnyCalls
+          - DoNotAcceptQueueCalls
+      description: Returned if *BLF* feature is switched on
+    DetailedExtensionPresenceWithSIPEventBody:
+      type: object
+      description: Notification payload body
+      properties:
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+          default: '~'
+        telephonyStatus:
+          type: string
+          description: Telephony presence status. Returned if telephony status is changed.
+          enum:
+          - NoCall
+          - CallConnected
+          - Ringing
+          - OnHold
+          - ParkedCall
+        activeCalls:
+          type: array
+          description: List of the latest 7 active calls on extension
+          items:
+            $ref: '#/components/schemas/ActiveCallInfo'
+        sequence:
+          type: integer
+          format: int32
+          description: Order number of a notification to state the chronology
+        presenceStatus:
+          type: string
+          description: Aggregated presence status, calculated from a number of sources
+          enum:
+          - Offline
+          - Busy
+          - Available
+        userStatus:
+          type: string
+          description: User-defined presence status (as previously published by the user)
+          enum:
+          - Offline
+          - Busy
+          - Available
+        meetingStatus:
+          type: string
+          description: Meetings presence status
+          enum:
+          - Connected
+          - Disconnected
+        dndStatus:
+          type: string
+          description: Extended DnD (Do not Disturb) status
+          enum:
+          - TakeAllCalls
+          - DoNotAcceptAnyCalls
+          - DoNotAcceptDepartmentCalls
+          - TakeDepartmentCallsOnly
+        allowSeeMyPresence:
+          type: boolean
+          description: If `true` enables other extensions to see the extension presence status
+        ringOnMonitoredCall:
+          type: boolean
+          description: If `true` enables to ring extension phone, if any user monitored by this extension is ringing
+        pickUpCallsOnHold:
+          type: boolean
+          description: If `true` enables the extension user to pick up a monitored line on hold
+        totalActiveCalls:
+          type: integer
+          format: int32
+          description: Total number of active calls on extension at the present moment
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
+    PresenceCallQueueInfo:
+      type: object
+      description: Call queue information
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a call queue
+        name:
+          type: string
+          description: Name of a call queue
+        extensionNumber:
+          type: string
+          description: Extension number of a call queue
+        editableMemberStatus:
+          type: boolean
+          description: Flag allow members to change their queue status
+    CallQueueMember:
+      type: object
+      description: Call queue member information
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension
+        name:
+          type: string
+          description: Extension full name
+        extensionNumber:
+          type: string
+          description: Extension number
+        site:
+          $ref: '#/components/schemas/SiteResource'
+    AccountPresenceEventBody:
+      type: object
+      description: Notification payload body
+      properties:
+        extensionId:
+          type: string
+          description: Internal identifier of an extension. Optional parameter
+          default: '~'
+        telephonyStatus:
+          type: string
+          description: Telephony presence status. Returned if telephony status is changed.
+          enum:
+          - NoCall
+          - CallConnected
+          - Ringing
+          - OnHold
+          - ParkedCall
+        sequence:
+          type: integer
+          format: int32
+          description: Order number of a notification to state the chronology
+        presenceStatus:
+          type: string
+          description: Aggregated presence status, calculated from a number of sources
+          enum:
+          - Offline
+          - Busy
+          - Available
+        userStatus:
+          type: string
+          description: User-defined presence status (as previously published by the user)
+          enum:
+          - Offline
+          - Busy
+          - Available
+        dndStatus:
+          type: string
+          description: Extended DnD (Do not Disturb) status
+          enum:
+          - TakeAllCalls
+          - DoNotAcceptAnyCalls
+          - DoNotAcceptDepartmentCalls
+          - TakeDepartmentCallsOnly
+        allowSeeMyPresence:
+          type: boolean
+          description: If `true` enables other extensions to see the extension presence status
+        ringOnMonitoredCall:
+          type: boolean
+          description: If `true` enables to ring extension phone, if any user monitored by this extension is ringing
+        pickUpCallsOnHold:
+          type: boolean
+          description: If `true` enables the extension user to pick up a monitored line on hold
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
+    CallQueuePresenceEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        event:
+          type: string
+          description: Event filter name
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when this notification was sent in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example *2016-03-10T18:07:52.534Z*
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        body:
+          $ref: '#/components/schemas/CallQueuePresenceEventBody'
+    ExtensionCallQueueUpdatePresence:
+      type: object
+      properties:
+        callQueue:
+          $ref: '#/components/schemas/CallQueueId'
+        acceptCalls:
+          type: boolean
+          description: Call queue agent availability for calls of this queue
+    UnifiedPresenceMeeting:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Meeting status calculated from all user`s meetings
+          enum:
+          - NoMeeting
+          - InMeeting
+      description: Returned if *Meetings* feature is switched on
+    CallQueueMemberPresence:
+      type: object
+      properties:
+        member:
+          $ref: '#/components/schemas/CallQueueMember'
+        acceptQueueCalls:
+          type: boolean
+          description: Private member telephony availability status applied to calls of all queues
+        acceptCurrentQueueCalls:
+          type: boolean
+          description: Call queue member availability in this particular queue
+    ActiveCallInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        direction:
+          type: string
+          enum:
+          - Inbound
+          - Outbound
+        queueCall:
+          type: boolean
+          description: Identifies if a call belongs to the call queue
+        from:
+          type: string
+          description: Phone number or extension number of a caller. For GCM transport type '_from' property should be used
+        fromName:
+          type: string
+          description: Name of a caller
+        to:
+          type: string
+          description: Phone number or extension number of a callee
+        toName:
+          type: string
+          description: Name of a callee
+        startTime:
+          type: string
+          format: date-time
+          description: Time when the call is actually started
+        telephonyStatus:
+          type: string
+          description: Telephony presence status
+          enum:
+          - NoCall
+          - CallConnected
+          - Ringing
+          - OnHold
+          - ParkedCall
+        sipData:
+          $ref: '#/components/schemas/DetailedCallInfo'
+        sessionId:
+          type: string
+        telephonySessionId:
+          type: string
+          description: Telephony identifier of a call session
+        onBehalfOf:
+          type: string
+          description: Extension ID of the call owner on whose behalf a call is performed
+        partyId:
+          type: string
+          description: Internal identifier of a call party
+        terminationType:
+          type: string
+        callInfo:
+          $ref: '#/components/schemas/CallInfoCQ'
+    PrimaryCQInfo:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Call information to be displayed as 'Line 1' for a call queue call session
+          enum:
+          - PhoneNumberLabel
+          - PhoneNumber
+          - QueueExtension
+          - QueueName
+          - CallerIdName
+          - CallerIdNumber
+          - None
+        value:
+          type: string
+          description: Call information value
+      description: Primary call session information. Supported for Call Queues only
+    CallQueueId:
+      type: object
+      description: Call queue information
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a call queue
+    GetPresenceExtensionInfo:
+      type: object
+      description: Information on extension, for which this presence data is returned
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        extensionNumber:
+          type: string
+          description: Extension number (usually 3 or 4 digits)
+    DetailedExtensionPresenceEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        event:
+          type: string
+          description: Event filter name
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when this notification was sent in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example *2016-03-10T18:07:52.534Z*
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        body:
+          $ref: '#/components/schemas/DetailedExtensionPresenceEventBody'
+    ActiveCallInfoWithoutSIP:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a call
+        direction:
+          type: string
+          description: Call direction
+          enum:
+          - Inbound
+          - Outbound
+        queueCall:
+          type: boolean
+          description: Identifies if a call belongs to the call queue
+        from:
+          type: string
+          description: Phone number or extension number of a caller. For GCM transport type '_from' property should be used
+        fromName:
+          type: string
+          description: Name of a caller
+        to:
+          type: string
+          description: Phone number or extension number of a callee
+        toName:
+          type: string
+          description: Name of a callee
+        partyId:
+          type: string
+          description: Internal identifier of a call party
+        startTime:
+          type: string
+          format: date-time
+          description: Time when the call is actually started
+        sessionId:
+          type: string
+          description: Internal identifier of a call session
+        telephonySessionId:
+          type: string
+          description: Telephony identifier of a call session
+        telephonyStatus:
+          type: string
+          description: Telephony call status
+          enum:
+          - NoCall
+          - CallConnected
+          - Ringing
+          - OnHold
+          - ParkedCall
+        terminationType:
+          type: string
+          description: Type of call termination. Supported for calls in 'NoCall' status. If the returned termination type is 'intermediate' it means the call is not actually ended, the connection is established on one of the devices
+          enum:
+          - final
+          - intermediate
+        callInfo:
+          $ref: '#/components/schemas/CallInfoCQ'
+    UpdateUnifiedPresenceGlip:
+      type: object
+      properties:
+        visibility:
+          type: string
+          description: Visibility setting allowing other users to see Glip presence status
+          enum:
+          - Visible
+          - Invisible
+        availability:
+          type: string
+          description: Availability setting specifying whether to receive Glip notifications or not
+          enum:
+          - Available
+          - DND
+    UnifiedPresenceListEntry:
+      type: object
+      properties:
+        resourceId:
+          type: string
+          description: Internal identifier of the resource
+        status:
+          type: integer
+          format: int32
+          description: Status code of resource retrieval
+        body:
+          $ref: '#/components/schemas/UnifiedPresence'
+    CallQueueMemberId:
+      type: object
+      description: Call queue member information
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension - queue member
+    ExtensionCallQueueUpdatePresenceList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtensionCallQueueUpdatePresence'
+    APNSInfo:
+      type: object
+      description: APNS (Apple Push Notification Service) information
+      properties:
+        aps:
+          $ref: '#/components/schemas/APSInfo'
+    ExtensionPresenceEventBody:
+      type: object
+      properties:
+        extensionId:
+          type: string
+          description: Internal identifier of an extension. Optional parameter
+          default: '~'
+        telephonyStatus:
+          type: string
+          description: Telephony presence status. Returned if telephony status is changed.
+          enum:
+          - NoCall
+          - CallConnected
+          - Ringing
+          - OnHold
+          - ParkedCall
+        sequence:
+          type: integer
+          format: int32
+          description: Order number of a notification to state the chronology
+        presenceStatus:
+          type: string
+          description: Aggregated presence status, calculated from a number of sources
+          enum:
+          - Offline
+          - Busy
+          - Available
+        userStatus:
+          type: string
+          description: User-defined presence status (as previously published by the user)
+          enum:
+          - Offline
+          - Busy
+          - Available
+        dndStatus:
+          type: string
+          description: Extended DnD (Do not Disturb) status
+          enum:
+          - TakeAllCalls
+          - DoNotAcceptAnyCalls
+          - DoNotAcceptDepartmentCalls
+          - TakeDepartmentCallsOnly
+        allowSeeMyPresence:
+          type: boolean
+          description: If `true` enables other extensions to see the extension presence status
+        ringOnMonitoredCall:
+          type: boolean
+          description: If `true` enables to ring extension phone, if any user monitored by this extension is ringing
+        pickUpCallsOnHold:
+          type: boolean
+          description: If `true` enables the extension user to pick up a monitored line on hold
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
+    CallQueueUpdatePresence:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallQueueUpdateMemberPresence'
+    CallQueuePresence:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallQueueMemberPresence'
+    IncomingCallEvent:
+      type: object
+      properties:
+        aps:
+          $ref: '#/components/schemas/APSInfo'
+        event:
+          type: string
+          description: Event filter name
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        timestamp:
+          type: string
+          format: date-time
+          description: The timestamp of a call action in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example 2016-03-10T18:07:52.534Z
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+          default: '~'
+        action:
+          type: string
+          description: Calling action, for example 'StartRing'
+        sessionId:
+          type: string
+          description: Identifier of a call session
+        serverId:
+          type: string
+          description: Identifier of a server
+        from:
+          type: string
+          description: Phone number of a caller. For GCM transport type '_from' property should be used
+        fromName:
+          type: string
+          description: Caller name
+        to:
+          type: string
+          description: Phone number of a callee
+        toName:
+          type: string
+          description: Callee name
+        sid:
+          type: string
+          description: Unique identifier of a session
+        toUrl:
+          type: string
+          description: SIP proxy registration name
+        srvLvl:
+          type: string
+          description: User data
+        srvLvlExt:
+          type: string
+          description: User data
+        recUrl:
+          type: string
+          description: File containing recorded caller name
+        pn_ttl:
+          type: integer
+          format: int32
+          description: Notification lifetime value in seconds, the default value is 30 seconds
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
+    ExtensionCallQueuePresence:
+      type: object
+      properties:
+        callQueue:
+          $ref: '#/components/schemas/PresenceCallQueueInfo'
+        acceptCalls:
+          type: boolean
+          description: Call queue agent availability for calls of this queue
+    PresencePagingInfo:
+      type: object
+      description: Information on paging
+      properties:
+        page:
+          type: integer
+          format: int32
+          description: The current page number. 1-indexed, so the first page is 1 by default. May be omitted if result is empty (because non-existent page was specified or perPage=0 was requested)
+        perPage:
+          type: integer
+          format: int32
+          description: Current page size, describes how many items are in each page. Default value is 100. Maximum value is 1000. If perPage value in the request is greater than 1000, the maximum value (1000) is applied
+        pageStart:
+          type: integer
+          format: int32
+          description: The zero-based number of the first element on the current page. Omitted if the page is omitted or result is empty
+        pageEnd:
+          type: integer
+          format: int32
+          description: The zero-based index of the last element on the current page. Omitted if the page is omitted or result is empty
+        totalPages:
+          type: integer
+          format: int32
+          description: The total number of pages in a dataset. May be omitted for some resources due to performance reasons
+        totalElements:
+          type: integer
+          format: int32
+          description: The total number of elements in a dataset. May be omitted for some resource due to performance reasons
+    UnifiedPresenceGlip:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Glip connection status calculated from all user's apps. Returned always for the requester's extension; returned for another users if their glip visibility is set to 'Visible'
+          enum:
+          - Offline
+          - Online
+        visibility:
+          type: string
+          description: Visibility setting allowing other users to see the user's Glip presence status; returned only for requester's extension
+          enum:
+          - Visible
+          - Invisible
+        availability:
+          type: string
+          description: Shows whether user wants to receive Glip notifications or not.
+          enum:
+          - Available
+          - DND
+      description: Returned if *Glip* feature is switched on
+    UnifiedPresenceList:
+      type: array
+      items:
+        $ref: '#/components/schemas/UnifiedPresenceListEntry'
     GetPresenceInfo:
       type: object
       properties:
@@ -421,107 +1249,33 @@ components:
           description: Information on active calls
           items:
             $ref: '#/components/schemas/ActiveCallInfo'
-    PresencePagingInfo:
-      type: object
-      description: Information on paging
-      properties:
-        page:
-          type: integer
-          format: int32
-          description: The current page number. 1-indexed, so the first page is 1 by default. May be omitted if result is empty (because non-existent page was specified or perPage=0 was requested)
-        perPage:
-          type: integer
-          format: int32
-          description: Current page size, describes how many items are in each page. Default value is 100. Maximum value is 1000. If perPage value in the request is greater than 1000, the maximum value (1000) is applied
-        pageStart:
-          type: integer
-          format: int32
-          description: The zero-based number of the first element on the current page. Omitted if the page is omitted or result is empty
-        pageEnd:
-          type: integer
-          format: int32
-          description: The zero-based index of the last element on the current page. Omitted if the page is omitted or result is empty
-        totalPages:
-          type: integer
-          format: int32
-          description: The total number of pages in a dataset. May be omitted for some resources due to performance reasons
-        totalElements:
-          type: integer
-          format: int32
-          description: The total number of elements in a dataset. May be omitted for some resource due to performance reasons
-    UnifiedPresenceGlip:
+    DetailedCallInfo:
       type: object
       properties:
-        status:
+        callId:
           type: string
-          description: Glip connection status calculated from all user's apps. Returned always for the requester's extension; returned for another users if their glip visibility is set to 'Visible'
-          enum:
-          - Offline
-          - Online
-        visibility:
+        toTag:
           type: string
-          description: Visibility setting allowing other users to see the user's Glip presence status; returned only for requester's extension
-          enum:
-          - Visible
-          - Invisible
+        fromTag:
+          type: string
+        remoteUri:
+          format: uri
+          type: string
+        localUri:
+          format: uri
+          type: string
+        rcSessionId:
+          type: string
+    UpdateUnifiedPresenceTelephony:
+      type: object
+      properties:
         availability:
           type: string
-          description: Shows whether user wants to receive Glip notifications or not.
+          description: Telephony DND status
           enum:
-          - Available
-          - DND
-      description: Returned if *Glip* feature is switched on
-    ExtensionCallQueuePresence:
-      type: object
-      properties:
-        callQueue:
-          $ref: '#/components/schemas/PresenceCallQueueInfo'
-        acceptCalls:
-          type: boolean
-          description: Call queue agent availability for calls of this queue
-    CallQueueMember:
-      type: object
-      description: Call queue member information
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an extension
-        name:
-          type: string
-          description: Extension full name
-        extensionNumber:
-          type: string
-          description: Extension number
-        site:
-          $ref: '#/components/schemas/SiteResource'
-    SiteResource:
-      type: object
-      description: Site extension information
-      properties:
-        id:
-          type: string
-          description: Site extension identifier
-        name:
-          type: string
-          description: Site extension name
-    ExtensionPresenceEvent:
-      type: object
-      properties:
-        uuid:
-          type: string
-          description: Universally unique identifier of a notification
-        event:
-          type: string
-          description: Event filter name
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp when this notification was sent in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example *2016-03-10T18:07:52.534Z*
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        body:
-          $ref: '#/components/schemas/ExtensionPresenceEventBody'
+          - TakeAllCalls
+          - DoNotAcceptAnyCalls
+          - DoNotAcceptQueueCalls
     PresenceInfoRequest:
       type: object
       properties:
@@ -559,30 +1313,25 @@ components:
           - All
           - None
           - PermittedUsers
-    DetailedExtensionPresenceEvent:
+    PresenceNavigationInfoURI:
       type: object
+      description: Canonical URI for the corresponding page of the list
       properties:
-        uuid:
+        uri:
           type: string
-          description: Universally unique identifier of a notification
-        event:
-          type: string
-          description: Event filter name
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp when this notification was sent in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example *2016-03-10T18:07:52.534Z*
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        body:
-          $ref: '#/components/schemas/DetailedExtensionPresenceEventBody'
-    APNSInfo:
+          format: uri
+    PresenceNavigationInfo:
       type: object
-      description: APNS (Apple Push Notification Service) information
+      description: Information on navigation
       properties:
-        aps:
-          $ref: '#/components/schemas/APSInfo'
+        firstPage:
+          $ref: '#/components/schemas/PresenceNavigationInfoURI'
+        nextPage:
+          $ref: '#/components/schemas/PresenceNavigationInfoURI'
+        previousPage:
+          $ref: '#/components/schemas/PresenceNavigationInfoURI'
+        lastPage:
+          $ref: '#/components/schemas/PresenceNavigationInfoURI'
     APSInfo:
       type: object
       description: APS (Apple Push Service) information/ priority data
@@ -591,180 +1340,88 @@ components:
           type: integer
           format: int32
           description: If the value is '1' then notification is turned on even if the application is in background
-    GetPresenceExtensionInfo:
-      type: object
-      description: Information on extension, for which this presence data is returned
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: Internal identifier of an extension
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of an extension
-        extensionNumber:
-          type: string
-          description: Extension number (usually 3 or 4 digits)
-    PrimaryCQInfo:
+    UnifiedPresence:
       type: object
       properties:
-        type:
+        status:
           type: string
-          description: Call information to be displayed as 'Line 1' for a call queue call session
-          enum:
-          - PhoneNumberLabel
-          - PhoneNumber
-          - QueueExtension
-          - QueueName
-          - CallerIdName
-          - CallerIdNumber
-          - None
-        value:
-          type: string
-          description: Call information value
-      description: Primary call session information. Supported for Call Queues only
-    AdditionalCQInfo:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Call information to be displayed as 'Line 2' for a call queue call session
-          enum:
-          - PhoneNumberLabel
-          - PhoneNumber
-          - QueueExtension
-          - QueueName
-          - CallerIdName
-          - CallerIdNumber
-          - None
-        value:
-          type: string
-          description: Call information value
-      description: Additional call session information. Supported for Call Queues only
-    CallQueueUpdateMemberPresence:
-      type: object
-      properties:
-        member:
-          $ref: '#/components/schemas/CallQueueMemberId'
-        acceptCurrentQueueCalls:
-          type: boolean
-          description: Call queue member availability for calls of this queue
-    CallQueuePresenceEventBody:
-      type: object
-      description: Notification payload body
-      properties:
-        extensionId:
-          type: string
-          description: Agent extension ID
-        callQueueId:
-          type: string
-          description: Call queue extension ID
-        acceptCalls:
-          type: boolean
-          description: Call queue agent availability for calls of this queue
-    ActiveCallInfo:
-      type: object
-      properties:
-        id:
-          type: string
-        direction:
-          type: string
-          enum:
-          - Inbound
-          - Outbound
-        queueCall:
-          type: boolean
-          description: Identifies if a call belongs to the call queue
-        from:
-          type: string
-          description: Phone number or extension number of a caller. For GCM transport type '_from' property should be used
-        fromName:
-          type: string
-          description: Name of a caller
-        to:
-          type: string
-          description: Phone number or extension number of a callee
-        toName:
-          type: string
-          description: Name of a callee
-        startTime:
-          type: string
-          format: date-time
-          description: Time when the call is actually started
-        telephonyStatus:
-          type: string
-          description: Telephony presence status
-          enum:
-          - NoCall
-          - CallConnected
-          - Ringing
-          - OnHold
-          - ParkedCall
-        sipData:
-          $ref: '#/components/schemas/DetailedCallInfo'
-        sessionId:
-          type: string
-        telephonySessionId:
-          type: string
-          description: Telephony identifier of a call session
-        onBehalfOf:
-          type: string
-          description: Extension ID of the call owner on whose behalf a call is performed
-        partyId:
-          type: string
-          description: Internal identifier of a call party
-        terminationType:
-          type: string
-        callInfo:
-          $ref: '#/components/schemas/CallInfoCQ'
-    CallQueueId:
-      type: object
-      description: Call queue information
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a call queue
-    UpdateUnifiedPresenceGlip:
-      type: object
-      properties:
-        visibility:
-          type: string
-          description: Visibility setting allowing other users to see Glip presence status
-          enum:
-          - Visible
-          - Invisible
-        availability:
-          type: string
-          description: Availability setting specifying whether to receive Glip notifications or not
+          description: Aggregated presence status of the user
           enum:
           - Available
+          - Offline
           - DND
-    CallQueuePresence:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallQueueMemberPresence'
-    CallQueuePresenceEvent:
+          - Busy
+        glip:
+          $ref: '#/components/schemas/UnifiedPresenceGlip'
+        telephony:
+          $ref: '#/components/schemas/UnifiedPresenceTelephony'
+        meeting:
+          $ref: '#/components/schemas/UnifiedPresenceMeeting'
+    MissedCallEvent:
       type: object
       properties:
         uuid:
           type: string
           description: Universally unique identifier of a notification
+        pn_apns:
+          $ref: '#/components/schemas/APNSInfo'
         event:
           type: string
           description: Event filter name
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp when this notification was sent in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example *2016-03-10T18:07:52.534Z*
         subscriptionId:
           type: string
           description: Internal identifier of a subscription
-        body:
-          $ref: '#/components/schemas/CallQueuePresenceEventBody'
+        timestamp:
+          type: string
+          format: date-time
+          description: The timestamp of a call action in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example 2016-03-10T18:07:52.534Z
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+          default: '~'
+        action:
+          type: string
+          description: Calling action, for example 'StartRing'
+        sessionId:
+          type: string
+          description: Identifier of a call session
+        serverId:
+          type: string
+          description: Identifier of a server
+        from:
+          type: string
+          description: Phone number of a caller. For GCM transport type '_from' property should be used
+        fromName:
+          type: string
+          description: Caller name
+        to:
+          type: string
+          description: Phone number of a callee
+        toName:
+          type: string
+          description: Callee name
+        sid:
+          type: string
+          description: Unique identifier of a session
+        toUrl:
+          type: string
+          description: SIP proxy registration name
+        srvLvl:
+          type: string
+          description: User data
+        srvLvlExt:
+          type: string
+          description: User data
+        recUrl:
+          type: string
+          description: File containing recorded caller name
+        pn_ttl:
+          type: integer
+          format: int32
+          description: Notification lifetime value in seconds, the default value is 30 seconds
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
     DetailedExtensionPresenceEventBody:
       type: object
       description: Notification payload body
@@ -835,668 +1492,6 @@ components:
         ownerId:
           type: string
           description: Internal identifier of a subscription owner extension
-    ExtensionCallQueuePresenceList:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExtensionCallQueuePresence'
-    IncomingCallEvent:
-      type: object
-      properties:
-        aps:
-          $ref: '#/components/schemas/APSInfo'
-        event:
-          type: string
-          description: Event filter name
-        uuid:
-          type: string
-          description: Universally unique identifier of a notification
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        timestamp:
-          type: string
-          format: date-time
-          description: The timestamp of a call action in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example 2016-03-10T18:07:52.534Z
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-          default: '~'
-        action:
-          type: string
-          description: Calling action, for example 'StartRing'
-        sessionId:
-          type: string
-          description: Identifier of a call session
-        serverId:
-          type: string
-          description: Identifier of a server
-        from:
-          type: string
-          description: Phone number of a caller. For GCM transport type '_from' property should be used
-        fromName:
-          type: string
-          description: Caller name
-        to:
-          type: string
-          description: Phone number of a callee
-        toName:
-          type: string
-          description: Callee name
-        sid:
-          type: string
-          description: Unique identifier of a session
-        toUrl:
-          type: string
-          description: SIP proxy registration name
-        srvLvl:
-          type: string
-          description: User data
-        srvLvlExt:
-          type: string
-          description: User data
-        recUrl:
-          type: string
-          description: File containing recorded caller name
-        pn_ttl:
-          type: integer
-          format: int32
-          description: Notification lifetime value in seconds, the default value is 30 seconds
-        ownerId:
-          type: string
-          description: Internal identifier of a subscription owner extension
-    UnifiedPresenceMeeting:
-      type: object
-      properties:
-        status:
-          type: string
-          description: Meeting status calculated from all user`s meetings
-          enum:
-          - NoMeeting
-          - InMeeting
-      description: Returned if *Meetings* feature is switched on
-    CallQueueMemberId:
-      type: object
-      description: Call queue member information
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an extension - queue member
-    UnifiedPresence:
-      type: object
-      properties:
-        status:
-          type: string
-          description: Aggregated presence status of the user
-          enum:
-          - Available
-          - Offline
-          - DND
-          - Busy
-        glip:
-          $ref: '#/components/schemas/UnifiedPresenceGlip'
-        telephony:
-          $ref: '#/components/schemas/UnifiedPresenceTelephony'
-        meeting:
-          $ref: '#/components/schemas/UnifiedPresenceMeeting'
-    UnifiedPresenceList:
-      type: array
-      items:
-        $ref: '#/components/schemas/UnifiedPresenceListEntry'
-    MissedCallEvent:
-      type: object
-      properties:
-        uuid:
-          type: string
-          description: Universally unique identifier of a notification
-        pn_apns:
-          $ref: '#/components/schemas/APNSInfo'
-        event:
-          type: string
-          description: Event filter name
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        timestamp:
-          type: string
-          format: date-time
-          description: The timestamp of a call action in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example 2016-03-10T18:07:52.534Z
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-          default: '~'
-        action:
-          type: string
-          description: Calling action, for example 'StartRing'
-        sessionId:
-          type: string
-          description: Identifier of a call session
-        serverId:
-          type: string
-          description: Identifier of a server
-        from:
-          type: string
-          description: Phone number of a caller. For GCM transport type '_from' property should be used
-        fromName:
-          type: string
-          description: Caller name
-        to:
-          type: string
-          description: Phone number of a callee
-        toName:
-          type: string
-          description: Callee name
-        sid:
-          type: string
-          description: Unique identifier of a session
-        toUrl:
-          type: string
-          description: SIP proxy registration name
-        srvLvl:
-          type: string
-          description: User data
-        srvLvlExt:
-          type: string
-          description: User data
-        recUrl:
-          type: string
-          description: File containing recorded caller name
-        pn_ttl:
-          type: integer
-          format: int32
-          description: Notification lifetime value in seconds, the default value is 30 seconds
-        ownerId:
-          type: string
-          description: Internal identifier of a subscription owner extension
-    CallQueueUpdatePresence:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallQueueUpdateMemberPresence'
-    PresenceCallQueueInfo:
-      type: object
-      description: Call queue information
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a call queue
-        name:
-          type: string
-          description: Name of a call queue
-        extensionNumber:
-          type: string
-          description: Extension number of a call queue
-        editableMemberStatus:
-          type: boolean
-          description: Flag allow members to change their queue status
-    CallQueueMemberPresence:
-      type: object
-      properties:
-        member:
-          $ref: '#/components/schemas/CallQueueMember'
-        acceptQueueCalls:
-          type: boolean
-          description: Private member telephony availability status applied to calls of all queues
-        acceptCurrentQueueCalls:
-          type: boolean
-          description: Call queue member availability in this particular queue
-    AccountPresenceInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of account presence resource
-        records:
-          type: array
-          description: List of Prompts
-          items:
-            $ref: '#/components/schemas/GetPresenceInfo'
-        navigation:
-          $ref: '#/components/schemas/PresenceNavigationInfo'
-        paging:
-          $ref: '#/components/schemas/PresencePagingInfo'
-    PresenceNavigationInfoURI:
-      type: object
-      description: Canonical URI for the corresponding page of the list
-      properties:
-        uri:
-          type: string
-          format: uri
-    ExtensionCallQueueUpdatePresenceList:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExtensionCallQueueUpdatePresence'
-    DetailedCallInfo:
-      type: object
-      properties:
-        callId:
-          type: string
-        toTag:
-          type: string
-        fromTag:
-          type: string
-        remoteUri:
-          format: uri
-          type: string
-        localUri:
-          format: uri
-          type: string
-        rcSessionId:
-          type: string
-    ExtensionCallQueueUpdatePresence:
-      type: object
-      properties:
-        callQueue:
-          $ref: '#/components/schemas/CallQueueId'
-        acceptCalls:
-          type: boolean
-          description: Call queue agent availability for calls of this queue
-    DetailedExtensionPresenceWithSIPEvent:
-      type: object
-      properties:
-        uuid:
-          type: string
-          description: Universally unique identifier of a notification
-        event:
-          type: string
-          description: Event filter name
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp when this notification was sent in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example *2016-03-10T18:07:52.534Z*
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        body:
-          $ref: '#/components/schemas/DetailedExtensionPresenceWithSIPEventBody'
-    PresenceInfoResponse:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the presence resource
-        userStatus:
-          type: string
-          enum:
-          - Offline
-          - Busy
-          - Available
-        dndStatus:
-          type: string
-          enum:
-          - TakeAllCalls
-          - DoNotAcceptDepartmentCalls
-          - TakeDepartmentCallsOnly
-          - DoNotAcceptAnyCalls
-          - Unknown
-        message:
-          maxLength: 75
-          minLength: 0
-          type: string
-        allowSeeMyPresence:
-          type: boolean
-          default: false
-        callerIdVisibility:
-          type: string
-          description: "Configures the user presence visibility. When the `allowSeeMyPresence` parameter is set to `true`, \nthe following visibility options are supported via this parameter - All, None, PermittedUsers\n"
-          enum:
-          - All
-          - None
-          - PermittedUsers
-        ringOnMonitoredCall:
-          type: boolean
-          default: false
-        pickUpCallsOnHold:
-          type: boolean
-          default: false
-        activeCalls:
-          type: array
-          items:
-            $ref: '#/components/schemas/ActiveCallInfo'
-        extension:
-          $ref: '#/components/schemas/GetPresenceExtensionInfo'
-        meetingStatus:
-          type: string
-          description: Meetings presence status
-          enum:
-          - Connected
-          - Disconnected
-        telephonyStatus:
-          type: string
-          description: Telephony presence status. Returned if telephony status is changed
-          enum:
-          - NoCall
-          - CallConnected
-          - Ringing
-          - OnHold
-          - ParkedCall
-        presenceStatus:
-          type: string
-          description: Aggregated presence status, calculated from a number of sources
-          enum:
-          - Offline
-          - Busy
-          - Available
-    UpdateUnifiedPresence:
-      type: object
-      properties:
-        glip:
-          $ref: '#/components/schemas/UpdateUnifiedPresenceGlip'
-        telephony:
-          $ref: '#/components/schemas/UpdateUnifiedPresenceTelephony'
-    ActiveCallInfoWithoutSIP:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a call
-        direction:
-          type: string
-          description: Call direction
-          enum:
-          - Inbound
-          - Outbound
-        queueCall:
-          type: boolean
-          description: Identifies if a call belongs to the call queue
-        from:
-          type: string
-          description: Phone number or extension number of a caller. For GCM transport type '_from' property should be used
-        fromName:
-          type: string
-          description: Name of a caller
-        to:
-          type: string
-          description: Phone number or extension number of a callee
-        toName:
-          type: string
-          description: Name of a callee
-        partyId:
-          type: string
-          description: Internal identifier of a call party
-        startTime:
-          type: string
-          format: date-time
-          description: Time when the call is actually started
-        sessionId:
-          type: string
-          description: Internal identifier of a call session
-        telephonySessionId:
-          type: string
-          description: Telephony identifier of a call session
-        telephonyStatus:
-          type: string
-          description: Telephony call status
-          enum:
-          - NoCall
-          - CallConnected
-          - Ringing
-          - OnHold
-          - ParkedCall
-        terminationType:
-          type: string
-          description: Type of call termination. Supported for calls in 'NoCall' status. If the returned termination type is 'intermediate' it means the call is not actually ended, the connection is established on one of the devices
-          enum:
-          - final
-          - intermediate
-        callInfo:
-          $ref: '#/components/schemas/CallInfoCQ'
-    UnifiedPresenceListEntry:
-      type: object
-      properties:
-        resourceId:
-          type: string
-          description: Internal identifier of the resource
-        status:
-          type: integer
-          format: int32
-          description: Status code of resource retrieval
-        body:
-          $ref: '#/components/schemas/UnifiedPresence'
-    UpdateUnifiedPresenceTelephony:
-      type: object
-      properties:
-        availability:
-          type: string
-          description: Telephony DND status
-          enum:
-          - TakeAllCalls
-          - DoNotAcceptAnyCalls
-          - DoNotAcceptQueueCalls
-    DetailedExtensionPresenceWithSIPEventBody:
-      type: object
-      description: Notification payload body
-      properties:
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-          default: '~'
-        telephonyStatus:
-          type: string
-          description: Telephony presence status. Returned if telephony status is changed.
-          enum:
-          - NoCall
-          - CallConnected
-          - Ringing
-          - OnHold
-          - ParkedCall
-        activeCalls:
-          type: array
-          description: List of the latest 7 active calls on extension
-          items:
-            $ref: '#/components/schemas/ActiveCallInfo'
-        sequence:
-          type: integer
-          format: int32
-          description: Order number of a notification to state the chronology
-        presenceStatus:
-          type: string
-          description: Aggregated presence status, calculated from a number of sources
-          enum:
-          - Offline
-          - Busy
-          - Available
-        userStatus:
-          type: string
-          description: User-defined presence status (as previously published by the user)
-          enum:
-          - Offline
-          - Busy
-          - Available
-        meetingStatus:
-          type: string
-          description: Meetings presence status
-          enum:
-          - Connected
-          - Disconnected
-        dndStatus:
-          type: string
-          description: Extended DnD (Do not Disturb) status
-          enum:
-          - TakeAllCalls
-          - DoNotAcceptAnyCalls
-          - DoNotAcceptDepartmentCalls
-          - TakeDepartmentCallsOnly
-        allowSeeMyPresence:
-          type: boolean
-          description: If `true` enables other extensions to see the extension presence status
-        ringOnMonitoredCall:
-          type: boolean
-          description: If `true` enables to ring extension phone, if any user monitored by this extension is ringing
-        pickUpCallsOnHold:
-          type: boolean
-          description: If `true` enables the extension user to pick up a monitored line on hold
-        totalActiveCalls:
-          type: integer
-          format: int32
-          description: Total number of active calls on extension at the present moment
-        ownerId:
-          type: string
-          description: Internal identifier of a subscription owner extension
-    AccountPresenceEventBody:
-      type: object
-      description: Notification payload body
-      properties:
-        extensionId:
-          type: string
-          description: Internal identifier of an extension. Optional parameter
-          default: '~'
-        telephonyStatus:
-          type: string
-          description: Telephony presence status. Returned if telephony status is changed.
-          enum:
-          - NoCall
-          - CallConnected
-          - Ringing
-          - OnHold
-          - ParkedCall
-        sequence:
-          type: integer
-          format: int32
-          description: Order number of a notification to state the chronology
-        presenceStatus:
-          type: string
-          description: Aggregated presence status, calculated from a number of sources
-          enum:
-          - Offline
-          - Busy
-          - Available
-        userStatus:
-          type: string
-          description: User-defined presence status (as previously published by the user)
-          enum:
-          - Offline
-          - Busy
-          - Available
-        dndStatus:
-          type: string
-          description: Extended DnD (Do not Disturb) status
-          enum:
-          - TakeAllCalls
-          - DoNotAcceptAnyCalls
-          - DoNotAcceptDepartmentCalls
-          - TakeDepartmentCallsOnly
-        allowSeeMyPresence:
-          type: boolean
-          description: If `true` enables other extensions to see the extension presence status
-        ringOnMonitoredCall:
-          type: boolean
-          description: If `true` enables to ring extension phone, if any user monitored by this extension is ringing
-        pickUpCallsOnHold:
-          type: boolean
-          description: If `true` enables the extension user to pick up a monitored line on hold
-        ownerId:
-          type: string
-          description: Internal identifier of a subscription owner extension
-    PresenceNavigationInfo:
-      type: object
-      description: Information on navigation
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PresenceNavigationInfoURI'
-        nextPage:
-          $ref: '#/components/schemas/PresenceNavigationInfoURI'
-        previousPage:
-          $ref: '#/components/schemas/PresenceNavigationInfoURI'
-        lastPage:
-          $ref: '#/components/schemas/PresenceNavigationInfoURI'
-    CallInfoCQ:
-      type: object
-      description: Primary/additional CQ information
-      properties:
-        primary:
-          $ref: '#/components/schemas/PrimaryCQInfo'
-        additional:
-          $ref: '#/components/schemas/AdditionalCQInfo'
-    ExtensionPresenceEventBody:
-      type: object
-      properties:
-        extensionId:
-          type: string
-          description: Internal identifier of an extension. Optional parameter
-          default: '~'
-        telephonyStatus:
-          type: string
-          description: Telephony presence status. Returned if telephony status is changed.
-          enum:
-          - NoCall
-          - CallConnected
-          - Ringing
-          - OnHold
-          - ParkedCall
-        sequence:
-          type: integer
-          format: int32
-          description: Order number of a notification to state the chronology
-        presenceStatus:
-          type: string
-          description: Aggregated presence status, calculated from a number of sources
-          enum:
-          - Offline
-          - Busy
-          - Available
-        userStatus:
-          type: string
-          description: User-defined presence status (as previously published by the user)
-          enum:
-          - Offline
-          - Busy
-          - Available
-        dndStatus:
-          type: string
-          description: Extended DnD (Do not Disturb) status
-          enum:
-          - TakeAllCalls
-          - DoNotAcceptAnyCalls
-          - DoNotAcceptDepartmentCalls
-          - TakeDepartmentCallsOnly
-        allowSeeMyPresence:
-          type: boolean
-          description: If `true` enables other extensions to see the extension presence status
-        ringOnMonitoredCall:
-          type: boolean
-          description: If `true` enables to ring extension phone, if any user monitored by this extension is ringing
-        pickUpCallsOnHold:
-          type: boolean
-          description: If `true` enables the extension user to pick up a monitored line on hold
-        ownerId:
-          type: string
-          description: Internal identifier of a subscription owner extension
-    UnifiedPresenceTelephony:
-      type: object
-      properties:
-        status:
-          type: string
-          description: Telephony status calculated from all user's phone numbers. Returned always for the requester's extension; returned for another users if their telephony visibility is set to 'Visible'
-          enum:
-          - NoCall
-          - Ringing
-          - CallConnected
-          - OnHold
-          - ParkedCall
-        visibility:
-          type: string
-          description: Specifies if the user's phone presence status is visible to other users; returned only for requester's extension
-          enum:
-          - Visible
-          - Invisible
-        availability:
-          type: string
-          description: Telephony DND status. Returned if *DND* feature is switched on
-          enum:
-          - TakeAllCalls
-          - DoNotAcceptAnyCalls
-          - DoNotAcceptQueueCalls
-      description: Returned if *BLF* feature is switched on
     AccountPresenceEvent:
       type: object
       properties:
@@ -1515,6 +1510,23 @@ components:
           description: Internal identifier of a subscription
         body:
           $ref: '#/components/schemas/AccountPresenceEventBody'
+    SiteResource:
+      type: object
+      description: Site extension information
+      properties:
+        id:
+          type: string
+          description: Site extension identifier
+        name:
+          type: string
+          description: Site extension name
+    ExtensionCallQueuePresenceList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtensionCallQueuePresence'
   parameters:
     AccountId:
       name: accountId

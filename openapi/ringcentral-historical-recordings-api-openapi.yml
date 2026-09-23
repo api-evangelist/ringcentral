@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Historical Recordings API
+  title: RingCentral Historical Recordings API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -32,9 +32,7 @@ paths:
       summary: List Webinar Recordings (Admin)
       description: 'Returns the list of webinar recordings (Administrator''s interface).
 
-        The user must have "WebinarSettings" permission granted otherwise the API returns HTTP 403.
-
-        '
+        The user must have "WebinarSettings" permission granted otherwise the API returns HTTP 403.'
       operationId: rcwHistoryAdminListRecordings
       parameters:
       - name: nameFragment
@@ -74,9 +72,7 @@ paths:
       description: 'Returns the webinar recording by ID (Administrator''s interface).
 
 
-        The user must have "WebinarSettings" permission granted otherwise the API returns HTTP 403.
-
-        '
+        The user must have "WebinarSettings" permission granted otherwise the API returns HTTP 403.'
       operationId: rcwHistoryAdminGetRecording
       parameters:
       - $ref: '#/components/parameters/RecordingId'
@@ -102,9 +98,7 @@ paths:
       tags:
       - Historical Recordings
       summary: List Webinar Recordings
-      description: 'Returns the list of webinar recordings for a given webinar host user
-
-        '
+      description: Returns the list of webinar recordings for a given webinar host user
       operationId: rcwHistoryListRecordings
       parameters:
       - $ref: '#/components/parameters/CreationTimeFrom'
@@ -134,9 +128,7 @@ paths:
       summary: Get Webinar Recording
       description: 'Returns the webinar recording by ID (Webinar host''s interface).
 
-        This API also returns sharing link if sharing is enabled.
-
-        '
+        This API also returns sharing link if sharing is enabled.'
       operationId: rcwHistoryGetRecording
       parameters:
       - $ref: '#/components/parameters/RecordingId'
@@ -167,9 +159,7 @@ paths:
 
         If called by a webinar host, the API returns error (403) if recording downloading is prohibited by company settings.
 
-        The admin user who has "WebinarSettings" permission should be able to download recording regardless of current company settings.
-
-        '
+        The admin user who has "WebinarSettings" permission should be able to download recording regardless of current company settings.'
       operationId: rcwHistoryGetRecordingDownload
       parameters:
       - $ref: '#/components/parameters/RecordingMediaType'
@@ -193,68 +183,7 @@ paths:
       x-app-permission: ReadWebinars
 components:
   schemas:
-    WebinarHostModel:
-      type: object
-      required:
-      - host
-      properties:
-        host:
-          $ref: '#/components/schemas/HostModel'
-    RecordingItemModel:
-      allOf:
-      - $ref: '#/components/schemas/RecordingModel'
-      - type: object
-        properties:
-          session:
-            $ref: '#/components/schemas/SessionRefModel'
-    RecordingExtendedModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceBaseModel'
-      - $ref: '#/components/schemas/RecordingBaseModel'
-      - $ref: '#/components/schemas/RecordingSharingModel'
-    WebinarTitleModel:
-      type: object
-      required:
-      - title
-      properties:
-        title:
-          type: string
-          description: Webinar title
-          maxLength: 512
-          minLength: 1
-          example: All-Hands Webinar
-        description:
-          type: string
-          description: User-friendly description of the Webinar
-          maxLength: 4096
-          minLength: 0
-          example: Quarterly All-hands event to present recent news about our company to employees
-          default: ''
-    RecordingSharedStatusModel:
-      type: boolean
-      description: 'Indicates if Host or Admin has shared a recording.
-
-        Can be set to true only then recording status is ''Available''.
-
-        '
-      example: true
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    RecordingListResource:
+    RecordingAdminListResource:
       type: object
       required:
       - records
@@ -264,97 +193,9 @@ components:
           type: array
           minItems: 0
           items:
-            $ref: '#/components/schemas/RecordingItemModel'
+            $ref: '#/components/schemas/RecordingAdminModel'
         paging:
           $ref: '#/components/schemas/RcwPagingModel'
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    RecordingDownloadModel:
-      type: object
-      required:
-      - downloadUri
-      - downloadContentType
-      - downloadSize
-      properties:
-        downloadUri:
-          type: string
-          format: uri
-          description: Download URI (available only for webinar host or admin)
-        downloadContentType:
-          type: string
-          description: MIME type of the file to download.
-          enum:
-          - video/mp4
-          - audio/m4a
-          default: video/mp4
-        downloadSize:
-          type: integer
-          format: int64
-          description: Download file size in bytes
-          example: 20821092300
-    RecordingMediaType:
-      type: string
-      description: Recording file media type. 'Video' implies multiplexed audio and video. 'Audio' refers to audio only.
-      enum:
-      - Video
-      - Audio
-      example: Video
-      default: Video
-    HostModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwBaseContactModel'
-      - $ref: '#/components/schemas/RcwLinkedUserModel'
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    RecordingSharingModel:
-      type: object
-      required:
-      - recordingSharedUri
-      properties:
-        recordingSharedUri:
-          type: string
-          format: uri
-          readOnly: true
-          description: Shared URI of the recording. If a password was required to join a webinar, the URI should contain the password encoded
-          example: https://v.ringcentral.com/w/a/recording/de7yd8ew7yfsdfjh899843rgj?pw=a1b2c3d4
-    RcwDomainUserModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwUserModel'
-      - type: object
-        required:
-        - domain
-        properties:
-          domain:
-            type: string
-            description: Identity domain
-            enum:
-            - pbx
-            - ilm
-            default: pbx
     RcwResourceBaseModel:
       allOf:
       - $ref: '#/components/schemas/RcwImmutableResourceIdModel'
@@ -373,76 +214,13 @@ components:
             description: Object last modification time
             format: date-time
             readOnly: true
-    RcwUserModel:
+    WebinarHostModel:
       type: object
       required:
-      - userId
-      - accountId
+      - host
       properties:
-        userId:
-          type: string
-          maxLength: 256
-          description: User ID
-        accountId:
-          type: string
-          maxLength: 256
-          description: Account ID
-    RcwPagingForwardModel:
-      type: object
-      required:
-      - pageToken
-      - perPage
-      properties:
-        perPage:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: Number of items per page
-          example: 100
-        pageToken:
-          type: string
-          description: Current page token
-        nextPageToken:
-          type: string
-          description: Next page token (absent for the last page of the result set)
-        previousPageToken:
-          type: string
-          description: 'Previous page token (absent for the first page of the result set)
-
-            May be omitted if the result set does not support backward navigation.
-
-            '
-    RecordingBaseModel:
-      type: object
-      required:
-      - status
-      properties:
-        status:
-          $ref: '#/components/schemas/RecordingStatusModel'
-        failureReason:
-          $ref: '#/components/schemas/ApiError'
-        duration:
-          type: integer
-          format: int32
-          readOnly: true
-          minimum: 1
-          description: Recording duration in seconds
-          example: 3600
-        shared:
-          $ref: '#/components/schemas/RecordingSharedStatusModel'
-        sharedUriExpirationTime:
-          $ref: '#/components/schemas/RecordingSharedLinkExpiryModel'
-    RcwImmutableResourceIdModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal object ID
-          minLength: 1
-          maxLength: 20
-          example: '78654321'
-          readOnly: true
+        host:
+          $ref: '#/components/schemas/HostModel'
     RcwResourceIdModel:
       type: object
       properties:
@@ -452,98 +230,12 @@ components:
           minLength: 1
           maxLength: 20
           example: '78654321'
-    WebinarRefModel:
+    RecordingExtendedModel:
       allOf:
-      - $ref: '#/components/schemas/RcwResourceIdModel'
-      - $ref: '#/components/schemas/WebinarTitleModel'
-      - $ref: '#/components/schemas/WebinarHostModel'
-    RecordingStatusModel:
-      type: string
-      description: Recording status
-      enum:
-      - Processing
-      - Available
-      - Failed
-      - Purged
-      example: Available
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    SessionRefAdminModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceIdModel'
-      - $ref: '#/components/schemas/SessionMinimalModel'
-      - type: object
-        properties:
-          webinar:
-            $ref: '#/components/schemas/WebinarRefModel'
-    SessionRefModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceIdModel'
-      - $ref: '#/components/schemas/SessionMinimalModel'
-      - type: object
-        properties:
-          webinar:
-            $ref: '#/components/schemas/WebinarRefModel'
-    RecordingSharedLinkExpiryModel:
-      type: string
-      nullable: true
-      format: date-time
-      description: Time after which recording shared link cannot be accessed by recipients.
-      example: '2023-10-01T10:05:00.000Z'
-    RecordingAdminModel:
-      allOf:
-      - $ref: '#/components/schemas/RecordingItemModel'
-      - type: object
-        properties:
-          session:
-            $ref: '#/components/schemas/SessionRefAdminModel'
-    RcwBaseContactModel:
-      type: object
-      properties:
-        firstName:
-          type: string
-          description: First (given) name
-          maxLength: 64
-          example: John
-          x-sensitive-data: masked
-        lastName:
-          type: string
-          description: Last (family) name
-          maxLength: 64
-          example: Doe
-          x-sensitive-data: masked
-    RecordingItemExtendedModel:
-      allOf:
-      - $ref: '#/components/schemas/RecordingExtendedModel'
-      - type: object
-        properties:
-          session:
-            $ref: '#/components/schemas/SessionRefModel'
-    RcwLinkedUserModel:
-      type: object
-      description: The internal IDs of RC-authenticated users.
-      properties:
-        linkedUser:
-          $ref: '#/components/schemas/RcwDomainUserModel'
-    RcwPagingModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwPagingForwardModel'
-      - type: object
-        properties:
-          previousPageToken:
-            type: string
-            description: Previous page token (absent for the first page of the result set)
-    RecordingAdminListResource:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - $ref: '#/components/schemas/RecordingBaseModel'
+      - $ref: '#/components/schemas/RecordingSharingModel'
+    RecordingListResource:
       type: object
       required:
       - records
@@ -553,13 +245,9 @@ components:
           type: array
           minItems: 0
           items:
-            $ref: '#/components/schemas/RecordingAdminModel'
+            $ref: '#/components/schemas/RecordingItemModel'
         paging:
           $ref: '#/components/schemas/RcwPagingModel'
-    RecordingModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceBaseModel'
-      - $ref: '#/components/schemas/RecordingBaseModel'
     SessionMinimalModel:
       type: object
       properties:
@@ -590,6 +278,82 @@ components:
           maxLength: 4096
           description: User-friendly description of the Session. If blank - derived from webinar title.
           example: Live session for US-based participants
+    RcwUserModel:
+      type: object
+      required:
+      - userId
+      - accountId
+      properties:
+        userId:
+          type: string
+          maxLength: 256
+          description: User ID
+        accountId:
+          type: string
+          maxLength: 256
+          description: Account ID
+    RecordingAdminModel:
+      allOf:
+      - $ref: '#/components/schemas/RecordingItemModel'
+      - type: object
+        properties:
+          session:
+            $ref: '#/components/schemas/SessionRefAdminModel'
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    RcwDomainUserModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwUserModel'
+      - type: object
+        required:
+        - domain
+        properties:
+          domain:
+            type: string
+            description: Identity domain
+            enum:
+            - pbx
+            - ilm
+            default: pbx
+    RecordingStatusModel:
+      type: string
+      description: Recording status
+      enum:
+      - Processing
+      - Available
+      - Failed
+      - Purged
+      example: Available
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
     RecordingAdminExtendedItemModel:
       allOf:
       - $ref: '#/components/schemas/RecordingItemExtendedModel'
@@ -597,106 +361,233 @@ components:
         properties:
           session:
             $ref: '#/components/schemas/SessionRefAdminModel'
-  parameters:
-    CreationTimeFrom:
-      name: creationTimeFrom
-      in: query
-      description: The beginning of the time window by 'creationTime' .
-      required: true
-      explode: false
-      schema:
-        type: string
-        format: date-time
-    HostUserId:
-      name: hostUserId
-      in: query
-      description: Identifier of the user who hosts a webinar (if omitted, webinars hosted by all company users will be returned)
-      required: false
-      explode: false
-      schema:
-        type: array
-        maxItems: 10
-        minItems: 0
-        items:
+    RcwPagingModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwPagingForwardModel'
+      - type: object
+        properties:
+          previousPageToken:
+            type: string
+            description: Previous page token (absent for the first page of the result set)
+    WebinarTitleModel:
+      type: object
+      required:
+      - title
+      properties:
+        title:
           type: string
+          description: Webinar title
+          maxLength: 512
+          minLength: 1
+          example: All-Hands Webinar
+        description:
+          type: string
+          description: User-friendly description of the Webinar
+          maxLength: 4096
+          minLength: 0
+          example: Quarterly All-hands event to present recent news about our company to employees
+          default: ''
+    RecordingBaseModel:
+      type: object
+      required:
+      - status
+      properties:
+        status:
+          $ref: '#/components/schemas/RecordingStatusModel'
+        failureReason:
+          $ref: '#/components/schemas/ApiError'
+        duration:
+          type: integer
+          format: int32
+          readOnly: true
+          minimum: 1
+          description: Recording duration in seconds
+          example: 3600
+        shared:
+          $ref: '#/components/schemas/RecordingSharedStatusModel'
+        sharedUriExpirationTime:
+          $ref: '#/components/schemas/RecordingSharedLinkExpiryModel'
+    RecordingItemModel:
+      allOf:
+      - $ref: '#/components/schemas/RecordingModel'
+      - type: object
+        properties:
+          session:
+            $ref: '#/components/schemas/SessionRefModel'
+    HostModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwBaseContactModel'
+      - $ref: '#/components/schemas/RcwLinkedUserModel'
+    RcwPagingForwardModel:
+      type: object
+      required:
+      - pageToken
+      - perPage
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: Number of items per page
+          example: 100
+        pageToken:
+          type: string
+          description: Current page token
+        nextPageToken:
+          type: string
+          description: Next page token (absent for the last page of the result set)
+        previousPageToken:
+          type: string
+          description: 'Previous page token (absent for the first page of the result set)
+
+            May be omitted if the result set does not support backward navigation.
+
+            '
+    RecordingSharedLinkExpiryModel:
+      type:
+      - string
+      - 'null'
+      format: date-time
+      description: Time after which recording shared link cannot be accessed by recipients.
+      example: '2023-10-01T10:05:00.000Z'
+    RcwLinkedUserModel:
+      type: object
+      description: The internal IDs of RC-authenticated users.
+      properties:
+        linkedUser:
+          $ref: '#/components/schemas/RcwDomainUserModel'
+    RecordingSharingModel:
+      type: object
+      required:
+      - recordingSharedUri
+      properties:
+        recordingSharedUri:
+          type: string
+          format: uri
+          readOnly: true
+          description: Shared URI of the recording. If a password was required to join a webinar, the URI should contain the password encoded
+          example: https://v.ringcentral.com/w/a/recording/de7yd8ew7yfsdfjh899843rgj?pw=a1b2c3d4
+    RcwImmutableResourceIdModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal object ID
           minLength: 1
           maxLength: 20
-      example:
-      - '77777777'
-    PerPage:
-      name: perPage
-      in: query
-      description: 'The number of items per page. If provided value in the request
+          example: '78654321'
+          readOnly: true
+    RcwBaseContactModel:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: First (given) name
+          maxLength: 64
+          example: John
+          x-sensitive-data: masked
+        lastName:
+          type: string
+          description: Last (family) name
+          maxLength: 64
+          example: Doe
+          x-sensitive-data: masked
+    RecordingSharedStatusModel:
+      type: boolean
+      description: 'Indicates if Host or Admin has shared a recording.
 
-        is greater than a maximum, the maximum value is applied
-
-        '
-      required: false
-      explode: false
-      schema:
-        type: integer
-        format: int32
-        minimum: 1
-        maximum: 1000
-        default: 100
-      example: 100
-    PageToken:
-      name: pageToken
-      in: query
-      description: 'The token indicating the particular page of the result set to be retrieved.
-
-        If omitted the first page will be returned.
+        Can be set to true only then recording status is ''Available''.
 
         '
-      required: false
-      explode: false
-      schema:
-        type: string
-    RecordingId:
-      name: recordingId
-      in: path
-      description: Identifier of the Webinar recording.
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-      example: '7637637682'
+      example: true
+    WebinarRefModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceIdModel'
+      - $ref: '#/components/schemas/WebinarTitleModel'
+      - $ref: '#/components/schemas/WebinarHostModel'
+    RecordingItemExtendedModel:
+      allOf:
+      - $ref: '#/components/schemas/RecordingExtendedModel'
+      - type: object
+        properties:
+          session:
+            $ref: '#/components/schemas/SessionRefModel'
+    RecordingModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - $ref: '#/components/schemas/RecordingBaseModel'
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    SessionRefAdminModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceIdModel'
+      - $ref: '#/components/schemas/SessionMinimalModel'
+      - type: object
+        properties:
+          webinar:
+            $ref: '#/components/schemas/WebinarRefModel'
+    RecordingDownloadModel:
+      type: object
+      required:
+      - downloadUri
+      - downloadContentType
+      - downloadSize
+      properties:
+        downloadUri:
+          type: string
+          format: uri
+          description: Download URI (available only for webinar host or admin)
+        downloadContentType:
+          type: string
+          description: MIME type of the file to download.
+          enum:
+          - video/mp4
+          - audio/m4a
+          default: video/mp4
+        downloadSize:
+          type: integer
+          format: int64
+          description: Download file size in bytes
+          example: 20821092300
+    SessionRefModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceIdModel'
+      - $ref: '#/components/schemas/SessionMinimalModel'
+      - type: object
+        properties:
+          webinar:
+            $ref: '#/components/schemas/WebinarRefModel'
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
     RecordingMediaType:
-      schema:
-        $ref: '#/components/schemas/RecordingMediaType'
-      in: query
-      name: recordingMediaType
-      description: 'Download file media type.
-
-        - Type ''Video'' refers to a multiplexed audio and video file.
-
-        - Type ''Audio'' refers to an audio only file.
-
-        - Unless specified by this query parameter, a video file is returned by default when a recording is downloaded.
-
-        '
-      required: false
-    RecordingStatus:
-      name: status
-      in: query
-      description: The status of the recording.
-      required: false
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          $ref: '#/components/schemas/RecordingStatusModel'
-    CreationTimeTo:
-      name: creationTimeTo
-      in: query
-      description: The end of the time window by 'creationTime' .
-      required: true
-      explode: false
-      schema:
-        type: string
-        format: date-time
+      type: string
+      description: Recording file media type. 'Video' implies multiplexed audio and video. 'Audio' refers to audio only.
+      enum:
+      - Video
+      - Audio
+      example: Video
+      default: Video
   responses:
     NotFound:
       description: 'General response with **HTTP 404 "Not found"** status.<br>
@@ -718,16 +609,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
     InvalidRequest:
       description: 'General response with **HTTP 400 "Bad request"** status.<br>
 
@@ -740,6 +621,116 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+  parameters:
+    CreationTimeTo:
+      name: creationTimeTo
+      in: query
+      description: The end of the time window by 'creationTime' .
+      required: true
+      explode: false
+      schema:
+        type: string
+        format: date-time
+    PageToken:
+      name: pageToken
+      in: query
+      description: 'The token indicating the particular page of the result set to be retrieved.
+
+        If omitted the first page will be returned.
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: string
+    RecordingStatus:
+      name: status
+      in: query
+      description: The status of the recording.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/RecordingStatusModel'
+    RecordingMediaType:
+      schema:
+        $ref: '#/components/schemas/RecordingMediaType'
+      in: query
+      name: recordingMediaType
+      description: 'Download file media type.
+
+        - Type ''Video'' refers to a multiplexed audio and video file.
+
+        - Type ''Audio'' refers to an audio only file.
+
+        - Unless specified by this query parameter, a video file is returned by default when a recording is downloaded.
+
+        '
+      required: false
+    HostUserId:
+      name: hostUserId
+      in: query
+      description: Identifier of the user who hosts a webinar (if omitted, webinars hosted by all company users will be returned)
+      required: false
+      explode: false
+      schema:
+        type: array
+        maxItems: 10
+        minItems: 0
+        items:
+          type: string
+          minLength: 1
+          maxLength: 20
+      example:
+      - '77777777'
+    RecordingId:
+      name: recordingId
+      in: path
+      description: Identifier of the Webinar recording.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+      example: '7637637682'
+    CreationTimeFrom:
+      name: creationTimeFrom
+      in: query
+      description: The beginning of the time window by 'creationTime' .
+      required: true
+      explode: false
+      schema:
+        type: string
+        format: date-time
+    PerPage:
+      name: perPage
+      in: query
+      description: 'The number of items per page. If provided value in the request
+
+        is greater than a maximum, the maximum value is applied
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 100
+      example: 100
   securitySchemes:
     OAuth2:
       type: oauth2

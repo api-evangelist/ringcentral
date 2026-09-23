@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Registration Management API
+  title: RingCentral Registration Management API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -35,9 +35,7 @@ paths:
 
         A caller must be an authorized user: either a host of the webinar or an IT Admin:
 
-        a user from host''s account with "WebinarSettings" permission.
-
-        '
+        a user from host''s account with "WebinarSettings" permission.'
       operationId: rcwRegGetSession
       parameters:
       - $ref: '#/components/parameters/RcwSessionId'
@@ -71,9 +69,7 @@ paths:
         a user from host''s account with "WebinarSettings" permission.
 
 
-        If a session record with given ID doesn''t exist on Registration Service side the API should return HTTP 404.
-
-        '
+        If a session record with given ID doesn''t exist on Registration Service side the API should return HTTP 404.'
       operationId: rcwRegUpdateSession
       parameters:
       - $ref: '#/components/parameters/RcwSessionId'
@@ -102,20 +98,20 @@ paths:
       x-app-permission: EditWebinars
 components:
   responses:
-    Forbidden:
-      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
 
-        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
 
         '
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
 
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
 
         '
       content:
@@ -145,46 +141,6 @@ components:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
   schemas:
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
     RegSessionModel:
       type: object
       required:
@@ -273,10 +229,11 @@ components:
               - OneYear
               default: SixMonths
             recordingExist:
-              type: boolean
+              type:
+              - boolean
+              - 'null'
               description: Indicates that recording exists for the session.
               readOnly: true
-              nullable: true
     ApiError:
       type: object
       description: Generalized API error structure suitable for any error type
@@ -293,6 +250,46 @@ components:
           description: User-friendly error message
           example: Something went wrong
       additionalProperties: true
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
   parameters:
     RcwSessionId:
       name: sessionId

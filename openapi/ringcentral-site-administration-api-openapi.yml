@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Site Administration API
+  title: RingCentral Site Administration API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -53,9 +53,7 @@ paths:
       operationId: updateUserAdministeredSites
       description: 'Updates the sites administered by the current user.
 
-        Please note: Only IDs of records are used for update.
-
-        '
+        Please note: Only IDs of records are used for update.'
       parameters:
       - $ref: '#/components/parameters/AccountId'
       - $ref: '#/components/parameters/ExtensionId'
@@ -79,19 +77,6 @@ paths:
       x-user-permission: EditAssignedRoles
 components:
   schemas:
-    ContactAddressInfoResource:
-      type: object
-      properties:
-        street:
-          type: string
-        city:
-          type: string
-        state:
-          type: string
-        zip:
-          type: string
-        country:
-          type: string
     RolesRegionalSettingsResource:
       type: object
       properties:
@@ -112,6 +97,50 @@ components:
           - 24h
         currency:
           $ref: '#/components/schemas/CurrencyResource'
+    RolesCountryResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+        name:
+          type: string
+        isoCode:
+          type: string
+        callingCode:
+          type: string
+        emergencyCalling:
+          type: boolean
+        numberSelling:
+          type: boolean
+        loginAllowed:
+          type: boolean
+        freeSoftphoneLine:
+          type: boolean
+        signupAllowed:
+          type: boolean
+    BusinessSiteCollectionRequest:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/RolesBusinessSiteResource'
+    ContactAddressInfoResource:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+        country:
+          type: string
     RolesLanguageResource:
       type: object
       properties:
@@ -120,19 +149,6 @@ components:
         name:
           type: string
         localeCode:
-          type: string
-    CurrencyResource:
-      type: object
-      properties:
-        id:
-          type: string
-        code:
-          type: string
-        name:
-          type: string
-        symbol:
-          type: string
-        minorSymbol:
           type: string
     RolesTimezoneResource:
       type: object
@@ -148,13 +164,15 @@ components:
           type: string
         bias:
           type: string
-    BusinessSiteCollectionRequest:
+    BasicExtensionInfoResource:
       type: object
       properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/RolesBusinessSiteResource'
+        id:
+          type: string
+        name:
+          type: string
+        extensionNumber:
+          type: string
     RolesBusinessSiteResource:
       type: object
       required:
@@ -182,30 +200,6 @@ components:
           $ref: '#/components/schemas/RolesRegionalSettingsResource'
         businessAddress:
           $ref: '#/components/schemas/ContactAddressInfoResource'
-    RolesCountryResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        id:
-          type: string
-        name:
-          type: string
-        isoCode:
-          type: string
-        callingCode:
-          type: string
-        emergencyCalling:
-          type: boolean
-        numberSelling:
-          type: boolean
-        loginAllowed:
-          type: boolean
-        freeSoftphoneLine:
-          type: boolean
-        signupAllowed:
-          type: boolean
     BusinessSiteCollectionResource:
       type: object
       properties:
@@ -216,14 +210,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RolesBusinessSiteResource'
-    BasicExtensionInfoResource:
+    CurrencyResource:
       type: object
       properties:
         id:
           type: string
+        code:
+          type: string
         name:
           type: string
-        extensionNumber:
+        symbol:
+          type: string
+        minorSymbol:
           type: string
   parameters:
     ExtensionId:

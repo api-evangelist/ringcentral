@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Conversations API
+  title: RingCentral Conversations API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -114,6 +114,33 @@ paths:
       x-app-permission: TeamMessaging
 components:
   schemas:
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+    TMConversationList:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of conversations
+          items:
+            $ref: '#/components/schemas/TMConversationInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+    TMChatMemberInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user
     TMConversationInfo:
       type: object
       properties:
@@ -163,33 +190,6 @@ components:
                 type: string
                 format: email
                 description: Email of a person
-    TMNavigationInfo:
-      type: object
-      properties:
-        prevPageToken:
-          type: string
-          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-        nextPageToken:
-          type: string
-          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-    TMConversationList:
-      required:
-      - records
-      type: object
-      properties:
-        records:
-          type: array
-          description: List of conversations
-          items:
-            $ref: '#/components/schemas/TMConversationInfo'
-        navigation:
-          $ref: '#/components/schemas/TMNavigationInfo'
-    TMChatMemberInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a user
   securitySchemes:
     OAuth2:
       type: oauth2

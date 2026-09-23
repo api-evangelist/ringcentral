@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Compliance Exports API
+  title: RingCentral Compliance Exports API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -116,60 +116,6 @@ paths:
       x-user-permission: Glip
 components:
   schemas:
-    GlipDataExportPagingInfo:
-      type: object
-      properties:
-        page:
-          type: integer
-          format: int32
-          description: The current page number. 1-indexed, so the first page is 1 by default. May be omitted if result is empty (because non-existent page was specified or perPage=0 was requested)
-        perPage:
-          type: integer
-          format: int32
-          description: Current page size, describes how many items are in each page. Default value is 100. Maximum value is 1000. If perPage value in the request is greater than 1000, the maximum value (1000) is applied
-        pageStart:
-          type: integer
-          format: int32
-          description: The zero-based number of the first element on the current page. Omitted if the page is omitted or result is empty
-        pageEnd:
-          type: integer
-          format: int32
-          description: The zero-based index of the last element on the current page. Omitted if the page is omitted or result is empty
-        totalPages:
-          type: integer
-          format: int32
-          description: The total number of pages in a dataset. May be omitted for some resources due to performance reasons
-        totalElements:
-          type: integer
-          format: int32
-          description: The total number of elements in a dataset. May be omitted for some resource due to performance reasons
-    ExportTaskResultInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a dataset
-        uri:
-          type: string
-          format: uri
-          description: Link for downloading a dataset
-        size:
-          type: integer
-          format: int64
-          description: Size of ta dataset in bytes
-    CreatorInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a user
-        firstName:
-          type: string
-          description: First name of a user
-        lastName:
-          type: string
-          description: Last name of a user
-      description: Task creator information
     CreateDataExportTaskRequest:
       type: object
       properties:
@@ -191,17 +137,26 @@ components:
           description: List of chats from which the data (posts, files, tasks, events, notes, etc.) will be collected. Maximum number of chats supported is 10
           items:
             type: string
-    DataExportTaskList:
+    GlipDataExportNavigationInfoUri:
       type: object
       properties:
-        tasks:
-          type: array
-          items:
-            $ref: '#/components/schemas/DataExportTask'
-        navigation:
-          $ref: '#/components/schemas/GlipDataExportNavigationInfo'
-        paging:
-          $ref: '#/components/schemas/GlipDataExportPagingInfo'
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI for the corresponding page of the list
+    CreatorInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user
+        firstName:
+          type: string
+          description: First name of a user
+        lastName:
+          type: string
+          description: Last name of a user
+      description: Task creator information
     DataExportTask:
       type: object
       properties:
@@ -237,6 +192,42 @@ components:
           description: Data collection archives. Returned by task ID
           items:
             $ref: '#/components/schemas/ExportTaskResultInfo'
+    DataExportTaskList:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataExportTask'
+        navigation:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfo'
+        paging:
+          $ref: '#/components/schemas/GlipDataExportPagingInfo'
+    ExportTaskResultInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a dataset
+        uri:
+          type: string
+          format: uri
+          description: Link for downloading a dataset
+        size:
+          type: integer
+          format: int64
+          description: Size of ta dataset in bytes
+    GlipDataExportNavigationInfo:
+      type: object
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
+        nextPage:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
+        previousPage:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
+        lastPage:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
     SpecificInfo:
       type: object
       properties:
@@ -258,24 +249,33 @@ components:
           items:
             type: string
       description: Information specified in request
-    GlipDataExportNavigationInfoUri:
+    GlipDataExportPagingInfo:
       type: object
       properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI for the corresponding page of the list
-    GlipDataExportNavigationInfo:
-      type: object
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
-        nextPage:
-          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
-        previousPage:
-          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
-        lastPage:
-          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
+        page:
+          type: integer
+          format: int32
+          description: The current page number. 1-indexed, so the first page is 1 by default. May be omitted if result is empty (because non-existent page was specified or perPage=0 was requested)
+        perPage:
+          type: integer
+          format: int32
+          description: Current page size, describes how many items are in each page. Default value is 100. Maximum value is 1000. If perPage value in the request is greater than 1000, the maximum value (1000) is applied
+        pageStart:
+          type: integer
+          format: int32
+          description: The zero-based number of the first element on the current page. Omitted if the page is omitted or result is empty
+        pageEnd:
+          type: integer
+          format: int32
+          description: The zero-based index of the last element on the current page. Omitted if the page is omitted or result is empty
+        totalPages:
+          type: integer
+          format: int32
+          description: The total number of pages in a dataset. May be omitted for some resources due to performance reasons
+        totalElements:
+          type: integer
+          format: int32
+          description: The total number of elements in a dataset. May be omitted for some resource due to performance reasons
     DataExportTaskContactInfo:
       type: object
       properties:

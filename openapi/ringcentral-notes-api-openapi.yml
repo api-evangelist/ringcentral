@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Notes API
+  title: RingCentral Notes API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -317,17 +317,29 @@ paths:
       x-app-permission: TeamMessaging
 components:
   schemas:
-    TMCreateNoteRequest:
-      required:
-      - title
+    LockedByInfo:
       type: object
       properties:
-        title:
+        id:
           type: string
-          description: Title of a note. Max allowed length is 250 characters
-        body:
+          description: Internal identifier of the user editing the note
+      description: Returned for the note being edited (locked) at the current moment. Information on the user editing the note
+    LastModifiedByInfo:
+      type: object
+      properties:
+        id:
           type: string
-          description: Contents of a note; HTML markup text. Max allowed length is 1048576 characters (1 Mb).
+          description: Internal identifier of the user who last updated the note
+      description: Note last modification information
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
     TMNoteList:
       type: object
       properties:
@@ -344,30 +356,17 @@ components:
           type: string
           description: Internal identifier of a user who created a note/task
       description: Note creator information
-    TMNavigationInfo:
+    TMCreateNoteRequest:
+      required:
+      - title
       type: object
       properties:
-        prevPageToken:
+        title:
           type: string
-          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-        nextPageToken:
+          description: Title of a note. Max allowed length is 250 characters
+        body:
           type: string
-          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-    TMNoteWithBodyInfo:
-      allOf:
-      - $ref: '#/components/schemas/TMNoteInfo'
-      - type: object
-        properties:
-          body:
-            type: string
-            description: Text of a note
-    LockedByInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of the user editing the note
-      description: Returned for the note being edited (locked) at the current moment. Information on the user editing the note
+          description: Contents of a note; HTML markup text. Max allowed length is 1048576 characters (1 Mb).
     TMNoteInfo:
       type: object
       properties:
@@ -409,13 +408,14 @@ components:
           type: string
           enum:
           - Note
-    LastModifiedByInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of the user who last updated the note
-      description: Note last modification information
+    TMNoteWithBodyInfo:
+      allOf:
+      - $ref: '#/components/schemas/TMNoteInfo'
+      - type: object
+        properties:
+          body:
+            type: string
+            description: Text of a note
   securitySchemes:
     OAuth2:
       type: oauth2

@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: RingCentral Adaptive Cards Status API
+  title: RingCentral Status API
   description: RingCentral API specification
   version: 1.0.58-20240529-47eda8bd
   contact:
@@ -57,181 +57,20 @@ paths:
       x-app-permission: AI
 components:
   schemas:
-    InteractionObject:
-      type: object
-      properties:
-        utteranceInsights:
-          type: array
-          items:
-            $ref: '#/components/schemas/UtteranceInsightsObject'
-        speakerInsights:
-          $ref: '#/components/schemas/SpeakerInsightsObject'
-        conversationalInsights:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConversationalInsightsUnit'
-    TranscribedObject:
+    DiarizedObject:
       required:
-      - transcript
-      - words
+      - speakerCount
+      - utterances
       type: object
       properties:
         speakerCount:
           type: integer
-          description: The number of speakers detected. Field is set only when enableSpeakerDiarization is true.
           format: int32
           example: 2
         utterances:
           type: array
-          description: Speaker wise utterances. Field is set only when enableSpeakerDiarization is true.
           items:
-            $ref: '#/components/schemas/UtteranceObject'
-        words:
-          type: array
-          items:
-            $ref: '#/components/schemas/WordSegment'
-        confidence:
-          type: number
-          description: Overall transcription confidence.
-          format: float
-        transcript:
-          type: string
-          description: The entire transcript with/without punctuations according to the input.
-    UtteranceInsightsUnit:
-      required:
-      - name
-      - value
-      type: object
-      properties:
-        name:
-          type: string
-          example: Emotion
-          enum:
-          - Emotion
-        value:
-          type: string
-          example: Neutral
-        confidence:
-          type: number
-          format: float
-          example: 0.97
-      additionalProperties:
-        type: string
-    SummaryApiOutput:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          $ref: '#/components/schemas/SummaryApiResponse'
-    SummaryApiResponse:
-      oneOf:
-      - $ref: '#/components/schemas/SummaryOutput'
-      - $ref: '#/components/schemas/CaiErrorResponse'
-    WordSegment:
-      required:
-      - end
-      - start
-      - word
-      type: object
-      properties:
-        speakerId:
-          type: string
-          example: JohnDoe
-        start:
-          type: number
-          format: float
-          example: 0.3
-        end:
-          type: number
-          format: float
-          example: 5.1
-        confidence:
-          type: number
-          format: float
-          example: 0.97
-        word:
-          type: string
-          example: hello
-    CaiErrorCodeResponse:
-      required:
-      - errorCode
-      - message
-      type: object
-      properties:
-        errorCode:
-          type: string
-          enum:
-          - CAI-101
-          - CAI-102
-          - CAI-103
-          - CAI-104
-          - CAI-105
-          - CAI-106
-          - CAI-107
-          - CAI-108
-          - CAI-109
-          - CAI-110
-        message:
-          type: string
-          description: Helpful description of the errorCode
-        parameterName:
-          type: string
-          description: Name of parameter if specified in the message
-    UtteranceInsightsObject:
-      required:
-      - end
-      - start
-      - text
-      type: object
-      properties:
-        start:
-          type: number
-          format: float
-          example: 0.3
-        end:
-          type: number
-          format: float
-          example: 5.1
-        text:
-          type: string
-          example: Hello! This is John.
-        confidence:
-          type: number
-          format: float
-          example: 0.97
-        speakerId:
-          type: string
-          example: JohnDoe
-        wordTimings:
-          type: array
-          items:
-            $ref: '#/components/schemas/WordTimingsUnit'
-        insights:
-          type: array
-          items:
-            $ref: '#/components/schemas/UtteranceInsightsUnit'
-    SpeakerInsightsUnit:
-      required:
-      - name
-      - values
-      type: object
-      properties:
-        name:
-          type: string
-          example: TalkToListenRatio
-          enum:
-          - Energy
-          - Pace
-          - TalkToListenRatio
-          - QuestionsAsked
-        values:
-          type: array
-          items:
-            $ref: '#/components/schemas/SpeakerInsightsValuesItems'
+            $ref: '#/components/schemas/DiarizeSegment'
     EmotionSegment:
       required:
       - emotion
@@ -261,45 +100,16 @@ components:
           type: number
           format: float
           example: 0.97
-    SpeakerInsightsValuesItems:
+    DiarizeSegment:
       required:
+      - end
       - speakerId
-      - value
+      - start
       type: object
       properties:
         speakerId:
           type: string
           example: JohnDoe
-        value:
-          type: string
-          description: The value corresponding to the insight for the speaker
-          example: 20:80
-      additionalProperties:
-        type: string
-    DiarizedObject:
-      required:
-      - speakerCount
-      - utterances
-      type: object
-      properties:
-        speakerCount:
-          type: integer
-          format: int32
-          example: 2
-        utterances:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiarizeSegment'
-    CaiErrorResponse:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/CaiErrorCodeResponse'
-    WordTimingsUnit:
-      type: object
-      properties:
         start:
           type: number
           format: float
@@ -308,60 +118,13 @@ components:
           type: number
           format: float
           example: 5.1
-        word:
-          type: string
-          example: Hello
-    SpeakerIdentificationObject:
-      required:
-      - utterances
-      type: object
-      properties:
-        utterances:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiarizeSegment'
-    SpeakerInsightsObject:
-      type: object
-      properties:
-        speakerCount:
-          type: integer
-          format: int32
-          example: 2
-        insights:
-          type: array
-          items:
-            $ref: '#/components/schemas/SpeakerInsightsUnit'
-    EmotionApiResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          oneOf:
-          - $ref: '#/components/schemas/EmotionObject'
-          - $ref: '#/components/schemas/CaiErrorResponse'
-    SummaryOutputUnit:
-      type: object
-      properties:
-        name:
-          type: string
-          example: AbstractiveShort
-          enum:
-          - Extractive
-          - AbstractiveLong
-          - AbstractiveShort
-          - All
-        values:
-          type: array
-          description: Summary output units sorted by their occurrence in the conversation
-          items:
-            $ref: '#/components/schemas/SummaryTimingsUnit'
-    PunctuateApiResponse:
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+    SummaryApiResponse:
       oneOf:
-      - $ref: '#/components/schemas/PunctuateOutput'
+      - $ref: '#/components/schemas/SummaryOutput'
       - $ref: '#/components/schemas/CaiErrorResponse'
     DiarizeApiResponse:
       type: object
@@ -375,18 +138,60 @@ components:
           oneOf:
           - $ref: '#/components/schemas/DiarizedObject'
           - $ref: '#/components/schemas/CaiErrorResponse'
-    AsrApiResponse:
+    SpeakerIdentificationObject:
+      required:
+      - utterances
       type: object
       properties:
-        status:
+        utterances:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiarizeSegment'
+    PunctuateOutput:
+      required:
+      - texts
+      type: object
+      properties:
+        texts:
+          type: array
+          items:
+            type: string
+    CaiErrorCodeResponse:
+      required:
+      - errorCode
+      - message
+      type: object
+      properties:
+        errorCode:
           type: string
           enum:
-          - Success
-          - Fail
-        response:
-          oneOf:
-          - $ref: '#/components/schemas/TranscribedObject'
-          - $ref: '#/components/schemas/CaiErrorResponse'
+          - CAI-101
+          - CAI-102
+          - CAI-103
+          - CAI-104
+          - CAI-105
+          - CAI-106
+          - CAI-107
+          - CAI-108
+          - CAI-109
+          - CAI-110
+        message:
+          type: string
+          description: Helpful description of the errorCode
+        parameterName:
+          type: string
+          description: Name of parameter if specified in the message
+    SpeakerInsightsObject:
+      type: object
+      properties:
+        speakerCount:
+          type: integer
+          format: int32
+          example: 2
+        insights:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpeakerInsightsUnit'
     ConversationalInsightsUnitValues:
       required:
       - end
@@ -433,84 +238,6 @@ components:
           example: Or or you can add another tab and have it resigned.
       additionalProperties:
         type: string
-    SummaryTimingsUnit:
-      required:
-      - value
-      type: object
-      properties:
-        confidence:
-          type: number
-          format: float
-          example: 0.97
-        value:
-          type: string
-          example: This meeting is focussed on rise of on demand marketplaces, online marketplaces and regulated services
-        start:
-          type: number
-          format: float
-          example: 0.3
-        end:
-          type: number
-          format: float
-          example: 3600.1
-    JobStatusResponse:
-      allOf:
-      - type: object
-        properties:
-          jobId:
-            type: string
-          creationTime:
-            type: string
-            format: date-time
-          completionTime:
-            type: string
-            format: date-time
-          expirationTime:
-            type: string
-            format: date-time
-      - oneOf:
-        - $ref: '#/components/schemas/SummaryApiOutput'
-        - $ref: '#/components/schemas/PunctuateApiOutput'
-        - $ref: '#/components/schemas/DiarizeApiResponse'
-        - $ref: '#/components/schemas/SpeakerIdentifyApiResponse'
-        - $ref: '#/components/schemas/AsrApiResponse'
-        - $ref: '#/components/schemas/EmotionApiResponse'
-        - $ref: '#/components/schemas/InteractionApiResponse'
-    ConversationalInsightsUnit:
-      required:
-      - name
-      - values
-      type: object
-      properties:
-        name:
-          type: string
-          example: KeyPhrases
-          enum:
-          - ExtractiveSummary
-          - AbstractiveSummaryLong
-          - AbstractiveSummaryShort
-          - KeyPhrases
-          - QuestionsAsked
-          - OverallSentiment
-          - Topics
-        values:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConversationalInsightsUnitValues'
-    EmotionObject:
-      type: array
-      items:
-        $ref: '#/components/schemas/EmotionSegment'
-    PunctuateApiOutput:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          $ref: '#/components/schemas/PunctuateApiResponse'
     UtteranceObject:
       required:
       - end
@@ -540,11 +267,179 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WordTimingsUnit'
-    DiarizeSegment:
+    CaiErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaiErrorCodeResponse'
+    SpeakerInsightsValuesItems:
+      required:
+      - speakerId
+      - value
+      type: object
+      properties:
+        speakerId:
+          type: string
+          example: JohnDoe
+        value:
+          type: string
+          description: The value corresponding to the insight for the speaker
+          example: 20:80
+      additionalProperties:
+        type: string
+    JobStatusResponse:
+      allOf:
+      - type: object
+        properties:
+          jobId:
+            type: string
+          creationTime:
+            type: string
+            format: date-time
+          completionTime:
+            type: string
+            format: date-time
+          expirationTime:
+            type: string
+            format: date-time
+      - oneOf:
+        - $ref: '#/components/schemas/SummaryApiOutput'
+        - $ref: '#/components/schemas/PunctuateApiOutput'
+        - $ref: '#/components/schemas/DiarizeApiResponse'
+        - $ref: '#/components/schemas/SpeakerIdentifyApiResponse'
+        - $ref: '#/components/schemas/AsrApiResponse'
+        - $ref: '#/components/schemas/EmotionApiResponse'
+        - $ref: '#/components/schemas/InteractionApiResponse'
+    WordTimingsUnit:
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        word:
+          type: string
+          example: Hello
+    SpeakerIdentifyApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/SpeakerIdentificationObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    EmotionObject:
+      type: array
+      items:
+        $ref: '#/components/schemas/EmotionSegment'
+    InteractionApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/InteractionObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    SpeakerInsightsUnit:
+      required:
+      - name
+      - values
+      type: object
+      properties:
+        name:
+          type: string
+          example: TalkToListenRatio
+          enum:
+          - Energy
+          - Pace
+          - TalkToListenRatio
+          - QuestionsAsked
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpeakerInsightsValuesItems'
+    SummaryApiOutput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          $ref: '#/components/schemas/SummaryApiResponse'
+    UtteranceInsightsObject:
       required:
       - end
-      - speakerId
       - start
+      - text
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        text:
+          type: string
+          example: Hello! This is John.
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        speakerId:
+          type: string
+          example: JohnDoe
+        wordTimings:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordTimingsUnit'
+        insights:
+          type: array
+          items:
+            $ref: '#/components/schemas/UtteranceInsightsUnit'
+    UtteranceInsightsUnit:
+      required:
+      - name
+      - value
+      type: object
+      properties:
+        name:
+          type: string
+          example: Emotion
+          enum:
+          - Emotion
+        value:
+          type: string
+          example: Neutral
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+      additionalProperties:
+        type: string
+    WordSegment:
+      required:
+      - end
+      - start
+      - word
       type: object
       properties:
         speakerId:
@@ -562,15 +457,144 @@ components:
           type: number
           format: float
           example: 0.97
-    PunctuateOutput:
-      required:
-      - texts
+        word:
+          type: string
+          example: hello
+    InteractionObject:
       type: object
       properties:
-        texts:
+        utteranceInsights:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/UtteranceInsightsObject'
+        speakerInsights:
+          $ref: '#/components/schemas/SpeakerInsightsObject'
+        conversationalInsights:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationalInsightsUnit'
+    EmotionApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/EmotionObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    ConversationalInsightsUnit:
+      required:
+      - name
+      - values
+      type: object
+      properties:
+        name:
+          type: string
+          example: KeyPhrases
+          enum:
+          - ExtractiveSummary
+          - AbstractiveSummaryLong
+          - AbstractiveSummaryShort
+          - KeyPhrases
+          - QuestionsAsked
+          - OverallSentiment
+          - Topics
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationalInsightsUnitValues'
+    PunctuateApiOutput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          $ref: '#/components/schemas/PunctuateApiResponse'
+    TranscribedObject:
+      required:
+      - transcript
+      - words
+      type: object
+      properties:
+        speakerCount:
+          type: integer
+          description: The number of speakers detected. Field is set only when enableSpeakerDiarization is true.
+          format: int32
+          example: 2
+        utterances:
+          type: array
+          description: Speaker wise utterances. Field is set only when enableSpeakerDiarization is true.
+          items:
+            $ref: '#/components/schemas/UtteranceObject'
+        words:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordSegment'
+        confidence:
+          type: number
+          description: Overall transcription confidence.
+          format: float
+        transcript:
+          type: string
+          description: The entire transcript with/without punctuations according to the input.
+    SummaryTimingsUnit:
+      required:
+      - value
+      type: object
+      properties:
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        value:
+          type: string
+          example: This meeting is focussed on rise of on demand marketplaces, online marketplaces and regulated services
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 3600.1
+    SummaryOutputUnit:
+      type: object
+      properties:
+        name:
+          type: string
+          example: AbstractiveShort
+          enum:
+          - Extractive
+          - AbstractiveLong
+          - AbstractiveShort
+          - All
+        values:
+          type: array
+          description: Summary output units sorted by their occurrence in the conversation
+          items:
+            $ref: '#/components/schemas/SummaryTimingsUnit'
+    AsrApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/TranscribedObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    PunctuateApiResponse:
+      oneOf:
+      - $ref: '#/components/schemas/PunctuateOutput'
+      - $ref: '#/components/schemas/CaiErrorResponse'
     SummaryOutput:
       type: object
       properties:
@@ -578,30 +602,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SummaryOutputUnit'
-    InteractionApiResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          oneOf:
-          - $ref: '#/components/schemas/InteractionObject'
-          - $ref: '#/components/schemas/CaiErrorResponse'
-    SpeakerIdentifyApiResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          oneOf:
-          - $ref: '#/components/schemas/SpeakerIdentificationObject'
-          - $ref: '#/components/schemas/CaiErrorResponse'
   parameters:
     JobId:
       name: jobId
