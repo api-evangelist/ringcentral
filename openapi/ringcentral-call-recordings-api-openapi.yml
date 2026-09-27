@@ -120,59 +120,6 @@ paths:
       x-app-permission: ReadCallRecording
       x-user-permission: ReadCallRecording
 components:
-  responses:
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
-
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
-
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    Forbidden:
-      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
-
-        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
   schemas:
     ApiError:
       type: object
@@ -190,6 +137,30 @@ components:
           description: User-friendly error message
           example: Something went wrong
       additionalProperties: true
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    CallRecordingIds:
+      type: object
+      required:
+      - records
+      properties:
+        records:
+          type: array
+          description: Call recordings ID(s) to delete
+          items:
+            type: string
+          minItems: 1
+          maxItems: 100
     ApiErrorWithParameter:
       description: 'The error model with additional attributes which can be used for HTTP 400/409
 
@@ -206,18 +177,6 @@ components:
           parameterValue:
             type: string
             description: The value of the API parameter/attribute which caused the error
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
     ParameterizedErrorResponseModel:
       type: object
       description: Standard error response which may include parameterized errors
@@ -257,19 +216,25 @@ components:
           type: integer
           format: int32
           description: Recorded call duration
-    CallRecordingIds:
-      type: object
-      required:
-      - records
-      properties:
-        records:
-          type: array
-          description: Call recordings ID(s) to delete
-          items:
-            type: string
-          minItems: 1
-          maxItems: 100
   parameters:
+    ContentDisposition:
+      name: contentDisposition
+      in: query
+      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
+      required: false
+      schema:
+        type: string
+        enum:
+        - Inline
+        - Attachment
+    CallRecordingId:
+      name: recordingId
+      in: path
+      description: Internal identifier of a call recording (returned in Call Log)
+      required: true
+      schema:
+        type: string
+        example: '625387632786'
     AccountId:
       name: accountId
       in: path
@@ -285,16 +250,6 @@ components:
         type: string
         default: '~'
       example: '~'
-    ContentDisposition:
-      name: contentDisposition
-      in: query
-      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
-      required: false
-      schema:
-        type: string
-        enum:
-        - Inline
-        - Attachment
     ContentDispositionFilename:
       name: contentDispositionFilename
       in: query
@@ -302,14 +257,59 @@ components:
       required: false
       schema:
         type: string
-    CallRecordingId:
-      name: recordingId
-      in: path
-      description: Internal identifier of a call recording (returned in Call Log)
-      required: true
-      schema:
-        type: string
-        example: '625387632786'
+  responses:
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
+
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
   securitySchemes:
     OAuth2:
       type: oauth2

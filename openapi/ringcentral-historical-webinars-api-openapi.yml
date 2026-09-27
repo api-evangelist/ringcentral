@@ -272,38 +272,6 @@ paths:
       x-app-permission: ReadWebinars
 components:
   schemas:
-    RcwResourceBaseModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwImmutableResourceIdModel'
-      - type: object
-        required:
-        - creationTime
-        - lastModifiedTime
-        properties:
-          creationTime:
-            type: string
-            description: Object creation time
-            format: date-time
-            readOnly: true
-          lastModifiedTime:
-            type: string
-            description: Object last modification time
-            format: date-time
-            readOnly: true
-    WebinarHostModel:
-      type: object
-      required:
-      - host
-      properties:
-        host:
-          $ref: '#/components/schemas/HostModel'
-    SessionGeneratedModel:
-      type: object
-      properties:
-        videoBridgeId:
-          type: string
-          description: The RCV bridge id
-          example: '839874770'
     RcwResourceIdModel:
       type: object
       properties:
@@ -313,6 +281,110 @@ components:
           minLength: 1
           maxLength: 20
           example: '78654321'
+    RcwPagingModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwPagingForwardModel'
+      - type: object
+        properties:
+          previousPageToken:
+            type: string
+            description: Previous page token (absent for the first page of the result set)
+    HostModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwBaseContactModel'
+      - $ref: '#/components/schemas/RcwLinkedUserModel'
+    SessionResource:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - $ref: '#/components/schemas/SessionBaseModel'
+      - $ref: '#/components/schemas/SessionGeneratedModel'
+      - $ref: '#/components/schemas/SessionRecordingExtendedModel'
+      - $ref: '#/components/schemas/SessionLivestreamListModel'
+    WebinarResource:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - $ref: '#/components/schemas/WebinarTitleModel'
+      - type: object
+        properties:
+          settings:
+            $ref: '#/components/schemas/WebinarSettingsModel'
+      - $ref: '#/components/schemas/WebinarHostModel'
+    RcwRoleAttributeModel:
+      type: object
+      description: The attribute declaration to indicate webinar session participant/invitee role
+      required:
+      - role
+      properties:
+        role:
+          $ref: '#/components/schemas/RcwRoleEnum'
+    WebinarRefModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceIdModel'
+      - $ref: '#/components/schemas/WebinarTitleModel'
+      - $ref: '#/components/schemas/WebinarHostModel'
+    WebinarHostModel:
+      type: object
+      required:
+      - host
+      properties:
+        host:
+          $ref: '#/components/schemas/HostModel'
+    RcwDomainUserModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwUserModel'
+      - type: object
+        required:
+        - domain
+        properties:
+          domain:
+            type: string
+            description: Identity domain
+            enum:
+            - pbx
+            - ilm
+            default: pbx
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    SessionRecordingModel:
+      type: object
+      properties:
+        recording:
+          $ref: '#/components/schemas/RecordingModel'
+    RecordingStatusModel:
+      type: string
+      description: Recording status
+      enum:
+      - Processing
+      - Available
+      - Failed
+      - Purged
+      example: Available
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
     RcwEmailModel:
       type: string
       format: email
@@ -321,31 +393,58 @@ components:
       example: john.doe@example.com
       description: User's contact email
       x-sensitive-data: normalized-anonymized
-    SessionResource:
+    InviteeModel:
       allOf:
-      - $ref: '#/components/schemas/RcwResourceBaseModel'
-      - $ref: '#/components/schemas/SessionBaseModel'
-      - $ref: '#/components/schemas/SessionGeneratedModel'
-      - $ref: '#/components/schemas/SessionRecordingExtendedModel'
-      - $ref: '#/components/schemas/SessionLivestreamListModel'
-    RecordingExtendedModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceBaseModel'
-      - $ref: '#/components/schemas/RecordingBaseModel'
-      - $ref: '#/components/schemas/RecordingSharingModel'
-    InviteeListResource:
+      - $ref: '#/components/schemas/ParticipantBaseModel'
+      - type: object
+        required:
+        - sendInvite
+        - joined
+        properties:
+          sendInvite:
+            type: boolean
+            description: 'Indicates if invite/cancellation emails was sent to this invitee.
+
+              '
+            example: true
+          joined:
+            type: boolean
+            description: Indicates that this invitee joined the session
+            example: true
+    SessionLivestreamMinimalModel:
       type: object
+      readOnly: true
       required:
-      - records
-      - paging
+      - livestreamId
+      - livestreamStatus
+      - serviceProvider
       properties:
-        records:
-          type: array
-          minItems: 0
-          items:
-            $ref: '#/components/schemas/InviteeModel'
-        paging:
-          $ref: '#/components/schemas/RcwPagingModel'
+        livestreamId:
+          type: string
+          description: Identifier of the livestream
+          example: 40740e06-4eec-4458-a86e-8578e192274q
+        serviceProvider:
+          type: string
+          description: Name of the livestreaming service provider
+          example: YoutTube
+        livestreamStatus:
+          $ref: '#/components/schemas/SessionLivestreamStatusModel'
+        previousLivestreamStatus:
+          $ref: '#/components/schemas/SessionLivestreamStatusModel'
+        livestreamStartTime:
+          type: string
+          description: Time at which the session started to publish media to livestream service provider.
+          format: date-time
+        error:
+          $ref: '#/components/schemas/ApiError'
+      example:
+        livestreamId: 40740e06-4eec-4458-a86e-8578e192274q
+        livestreamStatus: Error
+        previousLivestreamStatus: Initialized
+        serviceProvider: YouTube
+        error:
+          errorCode: WLA-123
+          message: Authorization invalid
     SessionMinimalModel:
       type: object
       properties:
@@ -376,6 +475,103 @@ components:
           maxLength: 4096
           description: User-friendly description of the Session. If blank - derived from webinar title.
           example: Live session for US-based participants
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    SessionBaseModel:
+      allOf:
+      - $ref: '#/components/schemas/SessionMinimalModel'
+      - type: object
+        properties:
+          scheduledStartTime:
+            type: string
+            description: Session scheduled start time.
+            format: date-time
+          scheduledDuration:
+            type: integer
+            format: int32
+            description: The scheduled duration of the Session in seconds.
+            example: 1800
+          timeZone:
+            type: string
+            description: IANA-compatible time zone name (see https://www.iana.org/time-zones).
+            example: America/New_York
+          localeCode:
+            type: string
+            description: Session locale code. Can't be blank or null.
+            example: en-US
+            default: en-US
+          panelJoinTimeOffset:
+            type: integer
+            format: int32
+            description: 'The time offset (positive, in seconds) indicating how much in advance
+
+              (comparing to "scheduledStartTime") panel members should join for the pre-webinar team sync
+
+              '
+            minimum: 0
+            default: 0
+            example: 900
+          broadcastingStartTime:
+            type: string
+            description: The time when broadcasting started.
+            format: date-time
+          broadcastingEndTime:
+            type: string
+            description: The time when broadcasting ended.
+            format: date-time
+          status:
+            $ref: '#/components/schemas/RcwSessionStatusModel'
+          runtimeStatus:
+            $ref: '#/components/schemas/SessionRuntimeStatusModel'
+          participantCount:
+            type: integer
+            format: int32
+            description: The number of participants (of all roles) who joined the webinar
+            example: 150
+          attendeeCount:
+            type: integer
+            format: int32
+            description: The number of attendees who joined the webinar
+            example: 145
+          uniqueParticipantCount:
+            type: integer
+            format: int32
+            description: Unique number of participants (of all roles) who joined the webinar
+            example: 140
+          uniqueAttendeeCount:
+            type: integer
+            format: int32
+            description: Unique number of attendees who joined the webinar
+            example: 135
+    SessionRecordingExtendedModel:
+      type: object
+      properties:
+        recording:
+          $ref: '#/components/schemas/RecordingExtendedModel'
+    ParticipantBaseModel:
+      readOnly: true
+      allOf:
+      - $ref: '#/components/schemas/ParticipantReducedModel'
+      - type: object
+        properties:
+          email:
+            $ref: '#/components/schemas/RcwEmailModel'
+          qnaBlocked:
+            type: boolean
+            description: 'Boolean to indicate if the participant was blocked from Q&A
+
+              '
+            example: true
     RcwUserModel:
       type: object
       required:
@@ -390,6 +586,26 @@ components:
           type: string
           maxLength: 256
           description: Account ID
+    ParticipantTypeModel:
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          description: The type of the participant specified in invite or determined at join time
+          enum:
+          - User
+          - Room
+          default: User
+    AvatarOwnerModel:
+      type: object
+      properties:
+        avatarToken:
+          type: string
+          description: A token to access avatar image from CDN. Available only for authenticated panelists
+          example: wedyugwied8wud98u90i329silqdjalidj
+          readOnly: true
     SessionLivestreamStatusModel:
       type: string
       description: 'Last known state of the livestream as notified by Webinar Livestreaming Controller Service (WLCS).
@@ -411,117 +627,24 @@ components:
       - Deleted
       - Completed
       example: Initialized
-    RcwRoleEnum:
-      type: string
-      description: 'The role of the webinar session participant/invitee.
-
-        See also: [Understanding Webinar Roles](https://support.ringcentral.com/webinar/getting-started/understanding-ringcentral-webinar-roles.html)
-
-        '
-      enum:
-      - Panelist
-      - CoHost
-      - Host
-      - Attendee
-      example: Panelist
-    OriginalRoleModel:
+    ParticipantListResource:
       type: object
-      description: Role assigned to participant when invite was sent or during join time (if an invite was not sent)
       required:
-      - originalRole
+      - records
+      - paging
       properties:
-        originalRole:
-          $ref: '#/components/schemas/RcwRoleEnum'
-    RcwDomainUserModel:
+        records:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/ParticipantExtendedModel'
+        paging:
+          $ref: '#/components/schemas/RcwPagingModel'
+    RecordingExtendedModel:
       allOf:
-      - $ref: '#/components/schemas/RcwUserModel'
-      - type: object
-        required:
-        - domain
-        properties:
-          domain:
-            type: string
-            description: Identity domain
-            enum:
-            - pbx
-            - ilm
-            default: pbx
-    AvatarOwnerModel:
-      type: object
-      properties:
-        avatarToken:
-          type: string
-          description: A token to access avatar image from CDN. Available only for authenticated panelists
-          example: wedyugwied8wud98u90i329silqdjalidj
-          readOnly: true
-    SessionRuntimeStatusModel:
-      type: string
-      description: 'Session runtime status (for ''Active'' Sessions only).
-
-        It is omitted (or null) if the status is not Active
-
-        '
-      enum:
-      - Idle
-      - Practice
-      - GoingLive
-      - Live
-      - Break
-      - Debrief
-    RecordingStatusModel:
-      type: string
-      description: Recording status
-      enum:
-      - Processing
-      - Available
-      - Failed
-      - Purged
-      example: Available
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    RcwPagingModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwPagingForwardModel'
-      - type: object
-        properties:
-          previousPageToken:
-            type: string
-            description: Previous page token (absent for the first page of the result set)
-    SessionRecordingModel:
-      type: object
-      properties:
-        recording:
-          $ref: '#/components/schemas/RecordingModel'
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - $ref: '#/components/schemas/RecordingBaseModel'
+      - $ref: '#/components/schemas/RecordingSharingModel'
     WebinarTitleModel:
       type: object
       required:
@@ -540,6 +663,189 @@ components:
           minLength: 0
           example: Quarterly All-hands event to present recent news about our company to employees
           default: ''
+    RcwRoleEnum:
+      type: string
+      description: 'The role of the webinar session participant/invitee.
+
+        See also: [Understanding Webinar Roles](https://support.ringcentral.com/webinar/getting-started/understanding-ringcentral-webinar-roles.html)
+
+        '
+      enum:
+      - Panelist
+      - CoHost
+      - Host
+      - Attendee
+      example: Panelist
+    ParticipantReducedModel:
+      readOnly: true
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceIdModel'
+      - $ref: '#/components/schemas/RcwBaseContactModel'
+      - $ref: '#/components/schemas/RcwRoleAttributeModel'
+      - $ref: '#/components/schemas/OriginalRoleModel'
+      - $ref: '#/components/schemas/RcwLinkedUserModel'
+      - $ref: '#/components/schemas/AvatarOwnerModel'
+      - $ref: '#/components/schemas/ParticipantTypeModel'
+    RcwLinkedUserModel:
+      type: object
+      description: The internal IDs of RC-authenticated users.
+      properties:
+        linkedUser:
+          $ref: '#/components/schemas/RcwDomainUserModel'
+    RcwSessionStatusModel:
+      type: string
+      description: Webinar session status
+      enum:
+      - Scheduled
+      - Active
+      - Finished
+      example: Finished
+    ParticipantExtendedModel:
+      allOf:
+      - $ref: '#/components/schemas/ParticipantBaseModel'
+      - type: object
+        properties:
+          joinTime:
+            type: string
+            format: date-time
+            description: The time (earliest) when this participant joined the session
+          leaveTime:
+            type: string
+            format: date-time
+            description: The time (latest) when this participant left the session
+          wasEjected:
+            type: boolean
+            description: Indicates if this participant was ejected from the webinar
+          inviteeId:
+            type: string
+            description: For invited participants - Invitee ID (matches Configuration API Invitee IDs)
+          registrantId:
+            type: string
+            description: Registrant ID
+            example: '12345678'
+          uniqueUserHash:
+            type: string
+            description: The hash string which is unique for each unique user
+            example: qzR4wNbddziRil7i033ELlb3KXrJDsw8mOyj970J+so=
+    RcwBaseContactModel:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: First (given) name
+          maxLength: 64
+          example: John
+          x-sensitive-data: masked
+        lastName:
+          type: string
+          description: Last (family) name
+          maxLength: 64
+          example: Doe
+          x-sensitive-data: masked
+    SessionGlobalListResource:
+      type: object
+      required:
+      - records
+      - paging
+      properties:
+        records:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/SessionGlobalResource'
+        paging:
+          $ref: '#/components/schemas/RcwPagingModel'
+    SessionLivestreamListModel:
+      type: object
+      readOnly: true
+      properties:
+        livestreams:
+          type: array
+          minItems: 0
+          description: The list of livestreams configured for the session
+          items:
+            $ref: '#/components/schemas/SessionLivestreamMinimalModel'
+    RecordingModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - $ref: '#/components/schemas/RecordingBaseModel'
+    SessionGeneratedModel:
+      type: object
+      properties:
+        videoBridgeId:
+          type: string
+          description: The RCV bridge id
+          example: '839874770'
+    InviteeListResource:
+      type: object
+      required:
+      - records
+      - paging
+      properties:
+        records:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/InviteeModel'
+        paging:
+          $ref: '#/components/schemas/RcwPagingModel'
+    SessionGlobalResource:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - type: object
+        required:
+        - webinar
+        properties:
+          webinar:
+            $ref: '#/components/schemas/WebinarRefModel'
+      - $ref: '#/components/schemas/SessionBaseModel'
+      - $ref: '#/components/schemas/SessionGeneratedModel'
+      - $ref: '#/components/schemas/SessionRecordingModel'
+      - $ref: '#/components/schemas/SessionLivestreamListModel'
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    RcwResourceBaseModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwImmutableResourceIdModel'
+      - type: object
+        required:
+        - creationTime
+        - lastModifiedTime
+        properties:
+          creationTime:
+            type: string
+            description: Object creation time
+            format: date-time
+            readOnly: true
+          lastModifiedTime:
+            type: string
+            description: Object last modification time
+            format: date-time
+            readOnly: true
+    RcwImmutableResourceIdModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal object ID
+          minLength: 1
+          maxLength: 20
+          example: '78654321'
+          readOnly: true
     RecordingBaseModel:
       type: object
       required:
@@ -560,25 +866,27 @@ components:
           $ref: '#/components/schemas/RecordingSharedStatusModel'
         sharedUriExpirationTime:
           $ref: '#/components/schemas/RecordingSharedLinkExpiryModel'
-    ParticipantReducedModel:
-      readOnly: true
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceIdModel'
-      - $ref: '#/components/schemas/RcwBaseContactModel'
-      - $ref: '#/components/schemas/RcwRoleAttributeModel'
-      - $ref: '#/components/schemas/OriginalRoleModel'
-      - $ref: '#/components/schemas/RcwLinkedUserModel'
-      - $ref: '#/components/schemas/AvatarOwnerModel'
-      - $ref: '#/components/schemas/ParticipantTypeModel'
-    HostModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwBaseContactModel'
-      - $ref: '#/components/schemas/RcwLinkedUserModel'
-    SessionRecordingExtendedModel:
-      type: object
-      properties:
-        recording:
-          $ref: '#/components/schemas/RecordingExtendedModel'
+    RecordingSharedLinkExpiryModel:
+      type:
+      - string
+      - 'null'
+      format: date-time
+      description: Time after which recording shared link cannot be accessed by recipients.
+      example: '2023-10-01T10:05:00.000Z'
+    SessionRuntimeStatusModel:
+      type: string
+      description: 'Session runtime status (for ''Active'' Sessions only).
+
+        It is omitted (or null) if the status is not Active
+
+        '
+      enum:
+      - Idle
+      - Practice
+      - GoingLive
+      - Live
+      - Break
+      - Debrief
     RcwPagingForwardModel:
       type: object
       required:
@@ -605,13 +913,17 @@ components:
             May be omitted if the result set does not support backward navigation.
 
             '
-    RecordingSharedLinkExpiryModel:
-      type:
-      - string
-      - 'null'
-      format: date-time
-      description: Time after which recording shared link cannot be accessed by recipients.
-      example: '2023-10-01T10:05:00.000Z'
+    RecordingSharingModel:
+      type: object
+      required:
+      - recordingSharedUri
+      properties:
+        recordingSharedUri:
+          type: string
+          format: uri
+          readOnly: true
+          description: Shared URI of the recording. If a password was required to join a webinar, the URI should contain the password encoded
+          example: https://v.ringcentral.com/w/a/recording/de7yd8ew7yfsdfjh899843rgj?pw=a1b2c3d4
     WebinarSettingsModel:
       type: object
       description: Various settings which define behavior of this Webinar's Sessions
@@ -738,136 +1050,6 @@ components:
           description: Indicates if livestreaming to external streaming provider is enabled
           readOnly: true
           default: true
-    SessionLivestreamMinimalModel:
-      type: object
-      readOnly: true
-      required:
-      - livestreamId
-      - livestreamStatus
-      - serviceProvider
-      properties:
-        livestreamId:
-          type: string
-          description: Identifier of the livestream
-          example: 40740e06-4eec-4458-a86e-8578e192274q
-        serviceProvider:
-          type: string
-          description: Name of the livestreaming service provider
-          example: YoutTube
-        livestreamStatus:
-          $ref: '#/components/schemas/SessionLivestreamStatusModel'
-        previousLivestreamStatus:
-          $ref: '#/components/schemas/SessionLivestreamStatusModel'
-        livestreamStartTime:
-          type: string
-          description: Time at which the session started to publish media to livestream service provider.
-          format: date-time
-        error:
-          $ref: '#/components/schemas/ApiError'
-      example:
-        livestreamId: 40740e06-4eec-4458-a86e-8578e192274q
-        livestreamStatus: Error
-        previousLivestreamStatus: Initialized
-        serviceProvider: YouTube
-        error:
-          errorCode: WLA-123
-          message: Authorization invalid
-    RcwLinkedUserModel:
-      type: object
-      description: The internal IDs of RC-authenticated users.
-      properties:
-        linkedUser:
-          $ref: '#/components/schemas/RcwDomainUserModel'
-    RcwImmutableResourceIdModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal object ID
-          minLength: 1
-          maxLength: 20
-          example: '78654321'
-          readOnly: true
-    RecordingSharingModel:
-      type: object
-      required:
-      - recordingSharedUri
-      properties:
-        recordingSharedUri:
-          type: string
-          format: uri
-          readOnly: true
-          description: Shared URI of the recording. If a password was required to join a webinar, the URI should contain the password encoded
-          example: https://v.ringcentral.com/w/a/recording/de7yd8ew7yfsdfjh899843rgj?pw=a1b2c3d4
-    ParticipantListResource:
-      type: object
-      required:
-      - records
-      - paging
-      properties:
-        records:
-          type: array
-          minItems: 0
-          items:
-            $ref: '#/components/schemas/ParticipantExtendedModel'
-        paging:
-          $ref: '#/components/schemas/RcwPagingModel'
-    RcwBaseContactModel:
-      type: object
-      properties:
-        firstName:
-          type: string
-          description: First (given) name
-          maxLength: 64
-          example: John
-          x-sensitive-data: masked
-        lastName:
-          type: string
-          description: Last (family) name
-          maxLength: 64
-          example: Doe
-          x-sensitive-data: masked
-    ParticipantBaseModel:
-      readOnly: true
-      allOf:
-      - $ref: '#/components/schemas/ParticipantReducedModel'
-      - type: object
-        properties:
-          email:
-            $ref: '#/components/schemas/RcwEmailModel'
-          qnaBlocked:
-            type: boolean
-            description: 'Boolean to indicate if the participant was blocked from Q&A
-
-              '
-            example: true
-    ParticipantExtendedModel:
-      allOf:
-      - $ref: '#/components/schemas/ParticipantBaseModel'
-      - type: object
-        properties:
-          joinTime:
-            type: string
-            format: date-time
-            description: The time (earliest) when this participant joined the session
-          leaveTime:
-            type: string
-            format: date-time
-            description: The time (latest) when this participant left the session
-          wasEjected:
-            type: boolean
-            description: Indicates if this participant was ejected from the webinar
-          inviteeId:
-            type: string
-            description: For invited participants - Invitee ID (matches Configuration API Invitee IDs)
-          registrantId:
-            type: string
-            description: Registrant ID
-            example: '12345678'
-          uniqueUserHash:
-            type: string
-            description: The hash string which is unique for each unique user
-            example: qzR4wNbddziRil7i033ELlb3KXrJDsw8mOyj970J+so=
     RecordingSharedStatusModel:
       type: boolean
       description: 'Indicates if Host or Admin has shared a recording.
@@ -876,251 +1058,61 @@ components:
 
         '
       example: true
-    SessionGlobalListResource:
+    OriginalRoleModel:
       type: object
+      description: Role assigned to participant when invite was sent or during join time (if an invite was not sent)
       required:
-      - records
-      - paging
+      - originalRole
       properties:
-        records:
-          type: array
-          minItems: 0
-          items:
-            $ref: '#/components/schemas/SessionGlobalResource'
-        paging:
-          $ref: '#/components/schemas/RcwPagingModel'
-    SessionGlobalResource:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceBaseModel'
-      - type: object
-        required:
-        - webinar
-        properties:
-          webinar:
-            $ref: '#/components/schemas/WebinarRefModel'
-      - $ref: '#/components/schemas/SessionBaseModel'
-      - $ref: '#/components/schemas/SessionGeneratedModel'
-      - $ref: '#/components/schemas/SessionRecordingModel'
-      - $ref: '#/components/schemas/SessionLivestreamListModel'
-    ParticipantTypeModel:
-      type: object
-      required:
-      - type
-      properties:
-        type:
-          type: string
-          description: The type of the participant specified in invite or determined at join time
-          enum:
-          - User
-          - Room
-          default: User
-    WebinarRefModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceIdModel'
-      - $ref: '#/components/schemas/WebinarTitleModel'
-      - $ref: '#/components/schemas/WebinarHostModel'
-    RecordingModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceBaseModel'
-      - $ref: '#/components/schemas/RecordingBaseModel'
-    SessionLivestreamListModel:
-      type: object
-      readOnly: true
-      properties:
-        livestreams:
-          type: array
-          minItems: 0
-          description: The list of livestreams configured for the session
-          items:
-            $ref: '#/components/schemas/SessionLivestreamMinimalModel'
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    RcwRoleAttributeModel:
-      type: object
-      description: The attribute declaration to indicate webinar session participant/invitee role
-      required:
-      - role
-      properties:
-        role:
+        originalRole:
           $ref: '#/components/schemas/RcwRoleEnum'
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    WebinarResource:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceBaseModel'
-      - $ref: '#/components/schemas/WebinarTitleModel'
-      - type: object
-        properties:
-          settings:
-            $ref: '#/components/schemas/WebinarSettingsModel'
-      - $ref: '#/components/schemas/WebinarHostModel'
-    RcwSessionStatusModel:
-      type: string
-      description: Webinar session status
-      enum:
-      - Scheduled
-      - Active
-      - Finished
-      example: Finished
-    SessionBaseModel:
-      allOf:
-      - $ref: '#/components/schemas/SessionMinimalModel'
-      - type: object
-        properties:
-          scheduledStartTime:
-            type: string
-            description: Session scheduled start time.
-            format: date-time
-          scheduledDuration:
-            type: integer
-            format: int32
-            description: The scheduled duration of the Session in seconds.
-            example: 1800
-          timeZone:
-            type: string
-            description: IANA-compatible time zone name (see https://www.iana.org/time-zones).
-            example: America/New_York
-          localeCode:
-            type: string
-            description: Session locale code. Can't be blank or null.
-            example: en-US
-            default: en-US
-          panelJoinTimeOffset:
-            type: integer
-            format: int32
-            description: 'The time offset (positive, in seconds) indicating how much in advance
-
-              (comparing to "scheduledStartTime") panel members should join for the pre-webinar team sync
-
-              '
-            minimum: 0
-            default: 0
-            example: 900
-          broadcastingStartTime:
-            type: string
-            description: The time when broadcasting started.
-            format: date-time
-          broadcastingEndTime:
-            type: string
-            description: The time when broadcasting ended.
-            format: date-time
-          status:
-            $ref: '#/components/schemas/RcwSessionStatusModel'
-          runtimeStatus:
-            $ref: '#/components/schemas/SessionRuntimeStatusModel'
-          participantCount:
-            type: integer
-            format: int32
-            description: The number of participants (of all roles) who joined the webinar
-            example: 150
-          attendeeCount:
-            type: integer
-            format: int32
-            description: The number of attendees who joined the webinar
-            example: 145
-          uniqueParticipantCount:
-            type: integer
-            format: int32
-            description: Unique number of participants (of all roles) who joined the webinar
-            example: 140
-          uniqueAttendeeCount:
-            type: integer
-            format: int32
-            description: Unique number of attendees who joined the webinar
-            example: 135
-    InviteeModel:
-      allOf:
-      - $ref: '#/components/schemas/ParticipantBaseModel'
-      - type: object
-        required:
-        - sendInvite
-        - joined
-        properties:
-          sendInvite:
-            type: boolean
-            description: 'Indicates if invite/cancellation emails was sent to this invitee.
-
-              '
-            example: true
-          joined:
-            type: boolean
-            description: Indicates that this invitee joined the session
-            example: true
-  responses:
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
-
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    Forbidden:
-      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
-
-        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
-
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
   parameters:
-    Role:
-      name: role
+    RcwSessionId:
+      name: sessionId
+      in: path
+      description: Identifier of the Session.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 20
+      example: '353535353'
+    EndTimeFrom:
+      name: endTimeFrom
       in: query
-      description: The role of the invitee/participant.
+      description: The beginning of the time window by 'endTime' .
+      required: true
+      explode: false
+      schema:
+        type: string
+        format: date-time
+    SessionStatus:
+      name: status
+      in: query
+      description: Filter to return only webinar sessions in certain status. Multiple values are supported.
       required: false
-      style: form
       explode: true
       schema:
         type: array
         items:
-          $ref: '#/components/schemas/RcwRoleEnum'
+          $ref: '#/components/schemas/RcwSessionStatusModel'
+      example:
+      - Active
+      - Finished
+    RcwInviteeId:
+      name: inviteeId
+      in: path
+      description: Identifier of the Session Invitee.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 20
+      example: '77777777'
     PageToken:
       name: pageToken
       in: query
@@ -1144,36 +1136,6 @@ components:
         type: array
         items:
           $ref: '#/components/schemas/RcwRoleEnum'
-    RcwWebinarId:
-      name: webinarId
-      in: path
-      description: Identifier of the Webinar.
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 20
-      example: '98989898'
-    EndTimeFrom:
-      name: endTimeFrom
-      in: query
-      description: The beginning of the time window by 'endTime' .
-      required: true
-      explode: false
-      schema:
-        type: string
-        format: date-time
-    EndTimeTo:
-      name: endTimeTo
-      in: query
-      description: The end of the time window by 'endTime' .
-      required: true
-      explode: false
-      schema:
-        type: string
-        format: date-time
     HostUserId:
       name: hostUserId
       in: query
@@ -1190,43 +1152,26 @@ components:
           maxLength: 20
       example:
       - '77777777'
-    RcwSessionId:
-      name: sessionId
-      in: path
-      description: Identifier of the Session.
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 20
-      example: '353535353'
-    RcwInviteeId:
-      name: inviteeId
-      in: path
-      description: Identifier of the Session Invitee.
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 20
-      example: '77777777'
-    SessionStatus:
-      name: status
+    Role:
+      name: role
       in: query
-      description: Filter to return only webinar sessions in certain status. Multiple values are supported.
+      description: The role of the invitee/participant.
       required: false
+      style: form
       explode: true
       schema:
         type: array
         items:
-          $ref: '#/components/schemas/RcwSessionStatusModel'
-      example:
-      - Active
-      - Finished
+          $ref: '#/components/schemas/RcwRoleEnum'
+    EndTimeTo:
+      name: endTimeTo
+      in: query
+      description: The end of the time window by 'endTime' .
+      required: true
+      explode: false
+      schema:
+        type: string
+        format: date-time
     PerPage:
       name: perPage
       in: query
@@ -1244,6 +1189,61 @@ components:
         maximum: 1000
         default: 100
       example: 100
+    RcwWebinarId:
+      name: webinarId
+      in: path
+      description: Identifier of the Webinar.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 20
+      example: '98989898'
+  responses:
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
+
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
   securitySchemes:
     OAuth2:
       type: oauth2

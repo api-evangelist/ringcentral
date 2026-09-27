@@ -390,60 +390,19 @@ paths:
       x-user-permission: CallQueueToCallQueue
 components:
   schemas:
-    BulkAssignItem:
+    PageNavigationModel:
       type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
       properties:
-        departmentId:
-          type: string
-        addedExtensionIds:
-          type: array
-          items:
-            type: string
-        removedExtensionIds:
-          type: array
-          items:
-            type: string
-    ExtensionInfo:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: Internal identifier of an extension
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of an extension
-        name:
-          type: string
-          description: Extension name
-        extensionNumber:
-          type: string
-          description: Extension short number
-        partnerId:
-          type: string
-          description: 'For partner applications. Internal identifier of an extension
-
-            created by partner. The RingCentral supports the mapping of accounts and
-
-            stores the corresponding account ID/extension ID for each partner ID of
-
-            a client application. In request URIs partner IDs are accepted instead
-
-            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
-
-            Though in response URIs contain the corresponding account IDs and extension
-
-            IDs. In all request and response bodies these values are reflected via
-
-            partnerId attributes of account and extension
-
-            '
-      description: 'Information on the extension, to which the phone number is assigned.
-
-        Returned only for the request of Account phone number list
-
-        '
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
     EnumeratedPagingModel:
       type: object
       required:
@@ -514,30 +473,6 @@ components:
 
             '
           example: 25
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-    CallQueueBulkAssignResource:
-      type: object
-      properties:
-        addedExtensionIds:
-          type: array
-          items:
-            type: string
-        removedExtensionIds:
-          type: array
-          items:
-            type: string
     CallQueues:
       required:
       - navigation
@@ -559,6 +494,96 @@ components:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
+    CallQueueInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call queue
+        id:
+          type: string
+          description: Internal identifier of a call queue
+        extensionNumber:
+          type: string
+          description: Extension number of a call queue
+        name:
+          type: string
+          description: Name of a call queue
+        status:
+          type: string
+          description: Call queue status
+          enum:
+          - Enabled
+          - Disabled
+          - NotActivated
+        subType:
+          type: string
+          description: Indicates whether it is an emergency call queue extension or not
+          enum:
+          - Emergency
+    BulkAssignItem:
+      type: object
+      properties:
+        departmentId:
+          type: string
+        addedExtensionIds:
+          type: array
+          items:
+            type: string
+        removedExtensionIds:
+          type: array
+          items:
+            type: string
+    UserCallQueues:
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of queues where an extension is an agent
+          items:
+            $ref: '#/components/schemas/QueueShortInfoResource'
+    ExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        name:
+          type: string
+          description: Extension name
+        extensionNumber:
+          type: string
+          description: Extension short number
+        partnerId:
+          type: string
+          description: 'For partner applications. Internal identifier of an extension
+
+            created by partner. The RingCentral supports the mapping of accounts and
+
+            stores the corresponding account ID/extension ID for each partner ID of
+
+            a client application. In request URIs partner IDs are accepted instead
+
+            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
+
+            Though in response URIs contain the corresponding account IDs and extension
+
+            IDs. In all request and response bodies these values are reflected via
+
+            partnerId attributes of account and extension
+
+            '
+      description: 'Information on the extension, to which the phone number is assigned.
+
+        Returned only for the request of Account phone number list
+
+        '
     QueueShortInfoResource:
       type: object
       properties:
@@ -568,49 +593,6 @@ components:
         name:
           type: string
           description: Call queue name (read-only)
-    CallQueueDetails:
-      allOf:
-      - $ref: '#/components/schemas/CallQueueInfo'
-      - type: object
-        properties:
-          serviceLevelSettings:
-            $ref: '#/components/schemas/CallQueueServiceLevelSettings'
-          editableMemberStatus:
-            type: boolean
-            description: Allows members to change their queue status
-          alertTimer:
-            type: integer
-            format: int32
-            description: 'Alert timer or pickup setting. Delay time in seconds before call queue group members are notified when calls are queued
-
-              '
-            enum:
-            - 5
-            - 10
-            - 15
-            - 20
-            - 30
-            - 45
-            - 60
-            - 120
-            - 180
-            - 240
-            - 300
-            - 360
-            - 420
-            - 480
-            - 540
-            - 600
-    CallQueueOverflowSettings:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          description: Call queue overflow status
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallQueueInfo'
     PageNavigationUri:
       type: object
       additionalProperties: false
@@ -619,6 +601,20 @@ components:
           type: string
           description: Canonical URI to retrieve the particular page of the result set
           format: uri
+    CallQueueMemberInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call queue member
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of a call queue member
+        extensionNumber:
+          type: string
+          description: Extension number of a call queue member
     CallQueueOverflowSettingsRequestResource:
       type: object
       properties:
@@ -629,12 +625,37 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CallQueueIdResource'
-    CallQueueIdResource:
+    CallQueueMembers:
+      required:
+      - navigation
+      - paging
+      - records
+      - uri
       type: object
       properties:
-        id:
+        uri:
           type: string
-          description: Internal identifier of a call queue
+          format: uri
+          description: Link to a call queue members resource
+        records:
+          type: array
+          description: List of call queue members
+          items:
+            $ref: '#/components/schemas/CallQueueMemberInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CallQueueOverflowSettings:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Call queue overflow status
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallQueueInfo'
     DepartmentBulkAssignResource:
       type: object
       description: 'Please note that legacy ''Department'' extension type corresponds to
@@ -682,6 +703,56 @@ components:
 
             '
       description: Call queue service level settings
+    CallQueueDetails:
+      allOf:
+      - $ref: '#/components/schemas/CallQueueInfo'
+      - type: object
+        properties:
+          serviceLevelSettings:
+            $ref: '#/components/schemas/CallQueueServiceLevelSettings'
+          editableMemberStatus:
+            type: boolean
+            description: Allows members to change their queue status
+          alertTimer:
+            type: integer
+            format: int32
+            description: 'Alert timer or pickup setting. Delay time in seconds before call queue group members are notified when calls are queued
+
+              '
+            enum:
+            - 5
+            - 10
+            - 15
+            - 20
+            - 30
+            - 45
+            - 60
+            - 120
+            - 180
+            - 240
+            - 300
+            - 360
+            - 420
+            - 480
+            - 540
+            - 600
+    CallQueueIdResource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a call queue
+    CallQueueBulkAssignResource:
+      type: object
+      properties:
+        addedExtensionIds:
+          type: array
+          items:
+            type: string
+        removedExtensionIds:
+          type: array
+          items:
+            type: string
     DepartmentMemberList:
       type: object
       description: 'Please note that legacy ''Department'' extension type corresponds to
@@ -703,84 +774,13 @@ components:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
-    UserCallQueues:
-      type: object
-      properties:
-        records:
-          type: array
-          description: List of queues where an extension is an agent
-          items:
-            $ref: '#/components/schemas/QueueShortInfoResource'
-    CallQueueInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a call queue
-        id:
-          type: string
-          description: Internal identifier of a call queue
-        extensionNumber:
-          type: string
-          description: Extension number of a call queue
-        name:
-          type: string
-          description: Name of a call queue
-        status:
-          type: string
-          description: Call queue status
-          enum:
-          - Enabled
-          - Disabled
-          - NotActivated
-        subType:
-          type: string
-          description: Indicates whether it is an emergency call queue extension or not
-          enum:
-          - Emergency
-    CallQueueMembers:
-      required:
-      - navigation
-      - paging
-      - records
-      - uri
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a call queue members resource
-        records:
-          type: array
-          description: List of call queue members
-          items:
-            $ref: '#/components/schemas/CallQueueMemberInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    CallQueueMemberInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a call queue member
-        id:
-          type: integer
-          format: int64
-          description: Internal identifier of a call queue member
-        extensionNumber:
-          type: string
-          description: Extension number of a call queue member
   parameters:
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true
@@ -790,12 +790,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    ExtensionId:
-      name: extensionId
+    AccountId:
+      name: accountId
       in: path
-      description: 'Internal identifier of the RingCentral extension/user
+      description: 'Internal identifier of the RingCentral account
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true

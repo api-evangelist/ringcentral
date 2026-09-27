@@ -177,7 +177,20 @@ paths:
       x-throttling-group: Light
 components:
   schemas:
-    PermissionResource:
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    PermissionCategoryResource:
       type: object
       properties:
         uri:
@@ -189,25 +202,6 @@ components:
           type: string
         description:
           type: string
-        assignable:
-          type: boolean
-          default: false
-        readOnly:
-          type: boolean
-          default: false
-        siteCompatible:
-          type: string
-          description: Site compatibility flag set for permission
-          enum:
-          - Incompatible
-          - Compatible
-          - Independent
-        category:
-          $ref: '#/components/schemas/PermissionCategoryIdResource'
-        includedPermissions:
-          type: array
-          items:
-            $ref: '#/components/schemas/PermissionIdResource'
     PermissionsCapabilities:
       type: object
       description: Advanced permissions capabilities. Returned if `advancedPermissions` query parameter is set to `true`.
@@ -221,119 +215,6 @@ components:
         grantEnabled:
           type: boolean
           description: Specifies if the users who were enabled with the listed permission can grant it further to other users
-    PermissionCategoryIdResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        id:
-          type: string
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    ActivePermissionResource:
-      type: object
-      properties:
-        permission:
-          $ref: '#/components/schemas/PermissionIdResource'
-        effectiveRole:
-          $ref: '#/components/schemas/RoleIdResource'
-        scopes:
-          type: array
-          items:
-            type: string
-            enum:
-            - Account
-            - AllExtensions
-            - Federation
-            - NonUserExtensions
-            - RoleBased
-            - Self
-            - UserExtensions
-    PermissionCategoryCollectionResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/PermissionCategoryResource'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-    PermissionIdResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        id:
-          type: string
-        siteCompatible:
-          type: string
-          description: Site compatibility flag set for permission
-          enum:
-          - Compatible
-          - Incompatible
-          - Independent
-        readOnly:
-          type: boolean
-          description: Specifies if the permission is editable on UI (if set to `true`) or not (if set to `false`)
-        assignable:
-          type: boolean
-          description: Specifies if the permission can be assigned by the account administrator
-        permissionsCapabilities:
-          $ref: '#/components/schemas/PermissionsCapabilities'
-    PermissionCategoryResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        id:
-          type: string
-        displayName:
-          type: string
-        description:
-          type: string
-    AuthProfileCheckResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        successful:
-          type: boolean
-          default: false
-        details:
-          $ref: '#/components/schemas/ActivePermissionResource'
-    AuthProfileResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        permissions:
-          type: array
-          items:
-            $ref: '#/components/schemas/ActivePermissionResource'
-    RoleIdResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        id:
-          type: string
     EnumeratedPagingModel:
       type: object
       required:
@@ -404,19 +285,6 @@ components:
 
             '
           example: 25
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
     PermissionCollectionResource:
       type: object
       properties:
@@ -431,7 +299,152 @@ components:
           $ref: '#/components/schemas/EnumeratedPagingModel'
         navigation:
           $ref: '#/components/schemas/PageNavigationModel'
+    ActivePermissionResource:
+      type: object
+      properties:
+        permission:
+          $ref: '#/components/schemas/PermissionIdResource'
+        effectiveRole:
+          $ref: '#/components/schemas/RoleIdResource'
+        scopes:
+          type: array
+          items:
+            type: string
+            enum:
+            - Account
+            - AllExtensions
+            - Federation
+            - NonUserExtensions
+            - RoleBased
+            - Self
+            - UserExtensions
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    PermissionIdResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+        siteCompatible:
+          type: string
+          description: Site compatibility flag set for permission
+          enum:
+          - Compatible
+          - Incompatible
+          - Independent
+        readOnly:
+          type: boolean
+          description: Specifies if the permission is editable on UI (if set to `true`) or not (if set to `false`)
+        assignable:
+          type: boolean
+          description: Specifies if the permission can be assigned by the account administrator
+        permissionsCapabilities:
+          $ref: '#/components/schemas/PermissionsCapabilities'
+    PermissionCategoryIdResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+    PermissionCategoryCollectionResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionCategoryResource'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+    AuthProfileResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivePermissionResource'
+    PermissionResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        assignable:
+          type: boolean
+          default: false
+        readOnly:
+          type: boolean
+          default: false
+        siteCompatible:
+          type: string
+          description: Site compatibility flag set for permission
+          enum:
+          - Incompatible
+          - Compatible
+          - Independent
+        category:
+          $ref: '#/components/schemas/PermissionCategoryIdResource'
+        includedPermissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionIdResource'
+    RoleIdResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+    AuthProfileCheckResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        successful:
+          type: boolean
+          default: false
+        details:
+          $ref: '#/components/schemas/ActivePermissionResource'
   parameters:
+    Page:
+      name: page
+      in: query
+      description: The result set page number (1-indexed) to return
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 1
+      example: 1
     ExtensionId:
       name: extensionId
       in: path
@@ -447,34 +460,6 @@ components:
         type: string
         default: '~'
       example: '~'
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    Page:
-      name: page
-      in: query
-      description: The result set page number (1-indexed) to return
-      required: false
-      explode: false
-      schema:
-        type: integer
-        format: int32
-        minimum: 1
-        maximum: 1000
-        default: 1
-      example: 1
     PerPage:
       name: perPage
       in: query
@@ -492,6 +477,21 @@ components:
         maximum: 1000
         default: 100
       example: 100
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
   securitySchemes:
     OAuth2:
       type: oauth2

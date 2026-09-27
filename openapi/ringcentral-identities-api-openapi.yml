@@ -76,16 +76,146 @@ paths:
       x-throttling-group: Light
       x-app-permission: SocialMessaging
 components:
+  parameters:
+    SocMsgOrderBy:
+      in: query
+      name: orderBy
+      required: false
+      description: Order results by specified field.
+      schema:
+        $ref: '#/components/schemas/SocMsgCreationTimeOrder'
+    IdentityId:
+      in: path
+      name: identityId
+      required: true
+      schema:
+        $ref: '#/components/schemas/IdentityId'
+    IdentityGroupIds:
+      name: identityGroupIds
+      description: Filter based on the specified identityGroupIds (separated by commas).
+      in: query
+      required: false
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    SourceId:
+      name: sourceId
+      description: Filter based on the specified sourceId.
+      in: query
+      required: false
+      schema:
+        type: string
+    PageToken:
+      name: pageToken
+      in: query
+      description: 'The token indicating the particular page of the result set to be retrieved.
+
+        If omitted the first page will be returned.
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: string
+    UUID:
+      name: uuid
+      description: Filter based on the specified uuid.
+      in: query
+      required: false
+      schema:
+        type: string
+    PerPage:
+      name: perPage
+      in: query
+      description: 'The number of items per page. If provided value in the request
+
+        is greater than a maximum, the maximum value is applied
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 100
+      example: 100
+    UserId:
+      name: userId
+      description: Filter based on the specified userId.
+      in: query
+      required: false
+      schema:
+        type: string
   schemas:
-    IdentityScreenName:
-      description: Screen name of the identity.
+    IdentityFbBio:
+      description: 'Facebook biography of the identity.
+
+
+        Applicable to Facebook and Messenger channels only.
+
+        '
       type: string
-      example: John D.
+      example: Painter living in Paris
     SocMsgEmailAddress:
       description: Email address.
       type: string
       format: email
       example: user@example.com
+    IdentityViberVersion:
+      description: 'Viber application version of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: 19.5.0
+    IdentityFbLocale:
+      description: 'Facebook locale of the identity.
+
+
+        Applicable to Facebook and Messenger channels only.
+
+        '
+      type: string
+      example: fr_FR
+    IdentityFbCategory:
+      description: 'Facebook category of the identity.
+
+
+        Applicable to Facebook and Messenger channels only.
+
+        '
+      type: string
+      example: Computers/Internet
+    IdentityMobileDeviceInfo:
+      description: 'Device info of the identity.
+
+
+        Applicable to RingCX Digital Messaging channels only.
+
+        '
+      type: string
+      example: iPhone (iPhone); iOS 15.0.2
+    SocMsgFirstName:
+      description: FirstName.
+      type: string
+      example: John
+    IdentityTwFollowingCount:
+      description: 'Count of Twitter accounts followed by the identity.
+
+
+        Applicable to Twitter channels only.
+
+        '
+      type: integer
+      format: int32
+      example: 500
     IdentityTwLocation:
       description: 'Twitter location of the identity.
 
@@ -95,10 +225,63 @@ components:
         '
       type: string
       example: Paris
-    SocMsgCompany:
-      description: Company.
+    SocMsgGender:
+      description: Gender.
+      type:
+      - string
+      - 'null'
+      example: Woman
+      enum:
+      - Man
+      - Woman
+    IdentitiesList:
+      type: object
+      required:
+      - records
+      - paging
+      properties:
+        records:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/IdentityModel'
+        paging:
+          $ref: '#/components/schemas/NonEnumeratedPagingModel'
+    IdentityApiVersion:
+      description: 'Viber API version of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
       type: string
-      example: Test Company
+      example: '10'
+    IdentityType:
+      description: Type of the identity.
+      type: string
+      enum:
+      - AppleMessagesForBusiness
+      - Email
+      - EngageMessaging
+      - Facebook
+      - GoogleBusinessMessages
+      - GoogleMyBusiness
+      - Instagram
+      - Linkedin
+      - Twitter
+      - Viber
+      - WhatsApp
+      - Youtube
+    IdentityTwFollowersCount:
+      description: 'Twitter followers count of the identity.
+
+
+        Applicable to Twitter channels only.
+
+        '
+      type: integer
+      format: int32
+      example: 10
     IdentityExtraValues:
       description: Additional data to store along the identity.
       type: object
@@ -106,6 +289,225 @@ components:
         type: string
       example:
         key: value
+    IdentityTwStatusesCount:
+      description: 'Count of tweets of the identity.
+
+
+        Applicable to Twitter channels only.
+
+        '
+      type: integer
+      format: int32
+      example: 42
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    IdentityMcc:
+      description: 'Viber mobile country code of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: '1'
+    IdentityScreenName:
+      description: Screen name of the identity.
+      type: string
+      example: John D.
+    SocMsgCreationTimeOrder:
+      description: Ordering by creationTime is descending by default.
+      type: string
+      enum:
+      - -creationTime
+      - +creationTime
+      - creationTime
+      default: -creationTime
+      example: +creationTime
+    SocMsgCreationTime:
+      description: Creation time of the resource.
+      format: date-time
+      type: string
+      example: '2023-02-04T12:43:07Z'
+    NonEnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        pageToken:
+          type: string
+          description: 'Current page token. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+        nextPageToken:
+          type: string
+          description: A page token to be used to fetch the next page of the result set. May be omitted if the current page is the last one.
+        previousPageToken:
+          type: string
+          description: 'A page token to be used to fetch the previous page of the result set.
+
+            May be omitted if the current page is the first one or if the result set does not support backward navigation.
+
+            '
+        firstPageToken:
+          type: string
+          description: A page token to be used to fetch the first page of the result set.
+    SocMsgLastName:
+      description: LastName.
+      type: string
+      example: Doe
+    IdentityGroupId:
+      description: 'The identity group id references the identity group that contains
+
+        all information (phone, notes, etc.). Many identities may belong to
+
+        this group. If the identity group id is null, it means that identity
+
+        does not have a group and any extra information.
+
+        '
+      type: string
+      example: 54085e5b7aa58d8b5d00006c
+    IdentityUserIds:
+      description: List of the associated user identifiers who can use the identity.
+      items:
+        type: string
+        example: 54085e5b7aa58d8b5d00006c
+      type: array
+      minItems: 0
+    IdentityAvatarURI:
+      description: Identity's avatar Uri.
+      type: string
+      format: uri
+      example: https://example.com/assets/avatar/default-79fd530c58c2a6b83a11fcc0e842ed7023ceb69292cfeb857bc2af2c624b90fd.png
+    IdentityDisplayName:
+      description: Display name of the identity.
+      type: string
+      example: John Doe
+    IdentityCountry:
+      description: 'Viber country of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: FR
+    IdentityDeviceType:
+      description: 'Viber device type of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: SM-G970U1
+    SocMsgPhoneNumber:
+      description: Phone number.
+      type: string
+      example: '+33634231224'
+    IdentityUUID:
+      description: UUID of the identity.
+      type: string
+      example: 9680ab94-3b78-495c-bb2c-a969954d8260
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    SocMsgLastModifiedTime:
+      description: The time when the last modification was completed.
+      format: date-time
+      type: string
+      example: '2023-02-04T12:43:07Z'
+    SocMsgCompany:
+      description: Company.
+      type: string
+      example: Test Company
+    IdentityLanguage:
+      description: 'Viber language of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: fr-FR
+    IdentityId:
+      type: string
+      description: Identity identifier.
+      example: 506d9e817aa58d1259000f12
+    IdentityMnc:
+      description: 'Viber mobile network code of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: '220'
+    IdentityTwDescription:
+      description: 'Twitter description of the identity.
+
+
+        Applicable to Twitter channels only.
+
+        '
+      type: string
+      example: Software Engineer
+    IdentityIgFollowersCount:
+      description: 'Instagram followers count of the identity.
+
+
+        Applicable to Instagram and InstagramMessaging channels only.
+
+        '
+      type: integer
+      format: int32
+      example: 10
+    IdentityPrimaryDeviceOs:
+      description: 'Viber primary device OS of the identity.
+
+
+        Applicable to Viber channels only.
+
+        '
+      type: string
+      example: Android 11
     IdentityModel:
       type: object
       required:
@@ -186,442 +588,13 @@ components:
           $ref: '#/components/schemas/IdentityPrimaryDeviceOs'
         viberVersion:
           $ref: '#/components/schemas/IdentityViberVersion'
-    IdentityViberVersion:
-      description: 'Viber application version of the identity.
-
-
-        Applicable to Viber channels only.
-
-        '
-      type: string
-      example: 19.5.0
-    IdentityMobileDeviceInfo:
-      description: 'Device info of the identity.
-
-
-        Applicable to RingCX Digital Messaging channels only.
-
-        '
-      type: string
-      example: iPhone (iPhone); iOS 15.0.2
-    IdentityId:
-      type: string
-      description: Identity identifier.
-      example: 506d9e817aa58d1259000f12
-    IdentityUserIds:
-      description: List of the associated user identifiers who can use the identity.
-      items:
-        type: string
-        example: 54085e5b7aa58d8b5d00006c
-      type: array
-      minItems: 0
-    IdentityIgFollowersCount:
-      description: 'Instagram followers count of the identity.
-
-
-        Applicable to Instagram and InstagramMessaging channels only.
-
-        '
-      type: integer
-      format: int32
-      example: 10
-    IdentityLanguage:
-      description: 'Viber language of the identity.
-
-
-        Applicable to Viber channels only.
-
-        '
-      type: string
-      example: fr-FR
-    IdentityType:
-      description: Type of the identity.
-      type: string
-      enum:
-      - AppleMessagesForBusiness
-      - Email
-      - EngageMessaging
-      - Facebook
-      - GoogleBusinessMessages
-      - GoogleMyBusiness
-      - Instagram
-      - Linkedin
-      - Twitter
-      - Viber
-      - WhatsApp
-      - Youtube
-    IdentityAvatarURI:
-      description: Identity's avatar Uri.
-      type: string
-      format: uri
-      example: https://example.com/assets/avatar/default-79fd530c58c2a6b83a11fcc0e842ed7023ceb69292cfeb857bc2af2c624b90fd.png
-    IdentityFbCategory:
-      description: 'Facebook category of the identity.
-
-
-        Applicable to Facebook and Messenger channels only.
-
-        '
-      type: string
-      example: Computers/Internet
-    SocMsgLastName:
-      description: LastName.
-      type: string
-      example: Doe
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    IdentityDeviceType:
-      description: 'Viber device type of the identity.
-
-
-        Applicable to Viber channels only.
-
-        '
-      type: string
-      example: SM-G970U1
-    IdentityDisplayName:
-      description: Display name of the identity.
-      type: string
-      example: John Doe
-    IdentityFbLocale:
-      description: 'Facebook locale of the identity.
-
-
-        Applicable to Facebook and Messenger channels only.
-
-        '
-      type: string
-      example: fr_FR
-    IdentityPrimaryDeviceOs:
-      description: 'Viber primary device OS of the identity.
-
-
-        Applicable to Viber channels only.
-
-        '
-      type: string
-      example: Android 11
-    IdentitiesList:
-      type: object
-      required:
-      - records
-      - paging
-      properties:
-        records:
-          type: array
-          minItems: 0
-          items:
-            $ref: '#/components/schemas/IdentityModel'
-        paging:
-          $ref: '#/components/schemas/NonEnumeratedPagingModel'
-    IdentityTwDescription:
-      description: 'Twitter description of the identity.
-
-
-        Applicable to Twitter channels only.
-
-        '
-      type: string
-      example: Software Engineer
-    IdentityMcc:
-      description: 'Viber mobile country code of the identity.
-
-
-        Applicable to Viber channels only.
-
-        '
-      type: string
-      example: '1'
-    IdentityUUID:
-      description: UUID of the identity.
-      type: string
-      example: 9680ab94-3b78-495c-bb2c-a969954d8260
-    IdentityMnc:
-      description: 'Viber mobile network code of the identity.
-
-
-        Applicable to Viber channels only.
-
-        '
-      type: string
-      example: '220'
-    SocMsgFirstName:
-      description: FirstName.
-      type: string
-      example: John
-    NonEnumeratedPagingModel:
-      type: object
-      required:
-      - perPage
-      additionalProperties: false
-      properties:
-        perPage:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'Current page size, describes how many items are in each page.
-
-            Matches "perPage" parameter from the request.
-
-            '
-          example: 50
-        pageToken:
-          type: string
-          description: 'Current page token. May be omitted if result is empty (because non-existent page
-
-            was specified or perPage=0 was requested)
-
-            '
-        nextPageToken:
-          type: string
-          description: A page token to be used to fetch the next page of the result set. May be omitted if the current page is the last one.
-        previousPageToken:
-          type: string
-          description: 'A page token to be used to fetch the previous page of the result set.
-
-            May be omitted if the current page is the first one or if the result set does not support backward navigation.
-
-            '
-        firstPageToken:
-          type: string
-          description: A page token to be used to fetch the first page of the result set.
-    SocMsgCreationTimeOrder:
-      description: Ordering by creationTime is descending by default.
-      type: string
-      enum:
-      - -creationTime
-      - +creationTime
-      - creationTime
-      default: -creationTime
-      example: +creationTime
-    IdentityCountry:
-      description: 'Viber country of the identity.
-
-
-        Applicable to Viber channels only.
-
-        '
-      type: string
-      example: FR
-    SocMsgGender:
-      description: Gender.
-      type:
-      - string
-      - 'null'
-      example: Woman
-      enum:
-      - Man
-      - Woman
-    IdentityTwFollowingCount:
-      description: 'Count of Twitter accounts followed by the identity.
-
-
-        Applicable to Twitter channels only.
-
-        '
-      type: integer
-      format: int32
-      example: 500
-    SocMsgCreationTime:
-      description: Creation time of the resource.
-      format: date-time
-      type: string
-      example: '2023-02-04T12:43:07Z'
-    IdentityTwFollowersCount:
-      description: 'Twitter followers count of the identity.
-
-
-        Applicable to Twitter channels only.
-
-        '
-      type: integer
-      format: int32
-      example: 10
-    SocMsgPhoneNumber:
-      description: Phone number.
-      type: string
-      example: '+33634231224'
-    SocMsgLastModifiedTime:
-      description: The time when the last modification was completed.
-      format: date-time
-      type: string
-      example: '2023-02-04T12:43:07Z'
-    IdentityGroupId:
-      description: 'The identity group id references the identity group that contains
-
-        all information (phone, notes, etc.). Many identities may belong to
-
-        this group. If the identity group id is null, it means that identity
-
-        does not have a group and any extra information.
-
-        '
-      type: string
-      example: 54085e5b7aa58d8b5d00006c
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    IdentityTwStatusesCount:
-      description: 'Count of tweets of the identity.
-
-
-        Applicable to Twitter channels only.
-
-        '
-      type: integer
-      format: int32
-      example: 42
-    IdentityApiVersion:
-      description: 'Viber API version of the identity.
-
-
-        Applicable to Viber channels only.
-
-        '
-      type: string
-      example: '10'
-    IdentityFbBio:
-      description: 'Facebook biography of the identity.
-
-
-        Applicable to Facebook and Messenger channels only.
-
-        '
-      type: string
-      example: Painter living in Paris
-  parameters:
-    SocMsgOrderBy:
-      in: query
-      name: orderBy
-      required: false
-      description: Order results by specified field.
-      schema:
-        $ref: '#/components/schemas/SocMsgCreationTimeOrder'
-    PageToken:
-      name: pageToken
-      in: query
-      description: 'The token indicating the particular page of the result set to be retrieved.
-
-        If omitted the first page will be returned.
-
-        '
-      required: false
-      explode: false
-      schema:
-        type: string
-    SourceId:
-      name: sourceId
-      description: Filter based on the specified sourceId.
-      in: query
-      required: false
-      schema:
-        type: string
-    IdentityGroupIds:
-      name: identityGroupIds
-      description: Filter based on the specified identityGroupIds (separated by commas).
-      in: query
-      required: false
-      style: form
-      explode: false
-      schema:
-        type: array
-        items:
-          type: string
-    PerPage:
-      name: perPage
-      in: query
-      description: 'The number of items per page. If provided value in the request
-
-        is greater than a maximum, the maximum value is applied
-
-        '
-      required: false
-      explode: false
-      schema:
-        type: integer
-        format: int32
-        minimum: 1
-        maximum: 1000
-        default: 100
-      example: 100
-    UserId:
-      name: userId
-      description: Filter based on the specified userId.
-      in: query
-      required: false
-      schema:
-        type: string
-    UUID:
-      name: uuid
-      description: Filter based on the specified uuid.
-      in: query
-      required: false
-      schema:
-        type: string
-    IdentityId:
-      in: path
-      name: identityId
-      required: true
-      schema:
-        $ref: '#/components/schemas/IdentityId'
-  responses:
-    SocMsgListIdentitiesResponse200:
-      description: Successful response.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/IdentitiesList'
-    SocMsgListIdentitiesResponse400:
-      description: Error 400 on Identity search
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-          examples:
-            EDI-028:
-              $ref: '#/components/examples/EDI-028'
-    SocMsgGetIdentityResponse200:
-      description: Successful response.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/IdentityModel'
-    SocMsgResponse404:
-      description: Error 404
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-          examples:
-            EDI-029:
-              $ref: '#/components/examples/EDI-029'
-            EDI-032:
-              $ref: '#/components/examples/EDI-032'
   examples:
+    EDI-029:
+      summary: Resource not found
+      value:
+        errors:
+        - errorCode: EDI-029
+          message: Resource not found
     EDI-028:
       summary: Search query is invalid
       value:
@@ -636,12 +609,39 @@ components:
         errors:
         - errorCode: EDI-032
           message: 'Invalid id: [${invalidId}]'
-    EDI-029:
-      summary: Resource not found
-      value:
-        errors:
-        - errorCode: EDI-029
-          message: Resource not found
+  responses:
+    SocMsgListIdentitiesResponse200:
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentitiesList'
+    SocMsgGetIdentityResponse200:
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityModel'
+    SocMsgListIdentitiesResponse400:
+      description: Error 400 on Identity search
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+          examples:
+            EDI-028:
+              $ref: '#/components/examples/EDI-028'
+    SocMsgResponse404:
+      description: Error 404
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+          examples:
+            EDI-029:
+              $ref: '#/components/examples/EDI-029'
+            EDI-032:
+              $ref: '#/components/examples/EDI-032'
   securitySchemes:
     OAuth2:
       type: oauth2

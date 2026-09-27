@@ -286,134 +286,56 @@ paths:
       x-user-permission: ReadCompanyInfo
 components:
   schemas:
-    AccountDirectoryProfileImageResource:
-      type: object
-      properties:
-        etag:
-          type: string
-          example: tag
-        uri:
-          type: string
-          format: uri
-    FederationType:
-      type: string
-      description: Federation type
-      enum:
-      - Regular
-      - AdminOnly
-    FederationTypes:
-      type: string
-      description: Federation types for search
-      enum:
-      - All
-      - Regular
-      - AdminOnly
-    SearchDirectoryEntriesRequest:
-      type: object
-      properties:
-        searchString:
-          type: string
-          description: 'String value to filter the contacts. The value specified is
-
-            searched through the following fields: `firstName`, `lastName`, `extensionNumber`, `phoneNumber`, `email`,
-
-            `jobTitle`, `department`, `customFieldValue`
-
-            '
-        searchFields:
-          type: array
-          description: The list of field to be searched for
-          items:
-            type: string
-            enum:
-            - firstName
-            - lastName
-            - extensionNumber
-            - phoneNumber
-            - email
-            - jobTitle
-            - department
-            - customFieldValue
-        showFederated:
-          type: boolean
-          description: If `true` then contacts of all accounts in federation are returned, if it is in federation, account section will be returned. If `false` then only contacts of the current account are returned, and account section is eliminated in this case
-        showAdminOnlyContacts:
-          type: boolean
-          description: Should show AdminOnly Contacts
-          default: false
-        extensionType:
-          $ref: '#/components/schemas/SearchDirectoryContactType'
-        siteId:
-          type: string
-          description: Internal identifier of the business site to which extensions belong
-          example: '872781797006'
-        showExternalContacts:
-          type: boolean
-          default: false
-          description: Allows to control whether External (Hybrid) contacts should be returned in the response or not
-          example: true
-        accountIds:
-          type: array
-          description: The list of Internal identifiers of an accounts
-          items:
-            type: string
-          example:
-          - '854874047006'
-          - '422456828004'
-          - '854874151006'
-        department:
-          type: string
-          description: Department
-        siteIds:
-          type: array
-          description: The list of Internal identifiers of the business sites to which extensions belong
-          items:
-            type: string
-        extensionStatuses:
-          type: array
-          description: Extension current state.
-          items:
-            type: string
-            enum:
-            - Enabled
-            - Disabled
-            - NotActivated
-        extensionTypes:
-          $ref: '#/components/schemas/SearchDirectoryExtensionTypes'
-        orderBy:
-          type: array
-          description: Sorting settings
-          items:
-            $ref: '#/components/schemas/OrderBy'
-        page:
-          type: integer
-          format: int32
-        perPage:
-          type: integer
-          format: int32
-      example:
-        searchString: John Doe
-        searchFields:
-        - lastName
-        - email
-        showFederated: true
-        siteIds:
-        - '872781797006'
-        - '872781820006'
-        extensionStatuses:
-        - Enabled
-        department: R&D department
-        page: 1
-        perPage: 30
-    GroupResource:
+    ExternalIntegrationResource:
       type: object
       properties:
         id:
           type: string
-          example: '63723034'
-        name:
+          example: '9813'
+        typeId:
           type: string
-          example: Leaders
+          example: '1'
+        type:
+          type: string
+          example: External
+        displayName:
+          type: string
+          example: Integration X
+        routingType:
+          type: string
+          example: Account
+        outboundEdgeId:
+          type: string
+          example: '1726'
+    OrderBy:
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
+          default: 1
+          description: Sorting priority index, starting from '1'. Optional if only one element in `orderBy` array is specified
+          example: 1
+        fieldName:
+          type: string
+          description: Field name by which to sort the contacts
+          enum:
+          - firstName
+          - lastName
+          - extensionNumber
+          - phoneNumber
+          - email
+          - jobTitle
+          - department
+          example: department
+        direction:
+          type: string
+          default: Asc
+          description: Sorting direction
+          enum:
+          - Asc
+          - Desc
+          example: Asc
     FederatedAccountResource:
       type: object
       required:
@@ -503,22 +425,49 @@ components:
 
             '
           example: 25
-    AccountResource:
-      required:
-      - id
+    ADGErrorResponse:
       type: object
       properties:
-        companyName:
-          type: string
-          example: My lovely company
-        federatedName:
-          type: string
-          example: Lovely Holding
+        errors:
+          type: array
+          description: Collection of all gathered errors
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/ADGError'
+      description: Format of response in case that any error occurred during request processing
+    CustomFieldResource:
+      type: object
+      properties:
         id:
           type: string
-          example: '400131426008'
-        mainNumber:
-          $ref: '#/components/schemas/PhoneNumberResource'
+          example: '1032854'
+        name:
+          type: string
+          example: Rank
+        value:
+          type: string
+          example: '5'
+    CallQueueResource:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '873014540006'
+        name:
+          type: string
+          example: Sales CQ
+    BusinessSiteResource:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '872781820006'
+        name:
+          type: string
+          example: Sales site
+        code:
+          type: string
+          example: '1007'
     ContactSubTypeEnum:
       type: string
       description: Extension subtype
@@ -556,30 +505,44 @@ components:
           description: Message that describes the error. This message can be used in UI.
           readOnly: true
       description: Description of an error occurred during request processing. This data type can be used only in readonly mode, no writing is allowed
-    BusinessSiteResource:
+    GroupResource:
       type: object
       properties:
         id:
           type: string
-          example: '872781820006'
+          example: '63723034'
         name:
           type: string
-          example: Sales site
-        code:
+          example: Leaders
+    AccountResource:
+      required:
+      - id
+      type: object
+      properties:
+        companyName:
           type: string
-          example: '1007'
-    CostCenterResource:
+          example: My lovely company
+        federatedName:
+          type: string
+          example: Lovely Holding
+        id:
+          type: string
+          example: '400131426008'
+        mainNumber:
+          $ref: '#/components/schemas/PhoneNumberResource'
+    DirectoryRoleResource:
+      required:
+      - id
       type: object
       properties:
         id:
           type: string
-          example: '83266549237542'
-        code:
-          type: string
-          example: Main
         name:
           type: string
-          example: Cost Center A
+        domain:
+          type: string
+        displayName:
+          type: string
     SearchDirectoryContactType:
       type: string
       description: Type of directory contact to filter
@@ -601,23 +564,61 @@ components:
       - GroupCallPickup
       - External
       example: User
+    FederationResource:
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/FederatedAccountResource'
+        creationTime:
+          type: string
+          format: date-time
+        displayName:
+          type: string
+        id:
+          type: string
+        lastModifiedTime:
+          type: string
+          format: date-time
+        type:
+          $ref: '#/components/schemas/FederationType'
+    PhoneNumberResource:
+      type: object
+      properties:
+        formattedPhoneNumber:
+          type: string
+          example: +1 (205) 6812029
+        phoneNumber:
+          type: string
+          example: '+12056812029'
+        type:
+          type: string
+          example: VoiceFax
+        label:
+          type: string
+          description: Custom user name of a phone number, if any
+          example: Boss
+        usageType:
+          type: string
+          description: Usage type of phone number
+          enum:
+          - MobileNumber
+          - ContactNumber
+          - DirectNumber
+          - ForwardedNumber
+          example: DirectNumber
+        hidden:
+          type: boolean
+          description: Specifies if a phone number should be hidden or not
+        primary:
+          type: boolean
+          description: Specifies if the number is primary, i.e. displayed as 'main number' and called by default
     SearchDirectoryExtensionTypes:
       type: array
       description: Types of extension to filter the contacts
       items:
         $ref: '#/components/schemas/SearchDirectoryExtensionType'
-    CustomFieldResource:
-      type: object
-      properties:
-        id:
-          type: string
-          example: '1032854'
-        name:
-          type: string
-          example: Rank
-        value:
-          type: string
-          example: '5'
     ContactResource:
       required:
       - id
@@ -719,127 +720,6 @@ components:
           $ref: '#/components/schemas/ExternalIntegrationResource'
         subType:
           $ref: '#/components/schemas/ContactSubTypeEnum'
-    CallQueueResource:
-      type: object
-      properties:
-        id:
-          type: string
-          example: '873014540006'
-        name:
-          type: string
-          example: Sales CQ
-    OrderBy:
-      type: object
-      properties:
-        index:
-          type: integer
-          format: int32
-          default: 1
-          description: Sorting priority index, starting from '1'. Optional if only one element in `orderBy` array is specified
-          example: 1
-        fieldName:
-          type: string
-          description: Field name by which to sort the contacts
-          enum:
-          - firstName
-          - lastName
-          - extensionNumber
-          - phoneNumber
-          - email
-          - jobTitle
-          - department
-          example: department
-        direction:
-          type: string
-          default: Asc
-          description: Sorting direction
-          enum:
-          - Asc
-          - Desc
-          example: Asc
-    FederationResource:
-      type: object
-      properties:
-        accounts:
-          type: array
-          items:
-            $ref: '#/components/schemas/FederatedAccountResource'
-        creationTime:
-          type: string
-          format: date-time
-        displayName:
-          type: string
-        id:
-          type: string
-        lastModifiedTime:
-          type: string
-          format: date-time
-        type:
-          $ref: '#/components/schemas/FederationType'
-    PhoneNumberResource:
-      type: object
-      properties:
-        formattedPhoneNumber:
-          type: string
-          example: +1 (205) 6812029
-        phoneNumber:
-          type: string
-          example: '+12056812029'
-        type:
-          type: string
-          example: VoiceFax
-        label:
-          type: string
-          description: Custom user name of a phone number, if any
-          example: Boss
-        usageType:
-          type: string
-          description: Usage type of phone number
-          enum:
-          - MobileNumber
-          - ContactNumber
-          - DirectNumber
-          - ForwardedNumber
-          example: DirectNumber
-        hidden:
-          type: boolean
-          description: Specifies if a phone number should be hidden or not
-        primary:
-          type: boolean
-          description: Specifies if the number is primary, i.e. displayed as 'main number' and called by default
-    ExternalIntegrationResource:
-      type: object
-      properties:
-        id:
-          type: string
-          example: '9813'
-        typeId:
-          type: string
-          example: '1'
-        type:
-          type: string
-          example: External
-        displayName:
-          type: string
-          example: Integration X
-        routingType:
-          type: string
-          example: Account
-        outboundEdgeId:
-          type: string
-          example: '1726'
-    DirectoryResource:
-      required:
-      - records
-      - paging
-      type: object
-      properties:
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/ContactResource'
     SearchDirectoryExtensionType:
       type: string
       description: Type of extension to filter the contacts
@@ -866,30 +746,163 @@ components:
       - GroupCallPickup
       - RoomConnector
       example: User
-    ADGErrorResponse:
+    SearchDirectoryEntriesRequest:
       type: object
       properties:
-        errors:
+        searchString:
+          type: string
+          description: 'String value to filter the contacts. The value specified is
+
+            searched through the following fields: `firstName`, `lastName`, `extensionNumber`, `phoneNumber`, `email`,
+
+            `jobTitle`, `department`, `customFieldValue`
+
+            '
+        searchFields:
           type: array
-          description: Collection of all gathered errors
-          readOnly: true
+          description: The list of field to be searched for
           items:
-            $ref: '#/components/schemas/ADGError'
-      description: Format of response in case that any error occurred during request processing
-    DirectoryRoleResource:
+            type: string
+            enum:
+            - firstName
+            - lastName
+            - extensionNumber
+            - phoneNumber
+            - email
+            - jobTitle
+            - department
+            - customFieldValue
+        showFederated:
+          type: boolean
+          description: If `true` then contacts of all accounts in federation are returned, if it is in federation, account section will be returned. If `false` then only contacts of the current account are returned, and account section is eliminated in this case
+        showAdminOnlyContacts:
+          type: boolean
+          description: Should show AdminOnly Contacts
+          default: false
+        extensionType:
+          $ref: '#/components/schemas/SearchDirectoryContactType'
+        siteId:
+          type: string
+          description: Internal identifier of the business site to which extensions belong
+          example: '872781797006'
+        showExternalContacts:
+          type: boolean
+          default: false
+          description: Allows to control whether External (Hybrid) contacts should be returned in the response or not
+          example: true
+        accountIds:
+          type: array
+          description: The list of Internal identifiers of an accounts
+          items:
+            type: string
+          example:
+          - '854874047006'
+          - '422456828004'
+          - '854874151006'
+        department:
+          type: string
+          description: Department
+        siteIds:
+          type: array
+          description: The list of Internal identifiers of the business sites to which extensions belong
+          items:
+            type: string
+        extensionStatuses:
+          type: array
+          description: Extension current state.
+          items:
+            type: string
+            enum:
+            - Enabled
+            - Disabled
+            - NotActivated
+        extensionTypes:
+          $ref: '#/components/schemas/SearchDirectoryExtensionTypes'
+        orderBy:
+          type: array
+          description: Sorting settings
+          items:
+            $ref: '#/components/schemas/OrderBy'
+        page:
+          type: integer
+          format: int32
+        perPage:
+          type: integer
+          format: int32
+      example:
+        searchString: John Doe
+        searchFields:
+        - lastName
+        - email
+        showFederated: true
+        siteIds:
+        - '872781797006'
+        - '872781820006'
+        extensionStatuses:
+        - Enabled
+        department: R&D department
+        page: 1
+        perPage: 30
+    FederationTypes:
+      type: string
+      description: Federation types for search
+      enum:
+      - All
+      - Regular
+      - AdminOnly
+    AccountDirectoryProfileImageResource:
+      type: object
+      properties:
+        etag:
+          type: string
+          example: tag
+        uri:
+          type: string
+          format: uri
+    DirectoryResource:
       required:
-      - id
+      - records
+      - paging
+      type: object
+      properties:
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactResource'
+    CostCenterResource:
       type: object
       properties:
         id:
           type: string
+          example: '83266549237542'
+        code:
+          type: string
+          example: Main
         name:
           type: string
-        domain:
-          type: string
-        displayName:
-          type: string
+          example: Cost Center A
+    FederationType:
+      type: string
+      description: Federation type
+      enum:
+      - Regular
+      - AdminOnly
   parameters:
+    IfNoneMatch:
+      name: If-None-Match
+      in: header
+      required: false
+      description: 'User in GET requests to skip retrieving the data if the provided value matches current `ETag` associated with this resource.
+
+        The server checks the current resource ETag and returns the data only if mismatches the `If-None-Match` value,
+
+        otherwise `HTTP 304 Not Modified` status is returned.
+
+        '
+      schema:
+        type: string
     AccountId:
       name: accountId
       in: path
@@ -905,19 +918,6 @@ components:
         type: string
         default: '~'
       example: '~'
-    IfNoneMatch:
-      name: If-None-Match
-      in: header
-      required: false
-      description: 'User in GET requests to skip retrieving the data if the provided value matches current `ETag` associated with this resource.
-
-        The server checks the current resource ETag and returns the data only if mismatches the `If-None-Match` value,
-
-        otherwise `HTTP 304 Not Modified` status is returned.
-
-        '
-      schema:
-        type: string
   securitySchemes:
     OAuth2:
       type: oauth2

@@ -117,6 +117,36 @@ paths:
       x-user-permission: ReadExtensions
 components:
   schemas:
+    FeatureList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureInfo'
+    ReasonInfo:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Reason code
+          enum:
+          - ServicePlanLimitation
+          - AccountLimitation
+          - ExtensionTypeLimitation
+          - ExtensionLimitation
+          - InsufficientPermissions
+          - ConfigurationLimitation
+        message:
+          type: string
+          description: Reason description
+        permission:
+          type: string
+      description: 'Reason for the feature unavailability. Returned only if `available`
+
+        is set to `false`
+
+        '
     FeatureInfo:
       type: object
       properties:
@@ -151,43 +181,13 @@ components:
         value:
           type: string
           description: Parameter value
-    FeatureList:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/FeatureInfo'
-    ReasonInfo:
-      type: object
-      properties:
-        code:
-          type: string
-          description: Reason code
-          enum:
-          - ServicePlanLimitation
-          - AccountLimitation
-          - ExtensionTypeLimitation
-          - ExtensionLimitation
-          - InsufficientPermissions
-          - ConfigurationLimitation
-        message:
-          type: string
-          description: Reason description
-        permission:
-          type: string
-      description: 'Reason for the feature unavailability. Returned only if `available`
-
-        is set to `false`
-
-        '
   parameters:
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true
@@ -197,12 +197,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    ExtensionId:
-      name: extensionId
+    AccountId:
+      name: accountId
       in: path
-      description: 'Internal identifier of the RingCentral extension/user
+      description: 'Internal identifier of the RingCentral account
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true

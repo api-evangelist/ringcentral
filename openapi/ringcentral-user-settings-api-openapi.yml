@@ -589,24 +589,144 @@ paths:
       x-user-permission: EditMessagesNotificationsSettings
 components:
   schemas:
-    CallerIdByFeatureRequest:
+    ExtensionRegionalSettingRequest:
       type: object
       properties:
-        feature:
+        homeCountry:
+          $ref: '#/components/schemas/ExtensionCountryInfoRequest'
+        timezone:
+          $ref: '#/components/schemas/ExtensionTimezoneInfoRequest'
+        language:
+          $ref: '#/components/schemas/ExtensionLanguageInfoRequest'
+        greetingLanguage:
+          $ref: '#/components/schemas/ExtensionGreetingLanguageInfoRequest'
+        formattingLocale:
+          $ref: '#/components/schemas/ExtensionFormattingLocaleInfoRequest'
+        currency:
+          $ref: '#/components/schemas/ExtensionCurrencyInfoRequest'
+        timeFormat:
+          type: string
+          description: Time format setting
+          default: 12h
+          enum:
+          - 12h
+          - 24h
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    ExtensionCallerIdInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URL of a caller ID resource
+        byDevice:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallerIdByDevice'
+        byFeature:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallerIdByFeature'
+        extensionNameForOutboundCalls:
+          type: boolean
+          description: 'If `true`, then user first name and last name will be used
+
+            as caller ID when making outbound calls from extension
+
+            '
+        extensionNumberForInternalCalls:
+          type: boolean
+          description: 'If `true`, then extension number will be used as caller ID
+
+            when making internal calls
+
+            '
+    BatchProvisionUsersRequestItem:
+      description: Describes request for user extension provisioning
+      type: object
+      required:
+      - status
+      - contact
+      properties:
+        extensionNumber:
+          $ref: '#/components/schemas/ExtensionNumber'
+        status:
+          description: Extension status. Only "Enabled" can be specified
           type: string
           enum:
-          - RingOut
-          - RingMe
-          - CallFlip
-          - FaxNumber
-          - AdditionalSoftphone
-          - Alternate
-          - CommonPhone
-          - MobileApp
-          - Delegated
-        callerId:
-          $ref: '#/components/schemas/CallerIdByFeatureInfoRequest'
-      description: Caller ID settings by feature
+          - Enabled
+          default: Enabled
+        contact:
+          description: User's contact information
+          required:
+          - firstName
+          - lastName
+          - email
+          allOf:
+          - $ref: '#/components/schemas/BasicContactInfo'
+          - type: object
+            properties:
+              mobileNumber:
+                $ref: '#/components/schemas/PhoneNumberE164'
+              emailAsLoginName:
+                description: 'Indicates that contact email is enabled as login name for this user.
+
+                  Please note that email must be unique in this case.
+
+                  '
+                type: boolean
+                default: true
+        costCenter:
+          type: object
+          required:
+          - id
+          properties:
+            id:
+              type: string
+              description: Internal identifier of the Cost Center
+              example: '224149'
+        roles:
+          type: array
+          maxItems: 1
+          items:
+            type: object
+            required:
+            - id
+            properties:
+              id:
+                type: string
+                description: Internal identifier of a role to be assigned
+                example: '1'
+        devices:
+          type: array
+          maxItems: 1
+          items:
+            type: object
+            required:
+            - deviceInfo
+            properties:
+              deviceInfo:
+                $ref: '#/components/schemas/DeviceDefinition'
+        sendWelcomeEmail:
+          type: boolean
+          description: 'Specifies if a welcome/activation email is sent to the new users (within extension status changing from
+
+            ''Unassigned'' to ''NotActivated/Disabled'')
+
+            '
+          default: true
     BatchProvisionUsersResponse:
       type: object
       required:
@@ -618,6 +738,572 @@ components:
             anyOf:
             - $ref: '#/components/schemas/BatchProvisionUsersSuccessItem'
             - $ref: '#/components/schemas/BatchProvisionErrorItem'
+    SiteReference:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a site
+    BulkItemResultModel:
+      type: object
+      required:
+      - bulkItemSuccessful
+      properties:
+        bulkItemSuccessful:
+          type: boolean
+          description: 'Indicates if this item was processed successfully during bulk operation.
+
+            If false, `bulkItemErrors` attribute contains the list of errors
+
+            '
+          example: true
+        bulkItemErrors:
+          type: array
+          description: 'The list of errors occurred during processing of particular item of bulk operation.
+
+            Returned only if `bulkItemSuccessful` is false
+
+            '
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    ExtensionGrantListEventBody:
+      type: object
+      properties:
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
+      description: Notification payload body
+    CallerIdDeviceInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a device
+        uri:
+          type: string
+          format: uri
+          description: Link to a device resource
+        name:
+          type: string
+          description: Name of a device
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    ExtensionInfoEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        event:
+          type: string
+          description: Event filter URI
+        timestamp:
+          type: string
+          description: 'Date/time of sending a notification in
+
+            [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+            format including timezone, for example *2016-03-10T18:07:52.534Z*
+
+            '
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        body:
+          $ref: '#/components/schemas/ExtensionInfoEventBody'
+    CountryInfoBasicModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoMinimalModel'
+      - type: object
+        properties:
+          name:
+            type: string
+            description: The official name of a country
+    PhoneNumberInfoConferencing:
+      type: object
+      properties:
+        country:
+          $ref: '#/components/schemas/CountryInfoShortModel'
+        default:
+          type: boolean
+          description: 'The value should be `true` if the number is default for the conference. Default
+
+            conference number is a domestic number that can be set by user (otherwise
+
+            it is set by the system). Only one default number per country is allowed
+
+            '
+        hasGreeting:
+          type: boolean
+          description: 'The value should be `true` if any greeting message is played on this number
+
+            '
+        location:
+          type: string
+          description: 'Location (city, region, state) of a conference phone number
+
+            '
+        phoneNumber:
+          type: string
+          description: Dial-in phone number to connect to a conference
+        premium:
+          type: boolean
+          description: 'Indicates if the number is ''premium'' (account phone number
+
+            with the `ConferencingNumber` usageType)
+
+            '
+    BulkDeleteUsersResponse:
+      type: object
+      required:
+      - records
+      properties:
+        records:
+          type: array
+          items:
+            allOf:
+            - type: object
+              properties:
+                id:
+                  type: string
+                  description: Internal identifier of an extension
+                  example: '1162820004'
+            - $ref: '#/components/schemas/BulkItemResultModel'
+    UserTransitionInfo:
+      type: object
+      properties:
+        sendWelcomeEmailsToUsers:
+          type: boolean
+          description: 'Specifies if a welcome/activation email is sent to the existing
+
+            users during account confirmation
+
+            '
+        sendWelcomeEmail:
+          type: boolean
+          description: 'Specifies if a welcome/activation email is sent to the new users (within extension status changing from
+
+            ''Unassigned'' to ''NotActivated/Disabled'')
+
+            '
+      description: 'For NotActivated extensions only. Welcome email settings
+
+        '
+    ExtensionNumber:
+      description: 'Short number of an extension.
+
+        Actual max length depends on system length limit for extension.
+
+        '
+      type: string
+      pattern: ^\d{3,8}$
+      minLength: 1
+      maxLength: 8
+      example: '205'
+    BatchProvisionErrorItem:
+      type: object
+      required:
+      - successful
+      - errors
+      properties:
+        successful:
+          type: boolean
+          description: Indicates if the provisioning operation was successful for this item, always `false` in this model
+          example: false
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    RegionalLanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a language set as regional
+        localeCode:
+          type: string
+          description: Localization code of a language set as regional
+        name:
+          type: string
+          description: Official name of a language set as regional
+      description: Information on a language set as regional
+    BulkOperationExtensionReference:
+      type: object
+      description: Information about an extension this device is assigned to
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a RingCentral extension
+          example: '12345'
+    CallerIdByFeatureInfoRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'If ''PhoneNumber'' value is specified, then a certain phone number
+
+            is shown as a caller ID when using this telephony feature. If ''Blocked''
+
+            value is specified, then a caller ID is hidden. The value ''CurrentLocation''
+
+            can be specified for ''RingOut'' feature only. The default is ''PhoneNumber''
+
+            = [''PhoneNumber'', ''Blocked'', ''CurrentLocation'']
+
+            '
+        phoneInfo:
+          $ref: '#/components/schemas/CallerIdPhoneInfoRequest'
+    ContactBusinessAddressInfo:
+      type: object
+      properties:
+        country:
+          type: string
+          description: Country name of a user's company
+        state:
+          type: string
+          description: 'State/province name of a user''s company. Mandatory
+
+            for the USA, UK and Canada
+
+            '
+        city:
+          type: string
+          description: City name of a user's company
+        street:
+          type: string
+          description: Street address of a user's company
+        zip:
+          type: string
+          description: Zip code of a user's company
+      description: 'User''s business address. The default is
+
+        Company (Auto-Receptionist) settings
+
+        '
+    ProvisioningSiteInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uri
+          description: Internal identifier of a site
+        uri:
+          type: string
+          format: uri
+          description: Link to a site resource
+        name:
+          type: string
+          description: Name of a site
+        code:
+          type: string
+          description: Site code value. Returned only if specified
+      description: 'Site data. If multi-site feature is turned on for an account,
+
+        then ID of a site must be specified. In order to assign a wireless
+
+        point to the main site (company) the site ID should be set to `main-site`
+
+        '
+    PermissionInfoAdmin:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specifies if a permission is enabled or not
+      description: Admin permission
+    UpdateConferencingInfoRequest:
+      type: object
+      properties:
+        phoneNumbers:
+          type: array
+          description: 'Multiple dial-in phone numbers to connect to audio conference
+
+            service, relevant for user''s brand. Each number is given with the country
+
+            and location information, in order to let the user choose the less expensive
+
+            way to connect to a conference. The first number in the list is the primary
+
+            conference number, that is default and domestic
+
+            '
+          items:
+            $ref: '#/components/schemas/ConferencePhoneNumberInfo'
+        allowJoinBeforeHost:
+          type: boolean
+          description: Determines if host user allows conference participants to join before the host
+    PhoneNumberTollType:
+      description: Indicates if a number is toll or toll-free
+      type: string
+      enum:
+      - Toll
+      - TollFree
+      example: Toll
+    ExtensionInfoEventBody:
+      type: object
+      properties:
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        eventType:
+          type: string
+          description: Type of extension info change
+          enum:
+          - Update
+          - Delete
+        hints:
+          type: array
+          description: Returned for 'Update' event type only
+          items:
+            type: string
+            enum:
+            - AccountSettings
+            - AccountStatus
+            - AnsweringRules
+            - CompanyNumbers
+            - DialingPlan
+            - ExtensionInfo
+            - Features
+            - Limits
+            - Permissions
+            - ProfileImage
+            - VideoConfiguration
+        ownerId:
+          type: string
+          description: 'Internal identifier of a subscription owner extension
+
+            '
+      description: Notification payload body
+    MissedCallsInfo:
+      type: object
+      properties:
+        notifyByEmail:
+          type: boolean
+          description: Email notification flag
+        notifyBySms:
+          type: boolean
+          description: SMS notification flag
+        advancedEmailAddresses:
+          type: array
+          description: 'List of recipient email addresses for missed call notifications.
+
+            Returned if specified, in both modes (advanced/basic). Applied in advanced
+
+            mode only
+
+            '
+          items:
+            type: string
+        advancedSmsEmailAddresses:
+          type: array
+          description: 'List of recipient phone numbers for missed call notifications.
+
+            Returned if specified, in both modes (advanced/basic). Applied in advanced
+
+            mode only
+
+            '
+          items:
+            type: string
+    TimezoneInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a timezone
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a timezone
+        name:
+          type: string
+          description: Short name of a timezone
+        description:
+          type: string
+          description: Meaningful description of the timezone
+        bias:
+          type: string
+      description: Extension timezone information
+    CallQueueInfoRequest:
+      type: object
+      properties:
+        slaGoal:
+          type: integer
+          format: int32
+          description: 'Target percentage of calls that must be answered by agents
+
+            within the service level time threshold
+
+            '
+        slaThresholdSeconds:
+          type: integer
+          format: int32
+        includeAbandonedCalls:
+          type: boolean
+        abandonedThresholdSeconds:
+          type: integer
+          format: int32
+      description: 'For Call Queue extension type only. Please note that legacy ''Department''
+
+        extension type corresponds to ''Call Queue'' extensions in modern RingCentral
+
+        product terminology
+
+        '
+    CountryInfoMinimalModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a country
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a country resource
+    ContactInfoUpdateRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: 'For User extension type only. Extension user first name
+
+            '
+        lastName:
+          type: string
+          description: 'For User extension type only. Extension user last name
+
+            '
+        company:
+          type: string
+          description: Extension user company name
+        jobTitle:
+          type: string
+        email:
+          type: string
+          format: email
+          description: Email of extension user
+        businessPhone:
+          type: string
+          description: 'Extension user contact phone number in
+
+            [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            format
+
+            '
+        mobilePhone:
+          type: string
+          description: 'Extension user mobile (**non** Toll Free) phone number in
+
+            [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            (with ''+'' sign) format
+
+            '
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        emailAsLoginName:
+          type: boolean
+          description: 'If `true` then contact email is enabled as login name for
+
+            this user. Please note that email should be unique in this case.
+
+            The default value is `false`
+
+            '
+        pronouncedName:
+          $ref: '#/components/schemas/PronouncedNameInfo'
+        department:
+          type: string
+          description: Extension user department, if any
+    ProfileImageInfoURI:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+    RegionalSettings:
+      type: object
+      properties:
+        homeCountry:
+          $ref: '#/components/schemas/CountryInfoShortModel'
+        timezone:
+          $ref: '#/components/schemas/TimezoneInfo'
+        language:
+          $ref: '#/components/schemas/RegionalLanguageInfo'
+        greetingLanguage:
+          $ref: '#/components/schemas/GreetingLanguageInfo'
+        formattingLocale:
+          $ref: '#/components/schemas/FormattingLocaleInfo'
+        timeFormat:
+          type: string
+          description: Time format setting. The default value is '12h' = ['12h', '24h']
+          enum:
+          - 12h
+          - 24h
+      description: 'Regional data (timezone, home country, language) of an extension/account.
+
+        The default is Company (Auto-Receptionist) settings
+
+        '
+    ProfileImageInfo:
+      required:
+      - uri
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: 'Link to a profile image. If an image is not uploaded for an
+
+            extension, only `uri` is returned
+
+            '
+        etag:
+          type: string
+          description: Identifier of an image
+        lastModified:
+          type: string
+          description: 'Date/time when an image was last updated, in ISO 8601 format,
+
+            for example 2016-03-10T18:07:52.534Z
+
+            '
+          format: date-time
+        contentType:
+          type: string
+          description: The type of image
+        scales:
+          type: array
+          description: 'List of URIs to profile images in different dimensions
+
+            '
+          items:
+            $ref: '#/components/schemas/ProfileImageInfoURI'
+      description: Information on profile image
+    ExtensionFormattingLocaleInfoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal Identifier of a formatting language
     EnumeratedPagingModel:
       type: object
       required:
@@ -688,268 +1374,106 @@ components:
 
             '
           example: 25
-    OutboundFaxesInfo:
+    ExtensionLanguageInfoRequest:
       type: object
       properties:
-        notifyByEmail:
-          type: boolean
-          description: Email notification flag
-        notifyBySms:
-          type: boolean
-          description: SMS notification flag
-        advancedEmailAddresses:
-          type: array
-          description: 'List of recipient email addresses for outbound fax notifications.
-
-            Returned if specified, in both modes (advanced/basic). Applied in advanced
-
-            mode only
-
-            '
-          items:
-            type: string
-        advancedSmsEmailAddresses:
-          type: array
-          description: 'List of recipient phone numbers for outbound fax notifications.
-
-            Returned if specified, in both modes (advanced/basic). Applied in advanced
-
-            mode only
-
-            '
-          items:
-            type: string
-    ApiError:
+        id:
+          type: string
+          description: Internal identifier of a language
+    PronouncedNameInfo:
       type: object
-      description: Generalized API error structure suitable for any error type
+      properties:
+        type:
+          type: string
+          description: 'The method used to pronounce the user''s name:
+
+            - `Default` - default extension name; first and last name specified in user''s profile are pronounced using text-to-speech;
+
+            - `TextToSpeech` - custom text specified by a user  pronounced using text-to-speech;
+
+            - `Recorded` - custom audio uploaded by a user, the name recorded in user''s own voice (supported only for extension retrieval).
+
+            '
+          enum:
+          - Default
+          - TextToSpeech
+          - Recorded
+        text:
+          type: string
+          description: Custom text (for `TextToSpeech` type only)
+        prompt:
+          $ref: '#/components/schemas/PronouncedNamePromptInfo'
+    ExtensionCallerIdInfoRequest:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URL of a caller ID resource
+        byDevice:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallerIdByDeviceRequest'
+        byFeature:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallerIdByFeatureRequest'
+        extensionNameForOutboundCalls:
+          type: boolean
+          description: 'If `true`, then the user first name and last name will be used
+
+            as caller ID when making outbound calls from extension
+
+            '
+        extensionNumberForInternalCalls:
+          type: boolean
+          description: 'If `true`, then extension number will be used as caller ID
+
+            when making internal calls
+
+            '
+    GetExtensionGrantListResponse:
       required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    CallerIdDeviceInfoRequest:
+      - navigation
+      - paging
+      - records
       type: object
       properties:
-        id:
+        uri:
           type: string
-          description: Internal identifier of a device
-    CallQueueExtensionInfo:
-      type: object
-      properties:
-        slaGoal:
-          type: integer
-          format: int32
-          description: 'Target percentage of calls that must be answered by agents
-
-            within the service level time threshold
-
-            '
-        slaThresholdSeconds:
-          type: integer
-          format: int32
-          description: 'Period of time in seconds that is considered to be an acceptable
-
-            service level
-
-            '
-        includeAbandonedCalls:
-          type: boolean
-          description: 'If `true` abandoned calls (hanged up prior to being served)
-
-            are included into service level calculation
-
-            '
-        abandonedThresholdSeconds:
-          type: integer
-          format: int32
-          description: 'Period of time in seconds specifying abandoned calls duration
-
-            - calls that are shorter will not be included into the calculation of
-
-            service level.; zero value means that abandoned calls of any duration
-
-            will be included into calculation
-
-            '
-      description: 'For Call Queue extension type only. Please note that legacy
-
-        ''Department'' extension type corresponds to ''Call Queue'' extensions
-
-        in modern RingCentral product terminology
-
-        '
-    CustomFieldInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a custom field
-        value:
-          type: string
-          description: Custom field value
-        displayName:
-          type: string
-    VoicemailsInfo:
-      type: object
-      properties:
-        notifyByEmail:
-          type: boolean
-          description: Email notification flag
-        notifyBySms:
-          type: boolean
-          description: SMS notification flag
-        advancedEmailAddresses:
+          format: uri
+          description: Link to the list of extension grants
+        records:
           type: array
-          description: 'List of recipient email addresses for voicemail notifications.
-
-            Returned if specified, in both modes (advanced/basic). Applied in advanced
-
-            mode only
-
-            '
+          description: List of extension grants with details
           items:
-            type: string
-        advancedSmsEmailAddresses:
-          type: array
-          description: 'List of recipient phone numbers for voicemail notifications.
-
-            Returned if specified, in both modes (advanced/basic). Applied in advanced
-
-            mode only
-
-            '
-          items:
-            type: string
-        includeAttachment:
-          type: boolean
-          description: 'Indicates whether voicemail should be attached to email
-
-            '
-        includeTranscription:
-          type: boolean
-          description: 'Specifies whether to add voicemail transcription or not
-
-            '
-        markAsRead:
-          type: boolean
-          description: 'Indicates whether a voicemail should be automatically marked
-
-            as read
-
-            '
-    CallQueueInfoRequest:
-      type: object
-      properties:
-        slaGoal:
-          type: integer
-          format: int32
-          description: 'Target percentage of calls that must be answered by agents
-
-            within the service level time threshold
-
-            '
-        slaThresholdSeconds:
-          type: integer
-          format: int32
-        includeAbandonedCalls:
-          type: boolean
-        abandonedThresholdSeconds:
-          type: integer
-          format: int32
-      description: 'For Call Queue extension type only. Please note that legacy ''Department''
-
-        extension type corresponds to ''Call Queue'' extensions in modern RingCentral
-
-        product terminology
-
-        '
-    PhoneNumberInfoConferencing:
-      type: object
-      properties:
-        country:
-          $ref: '#/components/schemas/CountryInfoShortModel'
-        default:
-          type: boolean
-          description: 'The value should be `true` if the number is default for the conference. Default
-
-            conference number is a domestic number that can be set by user (otherwise
-
-            it is set by the system). Only one default number per country is allowed
-
-            '
-        hasGreeting:
-          type: boolean
-          description: 'The value should be `true` if any greeting message is played on this number
-
-            '
-        location:
-          type: string
-          description: 'Location (city, region, state) of a conference phone number
-
-            '
-        phoneNumber:
-          type: string
-          description: Dial-in phone number to connect to a conference
-        premium:
-          type: boolean
-          description: 'Indicates if the number is ''premium'' (account phone number
-
-            with the `ConferencingNumber` usageType)
-
-            '
-    ExtensionTimezoneInfoRequest:
+            $ref: '#/components/schemas/GrantInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    GetExtensionAccountInfo:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of a timezone
-    ExtensionInfoEvent:
+          description: Internal identifier of an account
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an account resource
+      description: Account information
+    PhoneNumberDefinitionPreferredAreaCode:
       type: object
+      description: To use as selection hint when a "toll" number to be selected from the number pool.
+      required:
+      - preferredAreaCode
       properties:
-        uuid:
+        preferredAreaCode:
+          description: Preferred area code to use if numbers available
           type: string
-          description: Universally unique identifier of a notification
-        event:
-          type: string
-          description: Event filter URI
-        timestamp:
-          type: string
-          description: 'Date/time of sending a notification in
-
-            [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-
-            format including timezone, for example *2016-03-10T18:07:52.534Z*
-
-            '
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        body:
-          $ref: '#/components/schemas/ExtensionInfoEventBody'
+          pattern: ^[1-9]\d{1,3}$
+          example: '650'
     NotificationSettingsUpdateRequest:
       type: object
       properties:
@@ -998,7 +1522,277 @@ components:
 
             '
           default: true
-    CallerIdByFeatureInfo:
+    CallQueueExtensionInfo:
+      type: object
+      properties:
+        slaGoal:
+          type: integer
+          format: int32
+          description: 'Target percentage of calls that must be answered by agents
+
+            within the service level time threshold
+
+            '
+        slaThresholdSeconds:
+          type: integer
+          format: int32
+          description: 'Period of time in seconds that is considered to be an acceptable
+
+            service level
+
+            '
+        includeAbandonedCalls:
+          type: boolean
+          description: 'If `true` abandoned calls (hanged up prior to being served)
+
+            are included into service level calculation
+
+            '
+        abandonedThresholdSeconds:
+          type: integer
+          format: int32
+          description: 'Period of time in seconds specifying abandoned calls duration
+
+            - calls that are shorter will not be included into the calculation of
+
+            service level.; zero value means that abandoned calls of any duration
+
+            will be included into calculation
+
+            '
+      description: 'For Call Queue extension type only. Please note that legacy
+
+        ''Department'' extension type corresponds to ''Call Queue'' extensions
+
+        in modern RingCentral product terminology
+
+        '
+    PermissionInfoInt:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specifies if a permission is enabled or not
+      description: International Calling permission
+    AssignedCountryInfo:
+      type: object
+      description: Information on a country assigned to an extension user. Returned for the User extension type only
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an assigned country
+        uri:
+          type: string
+          description: Canonical URI of an assigned country resource
+        isoCode:
+          type: string
+          description: Country code according to the ISO standard, see [ISO 3166](https://www.iso.org/iso-3166-country-codes.html)
+        name:
+          type: string
+          description: Official name of a country
+    CallerIdByDeviceRequest:
+      type: object
+      properties:
+        device:
+          $ref: '#/components/schemas/CallerIdDeviceInfoRequest'
+        callerId:
+          $ref: '#/components/schemas/CallerIdByDeviceInfoRequest'
+      description: Caller ID settings by device
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    ExtensionCountryInfoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a country
+    PronouncedNamePromptInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        contentUri:
+          type: string
+          format: uri
+          description: Link to a prompt resource
+        contentType:
+          type: string
+          description: Content media type
+          enum:
+          - audio/mpeg
+          - audio/wav
+    GetConferencingInfoResponse:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a conferencing
+        allowJoinBeforeHost:
+          type: boolean
+          description: 'Determines if host user allows conference participants to join
+
+            before the host
+
+            '
+        hostCode:
+          type: string
+          description: Access code for a host user
+        mode:
+          type: string
+          description: 'Internal parameter specifying a conferencing engine
+
+            '
+        participantCode:
+          type: string
+          description: Access code for any participant
+        phoneNumber:
+          type: string
+          description: 'Primary conference phone number for user''s home country returned
+
+            in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format
+
+            '
+        supportUri:
+          description: Link to a branded support page
+          type: string
+          example: http://success.ringcentral.com
+        tapToJoinUri:
+          type: string
+          format: uri
+          description: 'Short URL leading to the service web page Tap to Join for audio
+
+            conference bridge
+
+            '
+        phoneNumbers:
+          type: array
+          description: 'List of multiple dial-in phone numbers to connect to audio
+
+            conference service, relevant for the user''s brand. Each number is given with
+
+            the country and location information, in order to let the user choose
+
+            less expensive way to connect to a conference. The first number in
+
+            the list is a primary conference number, that is default and domestic
+
+            '
+          items:
+            $ref: '#/components/schemas/PhoneNumberInfoConferencing'
+    InboundFaxesInfo:
+      type: object
+      properties:
+        notifyByEmail:
+          type: boolean
+          description: Email notification flag
+        notifyBySms:
+          type: boolean
+          description: SMS notification flag
+        advancedEmailAddresses:
+          type: array
+          description: 'List of recipient email addresses for inbound fax notifications.
+
+            Returned if specified, in both modes (advanced/basic). Applied in advanced
+
+            mode only
+
+            '
+          items:
+            type: string
+        advancedSmsEmailAddresses:
+          type: array
+          description: 'List of recipient phone numbers for inbound fax notifications.
+
+            Returned if specified, in both modes (advanced/basic). Applied in advanced
+
+            mode only
+
+            '
+          items:
+            type: string
+        includeAttachment:
+          type: boolean
+          description: 'Indicates whether fax should be attached to email
+
+            '
+        markAsRead:
+          type: boolean
+          description: 'Indicates whether email should be automatically marked as read
+
+            '
+    CountryInfoShortModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoBasicModel'
+      - type: object
+        properties:
+          isoCode:
+            type: string
+            description: 'A ISO country code value complying with the
+
+              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+
+              format.
+
+              '
+          callingCode:
+            type: string
+            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
+
+              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
+
+              [E.164](http://en.wikipedia.org/wiki/E.164),
+
+              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
+
+              '
+    InboundTextsInfo:
+      type: object
+      properties:
+        notifyByEmail:
+          type: boolean
+          description: Email notification flag
+        notifyBySms:
+          type: boolean
+          description: SMS notification flag
+        advancedEmailAddresses:
+          type: array
+          description: 'List of recipient email addresses for inbound text message
+
+            notifications. Returned if specified, in both modes (advanced/basic).
+
+            Applied in advanced mode only
+
+            '
+          items:
+            type: string
+        advancedSmsEmailAddresses:
+          type: array
+          description: 'List of recipient phone numbers for inbound text message notifications.
+
+            Returned if specified, in both modes (advanced/basic). Applied in advanced
+
+            mode only
+
+            '
+          items:
+            type: string
+    PhoneNumberDefinitionNumberId:
+      type: object
+      description: To be used to assign a number by ID
+      required:
+      - phoneNumberId
+      properties:
+        phoneNumberId:
+          type: string
+          description: Phone number ID
+    CallerIdByDeviceInfo:
       type: object
       properties:
         type:
@@ -1016,58 +1810,432 @@ components:
             '
         phoneInfo:
           $ref: '#/components/schemas/CallerIdPhoneInfo'
-    ExtensionCallerIdInfoRequest:
+    ReferenceInfo:
+      type: object
+      properties:
+        ref:
+          type: string
+          description: Non-RC identifier of an extension
+        type:
+          type: string
+          description: Type of external identifier
+          enum:
+          - PartnerId
+          - CustomerDirectoryId
+        refAccId:
+          type: string
+          description: Primary federation admin account identifier
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    GreetingLanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a greeting language
+        localeCode:
+          type: string
+          description: Localization code of a greeting language
+        name:
+          type: string
+          description: Official name of a greeting language
+      description: 'Information on language used for telephony greetings
+
+        '
+    CallerIdByDevice:
+      type: object
+      properties:
+        device:
+          $ref: '#/components/schemas/CallerIdDeviceInfo'
+        callerId:
+          $ref: '#/components/schemas/CallerIdByDeviceInfo'
+      description: Caller ID settings by device
+    ExtensionTimezoneInfoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a timezone
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    SetupWizardStateForUpdateEnum:
+      type: string
+      description: Initial configuration wizard state
+      enum:
+      - NotStarted
+      - Incomplete
+      - Completed
+      default: NotStarted
+    ContactInfo:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: 'User''s first name (for extensions of `User` type only)
+
+            '
+        lastName:
+          type: string
+          description: 'For User extension type only. User''s last name (for extensions of `User` type only)
+
+            '
+        name:
+          type: string
+          description: 'Extension name (for extensions of `User` type - concatenation of first and last name)
+
+            '
+        company:
+          type: string
+          description: User's company name
+        jobTitle:
+          type: string
+          description: User's job title
+        email:
+          type: string
+          format: email
+          description: User's contact email
+        businessPhone:
+          type: string
+          description: 'User''s contact phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            (with ''+'' sign) format
+
+            '
+        mobilePhone:
+          type: string
+          description: 'User''s mobile (**non** Toll Free) phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            (with ''+'' sign) format
+
+            '
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        emailAsLoginName:
+          type: boolean
+          description: 'Indicates that the contact email is enabled as a login name for this
+
+            user. Please note that the email must be unique in this case.
+
+            '
+          default: false
+        pronouncedName:
+          $ref: '#/components/schemas/PronouncedNameInfo'
+        department:
+          type: string
+          description: 'User''s department name
+
+            '
+      description: Detailed contact information
+    CallerIdByDeviceInfoRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'If ''PhoneNumber'' value is specified, then a certain phone number
+
+            is shown as a caller ID when using this telephony feature. If ''Blocked''
+
+            value is specified, then a caller ID is hidden. The value ''CurrentLocation''
+
+            can be specified for ''RingOut'' feature only. The default is ''PhoneNumber''
+
+            = [''PhoneNumber'', ''Blocked'', ''CurrentLocation'']
+
+            '
+        phoneInfo:
+          $ref: '#/components/schemas/CallerIdPhoneInfoRequest'
+    Roles:
       type: object
       properties:
         uri:
           type: string
           format: uri
-          description: Canonical URL of a caller ID resource
-        byDevice:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallerIdByDeviceRequest'
-        byFeature:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallerIdByFeatureRequest'
-        extensionNameForOutboundCalls:
+          description: Link to a role
+        id:
+          type: string
+          description: Internal identifier of a role
+        autoAssigned:
           type: boolean
-          description: 'If `true`, then the user first name and last name will be used
-
-            as caller ID when making outbound calls from extension
-
-            '
-        extensionNumberForInternalCalls:
+          default: false
+        displayName:
+          type: string
+        siteCompatible:
           type: boolean
-          description: 'If `true`, then extension number will be used as caller ID
-
-            when making internal calls
-
-            '
-    BulkItemResultModel:
+        siteRestricted:
+          type: boolean
+    PhoneNumberDefinitionTollType:
+      type: object
+      description: To use as selection criteria when a number to be selected from the number pool.
+      required:
+      - tollType
+      properties:
+        tollType:
+          $ref: '#/components/schemas/PhoneNumberTollType'
+    BasicContactInfo:
+      description: Personal contact information
+      type: object
+      properties:
+        firstName:
+          description: Given name
+          type: string
+          maxLength: 64
+          example: John
+        lastName:
+          description: Family name
+          type: string
+          maxLength: 64
+          example: Smith
+        email:
+          description: Contact email
+          type: string
+          format: email
+          maxLength: 64
+          example: john.smith@acme.com
+    BatchProvisionUsersSuccessItem:
       type: object
       required:
-      - bulkItemSuccessful
+      - successful
+      - extension
       properties:
-        bulkItemSuccessful:
+        successful:
           type: boolean
-          description: 'Indicates if this item was processed successfully during bulk operation.
-
-            If false, `bulkItemErrors` attribute contains the list of errors
-
-            '
+          description: Indicates if the provisioning operation was successful for this item, always `true` in this model
           example: true
-        bulkItemErrors:
-          type: array
-          description: 'The list of errors occurred during processing of particular item of bulk operation.
+        extension:
+          type: object
+          required:
+          - devices
+          - id
+          properties:
+            id:
+              type: string
+              description: The internal identifier of RingCentral extension created
+              example: '12345'
+            devices:
+              type: array
+              items:
+                type: object
+                required:
+                - id
+                - phoneNumber
+                properties:
+                  id:
+                    type: string
+                    description: The internal identifier of device created
+                    example: '12345'
+                  phoneNumber:
+                    $ref: '#/components/schemas/PhoneNumberE164'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
 
-            Returned only if `bulkItemSuccessful` is false
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    ConferencePhoneNumberInfo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Dial-in phone number to connect to a conference
+        default:
+          type: boolean
+          description: 'The value should be `true` if the number is default for the conference. Default
+
+            conference number is a domestic number that can be set by user (otherwise
+
+            it is set by the system). Only one default number per country is allowed
 
             '
-          minItems: 1
+    ExtensionStatusInfo:
+      type: object
+      properties:
+        comment:
+          type: string
+          description: A free-form user comment, describing the status change reason
+        reason:
+          type: string
+          description: Type of suspension
+          enum:
+          - SuspendedVoluntarily
+          - SuspendedInvoluntarily
+          - CancelledVoluntarily
+          - CancelledInvoluntarily
+        till:
+          type: string
+          format: date-time
+          description: 'Date until which an account will get deleted. The default
+
+            value is 30 days since the current date
+
+            '
+      description: 'Status information (reason, comment). Returned for ''Disabled''
+
+        status only
+
+        '
+    DeviceDefinition:
+      type: object
+      required:
+      - type
+      - emergency
+      - phoneInfo
+      properties:
+        type:
+          type: string
+          description: Device type. Only "OtherPhone" and "WebRTC" device types are supported at the moment
+          enum:
+          - OtherPhone
+          - WebRTC
+        emergency:
+          description: Only "address" is supported at the moment
+          oneOf:
+          - type: object
+            required:
+            - address
+            properties:
+              address:
+                $ref: '#/components/schemas/PostalAddress'
+          - type: object
+            required:
+            - location
+            properties:
+              location:
+                type: object
+                required:
+                - id
+                properties:
+                  id:
+                    type: string
+                    description: Emergency location ID
+        phoneInfo:
+          oneOf:
+          - $ref: '#/components/schemas/PhoneNumberDefinitionTollType'
+          - $ref: '#/components/schemas/PhoneNumberDefinitionPreferredAreaCode'
+          - $ref: '#/components/schemas/PhoneNumberDefinitionDirectNumberWithReservationId'
+          - $ref: '#/components/schemas/PhoneNumberDefinitionNumberId'
+    ExtensionUpdateRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Disabled
+          - Enabled
+          - NotActivated
+          - Frozen
+        statusInfo:
+          $ref: '#/components/schemas/ExtensionStatusInfo'
+        extensionNumber:
+          type: string
+          description: Extension number available
+        contact:
+          $ref: '#/components/schemas/ContactInfoUpdateRequest'
+        regionalSettings:
+          $ref: '#/components/schemas/ExtensionRegionalSettingRequest'
+        setupWizardState:
+          $ref: '#/components/schemas/SetupWizardStateForUpdateEnum'
+        partnerId:
+          type: string
+          description: 'Additional extension identifier, created by partner application
+
+            and applied on client side
+
+            '
+        ivrPin:
+          type: string
+          description: IVR PIN
+        password:
+          type: string
+          description: Password for extension
+        callQueueInfo:
+          $ref: '#/components/schemas/CallQueueInfoRequest'
+        transition:
+          $ref: '#/components/schemas/UserTransitionInfo'
+        customFields:
+          type: array
           items:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/CustomFieldInfo'
+        site:
+          $ref: '#/components/schemas/SiteReference'
+        type:
+          type: string
+          description: 'Extension type. Please note that legacy ''Department'' extension
+
+            type corresponds to ''Call Queue'' extensions in modern RingCentral
+
+            product terminology
+
+            '
+          enum:
+          - User
+          - FaxUser
+          - FlexibleUser
+          - VirtualUser
+          - DigitalUser
+          - Department
+          - Announcement
+          - Voicemail
+          - SharedLinesGroup
+          - PagingOnly
+          - IvrMenu
+          - ApplicationExtension
+          - ParkLocation
+          - DelegatedLinesGroup
+          - GroupCallPickup
+        subType:
+          type: string
+          description: 'Extension subtype, if applicable. For any unsupported subtypes
+
+            the ''Unknown'' value will be returned
+
+            '
+          enum:
+          - VideoPro
+          - VideoProPlus
+          - DigitalSignageOnlyRooms
+          - Unknown
+          - Emergency
+        references:
+          type: array
+          description: 'List of non-RC internal identifiers assigned to an extension
+
+            '
+          items:
+            $ref: '#/components/schemas/ReferenceInfo'
     PostalAddress:
       type: object
       description: Postal address/location
@@ -1107,99 +2275,225 @@ components:
           maxLength: 2
           minLength: 2
           example: US
-    CallerIdPhoneInfoRequest:
+    GrantInfo:
       type: object
       properties:
-        id:
-          type: string
-          description: Internal identifier of a phone number
-    PronouncedNamePromptInfo:
-      type: object
-      properties:
-        id:
-          type: string
-        contentUri:
+        uri:
           type: string
           format: uri
-          description: Link to a prompt resource
-        contentType:
+          description: Canonical URI of a grant
+        extension:
+          $ref: '#/components/schemas/ExtensionInfoGrants'
+        callPickup:
+          type: boolean
+          description: 'Specifies if picking up of other extensions'' calls is allowed
+
+            for the extension. If ''Presence'' feature is disabled for the given extension,
+
+            the flag is not returned
+
+            '
+        callMonitoring:
+          type: boolean
+          description: 'Specifies if monitoring of other extensions'' calls is allowed
+
+            for the extension. If ''CallMonitoring'' feature is disabled for the given
+
+            extension, the flag is not returned
+
+            '
+        callOnBehalfOf:
+          type: boolean
+          description: 'Specifies whether the current extension is able to make or
+
+            receive calls on behalf of the user referenced in extension object
+
+            '
+        callDelegation:
+          type: boolean
+          description: 'Specifies whether the current extension can delegate a call
+
+            to the user referenced in extension object
+
+            '
+        groupPaging:
+          type: boolean
+          description: 'Specifies whether the current extension is allowed to call
+
+            Paging Only group referenced to in extension object
+
+            '
+        callQueueSetup:
+          type: boolean
+          description: 'Specifies whether the current extension is assigned as a Full-Access
+
+            manager in the call queue referenced in extension object
+
+            '
+        callQueueMembersSetup:
+          type: boolean
+          description: 'Specifies whether the current extension is assigned as a Members-Only
+
+            manager in the call queue referenced in extension object
+
+            '
+        callQueueMessages:
+          type: boolean
+          description: 'Specifies whether the current extension is assigned as a Messages Manager
+
+            in the queue referenced in extension object
+
+            '
+        callQueueFacSetup:
+          type: boolean
+          description: 'Specifies whether the current extension is granted *Forward All Calls (FAC)* permission
+
+            '
+        sharedVoicemails:
+          type: boolean
+          description: 'Specifies whether the user referenced in extension object is sharing voicemails
+
+            with the current extension
+
+            '
+    BulkDeleteUsersRequest:
+      type: object
+      required:
+      - records
+      properties:
+        keepAssetsInInventory:
+          type: boolean
+          description: 'Indicates that the freed users'' assets (phone numbers and devices) should be moved
+
+            to account inventory rather than deleted. If set to `true`, the phone numbers and devices
+
+            assigned to deleted extensions will be kept in the account''s inventory. If set to `false`,
+
+            these assets will be deleted from the account and returned to either the partner''s phone
+
+            numbers or RingCentral''s phone number pool
+
+            '
+          default: true
+        records:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/BulkOperationExtensionReference'
+    OutboundFaxesInfo:
+      type: object
+      properties:
+        notifyByEmail:
+          type: boolean
+          description: Email notification flag
+        notifyBySms:
+          type: boolean
+          description: SMS notification flag
+        advancedEmailAddresses:
+          type: array
+          description: 'List of recipient email addresses for outbound fax notifications.
+
+            Returned if specified, in both modes (advanced/basic). Applied in advanced
+
+            mode only
+
+            '
+          items:
+            type: string
+        advancedSmsEmailAddresses:
+          type: array
+          description: 'List of recipient phone numbers for outbound fax notifications.
+
+            Returned if specified, in both modes (advanced/basic). Applied in advanced
+
+            mode only
+
+            '
+          items:
+            type: string
+    ExtensionGreetingLanguageInfoRequest:
+      type: object
+      properties:
+        id:
           type: string
-          description: Content media type
-          enum:
-          - audio/mpeg
-          - audio/wav
-    ExtensionInfoEventBody:
+          description: Internal identifier of a greeting language
+    EmailRecipientInfo:
       type: object
       properties:
         extensionId:
           type: string
           description: Internal identifier of an extension
-        eventType:
+        fullName:
           type: string
-          description: Type of extension info change
+          description: User full name
+        extensionNumber:
+          type: string
+          description: User extension number
+        status:
+          type: string
+          description: Current state of an extension
           enum:
-          - Update
-          - Delete
-        hints:
+          - Enabled
+          - Disable
+          - NotActivated
+          - Unassigned
+        emailAddresses:
           type: array
-          description: Returned for 'Update' event type only
+          description: 'List of user email addresses from extension notification settings.
+
+            By default, main email address from contact information is returned
+
+            '
           items:
             type: string
-            enum:
-            - AccountSettings
-            - AccountStatus
-            - AnsweringRules
-            - CompanyNumbers
-            - DialingPlan
-            - ExtensionInfo
-            - Features
-            - Limits
-            - Permissions
-            - ProfileImage
-            - VideoConfiguration
-        ownerId:
+        permission:
           type: string
-          description: 'Internal identifier of a subscription owner extension
-
-            '
-      description: Notification payload body
-    CallerIdByDeviceRequest:
-      type: object
-      properties:
-        device:
-          $ref: '#/components/schemas/CallerIdDeviceInfoRequest'
-        callerId:
-          $ref: '#/components/schemas/CallerIdByDeviceInfoRequest'
-      description: Caller ID settings by device
-    ExtensionGrantListEvent:
-      type: object
-      properties:
-        uuid:
-          type: string
-          description: Universally unique identifier of a notification
-        event:
-          type: string
-          description: Event filter URI
-        timestamp:
-          type: string
-          description: 'Date/time of sending a notification in
-
-            [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-
-            format including timezone, for example *2016-03-10T18:07:52.534Z*
-
-            '
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        body:
-          $ref: '#/components/schemas/ExtensionGrantListEventBody'
-    ExtensionLanguageInfoRequest:
+          description: Call queue manager permission
+          enum:
+          - FullAccess
+          - Messages
+          - MemberManagement
+    ExtensionInfoGrants:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of a language
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        extensionNumber:
+          type: string
+          description: Extension short number (usually 3 or 4 digits)
+        name:
+          type: string
+          description: Name of extension
+        type:
+          type: string
+          description: 'Extension type. Please note that legacy ''Department''
+
+            extension type corresponds to ''Call Queue'' extensions in modern RingCentral
+
+            product terminology
+
+            '
+          enum:
+          - User
+          - Fax User
+          - VirtualUser
+          - DigitalUser
+          - Department
+          - Announcement
+          - Voicemail
+          - SharedLinesGroup
+          - PagingOnly
+          - IvrMenu
+          - ApplicationExtension
+          - ParkLocation
+          - DelegatedLinesGroup
+      description: Extension information
     GetExtensionInfoResponse:
       type: object
       properties:
@@ -1373,350 +2667,7 @@ components:
           $ref: '#/components/schemas/ProvisioningSiteInfo'
         assignedCountry:
           $ref: '#/components/schemas/AssignedCountryInfo'
-    AssignedCountryInfo:
-      type: object
-      description: Information on a country assigned to an extension user. Returned for the User extension type only
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an assigned country
-        uri:
-          type: string
-          description: Canonical URI of an assigned country resource
-        isoCode:
-          type: string
-          description: Country code according to the ISO standard, see [ISO 3166](https://www.iso.org/iso-3166-country-codes.html)
-        name:
-          type: string
-          description: Official name of a country
-    CallerIdPhoneInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a phone number
-        uri:
-          type: string
-          format: uri
-          description: Link to a phone number resource
-        phoneNumber:
-          type: string
-          description: 'Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
-
-            (with ''+'' sign) format
-
-            '
-    GreetingLanguageInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a greeting language
-        localeCode:
-          type: string
-          description: Localization code of a greeting language
-        name:
-          type: string
-          description: Official name of a greeting language
-      description: 'Information on language used for telephony greetings
-
-        '
-    ExtensionCountryInfoRequest:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a country
-    PhoneNumberDefinitionTollType:
-      type: object
-      description: To use as selection criteria when a number to be selected from the number pool.
-      required:
-      - tollType
-      properties:
-        tollType:
-          $ref: '#/components/schemas/PhoneNumberTollType'
-    NotificationSettings:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of notifications settings resource
-        emailRecipients:
-          type: array
-          description: 'List of extensions specified as email notification recipients.
-
-            Returned only for call queues where queue managers are assigned as user
-
-            extensions.
-
-            '
-          items:
-            $ref: '#/components/schemas/EmailRecipientInfo'
-        emailAddresses:
-          type: array
-          description: 'List of notification recipient email addresses
-
-            '
-          items:
-            type: string
-        includeManagers:
-          type: boolean
-          description: 'Specifies if managers'' emails are included in the list of emails to which
-
-            notifications are sent
-
-            '
-        smsEmailAddresses:
-          type: array
-          description: List of notification recipient email addresses
-          items:
-            type: string
-        advancedMode:
-          type: boolean
-          description: 'Specifies notifications settings mode. If `true` then advanced
-
-            mode is on, it allows using different emails and/or phone numbers for
-
-            each notification type. If `false` then basic mode is on. Advanced mode
-
-            settings are returned in both modes, if specified once, but if basic mode
-
-            is switched on, they are not applied
-
-            '
-        voicemails:
-          $ref: '#/components/schemas/VoicemailsInfo'
-        inboundFaxes:
-          $ref: '#/components/schemas/InboundFaxesInfo'
-        outboundFaxes:
-          $ref: '#/components/schemas/OutboundFaxesInfo'
-        inboundTexts:
-          $ref: '#/components/schemas/InboundTextsInfo'
-        missedCalls:
-          $ref: '#/components/schemas/MissedCallsInfo'
-    BulkOperationExtensionReference:
-      type: object
-      description: Information about an extension this device is assigned to
-      required:
-      - id
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a RingCentral extension
-          example: '12345'
-    ExtensionUpdateRequest:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Disabled
-          - Enabled
-          - NotActivated
-          - Frozen
-        statusInfo:
-          $ref: '#/components/schemas/ExtensionStatusInfo'
-        extensionNumber:
-          type: string
-          description: Extension number available
-        contact:
-          $ref: '#/components/schemas/ContactInfoUpdateRequest'
-        regionalSettings:
-          $ref: '#/components/schemas/ExtensionRegionalSettingRequest'
-        setupWizardState:
-          $ref: '#/components/schemas/SetupWizardStateForUpdateEnum'
-        partnerId:
-          type: string
-          description: 'Additional extension identifier, created by partner application
-
-            and applied on client side
-
-            '
-        ivrPin:
-          type: string
-          description: IVR PIN
-        password:
-          type: string
-          description: Password for extension
-        callQueueInfo:
-          $ref: '#/components/schemas/CallQueueInfoRequest'
-        transition:
-          $ref: '#/components/schemas/UserTransitionInfo'
-        customFields:
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomFieldInfo'
-        site:
-          $ref: '#/components/schemas/SiteReference'
-        type:
-          type: string
-          description: 'Extension type. Please note that legacy ''Department'' extension
-
-            type corresponds to ''Call Queue'' extensions in modern RingCentral
-
-            product terminology
-
-            '
-          enum:
-          - User
-          - FaxUser
-          - FlexibleUser
-          - VirtualUser
-          - DigitalUser
-          - Department
-          - Announcement
-          - Voicemail
-          - SharedLinesGroup
-          - PagingOnly
-          - IvrMenu
-          - ApplicationExtension
-          - ParkLocation
-          - DelegatedLinesGroup
-          - GroupCallPickup
-        subType:
-          type: string
-          description: 'Extension subtype, if applicable. For any unsupported subtypes
-
-            the ''Unknown'' value will be returned
-
-            '
-          enum:
-          - VideoPro
-          - VideoProPlus
-          - DigitalSignageOnlyRooms
-          - Unknown
-          - Emergency
-        references:
-          type: array
-          description: 'List of non-RC internal identifiers assigned to an extension
-
-            '
-          items:
-            $ref: '#/components/schemas/ReferenceInfo'
-    ExtensionPermissions:
-      type: object
-      properties:
-        admin:
-          $ref: '#/components/schemas/PermissionInfoAdmin'
-        internationalCalling:
-          $ref: '#/components/schemas/PermissionInfoInt'
-      description: 'Extension permissions, corresponding to the Service Web permissions
-
-        ''Admin'' and ''InternationalCalling''
-
-        '
-    ExtensionFormattingLocaleInfoRequest:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal Identifier of a formatting language
-    ProfileImageInfo:
-      required:
-      - uri
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: 'Link to a profile image. If an image is not uploaded for an
-
-            extension, only `uri` is returned
-
-            '
-        etag:
-          type: string
-          description: Identifier of an image
-        lastModified:
-          type: string
-          description: 'Date/time when an image was last updated, in ISO 8601 format,
-
-            for example 2016-03-10T18:07:52.534Z
-
-            '
-          format: date-time
-        contentType:
-          type: string
-          description: The type of image
-        scales:
-          type: array
-          description: 'List of URIs to profile images in different dimensions
-
-            '
-          items:
-            $ref: '#/components/schemas/ProfileImageInfoURI'
-      description: Information on profile image
-    InboundFaxesInfo:
-      type: object
-      properties:
-        notifyByEmail:
-          type: boolean
-          description: Email notification flag
-        notifyBySms:
-          type: boolean
-          description: SMS notification flag
-        advancedEmailAddresses:
-          type: array
-          description: 'List of recipient email addresses for inbound fax notifications.
-
-            Returned if specified, in both modes (advanced/basic). Applied in advanced
-
-            mode only
-
-            '
-          items:
-            type: string
-        advancedSmsEmailAddresses:
-          type: array
-          description: 'List of recipient phone numbers for inbound fax notifications.
-
-            Returned if specified, in both modes (advanced/basic). Applied in advanced
-
-            mode only
-
-            '
-          items:
-            type: string
-        includeAttachment:
-          type: boolean
-          description: 'Indicates whether fax should be attached to email
-
-            '
-        markAsRead:
-          type: boolean
-          description: 'Indicates whether email should be automatically marked as read
-
-            '
-    CallerIdByDevice:
-      type: object
-      properties:
-        device:
-          $ref: '#/components/schemas/CallerIdDeviceInfo'
-        callerId:
-          $ref: '#/components/schemas/CallerIdByDeviceInfo'
-      description: Caller ID settings by device
-    SiteReference:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a site
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    ExtensionCurrencyInfoRequest:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal Identifier of a currency
-    CallerIdByDeviceInfo:
+    CallerIdByFeatureInfo:
       type: object
       properties:
         type:
@@ -1734,411 +2685,21 @@ components:
             '
         phoneInfo:
           $ref: '#/components/schemas/CallerIdPhoneInfo'
-    BatchProvisionUsersRequest:
-      description: Describes request for user extension provisioning
-      type: object
-      required:
-      - records
-      properties:
-        records:
-          type: array
-          maxItems: 10
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/BatchProvisionUsersRequestItem'
-    SetupWizardStateForUpdateEnum:
-      type: string
-      description: Initial configuration wizard state
-      enum:
-      - NotStarted
-      - Incomplete
-      - Completed
-      default: NotStarted
-    TimezoneInfo:
+    FormattingLocaleInfo:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of a timezone
-        uri:
+          description: Internal identifier of a formatting language
+        localeCode:
           type: string
-          format: uri
-          description: Canonical URI of a timezone
+          description: Localization code of a formatting language
         name:
           type: string
-          description: Short name of a timezone
-        description:
-          type: string
-          description: Meaningful description of the timezone
-        bias:
-          type: string
-      description: Extension timezone information
-    ContactInfoUpdateRequest:
-      type: object
-      properties:
-        firstName:
-          type: string
-          description: 'For User extension type only. Extension user first name
-
-            '
-        lastName:
-          type: string
-          description: 'For User extension type only. Extension user last name
-
-            '
-        company:
-          type: string
-          description: Extension user company name
-        jobTitle:
-          type: string
-        email:
-          type: string
-          format: email
-          description: Email of extension user
-        businessPhone:
-          type: string
-          description: 'Extension user contact phone number in
-
-            [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
-
-            format
-
-            '
-        mobilePhone:
-          type: string
-          description: 'Extension user mobile (**non** Toll Free) phone number in
-
-            [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
-
-            (with ''+'' sign) format
-
-            '
-        businessAddress:
-          $ref: '#/components/schemas/ContactBusinessAddressInfo'
-        emailAsLoginName:
-          type: boolean
-          description: 'If `true` then contact email is enabled as login name for
-
-            this user. Please note that email should be unique in this case.
-
-            The default value is `false`
-
-            '
-        pronouncedName:
-          $ref: '#/components/schemas/PronouncedNameInfo'
-        department:
-          type: string
-          description: Extension user department, if any
-    ExtensionGrantListEventBody:
-      type: object
-      properties:
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-        ownerId:
-          type: string
-          description: Internal identifier of a subscription owner extension
-      description: Notification payload body
-    MissedCallsInfo:
-      type: object
-      properties:
-        notifyByEmail:
-          type: boolean
-          description: Email notification flag
-        notifyBySms:
-          type: boolean
-          description: SMS notification flag
-        advancedEmailAddresses:
-          type: array
-          description: 'List of recipient email addresses for missed call notifications.
-
-            Returned if specified, in both modes (advanced/basic). Applied in advanced
-
-            mode only
-
-            '
-          items:
-            type: string
-        advancedSmsEmailAddresses:
-          type: array
-          description: 'List of recipient phone numbers for missed call notifications.
-
-            Returned if specified, in both modes (advanced/basic). Applied in advanced
-
-            mode only
-
-            '
-          items:
-            type: string
-    CountryInfoBasicModel:
-      allOf:
-      - $ref: '#/components/schemas/CountryInfoMinimalModel'
-      - type: object
-        properties:
-          name:
-            type: string
-            description: The official name of a country
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    PhoneNumberDefinitionDirectNumberWithReservationId:
-      type: object
-      description: To be used for direct number assignment in case number pool is not supported
-      required:
-      - phoneNumber
-      properties:
-        phoneNumber:
-          type: string
-          description: Phone number ID
-        reservationId:
-          type: string
-          description: Phone number reservation ID
-    ContactBusinessAddressInfo:
-      type: object
-      properties:
-        country:
-          type: string
-          description: Country name of a user's company
-        state:
-          type: string
-          description: 'State/province name of a user''s company. Mandatory
-
-            for the USA, UK and Canada
-
-            '
-        city:
-          type: string
-          description: City name of a user's company
-        street:
-          type: string
-          description: Street address of a user's company
-        zip:
-          type: string
-          description: Zip code of a user's company
-      description: 'User''s business address. The default is
-
-        Company (Auto-Receptionist) settings
+          description: Official name of a formatting language
+      description: 'Formatting language preferences for numbers, dates and currencies
 
         '
-    CallerIdByFeature:
-      type: object
-      properties:
-        feature:
-          type: string
-          enum:
-          - RingOut
-          - RingMe
-          - CallFlip
-          - FaxNumber
-          - AdditionalSoftphone
-          - Alternate
-          - CommonPhone
-          - MobileApp
-          - Delegated
-        callerId:
-          $ref: '#/components/schemas/CallerIdByFeatureInfo'
-      description: Caller ID settings by feature
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    UserTransitionInfo:
-      type: object
-      properties:
-        sendWelcomeEmailsToUsers:
-          type: boolean
-          description: 'Specifies if a welcome/activation email is sent to the existing
-
-            users during account confirmation
-
-            '
-        sendWelcomeEmail:
-          type: boolean
-          description: 'Specifies if a welcome/activation email is sent to the new users (within extension status changing from
-
-            ''Unassigned'' to ''NotActivated/Disabled'')
-
-            '
-      description: 'For NotActivated extensions only. Welcome email settings
-
-        '
-    CountryInfoMinimalModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a country
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a country resource
-    GetConferencingInfoResponse:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a conferencing
-        allowJoinBeforeHost:
-          type: boolean
-          description: 'Determines if host user allows conference participants to join
-
-            before the host
-
-            '
-        hostCode:
-          type: string
-          description: Access code for a host user
-        mode:
-          type: string
-          description: 'Internal parameter specifying a conferencing engine
-
-            '
-        participantCode:
-          type: string
-          description: Access code for any participant
-        phoneNumber:
-          type: string
-          description: 'Primary conference phone number for user''s home country returned
-
-            in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format
-
-            '
-        supportUri:
-          description: Link to a branded support page
-          type: string
-          example: http://success.ringcentral.com
-        tapToJoinUri:
-          type: string
-          format: uri
-          description: 'Short URL leading to the service web page Tap to Join for audio
-
-            conference bridge
-
-            '
-        phoneNumbers:
-          type: array
-          description: 'List of multiple dial-in phone numbers to connect to audio
-
-            conference service, relevant for the user''s brand. Each number is given with
-
-            the country and location information, in order to let the user choose
-
-            less expensive way to connect to a conference. The first number in
-
-            the list is a primary conference number, that is default and domestic
-
-            '
-          items:
-            $ref: '#/components/schemas/PhoneNumberInfoConferencing'
-    ContactInfo:
-      type: object
-      properties:
-        firstName:
-          type: string
-          description: 'User''s first name (for extensions of `User` type only)
-
-            '
-        lastName:
-          type: string
-          description: 'For User extension type only. User''s last name (for extensions of `User` type only)
-
-            '
-        name:
-          type: string
-          description: 'Extension name (for extensions of `User` type - concatenation of first and last name)
-
-            '
-        company:
-          type: string
-          description: User's company name
-        jobTitle:
-          type: string
-          description: User's job title
-        email:
-          type: string
-          format: email
-          description: User's contact email
-        businessPhone:
-          type: string
-          description: 'User''s contact phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
-
-            (with ''+'' sign) format
-
-            '
-        mobilePhone:
-          type: string
-          description: 'User''s mobile (**non** Toll Free) phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
-
-            (with ''+'' sign) format
-
-            '
-        businessAddress:
-          $ref: '#/components/schemas/ContactBusinessAddressInfo'
-        emailAsLoginName:
-          type: boolean
-          description: 'Indicates that the contact email is enabled as a login name for this
-
-            user. Please note that the email must be unique in this case.
-
-            '
-          default: false
-        pronouncedName:
-          $ref: '#/components/schemas/PronouncedNameInfo'
-        department:
-          type: string
-          description: 'User''s department name
-
-            '
-      description: Detailed contact information
-    InboundTextsInfo:
-      type: object
-      properties:
-        notifyByEmail:
-          type: boolean
-          description: Email notification flag
-        notifyBySms:
-          type: boolean
-          description: SMS notification flag
-        advancedEmailAddresses:
-          type: array
-          description: 'List of recipient email addresses for inbound text message
-
-            notifications. Returned if specified, in both modes (advanced/basic).
-
-            Applied in advanced mode only
-
-            '
-          items:
-            type: string
-        advancedSmsEmailAddresses:
-          type: array
-          description: 'List of recipient phone numbers for inbound text message notifications.
-
-            Returned if specified, in both modes (advanced/basic). Applied in advanced
-
-            mode only
-
-            '
-          items:
-            type: string
     ExtensionServiceFeatureInfo:
       type: object
       properties:
@@ -2220,562 +2781,178 @@ components:
             the reasons for limitations, if any, are returned in response
 
             '
-    ReferenceInfo:
+    CustomFieldInfo:
       type: object
       properties:
-        ref:
+        id:
           type: string
-          description: Non-RC identifier of an extension
-        type:
+          description: Internal identifier of a custom field
+        value:
           type: string
-          description: Type of external identifier
-          enum:
-          - PartnerId
-          - CustomerDirectoryId
-        refAccId:
+          description: Custom field value
+        displayName:
           type: string
-          description: Primary federation admin account identifier
-    PhoneNumberTollType:
-      description: Indicates if a number is toll or toll-free
-      type: string
-      enum:
-      - Toll
-      - TollFree
-      example: Toll
-    PermissionInfoInt:
+    ExtensionCurrencyInfoRequest:
       type: object
       properties:
-        enabled:
-          type: boolean
-          description: Specifies if a permission is enabled or not
-      description: International Calling permission
-    CountryInfoShortModel:
-      allOf:
-      - $ref: '#/components/schemas/CountryInfoBasicModel'
-      - type: object
-        properties:
-          isoCode:
+        id:
+          type: string
+          description: Internal Identifier of a currency
+    NotificationSettings:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of notifications settings resource
+        emailRecipients:
+          type: array
+          description: 'List of extensions specified as email notification recipients.
+
+            Returned only for call queues where queue managers are assigned as user
+
+            extensions.
+
+            '
+          items:
+            $ref: '#/components/schemas/EmailRecipientInfo'
+        emailAddresses:
+          type: array
+          description: 'List of notification recipient email addresses
+
+            '
+          items:
             type: string
-            description: 'A ISO country code value complying with the
+        includeManagers:
+          type: boolean
+          description: 'Specifies if managers'' emails are included in the list of emails to which
 
-              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+            notifications are sent
 
-              format.
-
-              '
-          callingCode:
+            '
+        smsEmailAddresses:
+          type: array
+          description: List of notification recipient email addresses
+          items:
             type: string
-            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
+        advancedMode:
+          type: boolean
+          description: 'Specifies notifications settings mode. If `true` then advanced
 
-              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
+            mode is on, it allows using different emails and/or phone numbers for
 
-              [E.164](http://en.wikipedia.org/wiki/E.164),
+            each notification type. If `false` then basic mode is on. Advanced mode
 
-              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
+            settings are returned in both modes, if specified once, but if basic mode
 
-              '
-    RegionalSettings:
+            is switched on, they are not applied
+
+            '
+        voicemails:
+          $ref: '#/components/schemas/VoicemailsInfo'
+        inboundFaxes:
+          $ref: '#/components/schemas/InboundFaxesInfo'
+        outboundFaxes:
+          $ref: '#/components/schemas/OutboundFaxesInfo'
+        inboundTexts:
+          $ref: '#/components/schemas/InboundTextsInfo'
+        missedCalls:
+          $ref: '#/components/schemas/MissedCallsInfo'
+    VoicemailsInfo:
       type: object
       properties:
-        homeCountry:
-          $ref: '#/components/schemas/CountryInfoShortModel'
-        timezone:
-          $ref: '#/components/schemas/TimezoneInfo'
-        language:
-          $ref: '#/components/schemas/RegionalLanguageInfo'
-        greetingLanguage:
-          $ref: '#/components/schemas/GreetingLanguageInfo'
-        formattingLocale:
-          $ref: '#/components/schemas/FormattingLocaleInfo'
-        timeFormat:
-          type: string
-          description: Time format setting. The default value is '12h' = ['12h', '24h']
-          enum:
-          - 12h
-          - 24h
-      description: 'Regional data (timezone, home country, language) of an extension/account.
+        notifyByEmail:
+          type: boolean
+          description: Email notification flag
+        notifyBySms:
+          type: boolean
+          description: SMS notification flag
+        advancedEmailAddresses:
+          type: array
+          description: 'List of recipient email addresses for voicemail notifications.
 
-        The default is Company (Auto-Receptionist) settings
+            Returned if specified, in both modes (advanced/basic). Applied in advanced
+
+            mode only
+
+            '
+          items:
+            type: string
+        advancedSmsEmailAddresses:
+          type: array
+          description: 'List of recipient phone numbers for voicemail notifications.
+
+            Returned if specified, in both modes (advanced/basic). Applied in advanced
+
+            mode only
+
+            '
+          items:
+            type: string
+        includeAttachment:
+          type: boolean
+          description: 'Indicates whether voicemail should be attached to email
+
+            '
+        includeTranscription:
+          type: boolean
+          description: 'Specifies whether to add voicemail transcription or not
+
+            '
+        markAsRead:
+          type: boolean
+          description: 'Indicates whether a voicemail should be automatically marked
+
+            as read
+
+            '
+    CallerIdPhoneInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a phone number
+        uri:
+          type: string
+          format: uri
+          description: Link to a phone number resource
+        phoneNumber:
+          type: string
+          description: 'Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            (with ''+'' sign) format
+
+            '
+    CallerIdByFeatureRequest:
+      type: object
+      properties:
+        feature:
+          type: string
+          enum:
+          - RingOut
+          - RingMe
+          - CallFlip
+          - FaxNumber
+          - AdditionalSoftphone
+          - Alternate
+          - CommonPhone
+          - MobileApp
+          - Delegated
+        callerId:
+          $ref: '#/components/schemas/CallerIdByFeatureInfoRequest'
+      description: Caller ID settings by feature
+    ExtensionPermissions:
+      type: object
+      properties:
+        admin:
+          $ref: '#/components/schemas/PermissionInfoAdmin'
+        internationalCalling:
+          $ref: '#/components/schemas/PermissionInfoInt'
+      description: 'Extension permissions, corresponding to the Service Web permissions
+
+        ''Admin'' and ''InternationalCalling''
 
         '
-    ProfileImageInfoURI:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-    ExtensionCallerIdInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URL of a caller ID resource
-        byDevice:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallerIdByDevice'
-        byFeature:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallerIdByFeature'
-        extensionNameForOutboundCalls:
-          type: boolean
-          description: 'If `true`, then user first name and last name will be used
-
-            as caller ID when making outbound calls from extension
-
-            '
-        extensionNumberForInternalCalls:
-          type: boolean
-          description: 'If `true`, then extension number will be used as caller ID
-
-            when making internal calls
-
-            '
-    UpdateConferencingInfoRequest:
-      type: object
-      properties:
-        phoneNumbers:
-          type: array
-          description: 'Multiple dial-in phone numbers to connect to audio conference
-
-            service, relevant for user''s brand. Each number is given with the country
-
-            and location information, in order to let the user choose the less expensive
-
-            way to connect to a conference. The first number in the list is the primary
-
-            conference number, that is default and domestic
-
-            '
-          items:
-            $ref: '#/components/schemas/ConferencePhoneNumberInfo'
-        allowJoinBeforeHost:
-          type: boolean
-          description: Determines if host user allows conference participants to join before the host
-    PhoneNumberDefinitionPreferredAreaCode:
-      type: object
-      description: To use as selection hint when a "toll" number to be selected from the number pool.
-      required:
-      - preferredAreaCode
-      properties:
-        preferredAreaCode:
-          description: Preferred area code to use if numbers available
-          type: string
-          pattern: ^[1-9]\d{1,3}$
-          example: '650'
-    GrantInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a grant
-        extension:
-          $ref: '#/components/schemas/ExtensionInfoGrants'
-        callPickup:
-          type: boolean
-          description: 'Specifies if picking up of other extensions'' calls is allowed
-
-            for the extension. If ''Presence'' feature is disabled for the given extension,
-
-            the flag is not returned
-
-            '
-        callMonitoring:
-          type: boolean
-          description: 'Specifies if monitoring of other extensions'' calls is allowed
-
-            for the extension. If ''CallMonitoring'' feature is disabled for the given
-
-            extension, the flag is not returned
-
-            '
-        callOnBehalfOf:
-          type: boolean
-          description: 'Specifies whether the current extension is able to make or
-
-            receive calls on behalf of the user referenced in extension object
-
-            '
-        callDelegation:
-          type: boolean
-          description: 'Specifies whether the current extension can delegate a call
-
-            to the user referenced in extension object
-
-            '
-        groupPaging:
-          type: boolean
-          description: 'Specifies whether the current extension is allowed to call
-
-            Paging Only group referenced to in extension object
-
-            '
-        callQueueSetup:
-          type: boolean
-          description: 'Specifies whether the current extension is assigned as a Full-Access
-
-            manager in the call queue referenced in extension object
-
-            '
-        callQueueMembersSetup:
-          type: boolean
-          description: 'Specifies whether the current extension is assigned as a Members-Only
-
-            manager in the call queue referenced in extension object
-
-            '
-        callQueueMessages:
-          type: boolean
-          description: 'Specifies whether the current extension is assigned as a Messages Manager
-
-            in the queue referenced in extension object
-
-            '
-        callQueueFacSetup:
-          type: boolean
-          description: 'Specifies whether the current extension is granted *Forward All Calls (FAC)* permission
-
-            '
-        sharedVoicemails:
-          type: boolean
-          description: 'Specifies whether the user referenced in extension object is sharing voicemails
-
-            with the current extension
-
-            '
-    DeviceDefinition:
-      type: object
-      required:
-      - type
-      - emergency
-      - phoneInfo
-      properties:
-        type:
-          type: string
-          description: Device type. Only "OtherPhone" and "WebRTC" device types are supported at the moment
-          enum:
-          - OtherPhone
-          - WebRTC
-        emergency:
-          description: Only "address" is supported at the moment
-          oneOf:
-          - type: object
-            required:
-            - address
-            properties:
-              address:
-                $ref: '#/components/schemas/PostalAddress'
-          - type: object
-            required:
-            - location
-            properties:
-              location:
-                type: object
-                required:
-                - id
-                properties:
-                  id:
-                    type: string
-                    description: Emergency location ID
-        phoneInfo:
-          oneOf:
-          - $ref: '#/components/schemas/PhoneNumberDefinitionTollType'
-          - $ref: '#/components/schemas/PhoneNumberDefinitionPreferredAreaCode'
-          - $ref: '#/components/schemas/PhoneNumberDefinitionDirectNumberWithReservationId'
-          - $ref: '#/components/schemas/PhoneNumberDefinitionNumberId'
-    CallerIdDeviceInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a device
-        uri:
-          type: string
-          format: uri
-          description: Link to a device resource
-        name:
-          type: string
-          description: Name of a device
-    FormattingLocaleInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a formatting language
-        localeCode:
-          type: string
-          description: Localization code of a formatting language
-        name:
-          type: string
-          description: Official name of a formatting language
-      description: 'Formatting language preferences for numbers, dates and currencies
-
-        '
-    CallerIdByFeatureInfoRequest:
-      type: object
-      properties:
-        type:
-          type: string
-          description: 'If ''PhoneNumber'' value is specified, then a certain phone number
-
-            is shown as a caller ID when using this telephony feature. If ''Blocked''
-
-            value is specified, then a caller ID is hidden. The value ''CurrentLocation''
-
-            can be specified for ''RingOut'' feature only. The default is ''PhoneNumber''
-
-            = [''PhoneNumber'', ''Blocked'', ''CurrentLocation'']
-
-            '
-        phoneInfo:
-          $ref: '#/components/schemas/CallerIdPhoneInfoRequest'
-    CallerIdByDeviceInfoRequest:
-      type: object
-      properties:
-        type:
-          type: string
-          description: 'If ''PhoneNumber'' value is specified, then a certain phone number
-
-            is shown as a caller ID when using this telephony feature. If ''Blocked''
-
-            value is specified, then a caller ID is hidden. The value ''CurrentLocation''
-
-            can be specified for ''RingOut'' feature only. The default is ''PhoneNumber''
-
-            = [''PhoneNumber'', ''Blocked'', ''CurrentLocation'']
-
-            '
-        phoneInfo:
-          $ref: '#/components/schemas/CallerIdPhoneInfoRequest'
-    ExtensionRegionalSettingRequest:
-      type: object
-      properties:
-        homeCountry:
-          $ref: '#/components/schemas/ExtensionCountryInfoRequest'
-        timezone:
-          $ref: '#/components/schemas/ExtensionTimezoneInfoRequest'
-        language:
-          $ref: '#/components/schemas/ExtensionLanguageInfoRequest'
-        greetingLanguage:
-          $ref: '#/components/schemas/ExtensionGreetingLanguageInfoRequest'
-        formattingLocale:
-          $ref: '#/components/schemas/ExtensionFormattingLocaleInfoRequest'
-        currency:
-          $ref: '#/components/schemas/ExtensionCurrencyInfoRequest'
-        timeFormat:
-          type: string
-          description: Time format setting
-          default: 12h
-          enum:
-          - 12h
-          - 24h
-    BasicContactInfo:
-      description: Personal contact information
-      type: object
-      properties:
-        firstName:
-          description: Given name
-          type: string
-          maxLength: 64
-          example: John
-        lastName:
-          description: Family name
-          type: string
-          maxLength: 64
-          example: Smith
-        email:
-          description: Contact email
-          type: string
-          format: email
-          maxLength: 64
-          example: john.smith@acme.com
-    ExtensionGreetingLanguageInfoRequest:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a greeting language
-    BulkDeleteUsersRequest:
-      type: object
-      required:
-      - records
-      properties:
-        keepAssetsInInventory:
-          type: boolean
-          description: 'Indicates that the freed users'' assets (phone numbers and devices) should be moved
-
-            to account inventory rather than deleted. If set to `true`, the phone numbers and devices
-
-            assigned to deleted extensions will be kept in the account''s inventory. If set to `false`,
-
-            these assets will be deleted from the account and returned to either the partner''s phone
-
-            numbers or RingCentral''s phone number pool
-
-            '
-          default: true
-        records:
-          type: array
-          minItems: 1
-          maxItems: 50
-          items:
-            $ref: '#/components/schemas/BulkOperationExtensionReference'
-    ExtensionInfoGrants:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an extension
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of an extension
-        extensionNumber:
-          type: string
-          description: Extension short number (usually 3 or 4 digits)
-        name:
-          type: string
-          description: Name of extension
-        type:
-          type: string
-          description: 'Extension type. Please note that legacy ''Department''
-
-            extension type corresponds to ''Call Queue'' extensions in modern RingCentral
-
-            product terminology
-
-            '
-          enum:
-          - User
-          - Fax User
-          - VirtualUser
-          - DigitalUser
-          - Department
-          - Announcement
-          - Voicemail
-          - SharedLinesGroup
-          - PagingOnly
-          - IvrMenu
-          - ApplicationExtension
-          - ParkLocation
-          - DelegatedLinesGroup
-      description: Extension information
-    BatchProvisionUsersRequestItem:
-      description: Describes request for user extension provisioning
-      type: object
-      required:
-      - status
-      - contact
-      properties:
-        extensionNumber:
-          $ref: '#/components/schemas/ExtensionNumber'
-        status:
-          description: Extension status. Only "Enabled" can be specified
-          type: string
-          enum:
-          - Enabled
-          default: Enabled
-        contact:
-          description: User's contact information
-          required:
-          - firstName
-          - lastName
-          - email
-          allOf:
-          - $ref: '#/components/schemas/BasicContactInfo'
-          - type: object
-            properties:
-              mobileNumber:
-                $ref: '#/components/schemas/PhoneNumberE164'
-              emailAsLoginName:
-                description: 'Indicates that contact email is enabled as login name for this user.
-
-                  Please note that email must be unique in this case.
-
-                  '
-                type: boolean
-                default: true
-        costCenter:
-          type: object
-          required:
-          - id
-          properties:
-            id:
-              type: string
-              description: Internal identifier of the Cost Center
-              example: '224149'
-        roles:
-          type: array
-          maxItems: 1
-          items:
-            type: object
-            required:
-            - id
-            properties:
-              id:
-                type: string
-                description: Internal identifier of a role to be assigned
-                example: '1'
-        devices:
-          type: array
-          maxItems: 1
-          items:
-            type: object
-            required:
-            - deviceInfo
-            properties:
-              deviceInfo:
-                $ref: '#/components/schemas/DeviceDefinition'
-        sendWelcomeEmail:
-          type: boolean
-          description: 'Specifies if a welcome/activation email is sent to the new users (within extension status changing from
-
-            ''Unassigned'' to ''NotActivated/Disabled'')
-
-            '
-          default: true
-    ExtensionNumber:
-      description: 'Short number of an extension.
-
-        Actual max length depends on system length limit for extension.
-
-        '
-      type: string
-      pattern: ^\d{3,8}$
-      minLength: 1
-      maxLength: 8
-      example: '205'
-    BatchProvisionErrorItem:
-      type: object
-      required:
-      - successful
-      - errors
-      properties:
-        successful:
-          type: boolean
-          description: Indicates if the provisioning operation was successful for this item, always `false` in this model
-          example: false
-        errors:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    RegionalLanguageInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a language set as regional
-        localeCode:
-          type: string
-          description: Localization code of a language set as regional
-        name:
-          type: string
-          description: Official name of a language set as regional
-      description: Information on a language set as regional
     CostCenterInfo:
       type: object
       description: Cost center information. Applicable if Cost Center feature is enabled. The default is `root` cost center value
@@ -2786,202 +2963,6 @@ components:
         name:
           type: string
           description: Name of a cost center
-    PermissionInfoAdmin:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          description: Specifies if a permission is enabled or not
-      description: Admin permission
-    PronouncedNameInfo:
-      type: object
-      properties:
-        type:
-          type: string
-          description: 'The method used to pronounce the user''s name:
-
-            - `Default` - default extension name; first and last name specified in user''s profile are pronounced using text-to-speech;
-
-            - `TextToSpeech` - custom text specified by a user  pronounced using text-to-speech;
-
-            - `Recorded` - custom audio uploaded by a user, the name recorded in user''s own voice (supported only for extension retrieval).
-
-            '
-          enum:
-          - Default
-          - TextToSpeech
-          - Recorded
-        text:
-          type: string
-          description: Custom text (for `TextToSpeech` type only)
-        prompt:
-          $ref: '#/components/schemas/PronouncedNamePromptInfo'
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-    BulkDeleteUsersResponse:
-      type: object
-      required:
-      - records
-      properties:
-        records:
-          type: array
-          items:
-            allOf:
-            - type: object
-              properties:
-                id:
-                  type: string
-                  description: Internal identifier of an extension
-                  example: '1162820004'
-            - $ref: '#/components/schemas/BulkItemResultModel'
-    PhoneNumberDefinitionNumberId:
-      type: object
-      description: To be used to assign a number by ID
-      required:
-      - phoneNumberId
-      properties:
-        phoneNumberId:
-          type: string
-          description: Phone number ID
-    GetExtensionAccountInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an account
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of an account resource
-      description: Account information
-    ConferencePhoneNumberInfo:
-      type: object
-      properties:
-        phoneNumber:
-          type: string
-          description: Dial-in phone number to connect to a conference
-        default:
-          type: boolean
-          description: 'The value should be `true` if the number is default for the conference. Default
-
-            conference number is a domestic number that can be set by user (otherwise
-
-            it is set by the system). Only one default number per country is allowed
-
-            '
-    ExtensionStatusInfo:
-      type: object
-      properties:
-        comment:
-          type: string
-          description: A free-form user comment, describing the status change reason
-        reason:
-          type: string
-          description: Type of suspension
-          enum:
-          - SuspendedVoluntarily
-          - SuspendedInvoluntarily
-          - CancelledVoluntarily
-          - CancelledInvoluntarily
-        till:
-          type: string
-          format: date-time
-          description: 'Date until which an account will get deleted. The default
-
-            value is 30 days since the current date
-
-            '
-      description: 'Status information (reason, comment). Returned for ''Disabled''
-
-        status only
-
-        '
-    EmailRecipientInfo:
-      type: object
-      properties:
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-        fullName:
-          type: string
-          description: User full name
-        extensionNumber:
-          type: string
-          description: User extension number
-        status:
-          type: string
-          description: Current state of an extension
-          enum:
-          - Enabled
-          - Disable
-          - NotActivated
-          - Unassigned
-        emailAddresses:
-          type: array
-          description: 'List of user email addresses from extension notification settings.
-
-            By default, main email address from contact information is returned
-
-            '
-          items:
-            type: string
-        permission:
-          type: string
-          description: Call queue manager permission
-          enum:
-          - FullAccess
-          - Messages
-          - MemberManagement
-    Roles:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a role
-        id:
-          type: string
-          description: Internal identifier of a role
-        autoAssigned:
-          type: boolean
-          default: false
-        displayName:
-          type: string
-        siteCompatible:
-          type: boolean
-        siteRestricted:
-          type: boolean
-    GetExtensionGrantListResponse:
-      required:
-      - navigation
-      - paging
-      - records
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the list of extension grants
-        records:
-          type: array
-          description: List of extension grants with details
-          items:
-            $ref: '#/components/schemas/GrantInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
     DepartmentInfo:
       type: object
       description: 'Please note that the `Department` extension type corresponds to
@@ -3001,85 +2982,120 @@ components:
         extensionNumber:
           type: string
           description: Short number of a department extension
-    ProvisioningSiteInfo:
+    CallerIdDeviceInfoRequest:
       type: object
       properties:
         id:
           type: string
-          format: uri
-          description: Internal identifier of a site
-        uri:
-          type: string
-          format: uri
-          description: Link to a site resource
-        name:
-          type: string
-          description: Name of a site
-        code:
-          type: string
-          description: Site code value. Returned only if specified
-      description: 'Site data. If multi-site feature is turned on for an account,
-
-        then ID of a site must be specified. In order to assign a wireless
-
-        point to the main site (company) the site ID should be set to `main-site`
-
-        '
-    BatchProvisionUsersSuccessItem:
+          description: Internal identifier of a device
+    BatchProvisionUsersRequest:
+      description: Describes request for user extension provisioning
       type: object
       required:
-      - successful
-      - extension
+      - records
       properties:
-        successful:
-          type: boolean
-          description: Indicates if the provisioning operation was successful for this item, always `true` in this model
-          example: true
-        extension:
-          type: object
-          required:
-          - devices
-          - id
-          properties:
-            id:
-              type: string
-              description: The internal identifier of RingCentral extension created
-              example: '12345'
-            devices:
-              type: array
-              items:
-                type: object
-                required:
-                - id
-                - phoneNumber
-                properties:
-                  id:
-                    type: string
-                    description: The internal identifier of device created
-                    example: '12345'
-                  phoneNumber:
-                    $ref: '#/components/schemas/PhoneNumberE164'
+        records:
+          type: array
+          maxItems: 10
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/BatchProvisionUsersRequestItem'
+    PhoneNumberDefinitionDirectNumberWithReservationId:
+      type: object
+      description: To be used for direct number assignment in case number pool is not supported
+      required:
+      - phoneNumber
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number ID
+        reservationId:
+          type: string
+          description: Phone number reservation ID
+    CallerIdByFeature:
+      type: object
+      properties:
+        feature:
+          type: string
+          enum:
+          - RingOut
+          - RingMe
+          - CallFlip
+          - FaxNumber
+          - AdditionalSoftphone
+          - Alternate
+          - CommonPhone
+          - MobileApp
+          - Delegated
+        callerId:
+          $ref: '#/components/schemas/CallerIdByFeatureInfo'
+      description: Caller ID settings by feature
+    ExtensionGrantListEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        event:
+          type: string
+          description: Event filter URI
+        timestamp:
+          type: string
+          description: 'Date/time of sending a notification in
+
+            [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+            format including timezone, for example *2016-03-10T18:07:52.534Z*
+
+            '
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        body:
+          $ref: '#/components/schemas/ExtensionGrantListEventBody'
     PhoneNumberE164:
       type: string
       pattern: ^\+[1-9]\d{1,14}$
       description: Phone number in e.164 format (with '+' prefix)
       maxLength: 18
       example: '+16501234567'
+    CallerIdPhoneInfoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a phone number
   parameters:
-    ProfileImageScale:
-      name: scaleSize
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Dimensions of a profile image which will be returned in response.
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true
+      style: simple
+      explode: false
       schema:
         type: string
-        enum:
-        - original
-        - 90x90
-        - 195x195
-        - 584x584
+        default: '~'
+      example: '~'
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
     ContentDispositionFilename:
       name: contentDispositionFilename
       in: query
@@ -3097,36 +3113,20 @@ components:
         enum:
         - Inline
         - Attachment
-    AccountId:
-      name: accountId
+    ProfileImageScale:
+      name: scaleSize
       in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+      description: 'Dimensions of a profile image which will be returned in response.
 
         '
       required: true
-      style: simple
-      explode: false
       schema:
         type: string
-        default: '~'
-      example: '~'
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
+        enum:
+        - original
+        - 90x90
+        - 195x195
+        - 584x584
   responses:
     InternalError:
       description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>

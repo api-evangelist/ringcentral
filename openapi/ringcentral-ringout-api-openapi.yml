@@ -100,6 +100,18 @@ paths:
       x-app-permission: RingOut
 components:
   schemas:
+    GetRingOutStatusResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a RingOut call
+        uri:
+          type: string
+          description: Link to a RingOut call resource
+          format: uri
+        status:
+          $ref: '#/components/schemas/RingOutStatusInfo'
     MakeRingOutRequest:
       required:
       - from
@@ -121,17 +133,13 @@ components:
             '
         country:
           $ref: '#/components/schemas/MakeRingOutCountryInfo'
-    MakeRingOutCountryInfo:
+    MakeRingOutCallerIdInfo:
       type: object
       properties:
-        id:
+        phoneNumber:
           type: string
-          description: Dialing plan country identifier
-      description: 'Optional. Dialing plan country data. If not specified, then an extension
-
-        home country is applied by default
-
-        '
+          description: Phone number in E.164 format
+      description: Phone number which will be displayed to the called party
     MakeRingOutCallerInfoRequestFrom:
       type: object
       properties:
@@ -150,17 +158,6 @@ components:
         leg of a RingOut call. This number can be one of the user''s configured forwarding
 
         numbers or an arbitrary number
-
-        '
-    MakeRingOutCallerInfoRequestTo:
-      type: object
-      properties:
-        phoneNumber:
-          type: string
-          description: Phone number in E.164 format
-      description: 'Phone number of a called party. This number corresponds to the
-
-        2nd leg of a RingOut call
 
         '
     RingOutStatusInfo:
@@ -215,25 +212,28 @@ components:
           - NotEnoughFunds
           - NoSuchUser
       description: RingOut status information
-    GetRingOutStatusResponse:
+    MakeRingOutCountryInfo:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of a RingOut call
-        uri:
-          type: string
-          description: Link to a RingOut call resource
-          format: uri
-        status:
-          $ref: '#/components/schemas/RingOutStatusInfo'
-    MakeRingOutCallerIdInfo:
+          description: Dialing plan country identifier
+      description: 'Optional. Dialing plan country data. If not specified, then an extension
+
+        home country is applied by default
+
+        '
+    MakeRingOutCallerInfoRequestTo:
       type: object
       properties:
         phoneNumber:
           type: string
           description: Phone number in E.164 format
-      description: Phone number which will be displayed to the called party
+      description: 'Phone number of a called party. This number corresponds to the
+
+        2nd leg of a RingOut call
+
+        '
   parameters:
     AccountId:
       name: accountId

@@ -334,29 +334,39 @@ paths:
       x-user-permission: AutoReceptionist
 components:
   schemas:
-    UpdateIVRPromptRequest:
-      type: object
-      properties:
-        filename:
-          type: string
-          description: Name of a file to be uploaded as a prompt
-    PromptLanguageInfo:
+    PromptInfo:
       type: object
       properties:
         uri:
           type: string
           format: uri
-          description: Link to a prompt language
+          description: Internal identifier of a prompt
         id:
           type: string
-          description: Internal identifier of a language
-        name:
+          description: Link to a prompt metadata
+        contentType:
           type: string
-          description: Language name
-        localeCode:
+          description: Type of prompt media content
+        contentUri:
           type: string
-          description: Language locale code
-      description: For 'TextToSpeech' mode only. Prompt language metadata
+          format: uri
+          description: Link to a prompt media content
+        filename:
+          type: string
+          description: Name of a prompt
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
     EnumeratedPagingModel:
       type: object
       required:
@@ -427,19 +437,6 @@ components:
 
             '
           example: 25
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
     IvrMenuPromptInfo:
       type: object
       properties:
@@ -457,6 +454,107 @@ components:
         language:
           $ref: '#/components/schemas/PromptLanguageInfo'
       description: Prompt metadata
+    IVRMenuListInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an IVR Menu extension
+          example: '7258440006'
+        uri:
+          type: string
+          format: uri
+          description: Link to an IVR Menu extension resource
+          example: https://api-example.rincentral.com/restapi/v1.0/account/5936989006/ivr-menus/7258440006
+        name:
+          type: string
+          description: First name of an IVR Menu user
+          example: IVR Menu 1001
+        extensionNumber:
+          type: string
+          description: Number of an IVR Menu extension
+          example: '1001'
+    IvrPrompts:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to prompts library resource
+        records:
+          type: array
+          description: List of Prompts
+          items:
+            $ref: '#/components/schemas/PromptInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    IVRMenuList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to an IVR Menu list
+        records:
+          type: array
+          description: List of ivr menus
+          items:
+            $ref: '#/components/schemas/IVRMenuListInfo'
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    PromptLanguageInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a prompt language
+        id:
+          type: string
+          description: Internal identifier of a language
+        name:
+          type: string
+          description: Language name
+        localeCode:
+          type: string
+          description: Language locale code
+      description: For 'TextToSpeech' mode only. Prompt language metadata
     IVRMenuActionsInfo:
       type: object
       properties:
@@ -483,6 +581,37 @@ components:
         phoneNumber:
           type: string
           description: For 'Transfer' action only. PSTN number in E.164 format
+    IVRMenuExtensionInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to an extension resource
+        id:
+          type: string
+          description: Internal identifier of an extension
+        name:
+          type: string
+          description: Name of an extension
+      description: For 'Connect' or 'Voicemail' actions only. Extension reference
+    AudioPromptInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a prompt audio file
+        id:
+          type: string
+          description: Internal identifier of a prompt
+      description: For 'Audio' mode only. Prompt media reference
+    UpdateIVRPromptRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+          description: Name of a file to be uploaded as a prompt
     ApiError:
       type: object
       description: Generalized API error structure suitable for any error type
@@ -499,123 +628,28 @@ components:
           description: User-friendly error message
           example: Something went wrong
       additionalProperties: true
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    IVRMenuListInfo:
+    IvrMenuSiteInfo:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of an IVR Menu extension
-          example: '7258440006'
-        uri:
-          type: string
-          format: uri
-          description: Link to an IVR Menu extension resource
-          example: https://api-example.rincentral.com/restapi/v1.0/account/5936989006/ivr-menus/7258440006
+          description: Internal identifier of a site. If the value is not specified in request, then the `main-site` default value is used
         name:
           type: string
-          description: First name of an IVR Menu user
-          example: IVR Menu 1001
-        extensionNumber:
-          type: string
-          description: Number of an IVR Menu extension
-          example: '1001'
-    AudioPromptInfo:
+          description: Site name
+      description: Site data
+    ParameterizedErrorResponseModel:
       type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
       properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a prompt audio file
-        id:
-          type: string
-          description: Internal identifier of a prompt
-      description: For 'Audio' mode only. Prompt media reference
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    PromptInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Internal identifier of a prompt
-        id:
-          type: string
-          description: Link to a prompt metadata
-        contentType:
-          type: string
-          description: Type of prompt media content
-        contentUri:
-          type: string
-          format: uri
-          description: Link to a prompt media content
-        filename:
-          type: string
-          description: Name of a prompt
-    IVRMenuExtensionInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to an extension resource
-        id:
-          type: string
-          description: Internal identifier of an extension
-        name:
-          type: string
-          description: Name of an extension
-      description: For 'Connect' or 'Voicemail' actions only. Extension reference
-    IVRMenuList:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to an IVR Menu list
-        records:
+        errors:
           type: array
-          description: List of ivr menus
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
           items:
-            $ref: '#/components/schemas/IVRMenuListInfo'
-    IvrPrompts:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to prompts library resource
-        records:
-          type: array
-          description: List of Prompts
-          items:
-            $ref: '#/components/schemas/PromptInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
+            $ref: '#/components/schemas/ApiErrorWithParameter'
     IVRMenuInfo:
       type: object
       properties:
@@ -641,89 +675,26 @@ components:
           description: Keys handling settings
           items:
             $ref: '#/components/schemas/IVRMenuActionsInfo'
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    IvrMenuSiteInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a site. If the value is not specified in request, then the `main-site` default value is used
-        name:
-          type: string
-          description: Site name
-      description: Site data
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-  responses:
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
-
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
-
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
   parameters:
+    IvrPromptId:
+      name: promptId
+      in: path
+      description: Internal identifier of an IVR prompt
+      required: true
+      schema:
+        type: string
     IvrMenuId:
       name: ivrMenuId
       description: Internal identifier of an IVR menu
       in: path
       required: true
+      schema:
+        type: string
+    ContentDispositionFilename:
+      name: contentDispositionFilename
+      in: query
+      description: The default filename of the file to be downloaded
+      required: false
       schema:
         type: string
     ContentDisposition:
@@ -751,20 +722,49 @@ components:
         type: string
         default: '~'
       example: '~'
-    IvrPromptId:
-      name: promptId
-      in: path
-      description: Internal identifier of an IVR prompt
-      required: true
-      schema:
-        type: string
-    ContentDispositionFilename:
-      name: contentDispositionFilename
-      in: query
-      description: The default filename of the file to be downloaded
-      required: false
-      schema:
-        type: string
+  responses:
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
   securitySchemes:
     OAuth2:
       type: oauth2

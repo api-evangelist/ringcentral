@@ -416,41 +416,362 @@ paths:
       x-user-permission: ReadUserDevices
 components:
   schemas:
-    SiteBasicInfo:
-      type: object
-      required:
-      - id
-      - name
-      properties:
-        id:
-          type: string
-          description: Site extension identifier or "main-site" for the main site
-        name:
-          type: string
-          description: Site name
-    AddonInfo:
+    ModelInfo:
       type: object
       properties:
         id:
           type: string
+          description: Internal identifier of a HardPhone device model
         name:
           type: string
-        count:
+          description: Device name
+        addons:
+          type: array
+          description: Add-ons description
+          items:
+            $ref: '#/components/schemas/AddonInfo'
+        deviceClass:
+          type: string
+        features:
+          type: array
+          description: Device feature or multiple features supported
+          items:
+            $ref: '#/components/schemas/DeviceFeatureEnum'
+        lineCount:
           type: integer
           format: int32
-    DeviceUpdateExtensionInfo:
+          description: Max supported count of phone lines
+      description: HardPhone model information
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    AccountDeviceUpdate:
+      type: object
+      properties:
+        emergencyServiceAddress:
+          $ref: '#/components/schemas/EmergencyServiceAddressResourceRequest'
+        emergency:
+          $ref: '#/components/schemas/DeviceEmergencyInfo'
+        extension:
+          $ref: '#/components/schemas/DeviceUpdateExtensionInfo'
+        phoneLines:
+          $ref: '#/components/schemas/DeviceUpdatePhoneLinesInfo'
+        useAsCommonPhone:
+          type: boolean
+          description: 'Supported only for devices assigned to Limited extensions.
+
+            If true, enables users to log in to this phone as a common phone
+
+            '
+        name:
+          type: string
+          description: Device label, maximum number of symbols is 64
+    PhoneLineTypeEnum:
+      type: string
+      description: The type of phone line
+      enum:
+      - Unknown
+      - Standalone
+      - StandaloneFree
+      - BlaPrimary
+      - BlaSecondary
+    DeviceEmergencyLocationInfo:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of an extension
-      description: Information on extension that the device is assigned to
-    UpdateDevicePhoneInfo:
+          description: Internal identifier of the emergency response location
+        name:
+          type: string
+          description: Location name
+        addressFormatId:
+          type: string
+          description: Address format ID
+      description: Company emergency response location details
+    DeviceSiteInfo:
       type: object
       properties:
         id:
           type: string
+          description: Internal identifier of a site
+        name:
+          type: string
+          description: Name of a site
+      description: Site data
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    RemoveLineRequest:
+      type: object
+      required:
+      - keepAssetsInInventory
+      properties:
+        keepAssetsInInventory:
+          type: boolean
+          default: true
+          description: 'The flag that controls what to do with the number and device:
+
+
+            - if the value of `keepAssetsInInventory` is `true`, the given device is moved to unassigned devices
+
+            and the number is moved to the number inventory;
+
+            - if the value of `keepAssetsInInventory` is `false`, the given device and number is removed from the account;
+
+            - if the parameter `keepAssetsInInventory` is not set (empty body) or the value of the parameter is empty,
+
+            default value `true` is set.
+
+            '
+    PhoneNumberDefinitionTollType:
+      type: object
+      description: To use as selection criteria when a number to be selected from the number pool.
+      required:
+      - tollType
+      properties:
+        tollType:
+          $ref: '#/components/schemas/PhoneNumberTollType'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    PhoneNumberDefinitionPreferredAreaCode:
+      type: object
+      description: To use as selection hint when a "toll" number to be selected from the number pool.
+      required:
+      - preferredAreaCode
+      properties:
+        preferredAreaCode:
+          description: Preferred area code to use if numbers available
+          type: string
+          pattern: ^[1-9]\d{1,3}$
+          example: '650'
+    BulkAddDevicesItem:
+      allOf:
+      - type: object
+        required:
+        - extension
+        properties:
+          costCenterId:
+            type: string
+            description: Internal identifier of a cost center
+            example: '224149'
+          extension:
+            $ref: '#/components/schemas/BulkOperationExtensionReference'
+      - $ref: '#/components/schemas/DeviceDefinition'
+    PhoneNumberInfoIntId:
+      type: object
+      properties:
+        id:
+          type: integer
           description: Internal identifier of a phone number
+          format: int64
+        country:
+          $ref: '#/components/schemas/PhoneNumberCountryInfo'
+        extension:
+          $ref: '#/components/schemas/DeviceProvisioningExtensionInfo'
+        label:
+          type: string
+          description: Custom user-defined name of a phone number, if any
+        location:
+          type: string
+          description: Location (City, State). Filled for local US numbers
+        paymentType:
+          type: string
+          description: 'Payment type. ''External'' is returned for forwarded numbers
+
+            which are not terminated in the RingCentral phone system
+
+            '
+          enum:
+          - External
+          - Local
+        phoneNumber:
+          type: string
+          description: Phone number
+        status:
+          type: string
+          description: 'Status of a phone number. If the value is ''Normal'', the phone
+
+            number is ready to be used. Otherwise, it is an external number not yet
+
+            ported to RingCentral
+
+            '
+        type:
+          type: string
+          description: Phone number type
+          enum:
+          - VoiceFax
+          - FaxOnly
+          - VoiceOnly
+        usageType:
+          type: string
+          description: Usage type of the phone number
+          enum:
+          - MainCompanyNumber
+          - AdditionalCompanyNumber
+          - CompanyNumber
+          - DirectNumber
+          - CompanyFaxNumber
+          - ForwardedNumber
+          - ForwardedCompanyNumber
+          - ContactCenterNumber
+      description: Phone number information
+    BulkAddDevicesResponse:
+      type: object
+      required:
+      - results
+      properties:
+        results:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/BulkAddDevicesSuccessItem'
+            - $ref: '#/components/schemas/BulkAddDevicesErrorItem'
+    DeviceEmergencyInfo:
+      type: object
+      properties:
+        address:
+          $ref: '#/components/schemas/CommonEmergencyLocationAddressInfoDefault'
+        location:
+          $ref: '#/components/schemas/DeviceEmergencyLocationInfo'
+        outOfCountry:
+          type: boolean
+          description: Specifies if emergency address is out of country
+        addressStatus:
+          type: string
+          description: Emergency address status
+          enum:
+          - Valid
+          - Invalid
+          - Provisioning
+        visibility:
+          type: string
+          description: 'Visibility of an emergency response location. If `Private`
+
+            is set, then location is visible only for the restricted number of users,
+
+            specified in `owners` array
+
+            '
+          enum:
+          - Private
+          - Public
+        syncStatus:
+          type: string
+          description: 'Resulting status of the emergency address synchronization. Returned
+
+            if `syncEmergencyAddress` parameter is set to `true`
+
+            '
+          enum:
+          - Verified
+          - Updated
+          - Deleted
+          - NotRequired
+          - Unsupported
+          - Failed
+        addressEditableStatus:
+          type: string
+          description: 'Ability to register new emergency address for a phone line
+
+            using devices sharing this line or only main device (line owner)
+
+            '
+          enum:
+          - MainDevice
+          - AnyDevice
+      description: Device emergency settings
     EmergencyAddress:
       type: object
       properties:
@@ -467,17 +788,162 @@ components:
           - Valid
           - Provisioning
           - Invalid
-    BulkAddDevicesResponse:
+    BillingStatementCharges:
+      type: object
+      properties:
+        description:
+          type: string
+        amount:
+          type: number
+          format: double
+        feature:
+          type: string
+        freeServiceCredit:
+          type: number
+          format: double
+    BulkAddDevicesRequest:
       type: object
       required:
-      - results
+      - records
       properties:
-        results:
+        records:
           type: array
+          minItems: 1
           items:
-            oneOf:
-            - $ref: '#/components/schemas/BulkAddDevicesSuccessItem'
-            - $ref: '#/components/schemas/BulkAddDevicesErrorItem'
+            $ref: '#/components/schemas/BulkAddDevicesItem'
+    DeviceDefinition:
+      type: object
+      required:
+      - type
+      - emergency
+      - phoneInfo
+      properties:
+        type:
+          type: string
+          description: Device type. Only "OtherPhone" and "WebRTC" device types are supported at the moment
+          enum:
+          - OtherPhone
+          - WebRTC
+        emergency:
+          description: Only "address" is supported at the moment
+          oneOf:
+          - type: object
+            required:
+            - address
+            properties:
+              address:
+                $ref: '#/components/schemas/PostalAddress'
+          - type: object
+            required:
+            - location
+            properties:
+              location:
+                type: object
+                required:
+                - id
+                properties:
+                  id:
+                    type: string
+                    description: Emergency location ID
+        phoneInfo:
+          oneOf:
+          - $ref: '#/components/schemas/PhoneNumberDefinitionTollType'
+          - $ref: '#/components/schemas/PhoneNumberDefinitionPreferredAreaCode'
+          - $ref: '#/components/schemas/PhoneNumberDefinitionDirectNumberWithReservationId'
+          - $ref: '#/components/schemas/PhoneNumberDefinitionNumberId'
+    OutboundProxyInfo:
+      type: object
+      properties:
+        region:
+          type: string
+          description: Geographical region
+          example: APAC
+        proxy:
+          type: string
+          description: SIP outbound proxy
+        proxyTLS:
+          type: string
+          description: SIP details for TLS (Transport Layer Security)
+    AddonInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        count:
+          type: integer
+          format: int32
+    SiteBasicInfo:
+      type: object
+      required:
+      - id
+      - name
+      properties:
+        id:
+          type: string
+          description: Site extension identifier or "main-site" for the main site
+        name:
+          type: string
+          description: Site name
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    UpdateDevicePhoneInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a phone number
+    BillingStatementFees:
+      type: object
+      properties:
+        description:
+          type: string
+        amount:
+          type: number
+          format: double
+        freeServiceCredit:
+          type: number
+          format: double
+    PhoneLinesInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a phone line
+        lineType:
+          $ref: '#/components/schemas/PhoneLineTypeEnum'
+        phoneInfo:
+          $ref: '#/components/schemas/PhoneNumberInfoIntId'
+        emergencyAddress:
+          $ref: '#/components/schemas/EmergencyAddress'
+    DeviceFeatureEnum:
+      type: string
+      description: Device feature
+      enum:
+      - BLA
+      - CommonPhone
+      - Intercom
+      - Paging
+      - HELD
     ShippingInfo:
       type: object
       properties:
@@ -504,6 +970,368 @@ components:
         to the customer
 
         '
+    AddDeviceToInventoryResponse:
+      type: object
+      required:
+      - devices
+      - site
+      properties:
+        devices:
+          type: array
+          items:
+            type: object
+            required:
+            - id
+            properties:
+              id:
+                type: string
+                description: Internal identifier of a created device
+        site:
+          $ref: '#/components/schemas/SiteBasicInfo'
+    EmergencyServiceAddressResource:
+      type: object
+      properties:
+        street:
+          type: string
+        street2:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        customerName:
+          type: string
+        state:
+          type: string
+          description: State/province name
+        stateId:
+          type: string
+          description: Internal identifier of a state
+        stateIsoCode:
+          type: string
+          description: ISO code of a state
+        stateName:
+          type: string
+          description: Full name of a state
+        countryId:
+          type: string
+          description: Internal identifier of a country
+        countryIsoCode:
+          type: string
+          description: ISO code of a country
+        country:
+          type: string
+          description: Country name
+        countryName:
+          type: string
+          description: Full name of a country
+        outOfCountry:
+          type: boolean
+          description: Specifies if emergency address is out of country
+        syncStatus:
+          type: string
+          description: 'Resulting status of emergency address synchronization. Returned
+
+            if `syncEmergencyAddress` parameter is set to `true`
+
+            '
+          enum:
+          - Verified
+          - Updated
+          - Deleted
+          - NotRequired
+          - Unsupported
+          - Failed
+        additionalCustomerName:
+          type: string
+          description: 'Name of an additional contact person. Should be specified for
+
+            countries except the US, Canada, the UK and Australia.
+
+            '
+        customerEmail:
+          type: string
+          format: email
+          description: 'Email of a primary contact person (receiver). Should be specified
+
+            for countries except the US, Canada, the UK and Australia.
+
+            '
+        additionalCustomerEmail:
+          type: string
+          format: email
+          description: 'Email of an additional contact person. Should be specified
+
+            for countries except the US, Canada, the UK and Australia.
+
+            '
+        customerPhone:
+          type: string
+          description: 'Phone number of a primary contact person (receiver). Should
+
+            be specified for countries except the US, Canada, the UK and Australia
+
+            '
+        additionalCustomerPhone:
+          type: string
+          description: 'Phone number of an additional contact person. Should be specified
+
+            for countries except the US, Canada, the UK & Australia.
+
+            '
+        lineProvisioningStatus:
+          type: string
+          description: Status of digital line provisioning
+          enum:
+          - Provisioning
+          - Valid
+          - Invalid
+        taxId:
+          type: string
+          description: Internal identifier of a tax
+      description: 'Address for emergency cases. The same emergency address is assigned
+
+        to all the numbers of one device
+
+        '
+    AddDeviceToInventoryRequest:
+      type: object
+      required:
+      - type
+      - quantity
+      properties:
+        type:
+          type: string
+          description: 'Device type. Use `OtherPhone` to indicate BYOD (customer provided) device
+
+            '
+          enum:
+          - OtherPhone
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 50
+          format: int32
+          description: Quantity of devices (total quantity should not exceed 50)
+        site:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Site extension identifier or "main-site" for the main site
+    CommonEmergencyLocationAddressInfoDefault:
+      type: object
+      properties:
+        country:
+          type: string
+          description: Country name
+        countryId:
+          type: string
+          description: Internal identifier of a country
+        countryIsoCode:
+          type: string
+          description: ISO code of a country
+        countryName:
+          type: string
+          description: Full name of a country
+        state:
+          type: string
+          description: 'State/Province name. Mandatory for the USA, the UK and Canada
+
+            '
+        stateId:
+          type: string
+          description: Internal identifier of a state
+        stateIsoCode:
+          type: string
+          description: ISO code of a state
+        stateName:
+          type: string
+          description: Full name of a state
+        city:
+          type: string
+          description: City name
+        street:
+          type: string
+          description: First line address
+        street2:
+          type: string
+          description: 'Second line address (apartment, suite, unit, building, floor,
+
+            etc.)
+
+            '
+        zip:
+          type: string
+          description: Postal (Zip) code
+        customerName:
+          type: string
+          description: Customer name
+    SipInfoResource:
+      type: object
+      properties:
+        domain:
+          type: string
+          description: SIP domain
+        outboundProxies:
+          type: array
+          description: List of outbound proxies
+          items:
+            $ref: '#/components/schemas/OutboundProxyInfo'
+        userName:
+          type: string
+          description: User credentials
+        password:
+          type: string
+          description: User password
+        authorizationId:
+          type: string
+          description: Internal identifier for SIP authorization
+    PostalAddress:
+      type: object
+      description: Postal address/location
+      required:
+      - street
+      - city
+      - zip
+      - country
+      properties:
+        street:
+          type: string
+          description: Street address
+          maxLength: 256
+          example: 20 Davis Dr
+        street2:
+          type: string
+          description: Street address (2nd line)
+          maxLength: 256
+        city:
+          type: string
+          description: City name
+          maxLength: 64
+          example: Belmont
+        state:
+          description: State or province information in the target country
+          maxLength: 64
+          type: string
+          example: CA
+        zip:
+          description: Postal code in the target country
+          type: string
+          maxLength: 10
+          example: '94002'
+        country:
+          description: ISO-3166-1 2-letter country code (alpha2)
+          type: string
+          maxLength: 2
+          minLength: 2
+          example: US
+    DeviceUpdatePhoneLinesInfo:
+      type: object
+      properties:
+        phoneLines:
+          type: array
+          description: Information on phone lines added to a device
+          items:
+            $ref: '#/components/schemas/UpdateDevicePhoneInfo'
+      description: Information on phone lines added to a device
+    BulkAddDevicesErrorItem:
+      type: object
+      required:
+      - successful
+      - errors
+      properties:
+        successful:
+          type: boolean
+          description: Indicates if the provisioning operation was successful for this item, always `false` in this model
+          example: false
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    BillingStatementInfo:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: 'Currency code complying with [ISO-4217](https://en.wikipedia.org/wiki/ISO_4217)
+
+            standard
+
+            '
+        charges:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingStatementCharges'
+        fees:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingStatementFees'
+        totalCharged:
+          type: number
+          format: double
+        totalCharges:
+          type: number
+          format: double
+        totalFees:
+          type: number
+          format: double
+        subtotal:
+          type: number
+          format: double
+        totalFreeServiceCredit:
+          type: number
+          format: double
+      description: 'Billing information. Returned for device update request if `prestatement`
+
+        query parameter is set to ''true''
+
+        '
+    BulkAddDevicesSuccessItem:
+      type: object
+      required:
+      - successful
+      - id
+      - extension
+      - phoneNumber
+      properties:
+        successful:
+          type: boolean
+          description: Indicates if the provisioning operation was successful for this item, always `true` in this model
+          example: true
+        id:
+          description: Internal identifier of the created device
+          type: string
+          example: '787878'
+        extension:
+          $ref: '#/components/schemas/BulkOperationExtensionReference'
+        phoneNumber:
+          $ref: '#/components/schemas/PhoneNumberE164'
+    PhoneNumberCountryInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a home country
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a home country
+        name:
+          type: string
+          description: Official name of a home country
+      description: Brief information on a phone number country
+    BulkOperationExtensionReference:
+      type: object
+      description: Information about an extension this device is assigned to
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a RingCentral extension
+          example: '12345'
     ShippingMethodInfo:
       allOf:
       - $ref: '#/components/schemas/ShippingMethodIdModel'
@@ -516,6 +1344,238 @@ components:
             - Ground
             - 2 Day
             - Overnight
+    GetExtensionDevicesResponse:
+      required:
+      - navigation
+      - paging
+      - records
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a list of extension devices
+        records:
+          type: array
+          description: List of extension devices
+          items:
+            $ref: '#/components/schemas/DeviceResource'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    PhoneNumberDefinitionNumberId:
+      type: object
+      description: To be used to assign a number by ID
+      required:
+      - phoneNumberId
+      properties:
+        phoneNumberId:
+          type: string
+          description: Phone number ID
+    PhoneNumberDefinitionDirectNumberWithReservationId:
+      type: object
+      description: To be used for direct number assignment in case number pool is not supported
+      required:
+      - phoneNumber
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number ID
+        reservationId:
+          type: string
+          description: Phone number reservation ID
+    EmergencyServiceAddressResourceRequest:
+      type: object
+      properties:
+        street:
+          type: string
+        street2:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        customerName:
+          type: string
+        state:
+          type: string
+          description: State/province name
+        stateId:
+          type: string
+          description: Internal identifier of a state
+        country:
+          type: string
+          description: Country name
+        countryId:
+          type: string
+          description: Internal identifier of a country
+      description: 'Address for emergency cases. The same emergency address is assigned to all
+
+        numbers of a single device. If the emergency address is also specified in
+
+        `emergency` resource, then this value is ignored
+
+        '
+    ShippingStatus:
+      description: 'Order item shipping status. It is set to `Initial` when the order is submitted.
+
+        Then it is changed to `Accepted` when a distributor starts processing the order.
+
+        Finally, it is changed to `Shipped` which means that the distributor has shipped the device.
+
+        '
+      type: string
+      enum:
+      - Initial
+      - Accepted
+      - Shipped
+      example: Shipped
+    DeviceUpdateExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension
+      description: Information on extension that the device is assigned to
+    ShippingAddressInfo:
+      type: object
+      properties:
+        customerName:
+          type: string
+          description: Name of a primary contact person (receiver)
+        additionalCustomerName:
+          type: string
+          description: 'Name of an additional contact person. Should be specified for
+
+            countries except the US, Canada, the UK and Australia.
+
+            '
+        customerEmail:
+          type: string
+          format: email
+          description: 'Email of a primary contact person (receiver). Should be specified
+
+            for countries except the US, Canada, the UK and Australia.
+
+            '
+        additionalCustomerEmail:
+          type: string
+          format: email
+          description: 'Email of an additional contact person. Should be specified
+
+            for countries except the US, Canada, the UK and Australia.
+
+            '
+        customerPhone:
+          type: string
+          description: 'Phone number of a primary contact person (receiver). Should
+
+            be specified for countries except the US, Canada, the UK and Australia
+
+            '
+        additionalCustomerPhone:
+          type: string
+          description: 'Phone number of an additional contact person. Should be specified
+
+            for countries except the US, Canada, the UK & Australia.
+
+            '
+        street:
+          type: string
+          description: 'Street address, line 1 - street address, P.O. box, company
+
+            name, c/o
+
+            '
+        street2:
+          type: string
+          description: 'Street address, line 2 - apartment, suite, unit, building,
+
+            floor, etc.
+
+            '
+        city:
+          type: string
+          description: City name
+        state:
+          type: string
+          description: State/province name
+        stateId:
+          type: string
+          description: Internal identifier of a state
+        stateIsoCode:
+          type: string
+          description: ISO code of a state
+        stateName:
+          type: string
+          description: Full name of a state
+        countryId:
+          type: string
+          description: Internal identifier of a country
+        countryIsoCode:
+          type: string
+          description: ISO code of a country
+        country:
+          type: string
+          description: Country name
+        countryName:
+          type: string
+          description: Full name of a country
+        zip:
+          type: string
+          description: Zip code
+        taxId:
+          type: string
+          description: 'National taxpayer identification number. Should be specified
+
+            for Brazil (CNPJ/CPF number) and Argentina (CUIT number).
+
+            '
+      description: 'Shipping address for the order. If it coincides with the Emergency
+
+        Service Address, then can be omitted. By default, the same value as the
+
+        emergencyServiceAddress. Multiple addresses can be specified; in case
+
+        an order contains several devices, they can be delivered to different addresses
+
+        '
+    RemoveLineResponse:
+      type: object
+      required:
+      - id
+      - type
+      - name
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a source device
+        type:
+          type: string
+          description: Device type
+          default: HardPhone
+          enum:
+          - HardPhone
+          - SoftPhone
+          - OtherPhone
+          - MobileDevice
+          - BLA
+          - Paging
+          - WebPhone
+          - WebRTC
+          - ZoomMobile
+          - ZoomPhone
+          - Room
+          - Unknown
+        name:
+          type: string
+          description: The display name of a source device
+          example: My Device N1
+        serial:
+          type: string
+          description: Serial number of a device (HardPhone)
+          example: ff:ff:ff:ff:ff:ff
     DeviceResource:
       type: object
       properties:
@@ -639,368 +1699,6 @@ components:
           $ref: '#/components/schemas/LinePoolingEnum'
         billingStatement:
           $ref: '#/components/schemas/BillingStatementInfo'
-    PhoneNumberDefinitionTollType:
-      type: object
-      description: To use as selection criteria when a number to be selected from the number pool.
-      required:
-      - tollType
-      properties:
-        tollType:
-          $ref: '#/components/schemas/PhoneNumberTollType'
-    ShippingAddressInfo:
-      type: object
-      properties:
-        customerName:
-          type: string
-          description: Name of a primary contact person (receiver)
-        additionalCustomerName:
-          type: string
-          description: 'Name of an additional contact person. Should be specified for
-
-            countries except the US, Canada, the UK and Australia.
-
-            '
-        customerEmail:
-          type: string
-          format: email
-          description: 'Email of a primary contact person (receiver). Should be specified
-
-            for countries except the US, Canada, the UK and Australia.
-
-            '
-        additionalCustomerEmail:
-          type: string
-          format: email
-          description: 'Email of an additional contact person. Should be specified
-
-            for countries except the US, Canada, the UK and Australia.
-
-            '
-        customerPhone:
-          type: string
-          description: 'Phone number of a primary contact person (receiver). Should
-
-            be specified for countries except the US, Canada, the UK and Australia
-
-            '
-        additionalCustomerPhone:
-          type: string
-          description: 'Phone number of an additional contact person. Should be specified
-
-            for countries except the US, Canada, the UK & Australia.
-
-            '
-        street:
-          type: string
-          description: 'Street address, line 1 - street address, P.O. box, company
-
-            name, c/o
-
-            '
-        street2:
-          type: string
-          description: 'Street address, line 2 - apartment, suite, unit, building,
-
-            floor, etc.
-
-            '
-        city:
-          type: string
-          description: City name
-        state:
-          type: string
-          description: State/province name
-        stateId:
-          type: string
-          description: Internal identifier of a state
-        stateIsoCode:
-          type: string
-          description: ISO code of a state
-        stateName:
-          type: string
-          description: Full name of a state
-        countryId:
-          type: string
-          description: Internal identifier of a country
-        countryIsoCode:
-          type: string
-          description: ISO code of a country
-        country:
-          type: string
-          description: Country name
-        countryName:
-          type: string
-          description: Full name of a country
-        zip:
-          type: string
-          description: Zip code
-        taxId:
-          type: string
-          description: 'National taxpayer identification number. Should be specified
-
-            for Brazil (CNPJ/CPF number) and Argentina (CUIT number).
-
-            '
-      description: 'Shipping address for the order. If it coincides with the Emergency
-
-        Service Address, then can be omitted. By default, the same value as the
-
-        emergencyServiceAddress. Multiple addresses can be specified; in case
-
-        an order contains several devices, they can be delivered to different addresses
-
-        '
-    EnumeratedPagingModel:
-      type: object
-      required:
-      - perPage
-      additionalProperties: false
-      properties:
-        perPage:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'Current page size, describes how many items are in each page.
-
-            Matches "perPage" parameter from the request.
-
-            '
-          example: 50
-        page:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'The current page number. 1-indexed, so the first page is 1
-
-            by default. May be omitted if result is empty (because non-existent page
-
-            was specified or perPage=0 was requested)
-
-            '
-          example: 5
-        pageStart:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based number of the first element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 0
-        pageEnd:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based index of the last element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 5
-        totalPages:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of pages in a dataset. May be omitted for
-
-            some resources due to performance reasons
-
-            '
-          example: 25
-        totalElements:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of elements in a dataset. May be omitted for
-
-            some resource due to performance reasons
-
-            '
-          example: 25
-    BillingStatementInfo:
-      type: object
-      properties:
-        currency:
-          type: string
-          description: 'Currency code complying with [ISO-4217](https://en.wikipedia.org/wiki/ISO_4217)
-
-            standard
-
-            '
-        charges:
-          type: array
-          items:
-            $ref: '#/components/schemas/BillingStatementCharges'
-        fees:
-          type: array
-          items:
-            $ref: '#/components/schemas/BillingStatementFees'
-        totalCharged:
-          type: number
-          format: double
-        totalCharges:
-          type: number
-          format: double
-        totalFees:
-          type: number
-          format: double
-        subtotal:
-          type: number
-          format: double
-        totalFreeServiceCredit:
-          type: number
-          format: double
-      description: 'Billing information. Returned for device update request if `prestatement`
-
-        query parameter is set to ''true''
-
-        '
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-    DeviceUpdatePhoneLinesInfo:
-      type: object
-      properties:
-        phoneLines:
-          type: array
-          description: Information on phone lines added to a device
-          items:
-            $ref: '#/components/schemas/UpdateDevicePhoneInfo'
-      description: Information on phone lines added to a device
-    RemoveLineResponse:
-      type: object
-      required:
-      - id
-      - type
-      - name
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a source device
-        type:
-          type: string
-          description: Device type
-          default: HardPhone
-          enum:
-          - HardPhone
-          - SoftPhone
-          - OtherPhone
-          - MobileDevice
-          - BLA
-          - Paging
-          - WebPhone
-          - WebRTC
-          - ZoomMobile
-          - ZoomPhone
-          - Room
-          - Unknown
-        name:
-          type: string
-          description: The display name of a source device
-          example: My Device N1
-        serial:
-          type: string
-          description: Serial number of a device (HardPhone)
-          example: ff:ff:ff:ff:ff:ff
-    BulkOperationExtensionReference:
-      type: object
-      description: Information about an extension this device is assigned to
-      required:
-      - id
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a RingCentral extension
-          example: '12345'
-    DeviceSiteInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a site
-        name:
-          type: string
-          description: Name of a site
-      description: Site data
-    PhoneLinesInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a phone line
-        lineType:
-          $ref: '#/components/schemas/PhoneLineTypeEnum'
-        phoneInfo:
-          $ref: '#/components/schemas/PhoneNumberInfoIntId'
-        emergencyAddress:
-          $ref: '#/components/schemas/EmergencyAddress'
-    DeviceProvisioningExtensionInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an extension
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of an extension
-        extensionNumber:
-          type: string
-          description: Number of extension
-        partnerId:
-          type: string
-          description: 'For Partner Applications Internal identifier of an extension
-
-            created by partner. The RingCentral supports the mapping of accounts and
-
-            stores the corresponding account ID/extension ID for each partner ID of
-
-            a client application. In request URIs partner IDs are accepted instead
-
-            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
-
-            Though in response URIs contain the corresponding account IDs and extension
-
-            IDs. In all request and response bodies these values are reflected via
-
-            partnerId attributes of account and extension
-
-            '
-      description: Information on the extension, to which the phone number is assigned. Returned only for the request of Account phone number list
-    PhoneNumberCountryInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a home country
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a home country
-        name:
-          type: string
-          description: Official name of a home country
-      description: Brief information on a phone number country
-    PhoneNumberTollType:
-      description: Indicates if a number is toll or toll-free
-      type: string
-      enum:
-      - Toll
-      - TollFree
-      example: Toll
     ApiError:
       type: object
       description: Generalized API error structure suitable for any error type
@@ -1017,92 +1715,39 @@ components:
           description: User-friendly error message
           example: Something went wrong
       additionalProperties: true
-    PhoneNumberDefinitionNumberId:
+    DeleteDeviceFromInventoryResponse:
       type: object
-      description: To be used to assign a number by ID
       required:
-      - phoneNumberId
-      properties:
-        phoneNumberId:
-          type: string
-          description: Phone number ID
-    GetExtensionDevicesResponse:
-      required:
-      - navigation
-      - paging
       - records
-      type: object
       properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a list of extension devices
         records:
           type: array
-          description: List of extension devices
           items:
-            $ref: '#/components/schemas/DeviceResource'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    DeviceEmergencyLocationInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of the emergency response location
-        name:
-          type: string
-          description: Location name
-        addressFormatId:
-          type: string
-          description: Address format ID
-      description: Company emergency response location details
-    ShippingMethodIdModel:
-      type: object
-      description: 'Devices shipping method. It is required if devices are ordered.
+            type: object
+            properties:
+              bulkItemSuccessful:
+                type: boolean
+                description: Specifies if a device is successfully deleted
+              deviceId:
+                type: string
+                description: Internal identifier of a device
+              bulkItemErrors:
+                type: array
+                description: 'The list of errors occurred during processing of particular item of bulk operation.
 
-        Availability of different shipping methods depends on package
+                  Returned only if `bulkItemSuccessful` is false
 
-        definition.
-
-        '
-      required:
-      - id
-      properties:
-        id:
-          type: string
-          description: 'Shipping method ID:
-
-            - "1" - Ground Shipping (5-7 business days)
-
-            - "2" - Expedited Shipping (2-days)
-
-            - "3" - Overnight Shipping
-
-            '
-          enum:
-          - '1'
-          - '2'
-          - '3'
-          default: '1'
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
+                  '
+                minItems: 1
+                items:
+                  $ref: '#/components/schemas/ApiError'
+    PhoneNumberTollType:
+      description: Indicates if a number is toll or toll-free
+      type: string
+      enum:
+      - Toll
+      - TollFree
+      example: Toll
     SwapDeviceRequest:
       description: Swap device request
       type: object
@@ -1111,6 +1756,26 @@ components:
           type: string
           description: Internal identifier of a target device, to which the current one will be swapped
           example: '8459879873'
+    PhoneNumberE164:
+      type: string
+      pattern: ^\+[1-9]\d{1,14}$
+      description: Phone number in e.164 format (with '+' prefix)
+      maxLength: 18
+      example: '+16501234567'
+    DeleteDeviceFromInventoryRequest:
+      type: object
+      required:
+      - records
+      properties:
+        records:
+          type: array
+          description: List of internal identifiers of the devices that should be deleted
+          items:
+            type: object
+            properties:
+              deviceId:
+                type: string
+                description: Internal identifier of a device that should be deleted
     ExtensionInfoIntId:
       type: object
       properties:
@@ -1145,744 +1810,67 @@ components:
 
             '
       description: This attribute can be omitted for unassigned devices
-    ModelInfo:
+    ShippingMethodIdModel:
+      type: object
+      description: 'Devices shipping method. It is required if devices are ordered.
+
+        Availability of different shipping methods depends on package
+
+        definition.
+
+        '
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: 'Shipping method ID:
+
+            - "1" - Ground Shipping (5-7 business days)
+
+            - "2" - Expedited Shipping (2-days)
+
+            - "3" - Overnight Shipping
+
+            '
+          enum:
+          - '1'
+          - '2'
+          - '3'
+          default: '1'
+    DeviceProvisioningExtensionInfo:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of a HardPhone device model
-        name:
-          type: string
-          description: Device name
-        addons:
-          type: array
-          description: Add-ons description
-          items:
-            $ref: '#/components/schemas/AddonInfo'
-        deviceClass:
-          type: string
-        features:
-          type: array
-          description: Device feature or multiple features supported
-          items:
-            $ref: '#/components/schemas/DeviceFeatureEnum'
-        lineCount:
-          type: integer
-          format: int32
-          description: Max supported count of phone lines
-      description: HardPhone model information
-    AccountDeviceUpdate:
-      type: object
-      properties:
-        emergencyServiceAddress:
-          $ref: '#/components/schemas/EmergencyServiceAddressResourceRequest'
-        emergency:
-          $ref: '#/components/schemas/DeviceEmergencyInfo'
-        extension:
-          $ref: '#/components/schemas/DeviceUpdateExtensionInfo'
-        phoneLines:
-          $ref: '#/components/schemas/DeviceUpdatePhoneLinesInfo'
-        useAsCommonPhone:
-          type: boolean
-          description: 'Supported only for devices assigned to Limited extensions.
-
-            If true, enables users to log in to this phone as a common phone
-
-            '
-        name:
-          type: string
-          description: Device label, maximum number of symbols is 64
-    BulkAddDevicesItem:
-      allOf:
-      - type: object
-        required:
-        - extension
-        properties:
-          costCenterId:
-            type: string
-            description: Internal identifier of a cost center
-            example: '224149'
-          extension:
-            $ref: '#/components/schemas/BulkOperationExtensionReference'
-      - $ref: '#/components/schemas/DeviceDefinition'
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
+          description: Internal identifier of an extension
         uri:
           type: string
-          description: Canonical URI to retrieve the particular page of the result set
           format: uri
-    DeleteDeviceFromInventoryRequest:
-      type: object
-      required:
-      - records
-      properties:
-        records:
-          type: array
-          description: List of internal identifiers of the devices that should be deleted
-          items:
-            type: object
-            properties:
-              deviceId:
-                type: string
-                description: Internal identifier of a device that should be deleted
-    PhoneNumberInfoIntId:
-      type: object
-      properties:
-        id:
-          type: integer
-          description: Internal identifier of a phone number
-          format: int64
-        country:
-          $ref: '#/components/schemas/PhoneNumberCountryInfo'
-        extension:
-          $ref: '#/components/schemas/DeviceProvisioningExtensionInfo'
-        label:
+          description: Canonical URI of an extension
+        extensionNumber:
           type: string
-          description: Custom user-defined name of a phone number, if any
-        location:
+          description: Number of extension
+        partnerId:
           type: string
-          description: Location (City, State). Filled for local US numbers
-        paymentType:
-          type: string
-          description: 'Payment type. ''External'' is returned for forwarded numbers
+          description: 'For Partner Applications Internal identifier of an extension
 
-            which are not terminated in the RingCentral phone system
+            created by partner. The RingCentral supports the mapping of accounts and
+
+            stores the corresponding account ID/extension ID for each partner ID of
+
+            a client application. In request URIs partner IDs are accepted instead
+
+            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
+
+            Though in response URIs contain the corresponding account IDs and extension
+
+            IDs. In all request and response bodies these values are reflected via
+
+            partnerId attributes of account and extension
 
             '
-          enum:
-          - External
-          - Local
-        phoneNumber:
-          type: string
-          description: Phone number
-        status:
-          type: string
-          description: 'Status of a phone number. If the value is ''Normal'', the phone
-
-            number is ready to be used. Otherwise, it is an external number not yet
-
-            ported to RingCentral
-
-            '
-        type:
-          type: string
-          description: Phone number type
-          enum:
-          - VoiceFax
-          - FaxOnly
-          - VoiceOnly
-        usageType:
-          type: string
-          description: Usage type of the phone number
-          enum:
-          - MainCompanyNumber
-          - AdditionalCompanyNumber
-          - CompanyNumber
-          - DirectNumber
-          - CompanyFaxNumber
-          - ForwardedNumber
-          - ForwardedCompanyNumber
-          - ContactCenterNumber
-      description: Phone number information
-    OutboundProxyInfo:
-      type: object
-      properties:
-        region:
-          type: string
-          description: Geographical region
-          example: APAC
-        proxy:
-          type: string
-          description: SIP outbound proxy
-        proxyTLS:
-          type: string
-          description: SIP details for TLS (Transport Layer Security)
-    BillingStatementFees:
-      type: object
-      properties:
-        description:
-          type: string
-        amount:
-          type: number
-          format: double
-        freeServiceCredit:
-          type: number
-          format: double
-    EmergencyServiceAddressResourceRequest:
-      type: object
-      properties:
-        street:
-          type: string
-        street2:
-          type: string
-        city:
-          type: string
-        zip:
-          type: string
-        customerName:
-          type: string
-        state:
-          type: string
-          description: State/province name
-        stateId:
-          type: string
-          description: Internal identifier of a state
-        country:
-          type: string
-          description: Country name
-        countryId:
-          type: string
-          description: Internal identifier of a country
-      description: 'Address for emergency cases. The same emergency address is assigned to all
-
-        numbers of a single device. If the emergency address is also specified in
-
-        `emergency` resource, then this value is ignored
-
-        '
-    PhoneNumberDefinitionPreferredAreaCode:
-      type: object
-      description: To use as selection hint when a "toll" number to be selected from the number pool.
-      required:
-      - preferredAreaCode
-      properties:
-        preferredAreaCode:
-          description: Preferred area code to use if numbers available
-          type: string
-          pattern: ^[1-9]\d{1,3}$
-          example: '650'
-    BulkAddDevicesSuccessItem:
-      type: object
-      required:
-      - successful
-      - id
-      - extension
-      - phoneNumber
-      properties:
-        successful:
-          type: boolean
-          description: Indicates if the provisioning operation was successful for this item, always `true` in this model
-          example: true
-        id:
-          description: Internal identifier of the created device
-          type: string
-          example: '787878'
-        extension:
-          $ref: '#/components/schemas/BulkOperationExtensionReference'
-        phoneNumber:
-          $ref: '#/components/schemas/PhoneNumberE164'
-    EmergencyServiceAddressResource:
-      type: object
-      properties:
-        street:
-          type: string
-        street2:
-          type: string
-        city:
-          type: string
-        zip:
-          type: string
-        customerName:
-          type: string
-        state:
-          type: string
-          description: State/province name
-        stateId:
-          type: string
-          description: Internal identifier of a state
-        stateIsoCode:
-          type: string
-          description: ISO code of a state
-        stateName:
-          type: string
-          description: Full name of a state
-        countryId:
-          type: string
-          description: Internal identifier of a country
-        countryIsoCode:
-          type: string
-          description: ISO code of a country
-        country:
-          type: string
-          description: Country name
-        countryName:
-          type: string
-          description: Full name of a country
-        outOfCountry:
-          type: boolean
-          description: Specifies if emergency address is out of country
-        syncStatus:
-          type: string
-          description: 'Resulting status of emergency address synchronization. Returned
-
-            if `syncEmergencyAddress` parameter is set to `true`
-
-            '
-          enum:
-          - Verified
-          - Updated
-          - Deleted
-          - NotRequired
-          - Unsupported
-          - Failed
-        additionalCustomerName:
-          type: string
-          description: 'Name of an additional contact person. Should be specified for
-
-            countries except the US, Canada, the UK and Australia.
-
-            '
-        customerEmail:
-          type: string
-          format: email
-          description: 'Email of a primary contact person (receiver). Should be specified
-
-            for countries except the US, Canada, the UK and Australia.
-
-            '
-        additionalCustomerEmail:
-          type: string
-          format: email
-          description: 'Email of an additional contact person. Should be specified
-
-            for countries except the US, Canada, the UK and Australia.
-
-            '
-        customerPhone:
-          type: string
-          description: 'Phone number of a primary contact person (receiver). Should
-
-            be specified for countries except the US, Canada, the UK and Australia
-
-            '
-        additionalCustomerPhone:
-          type: string
-          description: 'Phone number of an additional contact person. Should be specified
-
-            for countries except the US, Canada, the UK & Australia.
-
-            '
-        lineProvisioningStatus:
-          type: string
-          description: Status of digital line provisioning
-          enum:
-          - Provisioning
-          - Valid
-          - Invalid
-        taxId:
-          type: string
-          description: Internal identifier of a tax
-      description: 'Address for emergency cases. The same emergency address is assigned
-
-        to all the numbers of one device
-
-        '
-    DeviceDefinition:
-      type: object
-      required:
-      - type
-      - emergency
-      - phoneInfo
-      properties:
-        type:
-          type: string
-          description: Device type. Only "OtherPhone" and "WebRTC" device types are supported at the moment
-          enum:
-          - OtherPhone
-          - WebRTC
-        emergency:
-          description: Only "address" is supported at the moment
-          oneOf:
-          - type: object
-            required:
-            - address
-            properties:
-              address:
-                $ref: '#/components/schemas/PostalAddress'
-          - type: object
-            required:
-            - location
-            properties:
-              location:
-                type: object
-                required:
-                - id
-                properties:
-                  id:
-                    type: string
-                    description: Emergency location ID
-        phoneInfo:
-          oneOf:
-          - $ref: '#/components/schemas/PhoneNumberDefinitionTollType'
-          - $ref: '#/components/schemas/PhoneNumberDefinitionPreferredAreaCode'
-          - $ref: '#/components/schemas/PhoneNumberDefinitionDirectNumberWithReservationId'
-          - $ref: '#/components/schemas/PhoneNumberDefinitionNumberId'
-    ShippingStatus:
-      description: 'Order item shipping status. It is set to `Initial` when the order is submitted.
-
-        Then it is changed to `Accepted` when a distributor starts processing the order.
-
-        Finally, it is changed to `Shipped` which means that the distributor has shipped the device.
-
-        '
-      type: string
-      enum:
-      - Initial
-      - Accepted
-      - Shipped
-      example: Shipped
-    DeviceFeatureEnum:
-      type: string
-      description: Device feature
-      enum:
-      - BLA
-      - CommonPhone
-      - Intercom
-      - Paging
-      - HELD
-    BulkAddDevicesRequest:
-      type: object
-      required:
-      - records
-      properties:
-        records:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/BulkAddDevicesItem'
-    AddDeviceToInventoryResponse:
-      type: object
-      required:
-      - devices
-      - site
-      properties:
-        devices:
-          type: array
-          items:
-            type: object
-            required:
-            - id
-            properties:
-              id:
-                type: string
-                description: Internal identifier of a created device
-        site:
-          $ref: '#/components/schemas/SiteBasicInfo'
-    BillingStatementCharges:
-      type: object
-      properties:
-        description:
-          type: string
-        amount:
-          type: number
-          format: double
-        feature:
-          type: string
-        freeServiceCredit:
-          type: number
-          format: double
-    DeviceEmergencyInfo:
-      type: object
-      properties:
-        address:
-          $ref: '#/components/schemas/CommonEmergencyLocationAddressInfoDefault'
-        location:
-          $ref: '#/components/schemas/DeviceEmergencyLocationInfo'
-        outOfCountry:
-          type: boolean
-          description: Specifies if emergency address is out of country
-        addressStatus:
-          type: string
-          description: Emergency address status
-          enum:
-          - Valid
-          - Invalid
-          - Provisioning
-        visibility:
-          type: string
-          description: 'Visibility of an emergency response location. If `Private`
-
-            is set, then location is visible only for the restricted number of users,
-
-            specified in `owners` array
-
-            '
-          enum:
-          - Private
-          - Public
-        syncStatus:
-          type: string
-          description: 'Resulting status of the emergency address synchronization. Returned
-
-            if `syncEmergencyAddress` parameter is set to `true`
-
-            '
-          enum:
-          - Verified
-          - Updated
-          - Deleted
-          - NotRequired
-          - Unsupported
-          - Failed
-        addressEditableStatus:
-          type: string
-          description: 'Ability to register new emergency address for a phone line
-
-            using devices sharing this line or only main device (line owner)
-
-            '
-          enum:
-          - MainDevice
-          - AnyDevice
-      description: Device emergency settings
-    RemoveLineRequest:
-      type: object
-      required:
-      - keepAssetsInInventory
-      properties:
-        keepAssetsInInventory:
-          type: boolean
-          default: true
-          description: 'The flag that controls what to do with the number and device:
-
-
-            - if the value of `keepAssetsInInventory` is `true`, the given device is moved to unassigned devices
-
-            and the number is moved to the number inventory;
-
-            - if the value of `keepAssetsInInventory` is `false`, the given device and number is removed from the account;
-
-            - if the parameter `keepAssetsInInventory` is not set (empty body) or the value of the parameter is empty,
-
-            default value `true` is set.
-
-            '
-    DeleteDeviceFromInventoryResponse:
-      type: object
-      required:
-      - records
-      properties:
-        records:
-          type: array
-          items:
-            type: object
-            properties:
-              bulkItemSuccessful:
-                type: boolean
-                description: Specifies if a device is successfully deleted
-              deviceId:
-                type: string
-                description: Internal identifier of a device
-              bulkItemErrors:
-                type: array
-                description: 'The list of errors occurred during processing of particular item of bulk operation.
-
-                  Returned only if `bulkItemSuccessful` is false
-
-                  '
-                minItems: 1
-                items:
-                  $ref: '#/components/schemas/ApiError'
-    SipInfoResource:
-      type: object
-      properties:
-        domain:
-          type: string
-          description: SIP domain
-        outboundProxies:
-          type: array
-          description: List of outbound proxies
-          items:
-            $ref: '#/components/schemas/OutboundProxyInfo'
-        userName:
-          type: string
-          description: User credentials
-        password:
-          type: string
-          description: User password
-        authorizationId:
-          type: string
-          description: Internal identifier for SIP authorization
-    AddDeviceToInventoryRequest:
-      type: object
-      required:
-      - type
-      - quantity
-      properties:
-        type:
-          type: string
-          description: 'Device type. Use `OtherPhone` to indicate BYOD (customer provided) device
-
-            '
-          enum:
-          - OtherPhone
-        quantity:
-          type: integer
-          minimum: 1
-          maximum: 50
-          format: int32
-          description: Quantity of devices (total quantity should not exceed 50)
-        site:
-          type: object
-          properties:
-            id:
-              type: string
-              description: Site extension identifier or "main-site" for the main site
-    CommonEmergencyLocationAddressInfoDefault:
-      type: object
-      properties:
-        country:
-          type: string
-          description: Country name
-        countryId:
-          type: string
-          description: Internal identifier of a country
-        countryIsoCode:
-          type: string
-          description: ISO code of a country
-        countryName:
-          type: string
-          description: Full name of a country
-        state:
-          type: string
-          description: 'State/Province name. Mandatory for the USA, the UK and Canada
-
-            '
-        stateId:
-          type: string
-          description: Internal identifier of a state
-        stateIsoCode:
-          type: string
-          description: ISO code of a state
-        stateName:
-          type: string
-          description: Full name of a state
-        city:
-          type: string
-          description: City name
-        street:
-          type: string
-          description: First line address
-        street2:
-          type: string
-          description: 'Second line address (apartment, suite, unit, building, floor,
-
-            etc.)
-
-            '
-        zip:
-          type: string
-          description: Postal (Zip) code
-        customerName:
-          type: string
-          description: Customer name
-    BulkAddDevicesErrorItem:
-      type: object
-      required:
-      - successful
-      - errors
-      properties:
-        successful:
-          type: boolean
-          description: Indicates if the provisioning operation was successful for this item, always `false` in this model
-          example: false
-        errors:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    PostalAddress:
-      type: object
-      description: Postal address/location
-      required:
-      - street
-      - city
-      - zip
-      - country
-      properties:
-        street:
-          type: string
-          description: Street address
-          maxLength: 256
-          example: 20 Davis Dr
-        street2:
-          type: string
-          description: Street address (2nd line)
-          maxLength: 256
-        city:
-          type: string
-          description: City name
-          maxLength: 64
-          example: Belmont
-        state:
-          description: State or province information in the target country
-          maxLength: 64
-          type: string
-          example: CA
-        zip:
-          description: Postal code in the target country
-          type: string
-          maxLength: 10
-          example: '94002'
-        country:
-          description: ISO-3166-1 2-letter country code (alpha2)
-          type: string
-          maxLength: 2
-          minLength: 2
-          example: US
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    PhoneNumberDefinitionDirectNumberWithReservationId:
-      type: object
-      description: To be used for direct number assignment in case number pool is not supported
-      required:
-      - phoneNumber
-      properties:
-        phoneNumber:
-          type: string
-          description: Phone number ID
-        reservationId:
-          type: string
-          description: Phone number reservation ID
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    PhoneNumberE164:
-      type: string
-      pattern: ^\+[1-9]\d{1,14}$
-      description: Phone number in e.164 format (with '+' prefix)
-      maxLength: 18
-      example: '+16501234567'
-    PhoneLineTypeEnum:
-      type: string
-      description: The type of phone line
-      enum:
-      - Unknown
-      - Standalone
-      - StandaloneFree
-      - BlaPrimary
-      - BlaSecondary
+      description: Information on the extension, to which the phone number is assigned. Returned only for the request of Account phone number list
     LinePoolingEnum:
       type: string
       description: 'Pooling type of device:
@@ -1898,17 +1886,87 @@ components:
       - Host
       - Guest
       - None
-  responses:
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: The result set page number (1-indexed) to return
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 1
+      example: 1
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
 
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    DeviceId:
+      name: deviceId
+      in: path
+      description: Internal identifier of a device
+      required: true
+      schema:
+        type: string
+    PerPage:
+      name: perPage
+      in: query
+      description: 'The number of items per page. If provided value in the request
+
+        is greater than a maximum, the maximum value is applied
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 100
+      example: 100
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  responses:
     Forbidden:
       description: 'General response with **HTTP 403 "Forbidden"** status.<br>
 
@@ -1919,10 +1977,30 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
 
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    TooManyRequests:
+      description: 'General response with **HTTP 429 "Too many requests"** status.<br>
+
+        Reasons: certain rate limit is exceeded.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
 
         '
       content:
@@ -1941,94 +2019,16 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
 
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    TooManyRequests:
-      description: 'General response with **HTTP 429 "Too many requests"** status.<br>
-
-        Reasons: certain rate limit is exceeded.
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
 
         '
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
-  parameters:
-    DeviceId:
-      name: deviceId
-      in: path
-      description: Internal identifier of a device
-      required: true
-      schema:
-        type: string
-    Page:
-      name: page
-      in: query
-      description: The result set page number (1-indexed) to return
-      required: false
-      explode: false
-      schema:
-        type: integer
-        format: int32
-        minimum: 1
-        maximum: 1000
-        default: 1
-      example: 1
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    PerPage:
-      name: perPage
-      in: query
-      description: 'The number of items per page. If provided value in the request
-
-        is greater than a maximum, the maximum value is applied
-
-        '
-      required: false
-      explode: false
-      schema:
-        type: integer
-        format: int32
-        minimum: 1
-        maximum: 1000
-        default: 100
-      example: 100
   securitySchemes:
     OAuth2:
       type: oauth2

@@ -82,58 +82,19 @@ paths:
       x-throttling-group: Light
       x-app-permission: Video
 components:
-  responses:
-    RcvInternalError:
-      description: Error processing data
-    RcvAccessForbidden:
-      description: Access forbidden
-    RcvNotFound:
-      description: Resource not found
-  parameters:
-    RcvPerPage:
-      name: perPage
-      in: query
-      description: Number of records returned
-      schema:
-        type: integer
-        format: int32
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    RcvPageToken:
-      name: pageToken
-      in: query
-      description: Token to get the next page
-      schema:
-        type: string
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
   schemas:
+    Paging:
+      required:
+      - currentPageToken
+      type: object
+      properties:
+        currentPageToken:
+          type: string
+          description: Current offset token
+        nextPageToken:
+          type: string
+          description: Next page offset token
+      description: Paging information
     Host:
       type: object
       properties:
@@ -188,18 +149,6 @@ components:
           type: string
           description: Date after which recording will be deleted
       description: Recording information
-    Paging:
-      required:
-      - currentPageToken
-      type: object
-      properties:
-        currentPageToken:
-          type: string
-          description: Current offset token
-        nextPageToken:
-          type: string
-          description: Next page offset token
-      description: Paging information
     CloudRecordings:
       required:
       - paging
@@ -214,6 +163,57 @@ components:
         paging:
           $ref: '#/components/schemas/Paging'
       description: Recordings page
+  parameters:
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    RcvPerPage:
+      name: perPage
+      in: query
+      description: Number of records returned
+      schema:
+        type: integer
+        format: int32
+    RcvPageToken:
+      name: pageToken
+      in: query
+      description: Token to get the next page
+      schema:
+        type: string
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  responses:
+    RcvAccessForbidden:
+      description: Access forbidden
+    RcvInternalError:
+      description: Error processing data
+    RcvNotFound:
+      description: Resource not found
   securitySchemes:
     OAuth2:
       type: oauth2

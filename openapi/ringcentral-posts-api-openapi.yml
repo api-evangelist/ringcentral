@@ -275,36 +275,39 @@ components:
           type: string
           description: "Iterations ending datetime for periodic events in \n[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format\n"
           format: date-time
-    TMNavigationInfo:
+    TMCreatePostRequest:
+      type: object
+      description: Post data. At least one attribute should be provided (text or attachments)
+      properties:
+        text:
+          type: string
+          description: Text of a post. Maximum length is 10000 symbols. Mentions can be added in .md format `![:Type](id)`
+        attachments:
+          type: array
+          description: Identifier(s) of attachments. Maximum number of attachments is 25
+          items:
+            $ref: '#/components/schemas/TMAttachmentInfo'
+    TMAttachmentFootnoteInfo:
       type: object
       properties:
-        prevPageToken:
+        text:
           type: string
-          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-        nextPageToken:
+          description: Text of a footer
+        iconUri:
           type: string
-          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-    TMMentionsInfo:
+          format: uri
+          description: Link to an icon displayed to the left of a footer; sized 32x32px
+        time:
+          type: string
+          description: Message creation datetime in ISO 8601 format including timezone
+          format: date-time
+          example: '2016-03-10T18:07:52.534Z'
+    TMUpdatePostRequest:
       type: object
       properties:
-        id:
+        text:
           type: string
-          description: Internal identifier of a user
-        type:
-          type: string
-          description: Type of mention
-          enum:
-          - Person
-          - Team
-          - File
-          - Link
-          - Event
-          - Task
-          - Note
-          - Card
-        name:
-          type: string
-          description: Name of a user
+          description: Post text.
     TMMessageAttachmentInfo:
       type: object
       properties:
@@ -400,18 +403,6 @@ components:
           type: string
           format: uri
           description: Link to an image displayed to the left of an author's name; sized 82x82px
-    TMPostsList:
-      required:
-      - records
-      type: object
-      properties:
-        records:
-          type: array
-          description: List of posts
-          items:
-            $ref: '#/components/schemas/TMPostInfo'
-        navigation:
-          $ref: '#/components/schemas/TMNavigationInfo'
     TMAttachmentFieldsInfo:
       type: object
       properties:
@@ -428,69 +419,6 @@ components:
           enum:
           - Short
           - Long
-    TMAttachmentInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an attachment
-        type:
-          type: string
-          description: Type of an attachment
-          enum:
-          - File
-          - Note
-          - Event
-          - Card
-    TMAttachmentFootnoteInfo:
-      type: object
-      properties:
-        text:
-          type: string
-          description: Text of a footer
-        iconUri:
-          type: string
-          format: uri
-          description: Link to an icon displayed to the left of a footer; sized 32x32px
-        time:
-          type: string
-          description: Message creation datetime in ISO 8601 format including timezone
-          format: date-time
-          example: '2016-03-10T18:07:52.534Z'
-    TMUpdatePostRequest:
-      type: object
-      properties:
-        text:
-          type: string
-          description: Post text.
-    TMAddFileRequest:
-      required:
-      - contentUri
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a file
-        contentUri:
-          type: string
-          format: uri
-          description: Link to binary content
-        name:
-          type: string
-          description: Name of a file
-    TMCreatePostRequest:
-      type: object
-      description: Post data. At least one attribute should be provided (text or attachments)
-      properties:
-        text:
-          type: string
-          description: Text of a post. Maximum length is 10000 symbols. Mentions can be added in .md format `![:Type](id)`
-        attachments:
-          type: array
-          description: Identifier(s) of attachments. Maximum number of attachments is 25
-          items:
-            $ref: '#/components/schemas/TMAttachmentInfo'
     TMPostInfo:
       type: object
       properties:
@@ -548,6 +476,78 @@ components:
         iconEmoji:
           type: string
           description: Emoji used as an icon for this message
+    TMMentionsInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user
+        type:
+          type: string
+          description: Type of mention
+          enum:
+          - Person
+          - Team
+          - File
+          - Link
+          - Event
+          - Task
+          - Note
+          - Card
+        name:
+          type: string
+          description: Name of a user
+    TMAddFileRequest:
+      required:
+      - contentUri
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a file
+        contentUri:
+          type: string
+          format: uri
+          description: Link to binary content
+        name:
+          type: string
+          description: Name of a file
+    TMAttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an attachment
+        type:
+          type: string
+          description: Type of an attachment
+          enum:
+          - File
+          - Note
+          - Event
+          - Card
+    TMPostsList:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of posts
+          items:
+            $ref: '#/components/schemas/TMPostInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
   securitySchemes:
     OAuth2:
       type: oauth2

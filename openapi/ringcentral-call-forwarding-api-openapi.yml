@@ -215,137 +215,20 @@ paths:
       x-app-permission: EditExtensions
       x-user-permission: EditUserForwardingFlipNumbers
 components:
-  responses:
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
-
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
-
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
   schemas:
-    CreateForwardingNumberRequest:
+    PageNavigationModel:
       type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
       properties:
-        flipNumber:
-          type: integer
-          format: int32
-          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
-        phoneNumber:
-          type: string
-          description: Forwarding/Call flip phone number
-        label:
-          type: string
-          description: Forwarding/Call flip number title
-        type:
-          type: string
-          description: Forwarding/Call flip phone type. If specified, 'label' attribute value is ignored. The default value is 'Other'
-          enum:
-          - PhoneLine
-          - Home
-          - Mobile
-          - Work
-          - Other
-        device:
-          $ref: '#/components/schemas/CreateForwardingNumberDeviceInfo'
-    DeleteForwardingNumbersRequest:
-      type: object
-      properties:
-        records:
-          type: array
-          description: List of forwarding number IDs
-          items:
-            $ref: '#/components/schemas/ForwardingNumberId'
-    ForwardingNumberInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a forwarding/call flip phone number
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a forwarding/call flip phone number
-        phoneNumber:
-          type: string
-          description: Forwarding/Call flip phone number
-        label:
-          type: string
-          description: Forwarding/Call flip number title
-        features:
-          type: array
-          description: Type of option this phone number is used for. Multiple values are accepted
-          items:
-            type: string
-            enum:
-            - CallFlip
-            - CallForwarding
-        flipNumber:
-          type: string
-          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
-        device:
-          $ref: '#/components/schemas/CreateForwardingNumberDeviceInfo'
-        type:
-          type: string
-          description: Forwarding phone number type
-          enum:
-          - Home
-          - Mobile
-          - Work
-          - PhoneLine
-          - Outage
-          - Other
-          - BusinessMobilePhone
-          - ExternalCarrier
-          - ExtensionApps
-        extension:
-          type: object
-          description: Extension information. Returned only if extension type is 'ExtensionApps'
-          properties:
-            id:
-              type: string
-              description: Internal identifier of an extension
-            extensionNumber:
-              type: string
-              description: Number of an extension
-            name:
-              type: string
-              description: Extension name
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
     EnumeratedPagingModel:
       type: object
       required:
@@ -416,41 +299,12 @@ components:
 
             '
           example: 25
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
     ForwardingNumberId:
       type: object
       properties:
         forwardingNumberId:
           type: string
           description: Forwarding number id
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
     ApiErrorWithParameter:
       description: 'The error model with additional attributes which can be used for HTTP 400/409
 
@@ -467,30 +321,18 @@ components:
           parameterValue:
             type: string
             description: The value of the API parameter/attribute which caused the error
-    UpdateForwardingNumberRequest:
+    ApiErrorResponseModel:
       type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
       properties:
-        phoneNumber:
-          type: string
-          description: Forwarding/Call flip phone number
-        label:
-          type: string
-          description: Forwarding/Call flip number title
-        flipNumber:
-          type: string
-          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
-        type:
-          type: string
-          description: Forwarding phone number type
-          enum:
-          - Home
-          - Mobile
-          - Work
-          - PhoneLine
-          - Outage
-          - Other
-          - BusinessMobilePhone
-          - ExternalCarrier
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
     PageNavigationUri:
       type: object
       additionalProperties: false
@@ -499,17 +341,38 @@ components:
           type: string
           description: Canonical URI to retrieve the particular page of the result set
           format: uri
-    CreateForwardingNumberDeviceInfo:
+    DeleteForwardingNumbersRequest:
       type: object
       properties:
-        id:
+        records:
+          type: array
+          description: List of forwarding number IDs
+          items:
+            $ref: '#/components/schemas/ForwardingNumberId'
+    CreateForwardingNumberRequest:
+      type: object
+      properties:
+        flipNumber:
+          type: integer
+          format: int32
+          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
+        phoneNumber:
           type: string
-          description: Internal identifier of the other extension device
-      description: 'Forwarding device information. Applicable for ''PhoneLine'' type only.
-
-        Cannot be specified together with ''phoneNumber'' parameter
-
-        '
+          description: Forwarding/Call flip phone number
+        label:
+          type: string
+          description: Forwarding/Call flip number title
+        type:
+          type: string
+          description: Forwarding/Call flip phone type. If specified, 'label' attribute value is ignored. The default value is 'Other'
+          enum:
+          - PhoneLine
+          - Home
+          - Mobile
+          - Work
+          - Other
+        device:
+          $ref: '#/components/schemas/CreateForwardingNumberDeviceInfo'
     ForwardingNumberResource:
       type: object
       properties:
@@ -542,18 +405,46 @@ components:
           - PhoneLine
           - Outage
           - Other
-    ApiErrorResponseModel:
+    UpdateForwardingNumberRequest:
       type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
       properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
+        phoneNumber:
+          type: string
+          description: Forwarding/Call flip phone number
+        label:
+          type: string
+          description: Forwarding/Call flip number title
+        flipNumber:
+          type: string
+          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
+        type:
+          type: string
+          description: Forwarding phone number type
+          enum:
+          - Home
+          - Mobile
+          - Work
+          - PhoneLine
+          - Outage
+          - Other
+          - BusinessMobilePhone
+          - ExternalCarrier
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
     GetExtensionForwardingNumberListResponse:
       type: object
       properties:
@@ -570,6 +461,72 @@ components:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
+    CreateForwardingNumberDeviceInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of the other extension device
+      description: 'Forwarding device information. Applicable for ''PhoneLine'' type only.
+
+        Cannot be specified together with ''phoneNumber'' parameter
+
+        '
+    ForwardingNumberInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a forwarding/call flip phone number
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a forwarding/call flip phone number
+        phoneNumber:
+          type: string
+          description: Forwarding/Call flip phone number
+        label:
+          type: string
+          description: Forwarding/Call flip number title
+        features:
+          type: array
+          description: Type of option this phone number is used for. Multiple values are accepted
+          items:
+            type: string
+            enum:
+            - CallFlip
+            - CallForwarding
+        flipNumber:
+          type: string
+          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
+        device:
+          $ref: '#/components/schemas/CreateForwardingNumberDeviceInfo'
+        type:
+          type: string
+          description: Forwarding phone number type
+          enum:
+          - Home
+          - Mobile
+          - Work
+          - PhoneLine
+          - Outage
+          - Other
+          - BusinessMobilePhone
+          - ExternalCarrier
+          - ExtensionApps
+        extension:
+          type: object
+          description: Extension information. Returned only if extension type is 'ExtensionApps'
+          properties:
+            id:
+              type: string
+              description: Internal identifier of an extension
+            extensionNumber:
+              type: string
+              description: Number of an extension
+            name:
+              type: string
+              description: Extension name
     ParameterizedErrorResponseModel:
       type: object
       description: Standard error response which may include parameterized errors
@@ -596,21 +553,6 @@ components:
         maximum: 1000
         default: 1
       example: 1
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
     ForwardingNumberId:
       name: forwardingNumberId
       in: path
@@ -650,6 +592,64 @@ components:
         maximum: 1000
         default: 100
       example: 100
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+  responses:
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
   securitySchemes:
     OAuth2:
       type: oauth2

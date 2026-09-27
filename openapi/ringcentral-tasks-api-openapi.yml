@@ -297,15 +297,12 @@ paths:
       x-app-permission: TeamMessaging
 components:
   schemas:
-    TMCreateTaskRequest:
-      required:
-      - assignees
-      - subject
+    TMUpdateTaskRequest:
       type: object
       properties:
         subject:
           type: string
-          description: Task name/subject. Max allowed length is 250 characters
+          description: Task name/subject. Max allowed length is 250 characters.
         assignees:
           type: array
           items:
@@ -316,22 +313,20 @@ components:
                 description: Internal identifier of an assignee
         completenessCondition:
           type: string
-          default: Simple
           enum:
           - Simple
           - AllAssignees
           - Percentage
         startDate:
           type: string
-          description: Task start date in UTC time zone.
+          description: Task start date in UTC time zone
           format: date-time
         dueDate:
           type: string
-          description: Task due date/time in UTC time zone.
+          description: Task due date/time in UTC time zone
           format: date-time
         color:
           type: string
-          default: Black
           enum:
           - Black
           - Red
@@ -346,31 +341,13 @@ components:
           description: Task section to group / search by. Max allowed length is 100 characters.
         description:
           type: string
-          description: Task details. Max allowed length is 102400 characters (100kB).
+          description: Task details. Max allowed length is 102400 characters (100kB)
         recurrence:
           $ref: '#/components/schemas/TaskRecurrenceInfo'
         attachments:
           type: array
           items:
             $ref: '#/components/schemas/TMAttachmentInfo'
-    TMNavigationInfo:
-      type: object
-      properties:
-        prevPageToken:
-          type: string
-          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-        nextPageToken:
-          type: string
-          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-    TMTaskList:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/TMTaskInfo'
-        navigation:
-          $ref: '#/components/schemas/TMNavigationInfo'
     TMTaskInfo:
       type: object
       properties:
@@ -471,6 +448,93 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TaskAttachment'
+    TMTaskList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMTaskInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+    TMCreateTaskRequest:
+      required:
+      - assignees
+      - subject
+      type: object
+      properties:
+        subject:
+          type: string
+          description: Task name/subject. Max allowed length is 250 characters
+        assignees:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of an assignee
+        completenessCondition:
+          type: string
+          default: Simple
+          enum:
+          - Simple
+          - AllAssignees
+          - Percentage
+        startDate:
+          type: string
+          description: Task start date in UTC time zone.
+          format: date-time
+        dueDate:
+          type: string
+          description: Task due date/time in UTC time zone.
+          format: date-time
+        color:
+          type: string
+          default: Black
+          enum:
+          - Black
+          - Red
+          - Orange
+          - Yellow
+          - Green
+          - Blue
+          - Purple
+          - Magenta
+        section:
+          type: string
+          description: Task section to group / search by. Max allowed length is 100 characters.
+        description:
+          type: string
+          description: Task details. Max allowed length is 102400 characters (100kB).
+        recurrence:
+          $ref: '#/components/schemas/TaskRecurrenceInfo'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMAttachmentInfo'
+    TMCompleteTaskRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Completeness status
+          enum:
+          - Incomplete
+          - Complete
+        assignees:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of an assignee
+        completenessPercentage:
+          maximum: 100.0
+          minimum: 0
+          type: integer
+          format: int32
     TaskRecurrenceInfo:
       type: object
       description: Task information
@@ -504,57 +568,6 @@ components:
           type: string
           description: "End date of a periodic task in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) \nformat, UTC time zone\n"
           format: date-time
-    TMUpdateTaskRequest:
-      type: object
-      properties:
-        subject:
-          type: string
-          description: Task name/subject. Max allowed length is 250 characters.
-        assignees:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: Internal identifier of an assignee
-        completenessCondition:
-          type: string
-          enum:
-          - Simple
-          - AllAssignees
-          - Percentage
-        startDate:
-          type: string
-          description: Task start date in UTC time zone
-          format: date-time
-        dueDate:
-          type: string
-          description: Task due date/time in UTC time zone
-          format: date-time
-        color:
-          type: string
-          enum:
-          - Black
-          - Red
-          - Orange
-          - Yellow
-          - Green
-          - Blue
-          - Purple
-          - Magenta
-        section:
-          type: string
-          description: Task section to group / search by. Max allowed length is 100 characters.
-        description:
-          type: string
-          description: Task details. Max allowed length is 102400 characters (100kB)
-        recurrence:
-          $ref: '#/components/schemas/TaskRecurrenceInfo'
-        attachments:
-          type: array
-          items:
-            $ref: '#/components/schemas/TMAttachmentInfo'
     TMAttachmentInfo:
       type: object
       properties:
@@ -569,28 +582,6 @@ components:
           - Note
           - Event
           - Card
-    TMCompleteTaskRequest:
-      type: object
-      properties:
-        status:
-          type: string
-          description: Completeness status
-          enum:
-          - Incomplete
-          - Complete
-        assignees:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: Internal identifier of an assignee
-        completenessPercentage:
-          maximum: 100.0
-          minimum: 0
-          type: integer
-          format: int32
     TaskAttachment:
       type: object
       properties:
@@ -609,6 +600,15 @@ components:
           type: string
           format: uri
           description: URI
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
   securitySchemes:
     OAuth2:
       type: oauth2

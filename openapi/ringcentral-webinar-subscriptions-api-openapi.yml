@@ -199,60 +199,126 @@ paths:
       x-availability: High
       x-throttling-group: Light
 components:
-  responses:
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
-
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    Forbidden:
-      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
-
-        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
-
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
   schemas:
+    WebSocketDeliveryMode:
+      type: object
+      required:
+      - transportType
+      properties:
+        transportType:
+          type: string
+          description: The transport type for this subscription, or the channel by which an app should be notified of an event
+          enum:
+          - WebSocket
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    DisabledFilterInfo:
+      type: object
+      required:
+      - filter
+      - reason
+      properties:
+        filter:
+          type: string
+          description: Event filter that is disabled for the user
+        reason:
+          type: string
+          description: Reason why the filter is disabled for the user
+        message:
+          type: string
+          description: Error message
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    MobileDeliveryMode:
+      allOf:
+      - $ref: '#/components/schemas/MobileDeliveryModeRequest'
+      - type: object
+        required:
+        - encryption
+        properties:
+          encryption:
+            type: boolean
+            description: Specifies if notification messages will be encrypted or not.
+            enum:
+            - false
+            readOnly: true
+    UpdateSubscriptionRequest:
+      type: object
+      required:
+      - eventFilters
+      properties:
+        eventFilters:
+          type: array
+          description: The list of event filters corresponding to events the user is subscribed to
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
+        expiresIn:
+          type: integer
+          format: int32
+          minimum: 1
+          example: 1200
+          description: 'Subscription lifetime in seconds. The maximum subscription lifetime depends upon the specified `transportType`:
+
+
+            | Transport type      | Maximum permitted lifetime     |
+
+            | ------------------- | ------------------------------ |
+
+            | `WebHook`           | 315360000 seconds (10 years)   |
+
+            | `RC/APNS`, `RC/GSM` | 7776000 seconds (90 days)      |
+
+            | `PubNub`            | 900 seconds (15 minutes)       |
+
+            | `WebSocket`         | n/a (the parameter is ignored) |
+
+            '
+    MobileDeliveryModeRequest:
+      type: object
+      required:
+      - transportType
+      - certificateName
+      - registrationId
+      properties:
+        transportType:
+          type: string
+          description: The transport type for this subscription, or the channel by which an app should be notified of an event
+          enum:
+          - RC/APNS
+          - RC/GCM
+        certificateName:
+          type: string
+          description: Certificate name for mobile notification transports
+        registrationId:
+          type: string
+          description: Device instance ID for mobile notification transports
+          example: 38b062ae-85f8-4dcc-8734-04d3f7393d42
     SubscriptionInfo:
       required:
       - id
@@ -340,6 +406,87 @@ components:
             reason:
               type: string
               description: Reason of adding subscription to a black list
+    SubscriptionListResource:
+      type: object
+      required:
+      - uri
+      - records
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a resource
+        records:
+          type: array
+          minItems: 0
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/SubscriptionInfo'
+    NotificationDeliveryMode:
+      description: Notification delivery transport information
+      anyOf:
+      - $ref: '#/components/schemas/WebhookDeliveryMode'
+      - $ref: '#/components/schemas/MobileDeliveryMode'
+      - $ref: '#/components/schemas/PubNubDeliveryMode'
+      - $ref: '#/components/schemas/WebSocketDeliveryMode'
+      discriminator:
+        propertyName: transportType
+        mapping:
+          WebHook: '#/components/schemas/WebhookDeliveryMode'
+          RC/APNS: '#/components/schemas/MobileDeliveryMode'
+          RC/GCM: '#/components/schemas/MobileDeliveryMode'
+          PubNub: '#/components/schemas/PubNubDeliveryMode'
+          WebSocket: '#/components/schemas/WebSocketDeliveryMode'
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    WebhookDeliveryMode:
+      type: object
+      required:
+      - transportType
+      - address
+      - encryption
+      properties:
+        transportType:
+          type: string
+          description: The transport type for this subscription, or the channel by which an app should be notified of an event
+          enum:
+          - WebHook
+        address:
+          type: string
+          format: uri
+          description: 'The URL to which notifications should be delivered. This is only applicable for the `WebHook` transport type, for which it is a required field.
+
+            '
+          example: https://acme.com/myservice/webhook
+        encryption:
+          type: boolean
+          description: Specifies if notification messages will be encrypted or not.
+          enum:
+          - false
+          readOnly: true
+    CreateWebhookSubscriptionRequest:
+      allOf:
+      - $ref: '#/components/schemas/UpdateSubscriptionRequest'
+      - type: object
+        required:
+        - deliveryMode
+        properties:
+          deliveryMode:
+            $ref: '#/components/schemas/WebhookDeliveryModeRequest'
     PubNubDeliveryMode:
       allOf:
       - $ref: '#/components/schemas/PubNubDeliveryModeRequest'
@@ -383,118 +530,6 @@ components:
 
               '
             readOnly: true
-    WebhookDeliveryMode:
-      type: object
-      required:
-      - transportType
-      - address
-      - encryption
-      properties:
-        transportType:
-          type: string
-          description: The transport type for this subscription, or the channel by which an app should be notified of an event
-          enum:
-          - WebHook
-        address:
-          type: string
-          format: uri
-          description: 'The URL to which notifications should be delivered. This is only applicable for the `WebHook` transport type, for which it is a required field.
-
-            '
-          example: https://acme.com/myservice/webhook
-        encryption:
-          type: boolean
-          description: Specifies if notification messages will be encrypted or not.
-          enum:
-          - false
-          readOnly: true
-    MobileDeliveryMode:
-      allOf:
-      - $ref: '#/components/schemas/MobileDeliveryModeRequest'
-      - type: object
-        required:
-        - encryption
-        properties:
-          encryption:
-            type: boolean
-            description: Specifies if notification messages will be encrypted or not.
-            enum:
-            - false
-            readOnly: true
-    CreateWebhookSubscriptionRequest:
-      allOf:
-      - $ref: '#/components/schemas/UpdateSubscriptionRequest'
-      - type: object
-        required:
-        - deliveryMode
-        properties:
-          deliveryMode:
-            $ref: '#/components/schemas/WebhookDeliveryModeRequest'
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    UpdateSubscriptionRequest:
-      type: object
-      required:
-      - eventFilters
-      properties:
-        eventFilters:
-          type: array
-          description: The list of event filters corresponding to events the user is subscribed to
-          minItems: 1
-          items:
-            type: string
-            minLength: 1
-        expiresIn:
-          type: integer
-          format: int32
-          minimum: 1
-          example: 1200
-          description: 'Subscription lifetime in seconds. The maximum subscription lifetime depends upon the specified `transportType`:
-
-
-            | Transport type      | Maximum permitted lifetime     |
-
-            | ------------------- | ------------------------------ |
-
-            | `WebHook`           | 315360000 seconds (10 years)   |
-
-            | `RC/APNS`, `RC/GSM` | 7776000 seconds (90 days)      |
-
-            | `PubNub`            | 900 seconds (15 minutes)       |
-
-            | `WebSocket`         | n/a (the parameter is ignored) |
-
-            '
     WebhookDeliveryModeRequest:
       type: object
       required:
@@ -517,26 +552,18 @@ components:
           type: string
           description: An optional validation token used to verify the authenticity of the incoming webhook. Applicable only for the `WebHook` transport type.
           writeOnly: true
-    MobileDeliveryModeRequest:
+    ParameterizedErrorResponseModel:
       type: object
+      description: Standard error response which may include parameterized errors
       required:
-      - transportType
-      - certificateName
-      - registrationId
+      - errors
       properties:
-        transportType:
-          type: string
-          description: The transport type for this subscription, or the channel by which an app should be notified of an event
-          enum:
-          - RC/APNS
-          - RC/GCM
-        certificateName:
-          type: string
-          description: Certificate name for mobile notification transports
-        registrationId:
-          type: string
-          description: Device instance ID for mobile notification transports
-          example: 38b062ae-85f8-4dcc-8734-04d3f7393d42
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
     PubNubDeliveryModeRequest:
       type: object
       required:
@@ -557,86 +584,59 @@ components:
 
             '
           default: false
-    NotificationDeliveryMode:
-      description: Notification delivery transport information
-      anyOf:
-      - $ref: '#/components/schemas/WebhookDeliveryMode'
-      - $ref: '#/components/schemas/MobileDeliveryMode'
-      - $ref: '#/components/schemas/PubNubDeliveryMode'
-      - $ref: '#/components/schemas/WebSocketDeliveryMode'
-      discriminator:
-        propertyName: transportType
-        mapping:
-          WebHook: '#/components/schemas/WebhookDeliveryMode'
-          RC/APNS: '#/components/schemas/MobileDeliveryMode'
-          RC/GCM: '#/components/schemas/MobileDeliveryMode'
-          PubNub: '#/components/schemas/PubNubDeliveryMode'
-          WebSocket: '#/components/schemas/WebSocketDeliveryMode'
-    SubscriptionListResource:
-      type: object
-      required:
-      - uri
-      - records
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a resource
-        records:
-          type: array
-          minItems: 0
-          maxItems: 20
-          items:
-            $ref: '#/components/schemas/SubscriptionInfo'
-    WebSocketDeliveryMode:
-      type: object
-      required:
-      - transportType
-      properties:
-        transportType:
-          type: string
-          description: The transport type for this subscription, or the channel by which an app should be notified of an event
-          enum:
-          - WebSocket
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    DisabledFilterInfo:
-      type: object
-      required:
-      - filter
-      - reason
-      properties:
-        filter:
-          type: string
-          description: Event filter that is disabled for the user
-        reason:
-          type: string
-          description: Reason why the filter is disabled for the user
-        message:
-          type: string
-          description: Error message
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
+  responses:
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
+
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
   parameters:
     SubscriptionId:
       name: subscriptionId

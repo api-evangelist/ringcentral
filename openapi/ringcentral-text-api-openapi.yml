@@ -103,10 +103,6 @@ paths:
       x-app-permission: AI
 components:
   schemas:
-    SummaryApiResponse:
-      oneOf:
-      - $ref: '#/components/schemas/SummaryOutput'
-      - $ref: '#/components/schemas/CaiErrorResponse'
     PunctuateOutput:
       required:
       - texts
@@ -116,38 +112,26 @@ components:
           type: array
           items:
             type: string
-    CaiErrorCodeResponse:
-      required:
-      - errorCode
-      - message
+    SummaryOutputUnit:
       type: object
       properties:
-        errorCode:
+        name:
           type: string
+          example: AbstractiveShort
           enum:
-          - CAI-101
-          - CAI-102
-          - CAI-103
-          - CAI-104
-          - CAI-105
-          - CAI-106
-          - CAI-107
-          - CAI-108
-          - CAI-109
-          - CAI-110
-        message:
-          type: string
-          description: Helpful description of the errorCode
-        parameterName:
-          type: string
-          description: Name of parameter if specified in the message
-    CaiErrorResponse:
-      type: object
-      properties:
-        errors:
+          - Extractive
+          - AbstractiveLong
+          - AbstractiveShort
+          - All
+        values:
           type: array
+          description: Summary output units sorted by their occurrence in the conversation
           items:
-            $ref: '#/components/schemas/CaiErrorCodeResponse'
+            $ref: '#/components/schemas/SummaryTimingsUnit'
+    PunctuateApiResponse:
+      oneOf:
+      - $ref: '#/components/schemas/PunctuateOutput'
+      - $ref: '#/components/schemas/CaiErrorResponse'
     SummaryUnit:
       required:
       - text
@@ -170,40 +154,6 @@ components:
           type: number
           format: float
           example: 5.1
-    PunctuateInput:
-      required:
-      - texts
-      type: object
-      properties:
-        texts:
-          type: array
-          items:
-            type: string
-    CaiAsyncApiResponse:
-      type: object
-      properties:
-        jobId:
-          type: string
-    SummaryApiOutput:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          $ref: '#/components/schemas/SummaryApiResponse'
-    PunctuateApiOutput:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          $ref: '#/components/schemas/PunctuateApiResponse'
     SummaryInput:
       required:
       - summaryType
@@ -244,26 +194,16 @@ components:
           type: number
           format: float
           example: 3600.1
-    SummaryOutputUnit:
+    SummaryApiOutput:
       type: object
       properties:
-        name:
+        status:
           type: string
-          example: AbstractiveShort
           enum:
-          - Extractive
-          - AbstractiveLong
-          - AbstractiveShort
-          - All
-        values:
-          type: array
-          description: Summary output units sorted by their occurrence in the conversation
-          items:
-            $ref: '#/components/schemas/SummaryTimingsUnit'
-    PunctuateApiResponse:
-      oneOf:
-      - $ref: '#/components/schemas/PunctuateOutput'
-      - $ref: '#/components/schemas/CaiErrorResponse'
+          - Success
+          - Fail
+        response:
+          $ref: '#/components/schemas/SummaryApiResponse'
     SummaryOutput:
       type: object
       properties:
@@ -271,27 +211,98 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SummaryOutputUnit'
+    PunctuateInput:
+      required:
+      - texts
+      type: object
+      properties:
+        texts:
+          type: array
+          items:
+            type: string
+    CaiErrorCodeResponse:
+      required:
+      - errorCode
+      - message
+      type: object
+      properties:
+        errorCode:
+          type: string
+          enum:
+          - CAI-101
+          - CAI-102
+          - CAI-103
+          - CAI-104
+          - CAI-105
+          - CAI-106
+          - CAI-107
+          - CAI-108
+          - CAI-109
+          - CAI-110
+        message:
+          type: string
+          description: Helpful description of the errorCode
+        parameterName:
+          type: string
+          description: Name of parameter if specified in the message
+    CaiErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaiErrorCodeResponse'
+    CaiAsyncApiResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+    PunctuateApiOutput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          $ref: '#/components/schemas/PunctuateApiResponse'
+    SummaryApiResponse:
+      oneOf:
+      - $ref: '#/components/schemas/SummaryOutput'
+      - $ref: '#/components/schemas/CaiErrorResponse'
+  parameters:
+    CallbackRequestId:
+      name: RCRequestId
+      deprecated: true
+      in: header
+      description: 'Input RequestId corresponding to this response.\
+
+        DEPRECATED. "jobId" body attribute should be used for tracking.
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Webhook:
+      name: webhook
+      in: query
+      description: The webhook URI to which the job response will be returned
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+        format: uri
   requestBodies:
-    SummaryCallbackRequest:
-      description: Summary Callback Output
+    SummaryRequest:
+      description: Summary Input Format
       content:
         application/json:
           schema:
-            allOf:
-            - type: object
-              properties:
-                jobId:
-                  type: string
-                creationTime:
-                  type: string
-                  format: date-time
-                completionTime:
-                  type: string
-                  format: date-time
-                expirationTime:
-                  type: string
-                  format: date-time
-            - $ref: '#/components/schemas/SummaryApiOutput'
+            $ref: '#/components/schemas/SummaryInput'
       required: true
     PunctuateRequest:
       description: Punctuation API Input Format
@@ -321,38 +332,27 @@ components:
                   format: date-time
             - $ref: '#/components/schemas/PunctuateApiOutput'
       required: true
-    SummaryRequest:
-      description: Summary Input Format
+    SummaryCallbackRequest:
+      description: Summary Callback Output
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SummaryInput'
+            allOf:
+            - type: object
+              properties:
+                jobId:
+                  type: string
+                creationTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time
+                expirationTime:
+                  type: string
+                  format: date-time
+            - $ref: '#/components/schemas/SummaryApiOutput'
       required: true
-  parameters:
-    CallbackRequestId:
-      name: RCRequestId
-      deprecated: true
-      in: header
-      description: 'Input RequestId corresponding to this response.\
-
-        DEPRECATED. "jobId" body attribute should be used for tracking.
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-    Webhook:
-      name: webhook
-      in: query
-      description: The webhook URI to which the job response will be returned
-      required: true
-      style: form
-      explode: true
-      schema:
-        type: string
-        format: uri
   securitySchemes:
     OAuth2:
       type: oauth2

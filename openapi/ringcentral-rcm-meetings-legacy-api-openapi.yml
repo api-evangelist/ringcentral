@@ -541,41 +541,6 @@ paths:
       x-app-permission: Meetings
 components:
   schemas:
-    HostInfoRequest:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the meeting host resource
-        id:
-          type: string
-          description: Internal identifier of an extension which is assigned to be a meeting host. The default value is currently logged-in extension identifier
-      description: Meeting host information
-    MeetingLinks:
-      type: object
-      properties:
-        startUri:
-          type: string
-          format: uri
-        joinUri:
-          type: string
-          format: uri
-      description: Meeting links
-    MeetingsResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/MeetingResponseResource'
-        paging:
-          $ref: '#/components/schemas/MeetingsPagingInfo'
-        navigation:
-          $ref: '#/components/schemas/MeetingsNavigationInfo'
     WeekDay:
       type: string
       description: 'This field is used only if you''re scheduling a recurring meeting of type `3` to state a specific day in a week when the monthly meeting should recur; it works together with `MonthlyByWeek` field. The values are: 1 - Sunday; 2 - Monday; 3 - Tuesday; 4 - Wednesday; 5 - Thursday; 6 - Friday; 7- Saturday'
@@ -621,41 +586,265 @@ components:
           enum:
           - Completed
           - Processing
-    MonthlyWeek:
-      type: string
-      description: Supported together with `weeklyByDay`
-      enum:
-      - Last
-      - First
-      - Second
-      - Third
-      - Fourth
-    AccountLockSettingRecordResponse:
+    UserInMeetingResponse:
+      type: object
+      properties:
+        enableWaitingRoom:
+          type: boolean
+        breakoutRoom:
+          type: boolean
+        chat:
+          type: boolean
+        polling:
+          type: boolean
+        annotation:
+          type: boolean
+        virtualBackground:
+          type: boolean
+        screenSharing:
+          type: boolean
+        requestPermissionToUnmute:
+          type: boolean
+    MeetingsCountryResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+        name:
+          type: string
+        isoCode:
+          type: string
+        callingCode:
+          type: string
+        emergencyCalling:
+          type: boolean
+          default: false
+        numberSelling:
+          type: boolean
+          default: false
+        loginAllowed:
+          type: boolean
+          default: false
+    TelephonyUserMeetingSettings:
+      type: object
+      properties:
+        thirdPartyAudio:
+          type: boolean
+          description: ThirdParty audio option
+        audioConferenceInfo:
+          type: boolean
+          description: Users can join the meeting using the existing 3rd party audio configuration
+        globalDialCountries:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalDialInCountryResponse'
+    RecurrenceInfo:
+      type: object
+      properties:
+        frequency:
+          $ref: '#/components/schemas/MeetingFrequency'
+        interval:
+          type: integer
+          format: int32
+          description: 'Recurrence interval. The supported ranges are: 1-90 for `Daily`;
+
+            1-12 for `Weekly`; 1-3 for `Monthly`
+
+            '
+        weeklyByDays:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeekDay'
+        monthlyByDay:
+          type: integer
+          format: int32
+          description: The supported range is 1-31
+        monthlyByWeek:
+          $ref: '#/components/schemas/MonthlyWeek'
+        monthlyByWeekDay:
+          $ref: '#/components/schemas/WeekDay'
+        count:
+          type: integer
+          format: int32
+          description: Number of meeting occurrences
+        until:
+          type: string
+          description: Meeting expiration date-time
+    MeetingServiceInfoRequest:
+      type: object
+      properties:
+        externalUserInfo:
+          $ref: '#/components/schemas/MeetingExternalUserInfoResource'
+    ScheduleMeetingResponse:
+      type: object
+      properties:
+        startHostVideo:
+          type: boolean
+        startParticipantVideo:
+          type: boolean
+        audioOptions:
+          type: boolean
+        allowJoinBeforeHost:
+          type: boolean
+        requirePasswordForSchedulingNewMeetings:
+          type: boolean
+        requirePasswordForInstantMeetings:
+          type: boolean
+        requirePasswordForPmiMeetings:
+          type: boolean
+        enforceLogin:
+          type: boolean
+    AssistantsResource:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssistantResource'
+    MeetingsTimezoneResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+    UserMeetingRecordingSetting:
       type: object
       properties:
         localRecording:
           type: boolean
+          description: Allows hosts and participants to record a meeting to a local file
         cloudRecording:
           type: boolean
+          description: Allows hosts to record and save a meeting/webinar in the cloud
+        recordSpeakerView:
+          type: boolean
+          description: Allows to record active speaker with the shared screen
+          default: false
+        recordGalleryView:
+          type: boolean
+          description: Allows to record gallery view with the shared screen
+          default: false
+        recordAudioFile:
+          type: boolean
+          description: Allows to record an audio-only file
+          default: false
+        saveChatText:
+          type: boolean
+          description: Allows to save chat text from a meeting
+          default: false
+        showTimestamp:
+          type: boolean
+          description: Allows to show timestamp on video
+          default: false
         autoRecording:
-          type: boolean
-        cloudRecordingDownload:
-          type: boolean
-        hostDeleteCloudRecording:
-          type: boolean
-        accountUserAccessRecording:
-          type: boolean
+          type: string
+          description: Automatic recording (local/cloud/none) of meetings as they start
+          default: local
+          enum:
+          - local
+          - cloud
+          - none
         autoDeleteCmr:
-          type: boolean
-    MeetingRecordings:
+          type: string
+          description: Automatic deletion of cloud recordings
+          default: 'false'
+        autoDeleteCmrDays:
+          type: integer
+          format: int32
+          description: A specified number of days for automatic deletion of cloud recordings, the value range is 1-60
+      description: Meeting recording settings locked on account level
+    MeetingsResource:
       type: object
       properties:
-        meeting:
-          $ref: '#/components/schemas/MeetingInfo'
-        recordings:
+        uri:
+          type: string
+          format: uri
+        records:
           type: array
           items:
-            $ref: '#/components/schemas/MeetingRecordingInfo'
+            $ref: '#/components/schemas/MeetingResponseResource'
+        paging:
+          $ref: '#/components/schemas/MeetingsPagingInfo'
+        navigation:
+          $ref: '#/components/schemas/MeetingsNavigationInfo'
+    MeetingsNavigationInfo:
+      type: object
+      properties:
+        nextPage:
+          $ref: '#/components/schemas/MeetingsNavigationInfoUri'
+        previousPage:
+          $ref: '#/components/schemas/MeetingsNavigationInfoUri'
+        firstPage:
+          $ref: '#/components/schemas/MeetingsNavigationInfoUri'
+        lastPage:
+          $ref: '#/components/schemas/MeetingsNavigationInfoUri'
+    ScheduleUserMeetingInfo:
+      type: object
+      properties:
+        enforceLogin:
+          type: boolean
+          description: If true, then only signed-in users can join this meeting
+        startHostVideo:
+          type: boolean
+          description: Starting meetings with host video on/off (true/false)
+        startParticipantsVideo:
+          type: boolean
+          description: Starting meetings with participant video on/off (true/false)
+        audioOptions:
+          type: array
+          description: Determines how participants can join the audio channel of a meeting
+          items:
+            type: string
+            enum:
+            - Phone
+            - ComputerAudio
+            - ThirdParty
+        allowJoinBeforeHost:
+          type: boolean
+          description: Allows participants to join the meeting before the host arrives
+        usePmiForScheduledMeetings:
+          type: boolean
+          description: Determines whether to use Personal Meeting ID (PMI) when scheduling a meeting
+        usePmiForInstantMeetings:
+          type: boolean
+          description: Determines whether to use Personal Meeting ID (PMI) when starting an instant meeting
+        requirePasswordForSchedulingNewMeetings:
+          type: boolean
+          description: A password will be generated when scheduling a meeting and participants will require password to join a meeting. The Personal Meeting ID (PMI) meetings are not included
+        requirePasswordForScheduledMeetings:
+          type: boolean
+          description: Specifies whether to require a password for meetings which have already been scheduled
+        defaultPasswordForScheduledMeetings:
+          type: string
+          description: Password for already scheduled meetings. Users can set it individually
+        requirePasswordForInstantMeetings:
+          type: boolean
+          description: A random password will be generated for an instant meeting, if set to `true`. If you use PMI for your instant meetings, this option will be disabled
+        requirePasswordForPmiMeetings:
+          type: string
+          description: 'Specifies whether to require a password for meetings using Personal Meeting ID (PMI). The supported values are: ''none'', ''all'' and ''jbhOnly'' (joined before host only)'
+          enum:
+          - all
+          - none
+          - jbhOnly
+        pmiPassword:
+          type: string
+          description: The default password for Personal Meeting ID (PMI) meetings
+        pstnPasswordProtected:
+          type: boolean
+          description: Specifies whether to generate and require a password for participants joining by phone
+        muteParticipantsOnEntry:
+          type: boolean
+      description: Scheduling meeting settings locked on account level || Settings defining how to schedule user meetings
     MeetingResponseResource:
       type: object
       properties:
@@ -742,300 +931,6 @@ components:
             type: string
         alternativeHosts:
           type: string
-    GlobalDialInCountryResponse:
-      type: object
-      properties:
-        countryCode:
-          type: string
-        countryName:
-          type: string
-        checked:
-          type: boolean
-        order:
-          type: integer
-          format: int32
-    UserMeetingRecordingSetting:
-      type: object
-      properties:
-        localRecording:
-          type: boolean
-          description: Allows hosts and participants to record a meeting to a local file
-        cloudRecording:
-          type: boolean
-          description: Allows hosts to record and save a meeting/webinar in the cloud
-        recordSpeakerView:
-          type: boolean
-          description: Allows to record active speaker with the shared screen
-          default: false
-        recordGalleryView:
-          type: boolean
-          description: Allows to record gallery view with the shared screen
-          default: false
-        recordAudioFile:
-          type: boolean
-          description: Allows to record an audio-only file
-          default: false
-        saveChatText:
-          type: boolean
-          description: Allows to save chat text from a meeting
-          default: false
-        showTimestamp:
-          type: boolean
-          description: Allows to show timestamp on video
-          default: false
-        autoRecording:
-          type: string
-          description: Automatic recording (local/cloud/none) of meetings as they start
-          default: local
-          enum:
-          - local
-          - cloud
-          - none
-        autoDeleteCmr:
-          type: string
-          description: Automatic deletion of cloud recordings
-          default: 'false'
-        autoDeleteCmrDays:
-          type: integer
-          format: int32
-          description: A specified number of days for automatic deletion of cloud recordings, the value range is 1-60
-      description: Meeting recording settings locked on account level
-    MeetingServiceInfoRequest:
-      type: object
-      properties:
-        externalUserInfo:
-          $ref: '#/components/schemas/MeetingExternalUserInfoResource'
-    DialInNumberResource:
-      type: object
-      properties:
-        phoneNumber:
-          type: string
-        formattedNumber:
-          type: string
-        location:
-          type: string
-        country:
-          $ref: '#/components/schemas/MeetingsCountryResource'
-    AssistantResource:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-    RecurrenceInfo:
-      type: object
-      properties:
-        frequency:
-          $ref: '#/components/schemas/MeetingFrequency'
-        interval:
-          type: integer
-          format: int32
-          description: 'Recurrence interval. The supported ranges are: 1-90 for `Daily`;
-
-            1-12 for `Weekly`; 1-3 for `Monthly`
-
-            '
-        weeklyByDays:
-          type: array
-          items:
-            $ref: '#/components/schemas/WeekDay'
-        monthlyByDay:
-          type: integer
-          format: int32
-          description: The supported range is 1-31
-        monthlyByWeek:
-          $ref: '#/components/schemas/MonthlyWeek'
-        monthlyByWeekDay:
-          $ref: '#/components/schemas/WeekDay'
-        count:
-          type: integer
-          format: int32
-          description: Number of meeting occurrences
-        until:
-          type: string
-          description: Meeting expiration date-time
-    MeetingOccurrenceInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Identifier of a meeting occurrence
-        startTime:
-          type: string
-          format: date-time
-          description: Starting time of a meeting occurrence
-        durationInMinutes:
-          type: integer
-          format: int64
-          description: Duration of a meeting occurrence
-        status:
-          type: string
-          description: Status of a meeting occurrence
-    ScheduleUserMeetingInfo:
-      type: object
-      properties:
-        enforceLogin:
-          type: boolean
-          description: If true, then only signed-in users can join this meeting
-        startHostVideo:
-          type: boolean
-          description: Starting meetings with host video on/off (true/false)
-        startParticipantsVideo:
-          type: boolean
-          description: Starting meetings with participant video on/off (true/false)
-        audioOptions:
-          type: array
-          description: Determines how participants can join the audio channel of a meeting
-          items:
-            type: string
-            enum:
-            - Phone
-            - ComputerAudio
-            - ThirdParty
-        allowJoinBeforeHost:
-          type: boolean
-          description: Allows participants to join the meeting before the host arrives
-        usePmiForScheduledMeetings:
-          type: boolean
-          description: Determines whether to use Personal Meeting ID (PMI) when scheduling a meeting
-        usePmiForInstantMeetings:
-          type: boolean
-          description: Determines whether to use Personal Meeting ID (PMI) when starting an instant meeting
-        requirePasswordForSchedulingNewMeetings:
-          type: boolean
-          description: A password will be generated when scheduling a meeting and participants will require password to join a meeting. The Personal Meeting ID (PMI) meetings are not included
-        requirePasswordForScheduledMeetings:
-          type: boolean
-          description: Specifies whether to require a password for meetings which have already been scheduled
-        defaultPasswordForScheduledMeetings:
-          type: string
-          description: Password for already scheduled meetings. Users can set it individually
-        requirePasswordForInstantMeetings:
-          type: boolean
-          description: A random password will be generated for an instant meeting, if set to `true`. If you use PMI for your instant meetings, this option will be disabled
-        requirePasswordForPmiMeetings:
-          type: string
-          description: 'Specifies whether to require a password for meetings using Personal Meeting ID (PMI). The supported values are: ''none'', ''all'' and ''jbhOnly'' (joined before host only)'
-          enum:
-          - all
-          - none
-          - jbhOnly
-        pmiPassword:
-          type: string
-          description: The default password for Personal Meeting ID (PMI) meetings
-        pstnPasswordProtected:
-          type: boolean
-          description: Specifies whether to generate and require a password for participants joining by phone
-        muteParticipantsOnEntry:
-          type: boolean
-      description: Scheduling meeting settings locked on account level || Settings defining how to schedule user meetings
-    MeetingsCountryResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        id:
-          type: string
-        name:
-          type: string
-        isoCode:
-          type: string
-        callingCode:
-          type: string
-        emergencyCalling:
-          type: boolean
-          default: false
-        numberSelling:
-          type: boolean
-          default: false
-        loginAllowed:
-          type: boolean
-          default: false
-    MeetingsTimezoneResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-    AccountLockedSettingResponse:
-      type: object
-      properties:
-        scheduleMeeting:
-          $ref: '#/components/schemas/ScheduleMeetingResponse'
-        recording:
-          $ref: '#/components/schemas/AccountLockSettingRecordResponse'
-    ListMeetingRecordingsResponse:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/MeetingRecordings'
-        paging:
-          $ref: '#/components/schemas/MeetingRecordingsPagingInfo'
-        navigation:
-          $ref: '#/components/schemas/MeetingRecordingsNavigationInfo'
-    UserInMeetingResponse:
-      type: object
-      properties:
-        enableWaitingRoom:
-          type: boolean
-        breakoutRoom:
-          type: boolean
-        chat:
-          type: boolean
-        polling:
-          type: boolean
-        annotation:
-          type: boolean
-        virtualBackground:
-          type: boolean
-        screenSharing:
-          type: boolean
-        requestPermissionToUnmute:
-          type: boolean
-    PublicMeetingInvitationResponse:
-      type: object
-      properties:
-        invitation:
-          type: string
-          description: Meeting invitation
-    AssistedUsersResource:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/AssistedUserResource'
-    AssistantsResource:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/AssistantResource'
-    MeetingRecordingsNavigationInfoUri:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-      description: Canonical URI for the corresponding page of the list
-    AssistedUserResource:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
     MeetingsPagingInfo:
       type: object
       properties:
@@ -1057,119 +952,6 @@ components:
         pageEnd:
           type: integer
           format: int32
-    ScheduleMeetingResponse:
-      type: object
-      properties:
-        startHostVideo:
-          type: boolean
-        startParticipantVideo:
-          type: boolean
-        audioOptions:
-          type: boolean
-        allowJoinBeforeHost:
-          type: boolean
-        requirePasswordForSchedulingNewMeetings:
-          type: boolean
-        requirePasswordForInstantMeetings:
-          type: boolean
-        requirePasswordForPmiMeetings:
-          type: boolean
-        enforceLogin:
-          type: boolean
-    MeetingsNavigationInfo:
-      type: object
-      properties:
-        nextPage:
-          $ref: '#/components/schemas/MeetingsNavigationInfoUri'
-        previousPage:
-          $ref: '#/components/schemas/MeetingsNavigationInfoUri'
-        firstPage:
-          $ref: '#/components/schemas/MeetingsNavigationInfoUri'
-        lastPage:
-          $ref: '#/components/schemas/MeetingsNavigationInfoUri'
-    TelephonyUserMeetingSettings:
-      type: object
-      properties:
-        thirdPartyAudio:
-          type: boolean
-          description: ThirdParty audio option
-        audioConferenceInfo:
-          type: boolean
-          description: Users can join the meeting using the existing 3rd party audio configuration
-        globalDialCountries:
-          type: array
-          items:
-            $ref: '#/components/schemas/GlobalDialInCountryResponse'
-    MeetingRecordingsPagingInfo:
-      type: object
-      properties:
-        page:
-          type: integer
-          format: int32
-          description: The current page number. 1-indexed, so the first page is 1 by default. May be omitted if result is empty (because non-existent page was specified or perPage=0 was requested)
-        perPage:
-          type: integer
-          format: int32
-          description: Current page size, describes how many items are in each page. Default value is 100. Maximum value is 1000. If perPage value in the request is greater than 1000, the maximum value (1000) is applied
-        pageStart:
-          type: integer
-          format: int32
-          description: The zero-based number of the first element on the current page. Omitted if the page is omitted or result is empty
-        pageEnd:
-          type: integer
-          format: int32
-          description: The zero-based index of the last element on the current page. Omitted if the page is omitted or result is empty
-        totalPages:
-          type: integer
-          format: int32
-          description: The total number of pages in a dataset. May be omitted for some resources due to performance reasons
-        totalElements:
-          type: integer
-          format: int32
-          description: The total number of elements in a dataset. May be omitted for some resource due to performance reasons
-    MeetingInfo:
-      type: object
-      properties:
-        uuid:
-          type: string
-          description: Unique identifier of a meeting instance
-        id:
-          type: string
-        topic:
-          type: string
-        startTime:
-          type: string
-          format: date-time
-    MeetingScheduleResource:
-      type: object
-      properties:
-        startTime:
-          type: string
-          format: date-time
-        durationInMinutes:
-          type: integer
-          format: int32
-        timeZone:
-          $ref: '#/components/schemas/MeetingsTimezoneResource'
-      description: Timing of a meeting
-    MeetingFrequency:
-      type: string
-      description: Recurrence time frame
-      enum:
-      - Daily
-      - Weekly
-      - Monthly
-    MeetingUserSettingsResponse:
-      type: object
-      properties:
-        recording:
-          $ref: '#/components/schemas/UserMeetingRecordingSetting'
-        scheduleMeeting:
-          $ref: '#/components/schemas/ScheduleUserMeetingInfo'
-        telephony:
-          $ref: '#/components/schemas/TelephonyUserMeetingSettings'
-        inMeetings:
-          $ref: '#/components/schemas/UserInMeetingResponse'
     MeetingRecordingsNavigationInfo:
       type: object
       properties:
@@ -1181,6 +963,65 @@ components:
           $ref: '#/components/schemas/MeetingRecordingsNavigationInfoUri'
         lastPage:
           $ref: '#/components/schemas/MeetingRecordingsNavigationInfoUri'
+    AssistedUsersResource:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssistedUserResource'
+    MeetingServiceInfoResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        supportUri:
+          type: string
+          format: uri
+        intlDialInNumbersUri:
+          type: string
+          format: uri
+        externalUserInfo:
+          $ref: '#/components/schemas/MeetingExternalUserInfoResource'
+        dialInNumbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/DialInNumberResource'
+    MeetingOccurrenceInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identifier of a meeting occurrence
+        startTime:
+          type: string
+          format: date-time
+          description: Starting time of a meeting occurrence
+        durationInMinutes:
+          type: integer
+          format: int64
+          description: Duration of a meeting occurrence
+        status:
+          type: string
+          description: Status of a meeting occurrence
+    AccountLockSettingRecordResponse:
+      type: object
+      properties:
+        localRecording:
+          type: boolean
+        cloudRecording:
+          type: boolean
+        autoRecording:
+          type: boolean
+        cloudRecordingDownload:
+          type: boolean
+        hostDeleteCloudRecording:
+          type: boolean
+        accountUserAccessRecording:
+          type: boolean
+        autoDeleteCmr:
+          type: boolean
     MeetingRequestResource:
       type: object
       properties:
@@ -1248,6 +1089,118 @@ components:
             type: string
         alternativeHosts:
           type: string
+    HostInfoRequest:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the meeting host resource
+        id:
+          type: string
+          description: Internal identifier of an extension which is assigned to be a meeting host. The default value is currently logged-in extension identifier
+      description: Meeting host information
+    AssistantResource:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    MeetingLinks:
+      type: object
+      properties:
+        startUri:
+          type: string
+          format: uri
+        joinUri:
+          type: string
+          format: uri
+      description: Meeting links
+    MeetingRecordings:
+      type: object
+      properties:
+        meeting:
+          $ref: '#/components/schemas/MeetingInfo'
+        recordings:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetingRecordingInfo'
+    MonthlyWeek:
+      type: string
+      description: Supported together with `weeklyByDay`
+      enum:
+      - Last
+      - First
+      - Second
+      - Third
+      - Fourth
+    GlobalDialInCountryResponse:
+      type: object
+      properties:
+        countryCode:
+          type: string
+        countryName:
+          type: string
+        checked:
+          type: boolean
+        order:
+          type: integer
+          format: int32
+    MeetingRecordingsNavigationInfoUri:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+      description: Canonical URI for the corresponding page of the list
+    AssistedUserResource:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    MeetingRecordingsPagingInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          description: The current page number. 1-indexed, so the first page is 1 by default. May be omitted if result is empty (because non-existent page was specified or perPage=0 was requested)
+        perPage:
+          type: integer
+          format: int32
+          description: Current page size, describes how many items are in each page. Default value is 100. Maximum value is 1000. If perPage value in the request is greater than 1000, the maximum value (1000) is applied
+        pageStart:
+          type: integer
+          format: int32
+          description: The zero-based number of the first element on the current page. Omitted if the page is omitted or result is empty
+        pageEnd:
+          type: integer
+          format: int32
+          description: The zero-based index of the last element on the current page. Omitted if the page is omitted or result is empty
+        totalPages:
+          type: integer
+          format: int32
+          description: The total number of pages in a dataset. May be omitted for some resources due to performance reasons
+        totalElements:
+          type: integer
+          format: int32
+          description: The total number of elements in a dataset. May be omitted for some resource due to performance reasons
+    PublicMeetingInvitationResponse:
+      type: object
+      properties:
+        invitation:
+          type: string
+          description: Meeting invitation
+    AccountLockedSettingResponse:
+      type: object
+      properties:
+        scheduleMeeting:
+          $ref: '#/components/schemas/ScheduleMeetingResponse'
+        recording:
+          $ref: '#/components/schemas/AccountLockSettingRecordResponse'
     MeetingExternalUserInfoResource:
       type: object
       properties:
@@ -1277,31 +1230,93 @@ components:
           type: boolean
           description: Enables using personal meeting ID for instant meetings
           default: false
-    MeetingServiceInfoResource:
+    MeetingFrequency:
+      type: string
+      description: Recurrence time frame
+      enum:
+      - Daily
+      - Weekly
+      - Monthly
+    DialInNumberResource:
       type: object
       properties:
-        uri:
+        phoneNumber:
           type: string
-          format: uri
-        supportUri:
+        formattedNumber:
           type: string
-          format: uri
-        intlDialInNumbersUri:
+        location:
           type: string
-          format: uri
-        externalUserInfo:
-          $ref: '#/components/schemas/MeetingExternalUserInfoResource'
-        dialInNumbers:
-          type: array
-          items:
-            $ref: '#/components/schemas/DialInNumberResource'
+        country:
+          $ref: '#/components/schemas/MeetingsCountryResource'
     MeetingsNavigationInfoUri:
       type: object
       properties:
         uri:
           type: string
           format: uri
+    MeetingUserSettingsResponse:
+      type: object
+      properties:
+        recording:
+          $ref: '#/components/schemas/UserMeetingRecordingSetting'
+        scheduleMeeting:
+          $ref: '#/components/schemas/ScheduleUserMeetingInfo'
+        telephony:
+          $ref: '#/components/schemas/TelephonyUserMeetingSettings'
+        inMeetings:
+          $ref: '#/components/schemas/UserInMeetingResponse'
+    MeetingScheduleResource:
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: date-time
+        durationInMinutes:
+          type: integer
+          format: int32
+        timeZone:
+          $ref: '#/components/schemas/MeetingsTimezoneResource'
+      description: Timing of a meeting
+    ListMeetingRecordingsResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetingRecordings'
+        paging:
+          $ref: '#/components/schemas/MeetingRecordingsPagingInfo'
+        navigation:
+          $ref: '#/components/schemas/MeetingRecordingsNavigationInfo'
+    MeetingInfo:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Unique identifier of a meeting instance
+        id:
+          type: string
+        topic:
+          type: string
+        startTime:
+          type: string
+          format: date-time
   parameters:
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
     MeetingId:
       name: meetingId
       in: path
@@ -1315,21 +1330,6 @@ components:
       description: 'Internal identifier of the RingCentral account
 
         (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

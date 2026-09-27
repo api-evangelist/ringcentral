@@ -151,50 +151,60 @@ paths:
       x-app-permission: EditExtensions
       x-user-permission: EditUserAnsweringRules
 components:
-  responses:
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
-
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
-
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
   schemas:
+    UserBusinessHoursScheduleInfo:
+      type: object
+      properties:
+        weeklyRanges:
+          $ref: '#/components/schemas/WeeklyScheduleInfo'
+      description: Schedule when an answering rule is applied
+    CompanyBusinessHoursScheduleInfo:
+      type: object
+      properties:
+        weeklyRanges:
+          $ref: '#/components/schemas/WeeklyScheduleInfo'
+      description: Schedule when an answering rule is applied
+    TimeInterval:
+      type: object
+      properties:
+        from:
+          type: string
+          description: Time in format hh:mm
+        to:
+          type: string
+          description: Time in format hh:mm
+    UserBusinessHoursUpdateResponse:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a business-hours resource
+        schedule:
+          $ref: '#/components/schemas/UserBusinessHoursScheduleInfo'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    UserBusinessHoursUpdateRequest:
+      required:
+      - schedule
+      type: object
+      properties:
+        schedule:
+          $ref: '#/components/schemas/UserBusinessHoursScheduleInfo'
     GetUserBusinessHoursResponse:
       type: object
       properties:
@@ -223,98 +233,18 @@ components:
             thursday:
             - from: 09:00
               to: '18:00'
-    UserBusinessHoursScheduleInfo:
+    ApiErrorResponseModel:
       type: object
-      properties:
-        weeklyRanges:
-          $ref: '#/components/schemas/WeeklyScheduleInfo'
-      description: Schedule when an answering rule is applied
-    UserBusinessHoursUpdateRequest:
+      description: Standard error response model which is returned in case of any unsuccessful operation
       required:
-      - schedule
-      type: object
+      - errors
       properties:
-        schedule:
-          $ref: '#/components/schemas/UserBusinessHoursScheduleInfo'
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    UserBusinessHoursUpdateResponse:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a business-hours resource
-        schedule:
-          $ref: '#/components/schemas/UserBusinessHoursScheduleInfo'
-    TimeInterval:
-      type: object
-      properties:
-        from:
-          type: string
-          description: Time in format hh:mm
-        to:
-          type: string
-          description: Time in format hh:mm
-    ScheduleInfoUserBusinessHours:
-      type: object
-      properties:
-        weeklyRanges:
-          $ref: '#/components/schemas/WeeklyScheduleInfo'
-      description: Schedule when an answering rule is applied
-    CompanyBusinessHoursUpdateRequest:
-      type: object
-      properties:
-        schedule:
-          $ref: '#/components/schemas/CompanyBusinessHoursScheduleInfo'
-      example:
-        schedule:
-          weeklyRanges:
-            tuesday:
-            - from: 09:00
-              to: '18:00'
-            friday:
-            - from: 09:00
-              to: '18:00'
-            thursday:
-            - from: 09:00
-              to: '18:00'
-            wednesday:
-            - from: 09:00
-              to: '18:00'
-            monday:
-            - from: 09:00
-              to: '18:00'
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
     WeeklyScheduleInfo:
       type: object
       properties:
@@ -354,18 +284,35 @@ components:
           items:
             $ref: '#/components/schemas/TimeInterval'
       description: Weekly schedule
-    ApiErrorResponseModel:
+    ScheduleInfoUserBusinessHours:
       type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
       properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
+        weeklyRanges:
+          $ref: '#/components/schemas/WeeklyScheduleInfo'
+      description: Schedule when an answering rule is applied
+    CompanyBusinessHoursUpdateRequest:
+      type: object
+      properties:
+        schedule:
+          $ref: '#/components/schemas/CompanyBusinessHoursScheduleInfo'
+      example:
+        schedule:
+          weeklyRanges:
+            tuesday:
+            - from: 09:00
+              to: '18:00'
+            friday:
+            - from: 09:00
+              to: '18:00'
+            thursday:
+            - from: 09:00
+              to: '18:00'
+            wednesday:
+            - from: 09:00
+              to: '18:00'
+            monday:
+            - from: 09:00
+              to: '18:00'
     CompanyBusinessHours:
       type: object
       properties:
@@ -394,12 +341,22 @@ components:
             thursday:
             - from: 09:00
               to: '18:00'
-    CompanyBusinessHoursScheduleInfo:
+    ApiError:
       type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
       properties:
-        weeklyRanges:
-          $ref: '#/components/schemas/WeeklyScheduleInfo'
-      description: Schedule when an answering rule is applied
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
     ParameterizedErrorResponseModel:
       type: object
       description: Standard error response which may include parameterized errors
@@ -412,13 +369,56 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ApiErrorWithParameter'
-  parameters:
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
+  responses:
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+  parameters:
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true
@@ -428,12 +428,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    ExtensionId:
-      name: extensionId
+    AccountId:
+      name: accountId
       in: path
-      description: 'Internal identifier of the RingCentral extension/user
+      description: 'Internal identifier of the RingCentral account
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true

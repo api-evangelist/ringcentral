@@ -448,141 +448,16 @@ paths:
       x-throttling-group: Light
       x-app-permission: ReadAccounts
 components:
-  responses:
-    ScimUnauthorized:
-      description: Authorization failure
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-        application/scim+json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-    ScimConflict:
-      description: Duplicate email
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-        application/scim+json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-    ScimBadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-        application/scim+json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-    ScimNotFound:
-      description: Not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-        application/scim+json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-    ScimTooManyRequests:
-      description: Too many requests
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-        application/scim+json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-    ScimInternalError:
-      description: Internal server error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-        application/scim+json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-    ScimForbidden:
-      description: Permissions denied
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
-        application/scim+json:
-          schema:
-            $ref: '#/components/schemas/ScimErrorResponse'
   schemas:
-    ScimSchemaResponse:
-      required:
-      - id
+    ScimFilterSupported:
       type: object
       properties:
-        id:
-          type: string
-          description: The unique URI of the schema
-        name:
-          type: string
-          description: The name of the schema
-        description:
-          type: string
-          description: The description of the schema
-        attributes:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScimSchemaAttribute'
-        meta:
-          $ref: '#/components/schemas/ScimMeta'
-    ScimUser:
-      required:
-      - emails
-      - name
-      - schemas
-      - userName
-      type: object
-      properties:
-        active:
+        maxResults:
+          type: integer
+          format: int32
+        supported:
           type: boolean
-          description: User status
           default: false
-        addresses:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScimUserAddress'
-        emails:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScimEmail'
-        externalId:
-          type: string
-          description: External unique resource ID defined by provisioning client
-        id:
-          type: string
-          description: Unique resource ID defined by RingCentral
-        name:
-          $ref: '#/components/schemas/ScimName'
-        phoneNumbers:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScimPhoneNumber'
-        photos:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScimPhoto'
-        schemas:
-          type: array
-          items:
-            type: string
-            enum:
-            - urn:ietf:params:scim:schemas:core:2.0:User
-        title:
-          type: string
-          description: User title
-        urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:
-          $ref: '#/components/schemas/ScimEnterpriseUser'
-        userName:
-          type: string
-          description: MUST be same as work type email address
     ScimPhoneNumber:
       required:
       - type
@@ -597,110 +472,39 @@ components:
           - other
         value:
           type: string
-    ScimPatchOperation:
-      required:
-      - op
-      type: object
-      properties:
-        op:
-          type: string
-          enum:
-          - add
-          - replace
-          - remove
-        path:
-          type: string
-        value:
-          type: string
-          description: Corresponding 'value' of that field specified by 'path'
     ScimSupported:
       type: object
       properties:
         supported:
           type: boolean
           default: false
-    ScimBulkSupported:
-      type: object
-      properties:
-        maxOperations:
-          type: integer
-          format: int32
-        maxPayloadSize:
-          type: integer
-          format: int32
-        supported:
-          type: boolean
-          default: false
-    ScimSearchRequest:
-      type: object
-      properties:
-        count:
-          type: integer
-          description: Page size
-          format: int32
-        filter:
-          type: string
-          description: Only support 'userName' or 'email' filter expressions for now
-        schemas:
-          type: array
-          items:
-            type: string
-            enum:
-            - urn:ietf:params:scim:api:messages:2.0:SearchRequest
-        startIndex:
-          type: integer
-          description: Start index (1-based)
-          format: int32
-    ScimUserResponse:
+    ScimResourceTypeResponse:
       required:
-      - emails
       - name
-      - schemas
-      - userName
+      - endpoint
+      - schema
       type: object
       properties:
-        active:
-          type: boolean
-          description: User status
-          default: false
-        addresses:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScimUserAddress'
-        emails:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScimEmail'
-        externalId:
-          type: string
-          description: External unique resource ID defined by provisioning client
         id:
           type: string
-          description: Unique resource ID defined by RingCentral
+          description: Unique resource type ID, same value as the "name" attribute
         name:
-          $ref: '#/components/schemas/ScimName'
-        phoneNumbers:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScimPhoneNumber'
-        photos:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScimPhoto'
-        schemas:
-          type: array
-          items:
-            type: string
-            enum:
-            - urn:ietf:params:scim:schemas:core:2.0:User
-        title:
           type: string
-          description: User title
-        urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:
-          $ref: '#/components/schemas/ScimEnterpriseUser'
-        userName:
+          description: Resource type name
+        endpoint:
           type: string
-          description: MUST be same as work type email address
+          description: The resource type's HTTP-addressable endpoint
+        description:
+          type: string
+          description: Description of the resource type
+        schema:
+          type: string
+          enum:
+          - urn:ietf:params:scim:schemas:core:2.0:User
+        schemaExtensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimSchemaExtension'
         meta:
           $ref: '#/components/schemas/ScimMeta'
     ScimSchemaExtension:
@@ -795,23 +599,258 @@ components:
           items:
             type: string
           description: Indicates the SCIM resource types that be referenced
-    ScimAuthenticationScheme:
+    ScimUserAddress:
+      required:
+      - type
       type: object
       properties:
-        description:
+        country:
           type: string
-        documentationUri:
+        locality:
           type: string
-        name:
+        postalCode:
           type: string
-        specUri:
+        region:
           type: string
-        primary:
+        streetAddress:
+          type: string
+        type:
+          type: string
+          enum:
+          - work
+    ScimSearchRequest:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Page size
+          format: int32
+        filter:
+          type: string
+          description: Only support 'userName' or 'email' filter expressions for now
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:api:messages:2.0:SearchRequest
+        startIndex:
+          type: integer
+          description: Start index (1-based)
+          format: int32
+    ScimName:
+      required:
+      - familyName
+      - givenName
+      type: object
+      properties:
+        familyName:
+          type: string
+        givenName:
+          type: string
+    ScimPhoto:
+      required:
+      - type
+      - value
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - photo
+        value:
+          type: string
+    ScimMeta:
+      type: object
+      properties:
+        created:
+          type: string
+          format: date-time
+        lastModified:
+          type: string
+          format: date-time
+        location:
+          type: string
+          description: Resource location URI
+        resourceType:
+          type: string
+          enum:
+          - User
+          - Group
+          - ResourceType
+          - Schema
+      description: Resource metadata
+    ScimProviderConfig:
+      type: object
+      properties:
+        authenticationSchemes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimAuthenticationScheme'
+        bulk:
+          $ref: '#/components/schemas/ScimBulkSupported'
+        changePassword:
+          $ref: '#/components/schemas/ScimSupported'
+        etag:
+          $ref: '#/components/schemas/ScimSupported'
+        filter:
+          $ref: '#/components/schemas/ScimFilterSupported'
+        patch:
+          $ref: '#/components/schemas/ScimSupported'
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig
+        sort:
+          $ref: '#/components/schemas/ScimSupported'
+        xmlDataFormat:
+          $ref: '#/components/schemas/ScimSupported'
+    ScimSchemaSearchResponse:
+      type: object
+      properties:
+        Resources:
+          type: array
+          description: Resource type list
+          items:
+            $ref: '#/components/schemas/ScimSchemaResponse'
+        itemsPerPage:
+          type: integer
+          format: int64
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:api:messages:2.0:ListResponse
+        startIndex:
+          type: integer
+          format: int64
+        totalResults:
+          type: integer
+          format: int64
+    ScimUserSearchResponse:
+      type: object
+      properties:
+        Resources:
+          type: array
+          description: User list
+          items:
+            $ref: '#/components/schemas/ScimUserResponse'
+        itemsPerPage:
+          type: integer
+          format: int64
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:api:messages:2.0:ListResponse
+        startIndex:
+          type: integer
+          format: int64
+        totalResults:
+          type: integer
+          format: int64
+    ScimPatchOperation:
+      required:
+      - op
+      type: object
+      properties:
+        op:
+          type: string
+          enum:
+          - add
+          - replace
+          - remove
+        path:
+          type: string
+        value:
+          type: string
+          description: Corresponding 'value' of that field specified by 'path'
+    ScimUserResponse:
+      required:
+      - emails
+      - name
+      - schemas
+      - userName
+      type: object
+      properties:
+        active:
           type: boolean
-    ScimFilterSupported:
+          description: User status
+          default: false
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimUserAddress'
+        emails:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimEmail'
+        externalId:
+          type: string
+          description: External unique resource ID defined by provisioning client
+        id:
+          type: string
+          description: Unique resource ID defined by RingCentral
+        name:
+          $ref: '#/components/schemas/ScimName'
+        phoneNumbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimPhoneNumber'
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimPhoto'
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:schemas:core:2.0:User
+        title:
+          type: string
+          description: User title
+        urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:
+          $ref: '#/components/schemas/ScimEnterpriseUser'
+        userName:
+          type: string
+          description: MUST be same as work type email address
+        meta:
+          $ref: '#/components/schemas/ScimMeta'
+    ScimResourceTypeSearchResponse:
       type: object
       properties:
-        maxResults:
+        Resources:
+          type: array
+          description: Resource type list
+          items:
+            $ref: '#/components/schemas/ScimResourceTypeResponse'
+        itemsPerPage:
+          type: integer
+          format: int64
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:api:messages:2.0:ListResponse
+        startIndex:
+          type: integer
+          format: int64
+        totalResults:
+          type: integer
+          format: int64
+    ScimBulkSupported:
+      type: object
+      properties:
+        maxOperations:
+          type: integer
+          format: int32
+        maxPayloadSize:
           type: integer
           format: int32
         supported:
@@ -846,18 +885,6 @@ components:
         status:
           type: string
           description: Same as HTTP status code, e.g. 400, 401, etc.
-    ScimEmail:
-      required:
-      - type
-      - value
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-          - work
-        value:
-          type: string
     ScimUserPatch:
       required:
       - Operations
@@ -875,92 +902,7 @@ components:
             type: string
             enum:
             - urn:ietf:params:scim:api:messages:2.0:PatchOp
-    ScimMeta:
-      type: object
-      properties:
-        created:
-          type: string
-          format: date-time
-        lastModified:
-          type: string
-          format: date-time
-        location:
-          type: string
-          description: Resource location URI
-        resourceType:
-          type: string
-          enum:
-          - User
-          - Group
-          - ResourceType
-          - Schema
-      description: Resource metadata
-    ScimSchemaSearchResponse:
-      type: object
-      properties:
-        Resources:
-          type: array
-          description: Resource type list
-          items:
-            $ref: '#/components/schemas/ScimSchemaResponse'
-        itemsPerPage:
-          type: integer
-          format: int64
-        schemas:
-          type: array
-          items:
-            type: string
-            enum:
-            - urn:ietf:params:scim:api:messages:2.0:ListResponse
-        startIndex:
-          type: integer
-          format: int64
-        totalResults:
-          type: integer
-          format: int64
-    ScimUserAddress:
-      required:
-      - type
-      type: object
-      properties:
-        country:
-          type: string
-        locality:
-          type: string
-        postalCode:
-          type: string
-        region:
-          type: string
-        streetAddress:
-          type: string
-        type:
-          type: string
-          enum:
-          - work
-    ScimUserSearchResponse:
-      type: object
-      properties:
-        Resources:
-          type: array
-          description: User list
-          items:
-            $ref: '#/components/schemas/ScimUserResponse'
-        itemsPerPage:
-          type: integer
-          format: int64
-        schemas:
-          type: array
-          items:
-            type: string
-            enum:
-            - urn:ietf:params:scim:api:messages:2.0:ListResponse
-        startIndex:
-          type: integer
-          format: int64
-        totalResults:
-          type: integer
-          format: int64
-    ScimPhoto:
+    ScimEmail:
       required:
       - type
       - value
@@ -969,98 +911,156 @@ components:
         type:
           type: string
           enum:
-          - photo
+          - work
         value:
           type: string
-    ScimResourceTypeResponse:
+    ScimUser:
       required:
+      - emails
       - name
-      - endpoint
-      - schema
+      - schemas
+      - userName
+      type: object
+      properties:
+        active:
+          type: boolean
+          description: User status
+          default: false
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimUserAddress'
+        emails:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimEmail'
+        externalId:
+          type: string
+          description: External unique resource ID defined by provisioning client
+        id:
+          type: string
+          description: Unique resource ID defined by RingCentral
+        name:
+          $ref: '#/components/schemas/ScimName'
+        phoneNumbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimPhoneNumber'
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimPhoto'
+        schemas:
+          type: array
+          items:
+            type: string
+            enum:
+            - urn:ietf:params:scim:schemas:core:2.0:User
+        title:
+          type: string
+          description: User title
+        urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:
+          $ref: '#/components/schemas/ScimEnterpriseUser'
+        userName:
+          type: string
+          description: MUST be same as work type email address
+    ScimAuthenticationScheme:
+      type: object
+      properties:
+        description:
+          type: string
+        documentationUri:
+          type: string
+        name:
+          type: string
+        specUri:
+          type: string
+        primary:
+          type: boolean
+    ScimSchemaResponse:
+      required:
+      - id
       type: object
       properties:
         id:
           type: string
-          description: Unique resource type ID, same value as the "name" attribute
+          description: The unique URI of the schema
         name:
           type: string
-          description: Resource type name
-        endpoint:
-          type: string
-          description: The resource type's HTTP-addressable endpoint
+          description: The name of the schema
         description:
           type: string
-          description: Description of the resource type
-        schema:
-          type: string
-          enum:
-          - urn:ietf:params:scim:schemas:core:2.0:User
-        schemaExtensions:
+          description: The description of the schema
+        attributes:
           type: array
           items:
-            $ref: '#/components/schemas/ScimSchemaExtension'
+            $ref: '#/components/schemas/ScimSchemaAttribute'
         meta:
           $ref: '#/components/schemas/ScimMeta'
-    ScimResourceTypeSearchResponse:
-      type: object
-      properties:
-        Resources:
-          type: array
-          description: Resource type list
-          items:
-            $ref: '#/components/schemas/ScimResourceTypeResponse'
-        itemsPerPage:
-          type: integer
-          format: int64
-        schemas:
-          type: array
-          items:
-            type: string
-            enum:
-            - urn:ietf:params:scim:api:messages:2.0:ListResponse
-        startIndex:
-          type: integer
-          format: int64
-        totalResults:
-          type: integer
-          format: int64
-    ScimName:
-      required:
-      - familyName
-      - givenName
-      type: object
-      properties:
-        familyName:
-          type: string
-        givenName:
-          type: string
-    ScimProviderConfig:
-      type: object
-      properties:
-        authenticationSchemes:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScimAuthenticationScheme'
-        bulk:
-          $ref: '#/components/schemas/ScimBulkSupported'
-        changePassword:
-          $ref: '#/components/schemas/ScimSupported'
-        etag:
-          $ref: '#/components/schemas/ScimSupported'
-        filter:
-          $ref: '#/components/schemas/ScimFilterSupported'
-        patch:
-          $ref: '#/components/schemas/ScimSupported'
-        schemas:
-          type: array
-          items:
-            type: string
-            enum:
-            - urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig
-        sort:
-          $ref: '#/components/schemas/ScimSupported'
-        xmlDataFormat:
-          $ref: '#/components/schemas/ScimSupported'
+  responses:
+    ScimInternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+    ScimBadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+    ScimNotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+    ScimUnauthorized:
+      description: Authorization failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+    ScimTooManyRequests:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+    ScimForbidden:
+      description: Permissions denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+    ScimConflict:
+      description: Duplicate email
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
+        application/scim+json:
+          schema:
+            $ref: '#/components/schemas/ScimErrorResponse'
   parameters:
     ScimUserId:
       name: scimUserId
