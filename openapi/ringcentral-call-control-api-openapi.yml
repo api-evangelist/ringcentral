@@ -891,15 +891,89 @@ paths:
       x-app-permission: CallControl
 components:
   schemas:
-    PickupTarget:
-      required:
-      - deviceId
+    OriginInfo:
       type: object
       properties:
+        type:
+          type: string
+          description: Session origin type
+          enum:
+          - Call
+          - RingOut
+          - RingMe
+          - Conference
+          - GreetingsRecording
+          - VerificationCall
+          - Zoom
+          - CallOut
+      description: Session origin details
+    CallRecordingUpdate:
+      type: object
+      properties:
+        active:
+          type: boolean
+          description: Recording status
+    HoldCallPartyRequest:
+      type: object
+      properties:
+        proto:
+          type: string
+          description: Protocol for hold mode initiation
+          default: Auto
+          enum:
+          - Auto
+          - RC
+          - BroadWorks
+          - DisconnectHolder
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    PartyInfo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number of a party
+        name:
+          type: string
+          description: Displayed name of a party
         deviceId:
           type: string
-          description: Device identifier that is used to pick up the parked call.
-          example: '400018633008'
+          description: Internal identifier of a device
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+    OwnerInfo:
+      type: object
+      properties:
+        accountId:
+          type: string
+          description: Internal identifier of an account that monitors a call
+        extensionId:
+          type: string
+          description: Internal identifier of an extension that monitors a call
+      description: Deprecated. Information on a call owner
+    CallPartyInfo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Call party phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)(with '+' sign) format
+        name:
+          type: string
+          description: Call party name
+        extensionId:
+          type: string
+          description: Internal identifier of a call party extensionId
     PartySuperviseRequest:
       required:
       - agentExtensionId
@@ -931,111 +1005,6 @@ components:
           enum:
           - sendOnly
           - sendRecv
-    CountryId:
-      type: integer
-      format: int64
-      description: Optional. Dialing plan country data. If not specified, then extension home country is applied by default.
-    CallPartyReply:
-      type: object
-      properties:
-        replyWithText:
-          type: string
-          description: Text to reply
-        replyWithPattern:
-          $ref: '#/components/schemas/ReplyWithPattern'
-    AddPartyRequest:
-      required:
-      - partyId
-      - sessionId
-      type: object
-      properties:
-        sessionId:
-          type: string
-          description: Internal identifier of a call session
-        partyId:
-          type: string
-          description: Internal identifier of a party that should be added to the call session
-    CallStatusInfo:
-      type: object
-      properties:
-        code:
-          type: string
-          description: Status code of a call
-          enum:
-          - Setup
-          - Proceeding
-          - Answered
-          - Disconnected
-          - Gone
-          - Parked
-          - Hold
-          - VoiceMail
-          - FaxReceive
-          - Tds
-          - VoiceMailScreening
-        peerId:
-          $ref: '#/components/schemas/PeerInfo'
-        reason:
-          type: string
-          description: Reason for call termination. For 'Disconnected' code only
-          enum:
-          - Pickup
-          - Supervising
-          - TakeOver
-          - Timeout
-          - BlindTransfer
-          - RccTransfer
-          - AttendedTransfer
-          - CallerInputRedirect
-          - CallFlip
-          - ParkLocation
-          - DtmfTransfer
-          - AgentAnswered
-          - AgentDropped
-          - Rejected
-          - Cancelled
-          - InternalError
-          - NoAnswer
-          - TargetBusy
-          - InvalidNumber
-          - InternationalDisabled
-          - DestinationBlocked
-          - NotEnoughFunds
-          - NoSuchUser
-          - CallPark
-          - CallRedirected
-          - CallReplied
-          - CallSwitch
-          - CallFinished
-          - CallDropped
-        description:
-          type: string
-          description: Optional message
-      description: Status data of a call session
-    ParkInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Call park identifier
-      description: Call park information
-    CallRecording:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a call recording
-        active:
-          type: boolean
-          description: Call recording status
-    MakeCallOutCallerInfoRequestFrom:
-      type: object
-      properties:
-        deviceId:
-          type: string
-          description: Internal identifier of a device
-          example: '59474004'
-      description: Instance id of the caller. It corresponds to the 1st leg of the CallOut call.
     ReplyWithPattern:
       type: object
       properties:
@@ -1065,23 +1034,98 @@ components:
           - Minute
           - Hour
           - Day
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    AccountTelephonySessionsEvent:
+    PeerInfo:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        telephonySessionId:
+          type: string
+        partyId:
+          type: string
+      description: Peer session/party details. Valid in 'Gone' state of a call
+    CallPartyFlip:
+      type: object
+      properties:
+        callFlipId:
+          type: string
+          description: Call flip id
+    IgnoreRequestBody:
+      required:
+      - deviceId
+      type: object
+      properties:
+        deviceId:
+          type: string
+          description: Internal device identifier
+          example: '400020454008'
+    MakeCallOutCallerInfoRequestTo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number in E.164 format, short codes (*67, *86), emergency (911, 112) or special (988) numbers
+          example: '+16502223366'
+        extensionNumber:
+          type: string
+          description: Extension number
+          example: '103'
+      description: Phone number of the called party. This number corresponds to the 2nd leg of a CallOut call
+    PickupTarget:
+      required:
+      - deviceId
+      type: object
+      properties:
+        deviceId:
+          type: string
+          description: Device identifier that is used to pick up the parked call.
+          example: '400018633008'
+    PartySuperviseResponse:
+      type: object
+      properties:
+        from:
+          $ref: '#/components/schemas/PartyInfo'
+        to:
+          $ref: '#/components/schemas/PartyInfo'
+        direction:
+          type: string
+          description: Direction of a call
+          enum:
+          - Outbound
+          - Inbound
+        id:
+          type: string
+          description: Internal identifier of a party that monitors a call
+        accountId:
+          type: string
+          description: Internal identifier of an account that monitors a call
+        extensionId:
+          type: string
+          description: Internal identifier of an extension that monitors a call
+        muted:
+          type: boolean
+          description: Specifies if a call party is muted
+        owner:
+          $ref: '#/components/schemas/OwnerInfo'
+        standAlone:
+          type: boolean
+          description: Specifies if a device is stand-alone
+        status:
+          $ref: '#/components/schemas/CallStatusInfo'
+    PartyUpdateRequest:
+      type: object
+      properties:
+        party:
+          $ref: '#/components/schemas/PartyUpdateInfo'
+    MakeCallOutCallerInfoRequestFrom:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          description: Internal identifier of a device
+          example: '59474004'
+      description: Instance id of the caller. It corresponds to the 1st leg of the CallOut call.
+    ExtensionTelephonySessionsEvent:
       type: object
       properties:
         uuid:
@@ -1092,7 +1136,11 @@ components:
           description: Event filter URI
         timestamp:
           type: string
-          description: Date/time of sending a notification in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example *2016-03-10T18:07:52.534Z*
+          description: 'Date/time of sending a notification in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+            format including timezone, for example *2016-03-10T18:07:52.534Z*
+
+            '
         subscriptionId:
           type: string
           description: Internal identifier of a subscription
@@ -1101,6 +1149,165 @@ components:
           description: Internal identifier of a subscription owner extension
         body:
           $ref: '#/components/schemas/TelephonySessionsEventBody'
+    ParkInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Call park identifier
+      description: Call park information
+    ReplyParty:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a party
+        status:
+          $ref: '#/components/schemas/CallStatusInfo'
+        muted:
+          type: boolean
+          description: Specifies if a call participant is muted or not. **Note:** If a call is also controlled via Hard phone or RingCentral App (not only through the API by calling call control methods) then it cannot be fully muted/unmuted via API only, in this case the action should be duplicated via Hard phone/RC App interfaces
+        standAlone:
+          type: boolean
+          description: If `true` then the party is not connected to a session voice conference, `false` means the party is connected to other parties in a session
+        park:
+          $ref: '#/components/schemas/ParkInfo'
+        from:
+          $ref: '#/components/schemas/PartyInfo'
+        to:
+          $ref: '#/components/schemas/PartyInfo'
+        owner:
+          $ref: '#/components/schemas/OwnerInfo'
+        direction:
+          type: string
+          description: Direction of a call
+          enum:
+          - Inbound
+          - Outbound
+    BridgeTargetRequest:
+      required:
+      - partyId
+      - telephonySessionId
+      type: object
+      properties:
+        telephonySessionId:
+          type: string
+          description: Internal identifier of a call session to be connected to (bridged)
+        partyId:
+          type: string
+          description: Internal identifier of a call party to be connected to (bridged)
+    MakeCallOutRequest:
+      required:
+      - from
+      - to
+      type: object
+      properties:
+        from:
+          $ref: '#/components/schemas/MakeCallOutCallerInfoRequestFrom'
+        to:
+          $ref: '#/components/schemas/MakeCallOutCallerInfoRequestTo'
+        countryId:
+          $ref: '#/components/schemas/CountryId'
+    ForwardTarget:
+      type: object
+      description: 'Identifier of a call party the call will be forwarded to. Only **one of** these parameters:
+
+        `phoneNumber`, `voicemail` or `extensionNumber` must be specified, otherwise an error is returned.
+
+        '
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number
+        voicemail:
+          type: string
+          description: Voicemail owner extension identifier
+        extensionNumber:
+          type: string
+          description: Extension short number
+    CountryId:
+      type: integer
+      format: int64
+      description: Optional. Dialing plan country data. If not specified, then extension home country is applied by default.
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    SuperviseCallSessionRequest:
+      required:
+      - mode
+      - supervisorDeviceId
+      type: object
+      properties:
+        mode:
+          type: string
+          description: Supervising mode
+          example: Listen
+          enum:
+          - Listen
+        supervisorDeviceId:
+          type: string
+          description: Internal identifier of a supervisor's device which will be used for call session monitoring
+          example: '191888004'
+        agentExtensionId:
+          type: string
+          description: Extension identifier of the user that will be monitored
+          example: '400378008008'
+        autoAnswer:
+          type: boolean
+          description: Specifies if auto-answer SIP header should be sent. If auto-answer is set to `true`, the call is automatically answered by the supervising party, if set to `false` - then the supervising party has to accept or decline the monitored call
+          default: true
+        mediaSDP:
+          type: string
+          description: Specifies session description protocol setting
+          enum:
+          - sendOnly
+          - sendRecv
+    CallSessionStatusInfo:
+      type: object
+      properties:
+        code:
+          type: string
+        reason:
+          type: string
+        parkData:
+          type: string
+        peerId:
+          $ref: '#/components/schemas/PeerInfo'
+        mobilePickupData:
+          $ref: '#/components/schemas/MobilePickupData'
+    TelephonySessionsEventPartyInfo:
+      type: object
+      properties:
+        accountId:
+          type: string
+        extensionId:
+          type: string
+        id:
+          type: string
+        direction:
+          type: string
+          enum:
+          - Inbound
+          - Outbound
+        to:
+          $ref: '#/components/schemas/CallPartyInfo'
+        from:
+          $ref: '#/components/schemas/CallPartyInfo'
+        status:
+          $ref: '#/components/schemas/CallSessionStatusInfo'
     CallParty:
       type: object
       properties:
@@ -1169,70 +1376,42 @@ components:
           items:
             $ref: '#/components/schemas/RecordingInfo'
       description: Information on a party of a call session
-    CallPartyFlip:
+    TransferTarget:
+      type: object
+      description: 'Identifier of a call party the call will be transferred to. Only **one of** these parameters: `phoneNumber`, `voicemail`, `extensionNumber` or `parkOrbit` must be specified, otherwise an error is returned.'
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number
+        voicemail:
+          type: string
+          description: Voicemail owner extension identifier
+        parkOrbit:
+          type: string
+          description: Park orbit identifier
+        extensionNumber:
+          type: string
+          description: Extension short number
+    MobilePickupData:
       type: object
       properties:
-        callFlipId:
+        ccMailboxes:
+          type: array
+          description: List of extension IDs, configured to pick up a call from Desktop/Mobile applications
+          items:
+            type: string
+        to:
           type: string
-          description: Call flip id
-    OriginInfo:
-      type: object
-      properties:
-        type:
+          description: SIP proxy registration name
+        sid:
           type: string
-          description: Session origin type
-          enum:
-          - Call
-          - RingOut
-          - RingMe
-          - Conference
-          - GreetingsRecording
-          - VerificationCall
-          - Zoom
-          - CallOut
-      description: Session origin details
-    OwnerInfo:
-      type: object
-      properties:
-        accountId:
+          description: User data
+        srvlvl:
           type: string
-          description: Internal identifier of an account that monitors a call
-        extensionId:
+          description: User data
+        srvLvlExt:
           type: string
-          description: Internal identifier of an extension that monitors a call
-      description: Deprecated. Information on a call owner
-    PartyUpdateInfo:
-      type: object
-      properties:
-        muted:
-          type: boolean
-          description: Specifies if a call participant is muted or not. **Note:** If a call is also controlled via Hard phone or RingCentral App (not only through the API by calling call control methods) then it cannot be fully muted/unmuted via API only, in this case the action should be duplicated via Hard phone/RC App interfaces
-        standAlone:
-          type: boolean
-          description: If `true` then the party is not connected to a session voice conference, `false` means the party is connected to other parties in a session
-      description: Party update data
-    BridgeTargetRequest:
-      required:
-      - partyId
-      - telephonySessionId
-      type: object
-      properties:
-        telephonySessionId:
-          type: string
-          description: Internal identifier of a call session to be connected to (bridged)
-        partyId:
-          type: string
-          description: Internal identifier of a call party to be connected to (bridged)
-    PeerInfo:
-      type: object
-      properties:
-        sessionId:
-          type: string
-        telephonySessionId:
-          type: string
-        partyId:
-          type: string
-      description: Peer session/party details. Valid in 'Gone' state of a call
+          description: User data
     TelephonySessionsEventBody:
       type: object
       properties:
@@ -1261,6 +1440,18 @@ components:
           items:
             $ref: '#/components/schemas/TelephonySessionsEventPartyInfo'
       description: Notification payload body
+    AddPartyRequest:
+      required:
+      - partyId
+      - sessionId
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: Internal identifier of a call session
+        partyId:
+          type: string
+          description: Internal identifier of a party that should be added to the call session
     ApiErrorResponseModel:
       type: object
       description: Standard error response model which is returned in case of any unsuccessful operation
@@ -1273,190 +1464,6 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ApiError'
-    MobilePickupData:
-      type: object
-      properties:
-        ccMailboxes:
-          type: array
-          description: List of extension IDs, configured to pick up a call from Desktop/Mobile applications
-          items:
-            type: string
-        to:
-          type: string
-          description: SIP proxy registration name
-        sid:
-          type: string
-          description: User data
-        srvlvl:
-          type: string
-          description: User data
-        srvLvlExt:
-          type: string
-          description: User data
-    PartyInfo:
-      type: object
-      properties:
-        phoneNumber:
-          type: string
-          description: Phone number of a party
-        name:
-          type: string
-          description: Displayed name of a party
-        deviceId:
-          type: string
-          description: Internal identifier of a device
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-    CallPartyInfo:
-      type: object
-      properties:
-        phoneNumber:
-          type: string
-          description: Call party phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)(with '+' sign) format
-        name:
-          type: string
-          description: Call party name
-        extensionId:
-          type: string
-          description: Internal identifier of a call party extensionId
-    ForwardTarget:
-      type: object
-      description: 'Identifier of a call party the call will be forwarded to. Only **one of** these parameters:
-
-        `phoneNumber`, `voicemail` or `extensionNumber` must be specified, otherwise an error is returned.
-
-        '
-      properties:
-        phoneNumber:
-          type: string
-          description: Phone number
-        voicemail:
-          type: string
-          description: Voicemail owner extension identifier
-        extensionNumber:
-          type: string
-          description: Extension short number
-    CallRecordingUpdate:
-      type: object
-      properties:
-        active:
-          type: boolean
-          description: Recording status
-    ReplyParty:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a party
-        status:
-          $ref: '#/components/schemas/CallStatusInfo'
-        muted:
-          type: boolean
-          description: Specifies if a call participant is muted or not. **Note:** If a call is also controlled via Hard phone or RingCentral App (not only through the API by calling call control methods) then it cannot be fully muted/unmuted via API only, in this case the action should be duplicated via Hard phone/RC App interfaces
-        standAlone:
-          type: boolean
-          description: If `true` then the party is not connected to a session voice conference, `false` means the party is connected to other parties in a session
-        park:
-          $ref: '#/components/schemas/ParkInfo'
-        from:
-          $ref: '#/components/schemas/PartyInfo'
-        to:
-          $ref: '#/components/schemas/PartyInfo'
-        owner:
-          $ref: '#/components/schemas/OwnerInfo'
-        direction:
-          type: string
-          description: Direction of a call
-          enum:
-          - Inbound
-          - Outbound
-    SuperviseCallSessionResponse:
-      type: object
-      properties:
-        from:
-          $ref: '#/components/schemas/PartyInfo'
-        to:
-          $ref: '#/components/schemas/PartyInfo'
-        direction:
-          type: string
-          description: Direction of a call
-          enum:
-          - Outbound
-          - Inbound
-        id:
-          type: string
-          description: Internal identifier of a party that monitors a call
-        accountId:
-          type: string
-          description: Internal identifier of an account that monitors a call
-        extensionId:
-          type: string
-          description: Internal identifier of an extension that monitors a call
-        muted:
-          type: boolean
-          description: Specifies if a call participant is muted or not. **Note:** If a call is also controlled via Hard phone or RingCentral App (not only through the API by calling call control methods) then it cannot be fully muted/unmuted via API only, in this case the action should be duplicated via Hard phone/RC App interfaces
-        owner:
-          $ref: '#/components/schemas/OwnerInfo'
-        standAlone:
-          type: boolean
-          description: If `true` then the party is not connected to a session voice conference, `false` means the party is connected to other parties in a session
-        status:
-          $ref: '#/components/schemas/CallStatusInfo'
-    CallSession:
-      type: object
-      properties:
-        session:
-          $ref: '#/components/schemas/CallSessionObject'
-    MakeCallOutCallerInfoRequestTo:
-      type: object
-      properties:
-        phoneNumber:
-          type: string
-          description: Phone number in E.164 format, short codes (*67, *86), emergency (911, 112) or special (988) numbers
-          example: '+16502223366'
-        extensionNumber:
-          type: string
-          description: Extension number
-          example: '103'
-      description: Phone number of the called party. This number corresponds to the 2nd leg of a CallOut call
-    TransferTarget:
-      type: object
-      description: 'Identifier of a call party the call will be transferred to. Only **one of** these parameters: `phoneNumber`, `voicemail`, `extensionNumber` or `parkOrbit` must be specified, otherwise an error is returned.'
-      properties:
-        phoneNumber:
-          type: string
-          description: Phone number
-        voicemail:
-          type: string
-          description: Voicemail owner extension identifier
-        parkOrbit:
-          type: string
-          description: Park orbit identifier
-        extensionNumber:
-          type: string
-          description: Extension short number
-    IgnoreRequestBody:
-      required:
-      - deviceId
-      type: object
-      properties:
-        deviceId:
-          type: string
-          description: Internal device identifier
-          example: '400020454008'
-    HoldCallPartyRequest:
-      type: object
-      properties:
-        proto:
-          type: string
-          description: Protocol for hold mode initiation
-          default: Auto
-          enum:
-          - Auto
-          - RC
-          - BroadWorks
-          - DisconnectHolder
     ForwardCallPartyResponse:
       type: object
       properties:
@@ -1525,84 +1532,84 @@ components:
           items:
             $ref: '#/components/schemas/RecordingInfo'
       description: Information on a party of a call session
-    ExtensionTelephonySessionsEvent:
-      type: object
-      properties:
-        uuid:
-          type: string
-          description: Universally unique identifier of a notification
-        event:
-          type: string
-          description: Event filter URI
-        timestamp:
-          type: string
-          description: 'Date/time of sending a notification in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-
-            format including timezone, for example *2016-03-10T18:07:52.534Z*
-
-            '
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        ownerId:
-          type: string
-          description: Internal identifier of a subscription owner extension
-        body:
-          $ref: '#/components/schemas/TelephonySessionsEventBody'
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    AnswerTarget:
-      type: object
-      properties:
-        deviceId:
-          type: string
-          description: Device ID that is used to answer to incoming call.
-          example: '400018633008'
-    PartyUpdateRequest:
-      type: object
-      properties:
-        party:
-          $ref: '#/components/schemas/PartyUpdateInfo'
-    CallSessionStatusInfo:
+    CallStatusInfo:
       type: object
       properties:
         code:
           type: string
-        reason:
-          type: string
-        parkData:
-          type: string
+          description: Status code of a call
+          enum:
+          - Setup
+          - Proceeding
+          - Answered
+          - Disconnected
+          - Gone
+          - Parked
+          - Hold
+          - VoiceMail
+          - FaxReceive
+          - Tds
+          - VoiceMailScreening
         peerId:
           $ref: '#/components/schemas/PeerInfo'
-        mobilePickupData:
-          $ref: '#/components/schemas/MobilePickupData'
-    MakeCallOutRequest:
-      required:
-      - from
-      - to
+        reason:
+          type: string
+          description: Reason for call termination. For 'Disconnected' code only
+          enum:
+          - Pickup
+          - Supervising
+          - TakeOver
+          - Timeout
+          - BlindTransfer
+          - RccTransfer
+          - AttendedTransfer
+          - CallerInputRedirect
+          - CallFlip
+          - ParkLocation
+          - DtmfTransfer
+          - AgentAnswered
+          - AgentDropped
+          - Rejected
+          - Cancelled
+          - InternalError
+          - NoAnswer
+          - TargetBusy
+          - InvalidNumber
+          - InternationalDisabled
+          - DestinationBlocked
+          - NotEnoughFunds
+          - NoSuchUser
+          - CallPark
+          - CallRedirected
+          - CallReplied
+          - CallSwitch
+          - CallFinished
+          - CallDropped
+        description:
+          type: string
+          description: Optional message
+      description: Status data of a call session
+    CallSessionObject:
       type: object
       properties:
-        from:
-          $ref: '#/components/schemas/MakeCallOutCallerInfoRequestFrom'
-        to:
-          $ref: '#/components/schemas/MakeCallOutCallerInfoRequestTo'
-        countryId:
-          $ref: '#/components/schemas/CountryId'
-    PartySuperviseResponse:
+        id:
+          type: string
+          description: Internal identifier of a call session
+        origin:
+          $ref: '#/components/schemas/OriginInfo'
+        voiceCallToken:
+          type: string
+          description: For calls of 'Conference' type only
+        parties:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallParty'
+        creationTime:
+          type: string
+          format: date-time
+          description: Date and time of the latest session update represented in Unix time format
+      description: Call session information
+    SuperviseCallSessionResponse:
       type: object
       properties:
         from:
@@ -1626,96 +1633,48 @@ components:
           description: Internal identifier of an extension that monitors a call
         muted:
           type: boolean
-          description: Specifies if a call party is muted
+          description: Specifies if a call participant is muted or not. **Note:** If a call is also controlled via Hard phone or RingCentral App (not only through the API by calling call control methods) then it cannot be fully muted/unmuted via API only, in this case the action should be duplicated via Hard phone/RC App interfaces
         owner:
           $ref: '#/components/schemas/OwnerInfo'
         standAlone:
           type: boolean
-          description: Specifies if a device is stand-alone
+          description: If `true` then the party is not connected to a session voice conference, `false` means the party is connected to other parties in a session
         status:
           $ref: '#/components/schemas/CallStatusInfo'
-    CallSessionObject:
+    CallRecording:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of a call session
-        origin:
-          $ref: '#/components/schemas/OriginInfo'
-        voiceCallToken:
-          type: string
-          description: For calls of 'Conference' type only
-        parties:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallParty'
-        creationTime:
-          type: string
-          format: date-time
-          description: Date and time of the latest session update represented in Unix time format
-      description: Call session information
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    SuperviseCallSessionRequest:
-      required:
-      - mode
-      - supervisorDeviceId
-      type: object
-      properties:
-        mode:
-          type: string
-          description: Supervising mode
-          example: Listen
-          enum:
-          - Listen
-        supervisorDeviceId:
-          type: string
-          description: Internal identifier of a supervisor's device which will be used for call session monitoring
-          example: '191888004'
-        agentExtensionId:
-          type: string
-          description: Extension identifier of the user that will be monitored
-          example: '400378008008'
-        autoAnswer:
+          description: Internal identifier of a call recording
+        active:
           type: boolean
-          description: Specifies if auto-answer SIP header should be sent. If auto-answer is set to `true`, the call is automatically answered by the supervising party, if set to `false` - then the supervising party has to accept or decline the monitored call
-          default: true
-        mediaSDP:
-          type: string
-          description: Specifies session description protocol setting
-          enum:
-          - sendOnly
-          - sendRecv
-    TelephonySessionsEventPartyInfo:
+          description: Call recording status
+    AccountTelephonySessionsEvent:
       type: object
       properties:
-        accountId:
+        uuid:
           type: string
-        extensionId:
+          description: Universally unique identifier of a notification
+        event:
           type: string
-        id:
+          description: Event filter URI
+        timestamp:
           type: string
-        direction:
+          description: Date/time of sending a notification in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example *2016-03-10T18:07:52.534Z*
+        subscriptionId:
           type: string
-          enum:
-          - Inbound
-          - Outbound
-        to:
-          $ref: '#/components/schemas/CallPartyInfo'
-        from:
-          $ref: '#/components/schemas/CallPartyInfo'
-        status:
-          $ref: '#/components/schemas/CallSessionStatusInfo'
+          description: Internal identifier of a subscription
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
+        body:
+          $ref: '#/components/schemas/TelephonySessionsEventBody'
+    CallSession:
+      type: object
+      properties:
+        session:
+          $ref: '#/components/schemas/CallSessionObject'
     RecordingInfo:
       type: object
       properties:
@@ -1725,36 +1684,47 @@ components:
         active:
           type: boolean
           description: True if the recording is active. False if the recording is paused.
-  parameters:
-    TelephonySessionId:
-      name: telephonySessionId
-      in: path
-      description: Internal identifier of a call session
-      required: true
-      schema:
-        type: string
-    TelephonySessionPartyId:
-      name: partyId
-      in: path
-      description: Internal identifier of a call party
-      required: true
-      schema:
-        type: string
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
 
         '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    PartyUpdateInfo:
+      type: object
+      properties:
+        muted:
+          type: boolean
+          description: Specifies if a call participant is muted or not. **Note:** If a call is also controlled via Hard phone or RingCentral App (not only through the API by calling call control methods) then it cannot be fully muted/unmuted via API only, in this case the action should be duplicated via Hard phone/RC App interfaces
+        standAlone:
+          type: boolean
+          description: If `true` then the party is not connected to a session voice conference, `false` means the party is connected to other parties in a session
+      description: Party update data
+    AnswerTarget:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          description: Device ID that is used to answer to incoming call.
+          example: '400018633008'
+    CallPartyReply:
+      type: object
+      properties:
+        replyWithText:
+          type: string
+          description: Text to reply
+        replyWithPattern:
+          $ref: '#/components/schemas/ReplyWithPattern'
   responses:
     Forbidden:
       description: 'General response with **HTTP 403 "Forbidden"** status.<br>
@@ -1770,6 +1740,16 @@ components:
       description: 'General response with **HTTP 404 "Not found"** status.<br>
 
         Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
 
         '
       content:
@@ -1810,16 +1790,36 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+  parameters:
+    TelephonySessionId:
+      name: telephonySessionId
+      in: path
+      description: Internal identifier of a call session
+      required: true
+      schema:
+        type: string
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
 
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    TelephonySessionPartyId:
+      name: partyId
+      in: path
+      description: Internal identifier of a call party
+      required: true
+      schema:
+        type: string
   securitySchemes:
     OAuth2:
       type: oauth2

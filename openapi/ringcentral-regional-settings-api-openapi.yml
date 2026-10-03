@@ -362,6 +362,191 @@ paths:
       x-throttling-group: Light
 components:
   schemas:
+    CountryInfoBasicModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoMinimalModel'
+      - type: object
+        properties:
+          name:
+            type: string
+            description: The official name of a country
+    GetTimezoneInfoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a timezone
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a timezone
+        name:
+          type: string
+          description: Short name of a timezone
+        description:
+          type: string
+          description: Description of a timezone
+        bias:
+          type: string
+    GetLocationListResponse:
+      required:
+      - navigation
+      - paging
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the location list resource
+        records:
+          type: array
+          description: List of locations
+          items:
+            $ref: '#/components/schemas/LocationInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CountryInfoMinimalModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a country
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a country resource
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    GetTimezoneListResponse:
+      required:
+      - navigation
+      - paging
+      - records
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the timezone list resource
+        records:
+          type: array
+          description: List of timezones
+          items:
+            $ref: '#/components/schemas/GetTimezoneInfoResponse'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    GetStateListResponse:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a states list resource
+        records:
+          type: array
+          description: List of states
+          items:
+            $ref: '#/components/schemas/GetStateInfoResponse'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CountryInfoShortModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoBasicModel'
+      - type: object
+        properties:
+          isoCode:
+            type: string
+            description: 'A ISO country code value complying with the
+
+              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+
+              format.
+
+              '
+          callingCode:
+            type: string
+            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
+
+              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
+
+              [E.164](http://en.wikipedia.org/wiki/E.164),
+
+              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
+
+              '
+    LanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a language
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a language
+        greeting:
+          type: boolean
+          description: 'Indicates whether a language is available as
+
+            greeting language
+
+            '
+        formattingLocale:
+          type: boolean
+          description: 'Indicates whether a language is available as
+
+            formatting locale
+
+            '
+        localeCode:
+          type: string
+          description: Localization code of a language
+        isoCode:
+          type: string
+          description: Country code according to the ISO standard, see [ISO 3166](https://www.iso.org/iso-3166-country-codes.html)
+        name:
+          type: string
+          description: Official name of a language
+        ui:
+          type: boolean
+          description: 'Indicates whether a language is available as UI language
+
+            '
+        timeFormat:
+          type: string
+          description: Time format
+        dateFormat:
+          type: string
+          description: Date format
+      description: User interface language data
+    LanguageList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of the language list resource
+        records:
+          type: array
+          description: Language data
+          items:
+            $ref: '#/components/schemas/LanguageInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
     PageNavigationModel:
       type: object
       description: Links to other pages of the current result set
@@ -375,6 +560,45 @@ components:
           $ref: '#/components/schemas/PageNavigationUri'
         lastPage:
           $ref: '#/components/schemas/PageNavigationUri'
+    LocationInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a location
+        areaCode:
+          type: string
+          description: Area code of the location
+        city:
+          type: string
+          description: 'Official name of the city, belonging to the certain state
+
+            '
+        npa:
+          type: string
+          description: 'Area code of the location (3-digit usually), according to the
+
+            NANP number format, that can be summarized as NPA-NXX-xxxx and covers
+
+            Canada, the United States, parts of the Caribbean Sea, and some Atlantic
+
+            and Pacific islands. See for details North American Numbering Plan
+
+            '
+        nxx:
+          type: string
+          description: 'Central office code of the location, according to the NANP
+
+            number format, that can be summarized as NPA-NXX-xxxx and covers Canada,
+
+            the United States, parts of the Caribbean Sea, and some Atlantic and Pacific
+
+            islands. See for details North American Numbering Plan
+
+            '
+        state:
+          $ref: '#/components/schemas/LocationStateInfo'
     GetStateInfoResponse:
       type: object
       properties:
@@ -393,22 +617,6 @@ components:
         name:
           type: string
           description: Official name of a state
-    LanguageList:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of the language list resource
-        records:
-          type: array
-          description: Language data
-          items:
-            $ref: '#/components/schemas/LanguageInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
     EnumeratedPagingModel:
       type: object
       required:
@@ -479,170 +687,7 @@ components:
 
             '
           example: 25
-    CountryInfoMinimalModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a country
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a country resource
-    CountryInfoBasicModel:
-      allOf:
-      - $ref: '#/components/schemas/CountryInfoMinimalModel'
-      - type: object
-        properties:
-          name:
-            type: string
-            description: The official name of a country
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    GetLocationListResponse:
-      required:
-      - navigation
-      - paging
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the location list resource
-        records:
-          type: array
-          description: List of locations
-          items:
-            $ref: '#/components/schemas/LocationInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    GetStateListResponse:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a states list resource
-        records:
-          type: array
-          description: List of states
-          items:
-            $ref: '#/components/schemas/GetStateInfoResponse'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    LocationInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a location
-        areaCode:
-          type: string
-          description: Area code of the location
-        city:
-          type: string
-          description: 'Official name of the city, belonging to the certain state
-
-            '
-        npa:
-          type: string
-          description: 'Area code of the location (3-digit usually), according to the
-
-            NANP number format, that can be summarized as NPA-NXX-xxxx and covers
-
-            Canada, the United States, parts of the Caribbean Sea, and some Atlantic
-
-            and Pacific islands. See for details North American Numbering Plan
-
-            '
-        nxx:
-          type: string
-          description: 'Central office code of the location, according to the NANP
-
-            number format, that can be summarized as NPA-NXX-xxxx and covers Canada,
-
-            the United States, parts of the Caribbean Sea, and some Atlantic and Pacific
-
-            islands. See for details North American Numbering Plan
-
-            '
-        state:
-          $ref: '#/components/schemas/LocationStateInfo'
-    LanguageInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a language
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a language
-        greeting:
-          type: boolean
-          description: 'Indicates whether a language is available as
-
-            greeting language
-
-            '
-        formattingLocale:
-          type: boolean
-          description: 'Indicates whether a language is available as
-
-            formatting locale
-
-            '
-        localeCode:
-          type: string
-          description: Localization code of a language
-        isoCode:
-          type: string
-          description: Country code according to the ISO standard, see [ISO 3166](https://www.iso.org/iso-3166-country-codes.html)
-        name:
-          type: string
-          description: Official name of a language
-        ui:
-          type: boolean
-          description: 'Indicates whether a language is available as UI language
-
-            '
-        timeFormat:
-          type: string
-          description: Time format
-        dateFormat:
-          type: string
-          description: Date format
-      description: User interface language data
-    GetTimezoneInfoResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a timezone
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a timezone
-        name:
-          type: string
-          description: Short name of a timezone
-        description:
-          type: string
-          description: Description of a timezone
-        bias:
-          type: string
-    GetTimezoneListResponse:
+    CountryListDictionaryModel:
       required:
       - navigation
       - paging
@@ -652,12 +697,12 @@ components:
         uri:
           type: string
           format: uri
-          description: Link to the timezone list resource
+          description: Link to the list of countries supported
         records:
           type: array
-          description: List of timezones
+          description: List of countries with the country data
           items:
-            $ref: '#/components/schemas/GetTimezoneInfoResponse'
+            $ref: '#/components/schemas/CountryInfoDictionaryModel'
         navigation:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
@@ -708,51 +753,6 @@ components:
           localDialing:
             type: boolean
             description: Indicates that the local dialing is supported in this country and default area code can be set
-    CountryInfoShortModel:
-      allOf:
-      - $ref: '#/components/schemas/CountryInfoBasicModel'
-      - type: object
-        properties:
-          isoCode:
-            type: string
-            description: 'A ISO country code value complying with the
-
-              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
-
-              format.
-
-              '
-          callingCode:
-            type: string
-            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
-
-              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
-
-              [E.164](http://en.wikipedia.org/wiki/E.164),
-
-              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
-
-              '
-    CountryListDictionaryModel:
-      required:
-      - navigation
-      - paging
-      - records
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the list of countries supported
-        records:
-          type: array
-          description: List of countries with the country data
-          items:
-            $ref: '#/components/schemas/CountryInfoDictionaryModel'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
   securitySchemes:
     OAuth2:
       type: oauth2

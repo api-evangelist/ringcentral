@@ -286,27 +286,90 @@ paths:
       x-user-permission: ReadCompanyInfo
 components:
   schemas:
-    ExternalIntegrationResource:
+    SearchDirectoryContactType:
+      type: string
+      description: Type of directory contact to filter
+      enum:
+      - User
+      - Department
+      - Announcement
+      - Voicemail
+      - SharedLinesGroup
+      - PagingOnly
+      - ParkLocation
+      - IvrMenu
+      - Limited
+      - ApplicationExtension
+      - Site
+      - Bot
+      - Room
+      - DelegatedLinesGroup
+      - GroupCallPickup
+      - External
+      example: User
+    FederationResource:
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/FederatedAccountResource'
+        creationTime:
+          type: string
+          format: date-time
+        displayName:
+          type: string
+        id:
+          type: string
+        lastModifiedTime:
+          type: string
+          format: date-time
+        type:
+          $ref: '#/components/schemas/FederationType'
+    AccountDirectoryProfileImageResource:
+      type: object
+      properties:
+        etag:
+          type: string
+          example: tag
+        uri:
+          type: string
+          format: uri
+    SearchDirectoryExtensionType:
+      type: string
+      description: Type of extension to filter the contacts
+      enum:
+      - User
+      - Department
+      - Announcement
+      - Voicemail
+      - DigitalUser
+      - VirtualUser
+      - FaxUser
+      - PagingOnly
+      - SharedLinesGroup
+      - IvrMenu
+      - ApplicationExtension
+      - ParkLocation
+      - Limited
+      - Bot
+      - Site
+      - Room
+      - ProxyAdmin
+      - DelegatedLinesGroup
+      - FlexibleUser
+      - GroupCallPickup
+      - RoomConnector
+      example: User
+    GroupResource:
       type: object
       properties:
         id:
           type: string
-          example: '9813'
-        typeId:
+          example: '63723034'
+        name:
           type: string
-          example: '1'
-        type:
-          type: string
-          example: External
-        displayName:
-          type: string
-          example: Integration X
-        routingType:
-          type: string
-          example: Account
-        outboundEdgeId:
-          type: string
-          example: '1726'
+          example: Leaders
     OrderBy:
       type: object
       properties:
@@ -336,25 +399,209 @@ components:
           - Asc
           - Desc
           example: Asc
-    FederatedAccountResource:
+    BusinessSiteResource:
       type: object
+      properties:
+        id:
+          type: string
+          example: '872781820006'
+        name:
+          type: string
+          example: Sales site
+        code:
+          type: string
+          example: '1007'
+    DirectoryResource:
+      required:
+      - records
+      - paging
+      type: object
+      properties:
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactResource'
+    FederationType:
+      type: string
+      description: Federation type
+      enum:
+      - Regular
+      - AdminOnly
+    ContactSubTypeEnum:
+      type: string
+      description: Extension subtype
+      example: Unknown
+      enum:
+      - Unknown
+      - VideoPro
+      - VideoProPlus
+      - DigitalSignage
+      - Emergency
+    SearchDirectoryEntriesRequest:
+      type: object
+      properties:
+        searchString:
+          type: string
+          description: 'String value to filter the contacts. The value specified is
+
+            searched through the following fields: `firstName`, `lastName`, `extensionNumber`, `phoneNumber`, `email`,
+
+            `jobTitle`, `department`, `customFieldValue`
+
+            '
+        searchFields:
+          type: array
+          description: The list of field to be searched for
+          items:
+            type: string
+            enum:
+            - firstName
+            - lastName
+            - extensionNumber
+            - phoneNumber
+            - email
+            - jobTitle
+            - department
+            - customFieldValue
+        showFederated:
+          type: boolean
+          description: If `true` then contacts of all accounts in federation are returned, if it is in federation, account section will be returned. If `false` then only contacts of the current account are returned, and account section is eliminated in this case
+        showAdminOnlyContacts:
+          type: boolean
+          description: Should show AdminOnly Contacts
+          default: false
+        extensionType:
+          $ref: '#/components/schemas/SearchDirectoryContactType'
+        siteId:
+          type: string
+          description: Internal identifier of the business site to which extensions belong
+          example: '872781797006'
+        showExternalContacts:
+          type: boolean
+          default: false
+          description: Allows to control whether External (Hybrid) contacts should be returned in the response or not
+          example: true
+        accountIds:
+          type: array
+          description: The list of Internal identifiers of an accounts
+          items:
+            type: string
+          example:
+          - '854874047006'
+          - '422456828004'
+          - '854874151006'
+        department:
+          type: string
+          description: Department
+        siteIds:
+          type: array
+          description: The list of Internal identifiers of the business sites to which extensions belong
+          items:
+            type: string
+        extensionStatuses:
+          type: array
+          description: Extension current state.
+          items:
+            type: string
+            enum:
+            - Enabled
+            - Disabled
+            - NotActivated
+        extensionTypes:
+          $ref: '#/components/schemas/SearchDirectoryExtensionTypes'
+        orderBy:
+          type: array
+          description: Sorting settings
+          items:
+            $ref: '#/components/schemas/OrderBy'
+        page:
+          type: integer
+          format: int32
+        perPage:
+          type: integer
+          format: int32
+      example:
+        searchString: John Doe
+        searchFields:
+        - lastName
+        - email
+        showFederated: true
+        siteIds:
+        - '872781797006'
+        - '872781820006'
+        extensionStatuses:
+        - Enabled
+        department: R&D department
+        page: 1
+        perPage: 30
+    ADGErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          description: Collection of all gathered errors
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/ADGError'
+      description: Format of response in case that any error occurred during request processing
+    AccountResource:
       required:
       - id
+      type: object
       properties:
         companyName:
           type: string
-        conflictCount:
-          type: integer
-          format: int32
+          example: My lovely company
         federatedName:
           type: string
+          example: Lovely Holding
         id:
           type: string
-        linkCreationTime:
-          type: string
-          format: date-time
+          example: '400131426008'
         mainNumber:
           $ref: '#/components/schemas/PhoneNumberResource'
+    PhoneNumberResource:
+      type: object
+      properties:
+        formattedPhoneNumber:
+          type: string
+          example: +1 (205) 6812029
+        phoneNumber:
+          type: string
+          example: '+12056812029'
+        type:
+          type: string
+          example: VoiceFax
+        label:
+          type: string
+          description: Custom user name of a phone number, if any
+          example: Boss
+        usageType:
+          type: string
+          description: Usage type of phone number
+          enum:
+          - MobileNumber
+          - ContactNumber
+          - DirectNumber
+          - ForwardedNumber
+          example: DirectNumber
+        hidden:
+          type: boolean
+          description: Specifies if a phone number should be hidden or not
+        primary:
+          type: boolean
+          description: Specifies if the number is primary, i.e. displayed as 'main number' and called by default
+    CallQueueResource:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '873014540006'
+        name:
+          type: string
+          example: Sales CQ
     EnumeratedPagingModel:
       type: object
       required:
@@ -425,16 +672,6 @@ components:
 
             '
           example: 25
-    ADGErrorResponse:
-      type: object
-      properties:
-        errors:
-          type: array
-          description: Collection of all gathered errors
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/ADGError'
-      description: Format of response in case that any error occurred during request processing
     CustomFieldResource:
       type: object
       properties:
@@ -447,178 +684,18 @@ components:
         value:
           type: string
           example: '5'
-    CallQueueResource:
+    CostCenterResource:
       type: object
       properties:
         id:
           type: string
-          example: '873014540006'
-        name:
-          type: string
-          example: Sales CQ
-    BusinessSiteResource:
-      type: object
-      properties:
-        id:
-          type: string
-          example: '872781820006'
-        name:
-          type: string
-          example: Sales site
+          example: '83266549237542'
         code:
           type: string
-          example: '1007'
-    ContactSubTypeEnum:
-      type: string
-      description: Extension subtype
-      example: Unknown
-      enum:
-      - Unknown
-      - VideoPro
-      - VideoProPlus
-      - DigitalSignage
-      - Emergency
-    ADGError:
-      type: object
-      properties:
-        errorCode:
-          type: string
-          description: Code that characterizes this error. Code uniquely identifies the source of the error.
-          readOnly: true
-          enum:
-          - ErrorCode{code='ADG-000', httpStatus=503, description='Service temporary unavailable.'}
-          - ErrorCode{code='ADG-010', httpStatus=503, description='Federation data temporary unavailable.'}
-          - ErrorCode{code='ADG-001', httpStatus=500, description='Service internal error.'}
-          - ErrorCode{code='ADG-100', httpStatus=403, description='Insufficient permissions.'}
-          - ErrorCode{code='ADG-101', httpStatus=403, description='Unauthorized access.'}
-          - ErrorCode{code='ADG-102', httpStatus=405, description='Method not allowed.'}
-          - ErrorCode{code='ADG-111', httpStatus=400, description='Need Content-Type header.'}
-          - ErrorCode{code='ADG-112', httpStatus=400, description='Request body is invalid.'}
-          - ErrorCode{code='ADG-121', httpStatus=400, description='Parameter [${paramName}] is invalid. ${additionalInfo:-}'}
-          - ErrorCode{code='ADG-115', httpStatus=415, description='Unsupported Media Type.'}
-          - ErrorCode{code='ADG-105', httpStatus=404, description='Current account is not linked to any federation.'}
-          - ErrorCode{code='ADG-107', httpStatus=404, description='Account not found.'}
-          - ErrorCode{code='ADG-122', httpStatus=404, description='Contact not found.'}
-          - ErrorCode{code='ADG-200', httpStatus=404, description='Invalid URI'}
-        message:
-          type: string
-          description: Message that describes the error. This message can be used in UI.
-          readOnly: true
-      description: Description of an error occurred during request processing. This data type can be used only in readonly mode, no writing is allowed
-    GroupResource:
-      type: object
-      properties:
-        id:
-          type: string
-          example: '63723034'
+          example: Main
         name:
           type: string
-          example: Leaders
-    AccountResource:
-      required:
-      - id
-      type: object
-      properties:
-        companyName:
-          type: string
-          example: My lovely company
-        federatedName:
-          type: string
-          example: Lovely Holding
-        id:
-          type: string
-          example: '400131426008'
-        mainNumber:
-          $ref: '#/components/schemas/PhoneNumberResource'
-    DirectoryRoleResource:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        domain:
-          type: string
-        displayName:
-          type: string
-    SearchDirectoryContactType:
-      type: string
-      description: Type of directory contact to filter
-      enum:
-      - User
-      - Department
-      - Announcement
-      - Voicemail
-      - SharedLinesGroup
-      - PagingOnly
-      - ParkLocation
-      - IvrMenu
-      - Limited
-      - ApplicationExtension
-      - Site
-      - Bot
-      - Room
-      - DelegatedLinesGroup
-      - GroupCallPickup
-      - External
-      example: User
-    FederationResource:
-      type: object
-      properties:
-        accounts:
-          type: array
-          items:
-            $ref: '#/components/schemas/FederatedAccountResource'
-        creationTime:
-          type: string
-          format: date-time
-        displayName:
-          type: string
-        id:
-          type: string
-        lastModifiedTime:
-          type: string
-          format: date-time
-        type:
-          $ref: '#/components/schemas/FederationType'
-    PhoneNumberResource:
-      type: object
-      properties:
-        formattedPhoneNumber:
-          type: string
-          example: +1 (205) 6812029
-        phoneNumber:
-          type: string
-          example: '+12056812029'
-        type:
-          type: string
-          example: VoiceFax
-        label:
-          type: string
-          description: Custom user name of a phone number, if any
-          example: Boss
-        usageType:
-          type: string
-          description: Usage type of phone number
-          enum:
-          - MobileNumber
-          - ContactNumber
-          - DirectNumber
-          - ForwardedNumber
-          example: DirectNumber
-        hidden:
-          type: boolean
-          description: Specifies if a phone number should be hidden or not
-        primary:
-          type: boolean
-          description: Specifies if the number is primary, i.e. displayed as 'main number' and called by default
-    SearchDirectoryExtensionTypes:
-      type: array
-      description: Types of extension to filter the contacts
-      items:
-        $ref: '#/components/schemas/SearchDirectoryExtensionType'
+          example: Cost Center A
     ContactResource:
       required:
       - id
@@ -720,129 +797,11 @@ components:
           $ref: '#/components/schemas/ExternalIntegrationResource'
         subType:
           $ref: '#/components/schemas/ContactSubTypeEnum'
-    SearchDirectoryExtensionType:
-      type: string
-      description: Type of extension to filter the contacts
-      enum:
-      - User
-      - Department
-      - Announcement
-      - Voicemail
-      - DigitalUser
-      - VirtualUser
-      - FaxUser
-      - PagingOnly
-      - SharedLinesGroup
-      - IvrMenu
-      - ApplicationExtension
-      - ParkLocation
-      - Limited
-      - Bot
-      - Site
-      - Room
-      - ProxyAdmin
-      - DelegatedLinesGroup
-      - FlexibleUser
-      - GroupCallPickup
-      - RoomConnector
-      example: User
-    SearchDirectoryEntriesRequest:
-      type: object
-      properties:
-        searchString:
-          type: string
-          description: 'String value to filter the contacts. The value specified is
-
-            searched through the following fields: `firstName`, `lastName`, `extensionNumber`, `phoneNumber`, `email`,
-
-            `jobTitle`, `department`, `customFieldValue`
-
-            '
-        searchFields:
-          type: array
-          description: The list of field to be searched for
-          items:
-            type: string
-            enum:
-            - firstName
-            - lastName
-            - extensionNumber
-            - phoneNumber
-            - email
-            - jobTitle
-            - department
-            - customFieldValue
-        showFederated:
-          type: boolean
-          description: If `true` then contacts of all accounts in federation are returned, if it is in federation, account section will be returned. If `false` then only contacts of the current account are returned, and account section is eliminated in this case
-        showAdminOnlyContacts:
-          type: boolean
-          description: Should show AdminOnly Contacts
-          default: false
-        extensionType:
-          $ref: '#/components/schemas/SearchDirectoryContactType'
-        siteId:
-          type: string
-          description: Internal identifier of the business site to which extensions belong
-          example: '872781797006'
-        showExternalContacts:
-          type: boolean
-          default: false
-          description: Allows to control whether External (Hybrid) contacts should be returned in the response or not
-          example: true
-        accountIds:
-          type: array
-          description: The list of Internal identifiers of an accounts
-          items:
-            type: string
-          example:
-          - '854874047006'
-          - '422456828004'
-          - '854874151006'
-        department:
-          type: string
-          description: Department
-        siteIds:
-          type: array
-          description: The list of Internal identifiers of the business sites to which extensions belong
-          items:
-            type: string
-        extensionStatuses:
-          type: array
-          description: Extension current state.
-          items:
-            type: string
-            enum:
-            - Enabled
-            - Disabled
-            - NotActivated
-        extensionTypes:
-          $ref: '#/components/schemas/SearchDirectoryExtensionTypes'
-        orderBy:
-          type: array
-          description: Sorting settings
-          items:
-            $ref: '#/components/schemas/OrderBy'
-        page:
-          type: integer
-          format: int32
-        perPage:
-          type: integer
-          format: int32
-      example:
-        searchString: John Doe
-        searchFields:
-        - lastName
-        - email
-        showFederated: true
-        siteIds:
-        - '872781797006'
-        - '872781820006'
-        extensionStatuses:
-        - Enabled
-        department: R&D department
-        page: 1
-        perPage: 30
+    SearchDirectoryExtensionTypes:
+      type: array
+      description: Types of extension to filter the contacts
+      items:
+        $ref: '#/components/schemas/SearchDirectoryExtensionType'
     FederationTypes:
       type: string
       description: Federation types for search
@@ -850,45 +809,86 @@ components:
       - All
       - Regular
       - AdminOnly
-    AccountDirectoryProfileImageResource:
+    FederatedAccountResource:
       type: object
-      properties:
-        etag:
-          type: string
-          example: tag
-        uri:
-          type: string
-          format: uri
-    DirectoryResource:
       required:
-      - records
-      - paging
+      - id
+      properties:
+        companyName:
+          type: string
+        conflictCount:
+          type: integer
+          format: int32
+        federatedName:
+          type: string
+        id:
+          type: string
+        linkCreationTime:
+          type: string
+          format: date-time
+        mainNumber:
+          $ref: '#/components/schemas/PhoneNumberResource'
+    ADGError:
       type: object
       properties:
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/ContactResource'
-    CostCenterResource:
+        errorCode:
+          type: string
+          description: Code that characterizes this error. Code uniquely identifies the source of the error.
+          readOnly: true
+          enum:
+          - ErrorCode{code='ADG-000', httpStatus=503, description='Service temporary unavailable.'}
+          - ErrorCode{code='ADG-010', httpStatus=503, description='Federation data temporary unavailable.'}
+          - ErrorCode{code='ADG-001', httpStatus=500, description='Service internal error.'}
+          - ErrorCode{code='ADG-100', httpStatus=403, description='Insufficient permissions.'}
+          - ErrorCode{code='ADG-101', httpStatus=403, description='Unauthorized access.'}
+          - ErrorCode{code='ADG-102', httpStatus=405, description='Method not allowed.'}
+          - ErrorCode{code='ADG-111', httpStatus=400, description='Need Content-Type header.'}
+          - ErrorCode{code='ADG-112', httpStatus=400, description='Request body is invalid.'}
+          - ErrorCode{code='ADG-121', httpStatus=400, description='Parameter [${paramName}] is invalid. ${additionalInfo:-}'}
+          - ErrorCode{code='ADG-115', httpStatus=415, description='Unsupported Media Type.'}
+          - ErrorCode{code='ADG-105', httpStatus=404, description='Current account is not linked to any federation.'}
+          - ErrorCode{code='ADG-107', httpStatus=404, description='Account not found.'}
+          - ErrorCode{code='ADG-122', httpStatus=404, description='Contact not found.'}
+          - ErrorCode{code='ADG-200', httpStatus=404, description='Invalid URI'}
+        message:
+          type: string
+          description: Message that describes the error. This message can be used in UI.
+          readOnly: true
+      description: Description of an error occurred during request processing. This data type can be used only in readonly mode, no writing is allowed
+    DirectoryRoleResource:
+      required:
+      - id
       type: object
       properties:
         id:
           type: string
-          example: '83266549237542'
-        code:
-          type: string
-          example: Main
         name:
           type: string
-          example: Cost Center A
-    FederationType:
-      type: string
-      description: Federation type
-      enum:
-      - Regular
-      - AdminOnly
+        domain:
+          type: string
+        displayName:
+          type: string
+    ExternalIntegrationResource:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '9813'
+        typeId:
+          type: string
+          example: '1'
+        type:
+          type: string
+          example: External
+        displayName:
+          type: string
+          example: Integration X
+        routingType:
+          type: string
+          example: Account
+        outboundEdgeId:
+          type: string
+          example: '1726'
   parameters:
     IfNoneMatch:
       name: If-None-Match

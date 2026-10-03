@@ -428,14 +428,37 @@ paths:
       x-user-permission: ReadPersonalContacts
 components:
   schemas:
-    UserContactsGroupsInfo:
+    ContactList:
       type: object
       properties:
         uri:
           type: string
           format: uri
-          description: Link to the list of address book groups
-      description: Information on address book groups
+          description: Link to the list of user personal contacts
+        records:
+          type: array
+          description: 'List of personal contacts from the extension address book
+
+            '
+          items:
+            $ref: '#/components/schemas/PersonalContactResource'
+        navigation:
+          $ref: '#/components/schemas/UserContactsNavigationInfo'
+        paging:
+          $ref: '#/components/schemas/UserContactsPagingInfo'
+        groups:
+          $ref: '#/components/schemas/UserContactsGroupsInfo'
+    AddressBookBulkUploadRequest:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/AddressBookBulkUploadResource'
     PersonalContactRequest:
       type: object
       properties:
@@ -548,180 +571,6 @@ components:
         ringtoneIndex:
           type: string
           description: Contact ringtone. Max number of symbols is 64
-    FavoriteCollection:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/FavoriteContactResource'
-    AddressBookSync:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/PersonalContactResource'
-        syncInfo:
-          $ref: '#/components/schemas/SyncInfo'
-        nextPageId:
-          type: integer
-          format: int64
-        nextPageUri:
-          type: string
-          format: uri
-    SyncInfo:
-      type: object
-      properties:
-        syncType:
-          type: string
-          enum:
-          - FSync
-          - ISync
-        syncToken:
-          type: string
-        syncTime:
-          type: string
-          format: date-time
-        olderRecordsExist:
-          type: boolean
-          default: false
-    ExtensionFavoritesEvent:
-      type: object
-      properties:
-        uuid:
-          type: string
-          description: Universally unique identifier of a notification
-        event:
-          type: string
-          description: Event filter URI
-        timestamp:
-          format: date-time
-          type: string
-          description: 'Date/time of sending a notification in
-
-            [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-
-            format including timezone, for example *2016-03-10T18:07:52.534Z*
-
-            '
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        body:
-          $ref: '#/components/schemas/ExtensionFavoritesEventBody'
-    UserContactsPagingInfo:
-      type: object
-      properties:
-        page:
-          type: integer
-          description: 'Current page number. 1-indexed, so the first page is 1
-
-            by default. May be omitted if the result is empty (because non-existent page
-
-            was specified or perPage=0 was requested)
-
-            '
-          format: int32
-        perPage:
-          type: integer
-          description: 'Current page size, describes how many items each page contains.
-
-            Default value is 100. Maximum value is 1000. If perPage value in the request
-
-            is greater than 1000, the maximum value (1000) is applied
-
-            '
-          format: int32
-        pageStart:
-          type: integer
-          description: 'Zero-based number of the first element on the current page.
-
-            Omitted if a page is omitted or the result is empty
-
-            '
-          format: int32
-        pageEnd:
-          type: integer
-          description: 'Zero-based index of the last element on the current page.
-
-            Omitted if a page is omitted or the result is empty
-
-            '
-          format: int32
-        totalPages:
-          type: integer
-          description: 'Total number of pages in a dataset. May be omitted for
-
-            some resources due to performance reasons
-
-            '
-          format: int32
-        totalElements:
-          type: integer
-          description: 'Total number of elements in a dataset. May be omitted for
-
-            some resource due to performance reasons
-
-            '
-          format: int32
-      description: Information on paging
-    AddressBookBulkContactAddressInfo:
-      type: object
-      properties:
-        country:
-          type: string
-          description: 'Country name of the extension user company. Not returned for Address
-
-            Book
-
-            '
-        state:
-          type: string
-          description: State/province name of the extension user company
-        city:
-          type: string
-          description: City name of the extension user company
-        street:
-          type: string
-          description: Street address of the extension user company
-        zip:
-          type: string
-          description: Zip code of the extension user company
-    ContactList:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the list of user personal contacts
-        records:
-          type: array
-          description: 'List of personal contacts from the extension address book
-
-            '
-          items:
-            $ref: '#/components/schemas/PersonalContactResource'
-        navigation:
-          $ref: '#/components/schemas/UserContactsNavigationInfo'
-        paging:
-          $ref: '#/components/schemas/UserContactsPagingInfo'
-        groups:
-          $ref: '#/components/schemas/UserContactsGroupsInfo'
-    AddressBookBulkUploadRequest:
-      required:
-      - records
-      type: object
-      properties:
-        records:
-          type: array
-          minItems: 1
-          maxItems: 500
-          items:
-            $ref: '#/components/schemas/AddressBookBulkUploadResource'
     UserContactsNavigationInfoUri:
       type: object
       properties:
@@ -729,102 +578,6 @@ components:
           type: string
           format: uri
       description: Canonical URI for a corresponding page of a list
-    ContactAddressInfo:
-      type: object
-      properties:
-        street:
-          type: string
-          description: Street address
-          example: 20 Davis Dr.
-        city:
-          type: string
-          description: City name
-          example: Belmont
-        country:
-          type: string
-          description: Country name
-        state:
-          type: string
-          description: State/province name
-          example: CA
-        zip:
-          type: string
-          description: Zip/Postal code
-          example: '94002'
-    AddressBookBulkUploadTaskResult:
-      type: object
-      properties:
-        affectedItems:
-          type: array
-          items:
-            $ref: '#/components/schemas/AddressBookBulkUploadResource'
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorEntity'
-    ErrorEntity:
-      type: object
-      properties:
-        errorCode:
-          type: string
-          description: Error code
-        message:
-          type: string
-          description: Error message
-        parameterName:
-          type: string
-          description: Name of invalid parameter
-        parameterValue:
-          type: string
-          description: Value of invalid parameter
-    UserContactsNavigationInfo:
-      type: object
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
-        nextPage:
-          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
-        previousPage:
-          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
-        lastPage:
-          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
-      description: Information on navigation
-    FavoriteContactList:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/FavoriteContactResource'
-    AddressBookBulkUploadResource:
-      required:
-      - extensionId
-      - contacts
-      type: object
-      properties:
-        extensionId:
-          type: string
-        contacts:
-          type: array
-          minItems: 1
-          maxItems: 10000
-          items:
-            $ref: '#/components/schemas/AddressBookBulkContactResource'
-    FavoriteContactResource:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        extensionId:
-          type: string
-        accountId:
-          type: string
-        contactId:
-          type: string
     PersonalContactResource:
       type: object
       properties:
@@ -960,6 +713,300 @@ components:
         ringtoneIndex:
           type: string
           description: Contact ringtone. Max number of symbols is 64
+    AddressBookBulkContactAddressInfo:
+      type: object
+      properties:
+        country:
+          type: string
+          description: 'Country name of the extension user company. Not returned for Address
+
+            Book
+
+            '
+        state:
+          type: string
+          description: State/province name of the extension user company
+        city:
+          type: string
+          description: City name of the extension user company
+        street:
+          type: string
+          description: Street address of the extension user company
+        zip:
+          type: string
+          description: Zip code of the extension user company
+    SyncInfo:
+      type: object
+      properties:
+        syncType:
+          type: string
+          enum:
+          - FSync
+          - ISync
+        syncToken:
+          type: string
+        syncTime:
+          type: string
+          format: date-time
+        olderRecordsExist:
+          type: boolean
+          default: false
+    ExtensionFavoritesEventBody:
+      type: object
+      properties:
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
+      description: Notification payload body
+    ContactAddressInfo:
+      type: object
+      properties:
+        street:
+          type: string
+          description: Street address
+          example: 20 Davis Dr.
+        city:
+          type: string
+          description: City name
+          example: Belmont
+        country:
+          type: string
+          description: Country name
+        state:
+          type: string
+          description: State/province name
+          example: CA
+        zip:
+          type: string
+          description: Zip/Postal code
+          example: '94002'
+    AddressBookBulkUploadResponse:
+      description: 'Information on a task for adding multiple contacts to multiple extensions
+
+        '
+      required:
+      - id
+      - uri
+      - creationTime
+      - lastModifiedTime
+      - status
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a task
+        uri:
+          type: string
+          format: uri
+          description: Link for the task status retrieval
+        status:
+          type: string
+          description: Task status
+          enum:
+          - Accepted
+          - InProgress
+          - Completed
+          - Failed
+        creationTime:
+          type: string
+          format: date-time
+          description: Date/time of a task creation
+        lastModifiedTime:
+          type: string
+          format: date-time
+          description: Date/time of a task latest update
+        results:
+          $ref: '#/components/schemas/AddressBookBulkUploadTaskResult'
+    UserContactsNavigationInfo:
+      type: object
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
+        nextPage:
+          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
+        previousPage:
+          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
+        lastPage:
+          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
+      description: Information on navigation
+    FavoriteContactList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteContactResource'
+    UserContactsPagingInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: 'Current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if the result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          format: int32
+        perPage:
+          type: integer
+          description: 'Current page size, describes how many items each page contains.
+
+            Default value is 100. Maximum value is 1000. If perPage value in the request
+
+            is greater than 1000, the maximum value (1000) is applied
+
+            '
+          format: int32
+        pageStart:
+          type: integer
+          description: 'Zero-based number of the first element on the current page.
+
+            Omitted if a page is omitted or the result is empty
+
+            '
+          format: int32
+        pageEnd:
+          type: integer
+          description: 'Zero-based index of the last element on the current page.
+
+            Omitted if a page is omitted or the result is empty
+
+            '
+          format: int32
+        totalPages:
+          type: integer
+          description: 'Total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          format: int32
+        totalElements:
+          type: integer
+          description: 'Total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          format: int32
+      description: Information on paging
+    FavoriteCollection:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteContactResource'
+    AddressBookBulkUploadResource:
+      required:
+      - extensionId
+      - contacts
+      type: object
+      properties:
+        extensionId:
+          type: string
+        contacts:
+          type: array
+          minItems: 1
+          maxItems: 10000
+          items:
+            $ref: '#/components/schemas/AddressBookBulkContactResource'
+    AddressBookSync:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonalContactResource'
+        syncInfo:
+          $ref: '#/components/schemas/SyncInfo'
+        nextPageId:
+          type: integer
+          format: int64
+        nextPageUri:
+          type: string
+          format: uri
+    UserContactsGroupsInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the list of address book groups
+      description: Information on address book groups
+    ExtensionFavoritesEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        event:
+          type: string
+          description: Event filter URI
+        timestamp:
+          format: date-time
+          type: string
+          description: 'Date/time of sending a notification in
+
+            [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+            format including timezone, for example *2016-03-10T18:07:52.534Z*
+
+            '
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        body:
+          $ref: '#/components/schemas/ExtensionFavoritesEventBody'
+    FavoriteContactResource:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        extensionId:
+          type: string
+        accountId:
+          type: string
+        contactId:
+          type: string
+    AddressBookBulkUploadTaskResult:
+      type: object
+      properties:
+        affectedItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddressBookBulkUploadResource'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorEntity'
+    ErrorEntity:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        parameterName:
+          type: string
+          description: Name of invalid parameter
+        parameterValue:
+          type: string
+          description: Value of invalid parameter
     AddressBookBulkContactResource:
       type: object
       properties:
@@ -1068,105 +1115,7 @@ components:
           $ref: '#/components/schemas/AddressBookBulkContactAddressInfo'
         otherAddress:
           $ref: '#/components/schemas/AddressBookBulkContactAddressInfo'
-    AddressBookBulkUploadResponse:
-      description: 'Information on a task for adding multiple contacts to multiple extensions
-
-        '
-      required:
-      - id
-      - uri
-      - creationTime
-      - lastModifiedTime
-      - status
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a task
-        uri:
-          type: string
-          format: uri
-          description: Link for the task status retrieval
-        status:
-          type: string
-          description: Task status
-          enum:
-          - Accepted
-          - InProgress
-          - Completed
-          - Failed
-        creationTime:
-          type: string
-          format: date-time
-          description: Date/time of a task creation
-        lastModifiedTime:
-          type: string
-          format: date-time
-          description: Date/time of a task latest update
-        results:
-          $ref: '#/components/schemas/AddressBookBulkUploadTaskResult'
-    ExtensionFavoritesEventBody:
-      type: object
-      properties:
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-        ownerId:
-          type: string
-          description: Internal identifier of a subscription owner extension
-      description: Notification payload body
   parameters:
-    Page:
-      name: page
-      in: query
-      description: The result set page number (1-indexed) to return
-      required: false
-      explode: false
-      schema:
-        type: integer
-        format: int32
-        minimum: 1
-        maximum: 1000
-        default: 1
-      example: 1
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    ContactIds:
-      name: contactId
-      in: path
-      description: The list of contact identifiers (comma-separated)
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: array
-        minItems: 1
-        items:
-          type: integer
-          format: int64
-    ContactId:
-      name: contactId
-      in: path
-      description: 'Internal identifier of a contact record in the RingCentral database
-
-        '
-      required: true
-      schema:
-        type: integer
-        format: int64
     PerPage:
       name: perPage
       in: query
@@ -1184,12 +1133,63 @@ components:
         maximum: 1000
         default: 100
       example: 100
+    Page:
+      name: page
+      in: query
+      description: The result set page number (1-indexed) to return
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 1
+      example: 1
+    ContactIds:
+      name: contactId
+      in: path
+      description: The list of contact identifiers (comma-separated)
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: array
+        minItems: 1
+        items:
+          type: integer
+          format: int64
     AccountId:
       name: accountId
       in: path
       description: 'Internal identifier of the RingCentral account
 
         (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ContactId:
+      name: contactId
+      in: path
+      description: 'Internal identifier of a contact record in the RingCentral database
+
+        '
+      required: true
+      schema:
+        type: integer
+        format: int64
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

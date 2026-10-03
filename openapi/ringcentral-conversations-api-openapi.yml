@@ -120,6 +120,42 @@ components:
         id:
           type: string
           description: Internal identifier of a user
+    TMConversationList:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          description: List of conversations
+          items:
+            $ref: '#/components/schemas/TMConversationInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+    CreateConversationRequest:
+      required:
+      - members
+      type: object
+      properties:
+        members:
+          type: array
+          description: 'Identifier(s) of chat member(s). The maximum supported number
+
+            of IDs is 15. User''s own ID is optional. If `members` section is omitted
+
+            then "Personal" chat will be returned
+
+            '
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of a person
+              email:
+                type: string
+                format: email
+                description: Email of a person
     TMConversationInfo:
       type: object
       properties:
@@ -145,42 +181,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TMChatMemberInfo'
-    CreateConversationRequest:
-      required:
-      - members
-      type: object
-      properties:
-        members:
-          type: array
-          description: 'Identifier(s) of chat member(s). The maximum supported number
-
-            of IDs is 15. User''s own ID is optional. If `members` section is omitted
-
-            then "Personal" chat will be returned
-
-            '
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: Internal identifier of a person
-              email:
-                type: string
-                format: email
-                description: Email of a person
-    TMConversationList:
-      required:
-      - records
-      type: object
-      properties:
-        records:
-          type: array
-          description: List of conversations
-          items:
-            $ref: '#/components/schemas/TMConversationInfo'
-        navigation:
-          $ref: '#/components/schemas/TMNavigationInfo'
     TMNavigationInfo:
       type: object
       properties:

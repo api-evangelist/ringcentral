@@ -112,34 +112,17 @@ components:
           format: uri
         status:
           $ref: '#/components/schemas/RingOutStatusInfo'
-    MakeRingOutRequest:
-      required:
-      - from
-      - to
+    MakeRingOutCountryInfo:
       type: object
       properties:
-        from:
-          $ref: '#/components/schemas/MakeRingOutCallerInfoRequestFrom'
-        to:
-          $ref: '#/components/schemas/MakeRingOutCallerInfoRequestTo'
-        callerId:
-          $ref: '#/components/schemas/MakeRingOutCallerIdInfo'
-        playPrompt:
-          type: boolean
-          description: 'Audio prompt that a calling party hears when a call
-
-            is connected
-
-            '
-        country:
-          $ref: '#/components/schemas/MakeRingOutCountryInfo'
-    MakeRingOutCallerIdInfo:
-      type: object
-      properties:
-        phoneNumber:
+        id:
           type: string
-          description: Phone number in E.164 format
-      description: Phone number which will be displayed to the called party
+          description: Dialing plan country identifier
+      description: 'Optional. Dialing plan country data. If not specified, then an extension
+
+        home country is applied by default
+
+        '
     MakeRingOutCallerInfoRequestFrom:
       type: object
       properties:
@@ -158,6 +141,24 @@ components:
         leg of a RingOut call. This number can be one of the user''s configured forwarding
 
         numbers or an arbitrary number
+
+        '
+    MakeRingOutCallerIdInfo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number in E.164 format
+      description: Phone number which will be displayed to the called party
+    MakeRingOutCallerInfoRequestTo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number in E.164 format
+      description: 'Phone number of a called party. This number corresponds to the
+
+        2nd leg of a RingOut call
 
         '
     RingOutStatusInfo:
@@ -212,28 +213,27 @@ components:
           - NotEnoughFunds
           - NoSuchUser
       description: RingOut status information
-    MakeRingOutCountryInfo:
+    MakeRingOutRequest:
+      required:
+      - from
+      - to
       type: object
       properties:
-        id:
-          type: string
-          description: Dialing plan country identifier
-      description: 'Optional. Dialing plan country data. If not specified, then an extension
+        from:
+          $ref: '#/components/schemas/MakeRingOutCallerInfoRequestFrom'
+        to:
+          $ref: '#/components/schemas/MakeRingOutCallerInfoRequestTo'
+        callerId:
+          $ref: '#/components/schemas/MakeRingOutCallerIdInfo'
+        playPrompt:
+          type: boolean
+          description: 'Audio prompt that a calling party hears when a call
 
-        home country is applied by default
+            is connected
 
-        '
-    MakeRingOutCallerInfoRequestTo:
-      type: object
-      properties:
-        phoneNumber:
-          type: string
-          description: Phone number in E.164 format
-      description: 'Phone number of a called party. This number corresponds to the
-
-        2nd leg of a RingOut call
-
-        '
+            '
+        country:
+          $ref: '#/components/schemas/MakeRingOutCountryInfo'
   parameters:
     AccountId:
       name: accountId

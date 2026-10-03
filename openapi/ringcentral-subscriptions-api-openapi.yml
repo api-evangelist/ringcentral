@@ -291,62 +291,9 @@ components:
           description: The transport type for this subscription, or the channel by which an app should be notified of an event
           enum:
           - WebSocket
-    CreateSubscriptionRequest:
-      allOf:
-      - $ref: '#/components/schemas/UpdateSubscriptionRequest'
-      - type: object
-        required:
-        - deliveryMode
-        properties:
-          deliveryMode:
-            $ref: '#/components/schemas/NotificationDeliveryModeRequest'
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    DisabledFilterInfo:
+    ParameterizedErrorResponseModel:
       type: object
-      required:
-      - filter
-      - reason
-      properties:
-        filter:
-          type: string
-          description: Event filter that is disabled for the user
-        reason:
-          type: string
-          description: Reason why the filter is disabled for the user
-        message:
-          type: string
-          description: Error message
-    NotificationDeliveryModeRequest:
-      description: Notification delivery transport information
-      anyOf:
-      - $ref: '#/components/schemas/WebhookDeliveryModeRequest'
-      - $ref: '#/components/schemas/MobileDeliveryModeRequest'
-      - $ref: '#/components/schemas/PubNubDeliveryModeRequest'
-      discriminator:
-        propertyName: transportType
-        mapping:
-          WebHook: '#/components/schemas/WebhookDeliveryModeRequest'
-          RC/APNS: '#/components/schemas/MobileDeliveryModeRequest'
-          RC/GCM: '#/components/schemas/MobileDeliveryModeRequest'
-          PubNub: '#/components/schemas/PubNubDeliveryModeRequest'
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
+      description: Standard error response which may include parameterized errors
       required:
       - errors
       properties:
@@ -355,20 +302,7 @@ components:
           description: The array of errors (there will be just one in the most of the cases)
           minItems: 1
           items:
-            $ref: '#/components/schemas/ApiError'
-    MobileDeliveryMode:
-      allOf:
-      - $ref: '#/components/schemas/MobileDeliveryModeRequest'
-      - type: object
-        required:
-        - encryption
-        properties:
-          encryption:
-            type: boolean
-            description: Specifies if notification messages will be encrypted or not.
-            enum:
-            - false
-            readOnly: true
+            $ref: '#/components/schemas/ApiErrorWithParameter'
     UpdateSubscriptionRequest:
       type: object
       required:
@@ -402,26 +336,109 @@ components:
             | `WebSocket`         | n/a (the parameter is ignored) |
 
             '
-    MobileDeliveryModeRequest:
+    MobileDeliveryMode:
+      allOf:
+      - $ref: '#/components/schemas/MobileDeliveryModeRequest'
+      - type: object
+        required:
+        - encryption
+        properties:
+          encryption:
+            type: boolean
+            description: Specifies if notification messages will be encrypted or not.
+            enum:
+            - false
+            readOnly: true
+    PubNubDeliveryMode:
+      allOf:
+      - $ref: '#/components/schemas/PubNubDeliveryModeRequest'
+      - type: object
+        required:
+        - address
+        - subscriberKey
+        - secretKey
+        - encryption
+        properties:
+          address:
+            type: string
+            description: 'PubNub channel name
+
+              '
+            example: 54770517599294_6dda849e
+            readOnly: true
+          subscriberKey:
+            type: string
+            description: PubNub credential required to subscribe to the channel
+            readOnly: true
+          secretKey:
+            type: string
+            description: PubNub credential required to subscribe to the channel
+            readOnly: true
+          encryptionAlgorithm:
+            type: string
+            description: '(Only for a "PubNub" transport, returned only if `encryption` is `true`)
+
+              Encryption algorithm used
+
+              '
+            enum:
+            - AES
+            readOnly: true
+          encryptionKey:
+            type: string
+            description: '(Only for a "PubNub" transport, returned only if `encryption` is `true`)
+
+              Cryptographic key to decrypt PubNub notification messages
+
+              '
+            readOnly: true
+    WebhookDeliveryMode:
       type: object
       required:
       - transportType
-      - certificateName
-      - registrationId
+      - address
+      - encryption
       properties:
         transportType:
           type: string
           description: The transport type for this subscription, or the channel by which an app should be notified of an event
           enum:
-          - RC/APNS
-          - RC/GCM
-        certificateName:
+          - WebHook
+        address:
           type: string
-          description: Certificate name for mobile notification transports
-        registrationId:
+          format: uri
+          description: 'The URL to which notifications should be delivered. This is only applicable for the `WebHook` transport type, for which it is a required field.
+
+            '
+          example: https://acme.com/myservice/webhook
+        encryption:
+          type: boolean
+          description: Specifies if notification messages will be encrypted or not.
+          enum:
+          - false
+          readOnly: true
+    WebhookDeliveryModeRequest:
+      type: object
+      required:
+      - transportType
+      - address
+      properties:
+        transportType:
           type: string
-          description: Device instance ID for mobile notification transports
-          example: 38b062ae-85f8-4dcc-8734-04d3f7393d42
+          description: The transport type for this subscription, or the channel by which an app should be notified of an event
+          enum:
+          - WebHook
+        address:
+          type: string
+          format: uri
+          description: 'The URL to which notifications should be delivered. This is only applicable for the `WebHook` transport type, for which it is a required field.
+
+            '
+          example: https://acme.com/myservice/webhook
+        verificationToken:
+          type: string
+          description: An optional validation token used to verify the authenticity of the incoming webhook. Applicable only for the `WebHook` transport type.
+          writeOnly: true
     SubscriptionInfo:
       required:
       - id
@@ -509,37 +526,6 @@ components:
             reason:
               type: string
               description: Reason of adding subscription to a black list
-    SubscriptionListResource:
-      type: object
-      required:
-      - uri
-      - records
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a resource
-        records:
-          type: array
-          minItems: 0
-          maxItems: 20
-          items:
-            $ref: '#/components/schemas/SubscriptionInfo'
-    NotificationDeliveryMode:
-      description: Notification delivery transport information
-      anyOf:
-      - $ref: '#/components/schemas/WebhookDeliveryMode'
-      - $ref: '#/components/schemas/MobileDeliveryMode'
-      - $ref: '#/components/schemas/PubNubDeliveryMode'
-      - $ref: '#/components/schemas/WebSocketDeliveryMode'
-      discriminator:
-        propertyName: transportType
-        mapping:
-          WebHook: '#/components/schemas/WebhookDeliveryMode'
-          RC/APNS: '#/components/schemas/MobileDeliveryMode'
-          RC/GCM: '#/components/schemas/MobileDeliveryMode'
-          PubNub: '#/components/schemas/PubNubDeliveryMode'
-          WebSocket: '#/components/schemas/WebSocketDeliveryMode'
     ApiError:
       type: object
       description: Generalized API error structure suitable for any error type
@@ -556,99 +542,24 @@ components:
           description: User-friendly error message
           example: Something went wrong
       additionalProperties: true
-    WebhookDeliveryMode:
+    DisabledFilterInfo:
       type: object
       required:
-      - transportType
-      - address
-      - encryption
+      - filter
+      - reason
       properties:
-        transportType:
+        filter:
           type: string
-          description: The transport type for this subscription, or the channel by which an app should be notified of an event
-          enum:
-          - WebHook
-        address:
+          description: Event filter that is disabled for the user
+        reason:
           type: string
-          format: uri
-          description: 'The URL to which notifications should be delivered. This is only applicable for the `WebHook` transport type, for which it is a required field.
-
-            '
-          example: https://acme.com/myservice/webhook
-        encryption:
-          type: boolean
-          description: Specifies if notification messages will be encrypted or not.
-          enum:
-          - false
-          readOnly: true
-    PubNubDeliveryMode:
-      allOf:
-      - $ref: '#/components/schemas/PubNubDeliveryModeRequest'
-      - type: object
-        required:
-        - address
-        - subscriberKey
-        - secretKey
-        - encryption
-        properties:
-          address:
-            type: string
-            description: 'PubNub channel name
-
-              '
-            example: 54770517599294_6dda849e
-            readOnly: true
-          subscriberKey:
-            type: string
-            description: PubNub credential required to subscribe to the channel
-            readOnly: true
-          secretKey:
-            type: string
-            description: PubNub credential required to subscribe to the channel
-            readOnly: true
-          encryptionAlgorithm:
-            type: string
-            description: '(Only for a "PubNub" transport, returned only if `encryption` is `true`)
-
-              Encryption algorithm used
-
-              '
-            enum:
-            - AES
-            readOnly: true
-          encryptionKey:
-            type: string
-            description: '(Only for a "PubNub" transport, returned only if `encryption` is `true`)
-
-              Cryptographic key to decrypt PubNub notification messages
-
-              '
-            readOnly: true
-    WebhookDeliveryModeRequest:
+          description: Reason why the filter is disabled for the user
+        message:
+          type: string
+          description: Error message
+    ApiErrorResponseModel:
       type: object
-      required:
-      - transportType
-      - address
-      properties:
-        transportType:
-          type: string
-          description: The transport type for this subscription, or the channel by which an app should be notified of an event
-          enum:
-          - WebHook
-        address:
-          type: string
-          format: uri
-          description: 'The URL to which notifications should be delivered. This is only applicable for the `WebHook` transport type, for which it is a required field.
-
-            '
-          example: https://acme.com/myservice/webhook
-        verificationToken:
-          type: string
-          description: An optional validation token used to verify the authenticity of the incoming webhook. Applicable only for the `WebHook` transport type.
-          writeOnly: true
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
+      description: Standard error response model which is returned in case of any unsuccessful operation
       required:
       - errors
       properties:
@@ -657,7 +568,7 @@ components:
           description: The array of errors (there will be just one in the most of the cases)
           minItems: 1
           items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
+            $ref: '#/components/schemas/ApiError'
     PubNubDeliveryModeRequest:
       type: object
       required:
@@ -678,6 +589,95 @@ components:
 
             '
           default: false
+    NotificationDeliveryMode:
+      description: Notification delivery transport information
+      anyOf:
+      - $ref: '#/components/schemas/WebhookDeliveryMode'
+      - $ref: '#/components/schemas/MobileDeliveryMode'
+      - $ref: '#/components/schemas/PubNubDeliveryMode'
+      - $ref: '#/components/schemas/WebSocketDeliveryMode'
+      discriminator:
+        propertyName: transportType
+        mapping:
+          WebHook: '#/components/schemas/WebhookDeliveryMode'
+          RC/APNS: '#/components/schemas/MobileDeliveryMode'
+          RC/GCM: '#/components/schemas/MobileDeliveryMode'
+          PubNub: '#/components/schemas/PubNubDeliveryMode'
+          WebSocket: '#/components/schemas/WebSocketDeliveryMode'
+    CreateSubscriptionRequest:
+      allOf:
+      - $ref: '#/components/schemas/UpdateSubscriptionRequest'
+      - type: object
+        required:
+        - deliveryMode
+        properties:
+          deliveryMode:
+            $ref: '#/components/schemas/NotificationDeliveryModeRequest'
+    SubscriptionListResource:
+      type: object
+      required:
+      - uri
+      - records
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a resource
+        records:
+          type: array
+          minItems: 0
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/SubscriptionInfo'
+    NotificationDeliveryModeRequest:
+      description: Notification delivery transport information
+      anyOf:
+      - $ref: '#/components/schemas/WebhookDeliveryModeRequest'
+      - $ref: '#/components/schemas/MobileDeliveryModeRequest'
+      - $ref: '#/components/schemas/PubNubDeliveryModeRequest'
+      discriminator:
+        propertyName: transportType
+        mapping:
+          WebHook: '#/components/schemas/WebhookDeliveryModeRequest'
+          RC/APNS: '#/components/schemas/MobileDeliveryModeRequest'
+          RC/GCM: '#/components/schemas/MobileDeliveryModeRequest'
+          PubNub: '#/components/schemas/PubNubDeliveryModeRequest'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    MobileDeliveryModeRequest:
+      type: object
+      required:
+      - transportType
+      - certificateName
+      - registrationId
+      properties:
+        transportType:
+          type: string
+          description: The transport type for this subscription, or the channel by which an app should be notified of an event
+          enum:
+          - RC/APNS
+          - RC/GCM
+        certificateName:
+          type: string
+          description: Certificate name for mobile notification transports
+        registrationId:
+          type: string
+          description: Device instance ID for mobile notification transports
+          example: 38b062ae-85f8-4dcc-8734-04d3f7393d42
   responses:
     Forbidden:
       description: 'General response with **HTTP 403 "Forbidden"** status.<br>
@@ -693,6 +693,16 @@ components:
       description: 'General response with **HTTP 404 "Not found"** status.<br>
 
         Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
 
         '
       content:
@@ -721,34 +731,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
   examples:
-    CreateSubscriptionRequestPubnub:
-      summary: PubNub
-      value:
-        eventFilters:
-        - /restapi/v1.0/account/~/extension/~/presence?detailedTelephonyState=true
-        deliveryMode:
-          transportType: PubNub
-          encryption: true
-    CreateSubscriptionRequestWebhook:
-      summary: Webhook
-      value:
-        eventFilters:
-        - /restapi/v1.0/account/~/extension/~/presence
-        - /restapi/v1.0/account/~/extension/~/message-store
-        deliveryMode:
-          transportType: WebHook
-          address: https://consumer-host.example.com/consumer/path
     CreateSubscriptionResponseWebhook:
       summary: Webhook
       value:
@@ -765,6 +748,14 @@ components:
           transportType: WebHook
           encryption: false
           address: https://consumer-host.example.com/consumer/path
+    CreateSubscriptionRequestPubnub:
+      summary: PubNub
+      value:
+        eventFilters:
+        - /restapi/v1.0/account/~/extension/~/presence?detailedTelephonyState=true
+        deliveryMode:
+          transportType: PubNub
+          encryption: true
     CreateSubscriptionResponsePubnub:
       summary: PubNub
       value:
@@ -784,6 +775,15 @@ components:
           secretKey: y943yr9834ry394yriy4489yr93y4r983y4r3894ry94
           encryptionAlgorithm: AES
           encryptionKey: 0mWk/6SMiSz191u2dV5drg==
+    CreateSubscriptionRequestWebhook:
+      summary: Webhook
+      value:
+        eventFilters:
+        - /restapi/v1.0/account/~/extension/~/presence
+        - /restapi/v1.0/account/~/extension/~/message-store
+        deliveryMode:
+          transportType: WebHook
+          address: https://consumer-host.example.com/consumer/path
   parameters:
     SubscriptionId:
       name: subscriptionId

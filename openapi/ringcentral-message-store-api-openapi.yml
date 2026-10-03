@@ -643,266 +643,141 @@ paths:
       x-user-permission: EditMessages
 components:
   schemas:
-    MessageStatusEnum:
+    SyncTypeEnum:
       type: string
-      description: 'Message status. Different message types may have different
+      enum:
+      - FSync
+      - ISync
+      description: "Type of message synchronization request:\n  - FSync -- full sync\n  - ISync -- incremental sync\n"
+    MessageDirectionEnum:
+      type: string
+      enum:
+      - Inbound
+      - Outbound
+      description: 'Text message direction. Note that for some message types not all
 
-        allowed status values. For outbound faxes the aggregated message status
+        directions are allowed. For example voicemail messages can
 
-        is returned. If, for outbound message, a status for at least one recipient is ''Queued'', then
-
-        the ''Queued'' value is returned. If a status for at least one recipient is
-
-        ''SendingFailed'', then the ''SendingFailed'' value is returned. In other cases
-
-        the ''Sent'' status is returned
+        be only inbound
 
         '
-      enum:
-      - Queued
-      - Sent
-      - Delivered
-      - DeliveryFailed
-      - SendingFailed
-      - Received
-    SenderInfo:
+    MessageChanges:
       type: object
       properties:
-        phoneNumber:
-          type: string
-          description: Phone number in E.164 (with '+' sign) format
-        extensionNumber:
-          type: string
-          description: Extension number
-        location:
-          type: string
-          description: 'Contains party location (city, state) if one can be determined
-
-            from phoneNumber. This property is filled only when phoneNumber is not
-
-            empty and server can calculate location information from it (for example,
-
-            this information is unavailable for US toll-free numbers)
-
-            '
-        name:
-          type: string
-          description: 'Symbolic name associated with a caller/callee. If the phone
-
-            does not belong to the known extension, only the location is returned,
-
-            the name is not determined then
-
-            '
-      description: Extension Type. For GCM transport type '_from' property should be used || Message sender information
-    FaxErrorCodeEnum:
-      type: string
-      enum:
-      - AllLinesInUse
-      - Undefined
-      - NoFaxSendPermission
-      - NoInternationalPermission
-      - NoFaxMachine
-      - NoAnswer
-      - LineBusy
-      - CallerHungUp
-      - NotEnoughCredits
-      - SentPartially
-      - InternationalCallingDisabled
-      - DestinationCountryDisabled
-      - UnknownCountryCode
-      - NotAccepted
-      - InvalidNumber
-      - CallDeclined
-      - TooManyCallsPerLine
-      - CallFailed
-      - RenderingFailed
-      - TooManyPages
-      - ReturnToDBQueue
-      - NoCallTime
-      - WrongNumber
-      - ProhibitedNumber
-      - InternalError
-      - FaxSendingProhibited
-      - ThePhoneIsBlacklisted
-      - UserNotFound
-      - ConvertError
-      - DBGeneralError
-      - SkypeBillingFailed
-      - AccountSuspended
-      - ProhibitedDestination
-      - InternationalDisabled
-    MessagingPagingInfo:
+        type:
+          $ref: '#/components/schemas/MessageTypeEnum'
+        newCount:
+          type: integer
+          format: int32
+          description: Number of new messages. Can be omitted if the value is zero
+        updatedCount:
+          type: integer
+          format: int32
+          description: Number of updated messages. Can be omitted if the value is zero
+        newMessageIds:
+          description: Identifiers of the new messages, applicable for all message types
+          type: array
+          items:
+            type: integer
+            format: int64
+    NotificationInfo:
       type: object
       properties:
-        page:
-          type: integer
-          format: int32
-          description: 'Current page number. 1-indexed, so the first page is 1
-
-            by default. May be omitted if result is empty (because non-existent page
-
-            was specified or perPage=0 was requested)
-
-            '
-        perPage:
-          type: integer
-          format: int32
-          description: 'Current page size, describes how many items are in each page.
-
-            Default value is 100. Maximum value is 1000. If perPage value in the request
-
-            is greater than 1000, the maximum value (1000) is applied
-
-            '
-        pageStart:
-          type: integer
-          format: int32
-          description: 'Zero-based number of the first element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-        pageEnd:
-          type: integer
-          format: int32
-          description: 'Zero-based index of the last element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-        totalPages:
-          type: integer
-          format: int32
-          description: 'Total number of pages in a dataset. May be omitted for
-
-            some resources due to performance reasons
-
-            '
-        totalElements:
-          type: integer
-          format: int32
-          description: 'Total number of elements in a dataset. May be omitted for
-
-            some resource due to performance reasons
-
-            '
-      description: Information on paging
-    MessageStoreCallerInfoResponseFrom:
+        alert:
+          $ref: '#/components/schemas/AlertInfo'
+        badge:
+          type: string
+          description: Number of incoming messages
+        sound:
+          type: string
+          description: Message sound
+        content-available:
+          type: string
+          description: Content availability
+        category:
+          type: string
+          description: Category of a message
+      description: Information on a notification
+    MultipartRequestEntryBase:
       type: object
       properties:
-        extensionNumber:
+        resourceId:
           type: string
-          description: 'Extension short number (usually 3 or 4 digits). This property
-
-            is filled when parties communicate by means of short internal numbers,
-
-            for example when calling to other extension or sending/receiving Company
-
-            Pager message
-
-            '
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-        location:
-          type: string
-          description: 'Contains party location (city, state) if one can be determined
-
-            from phoneNumber. This property is filled only when phoneNumber is not
-
-            empty and server can calculate location information from it (for example,
-
-            this information is unavailable for US toll-free numbers)
-
-            '
-        name:
-          type: string
-          description: 'Symbolic name associated with a party. If the phone does not
-
-            belong to the known extension, only the location is returned, the name
-
-            is not determined then
-
-            '
-        phoneNumber:
-          type: string
-          description: 'Phone number of a party. Usually it is a plain number including
-
-            country and area code like 18661234567. But sometimes it could be returned
-
-            from database with some formatting applied, for example (866)123-4567.
-
-            This property is filled in all cases where parties communicate by means
-
-            of global phone numbers, for example when calling to direct numbers or
-
-            sending/receiving SMS
-
-            '
-      description: Sender information
-    AlertInfo:
+          description: Internal identifier of a resource (required when alternative syntax with '*' is used)
+          example: '1724099032020'
+    PatchMessageRequest:
+      type: object
+      description: Either `readStatus` or `availability` or both are required
+      properties:
+        readStatus:
+          $ref: '#/components/schemas/MessageReadStatusEnum'
+        availability:
+          $ref: '#/components/schemas/MessageAvailabilityEnum'
+    MessagingNavigationInfo:
       type: object
       properties:
-        title:
-          type: string
-          description: Title of a message
-        body:
-          type: string
-          description: Message Description
-      description: Alert information
-    GetMessageMultiResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/GetMessageInfoMultiResponse'
+        firstPage:
+          $ref: '#/components/schemas/MessagingNavigationInfoURI'
+        nextPage:
+          $ref: '#/components/schemas/MessagingNavigationInfoURI'
+        previousPage:
+          $ref: '#/components/schemas/MessagingNavigationInfoURI'
+        lastPage:
+          $ref: '#/components/schemas/MessagingNavigationInfoURI'
+      description: Information on navigation
+    MessageStoreConfiguration:
+      type: object
+      properties:
+        retentionPeriod:
+          maximum: 90
+          minimum: 7
+          type: integer
+          format: int32
+          description: 'Retention policy setting, specifying how long to keep messages;
+
+            the supported value range is 7-90 days. Currently, the retention period is supported for `Fax` and `Voicemail` messages only.
+
+            SMS messages are stored with no time limits
+
+            '
     DeleteMessageBulkRequest:
       type: array
       minItems: 1
       items:
         type: string
         description: Internal identifier of a message to be deleted
-    PatchMessageBulkRequest:
+    GetMessageMultiResponse:
       type: array
-      minItems: 1
       items:
-        allOf:
-        - $ref: '#/components/schemas/MultipartRequestEntryBase'
-        - type: object
-          required:
-          - body
-          properties:
-            body:
-              $ref: '#/components/schemas/PatchMessageRequest'
-    VoicemailMessageEvent:
+        $ref: '#/components/schemas/GetMessageInfoMultiResponse'
+    MessageTypeEnum:
+      type: string
+      enum:
+      - Fax
+      - SMS
+      - VoiceMail
+      - Pager
+      description: Type of the message
+    GetMessageList:
+      required:
+      - navigation
+      - paging
+      - records
       type: object
       properties:
-        uuid:
+        uri:
           type: string
-          description: Universally unique identifier of a notification
-        event:
-          type: string
-          description: Event filter URI
-        timestamp:
-          type: string
-          description: Date/time of sending a notification in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example *2016-03-10T18:07:52.534Z*
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        ownerId:
-          type: string
-          description: Internal identifier of a subscription owner extension
-        body:
-          $ref: '#/components/schemas/VoicemailMessageEventBody'
-    MessageAttachmentTypeEnum:
-      type: string
-      description: Type of message attachment
-      enum:
-      - AudioRecording
-      - AudioTranscription
-      - Text
-      - SourceDocument
-      - RenderedDocument
-      - MmsAttachment
+          format: uri
+          description: Link to a list of user messages
+        records:
+          type: array
+          description: List of records with message information
+          items:
+            $ref: '#/components/schemas/GetMessageInfoResponse'
+        navigation:
+          $ref: '#/components/schemas/MessagingNavigationInfo'
+        paging:
+          $ref: '#/components/schemas/MessagingPagingInfo'
     VoicemailMessageEventBody:
       type: object
       properties:
@@ -972,6 +847,355 @@ components:
           - Failed
           - Unknown
       description: Notification payload body
+    MessageEventBody:
+      type: object
+      properties:
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        lastUpdated:
+          type: string
+          description: 'Date/time when the message was last modified in ISO 8601 format
+
+            including timezone, for example 2016-03-10T18:07:52.534Z
+
+            '
+          format: date-time
+        changes:
+          type: array
+          description: Message Changes
+          items:
+            $ref: '#/components/schemas/MessageChanges'
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
+      description: Notification payload body
+    AlertInfo:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of a message
+        body:
+          type: string
+          description: Message Description
+      description: Alert information
+    PatchMessageBulkRequest:
+      type: array
+      minItems: 1
+      items:
+        allOf:
+        - $ref: '#/components/schemas/MultipartRequestEntryBase'
+        - type: object
+          required:
+          - body
+          properties:
+            body:
+              $ref: '#/components/schemas/PatchMessageRequest'
+    MultipartResponseEntryBase:
+      type: object
+      required:
+      - resourceId
+      - status
+      properties:
+        resourceId:
+          type: string
+          description: Internal identifier of a resource
+          example: '1724099032020'
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code of an operation on given resource
+          example: 200
+    MessageStatusEnum:
+      type: string
+      description: 'Message status. Different message types may have different
+
+        allowed status values. For outbound faxes the aggregated message status
+
+        is returned. If, for outbound message, a status for at least one recipient is ''Queued'', then
+
+        the ''Queued'' value is returned. If a status for at least one recipient is
+
+        ''SendingFailed'', then the ''SendingFailed'' value is returned. In other cases
+
+        the ''Sent'' status is returned
+
+        '
+      enum:
+      - Queued
+      - Sent
+      - Delivered
+      - DeliveryFailed
+      - SendingFailed
+      - Received
+    MessagingPagingInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          description: 'Current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+        perPage:
+          type: integer
+          format: int32
+          description: 'Current page size, describes how many items are in each page.
+
+            Default value is 100. Maximum value is 1000. If perPage value in the request
+
+            is greater than 1000, the maximum value (1000) is applied
+
+            '
+        pageStart:
+          type: integer
+          format: int32
+          description: 'Zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+        pageEnd:
+          type: integer
+          format: int32
+          description: 'Zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+        totalPages:
+          type: integer
+          format: int32
+          description: 'Total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+        totalElements:
+          type: integer
+          format: int32
+          description: 'Total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+      description: Information on paging
+    MessageAttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of a message attachment
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a message attachment
+        type:
+          $ref: '#/components/schemas/MessageAttachmentTypeEnum'
+        contentType:
+          type: string
+          description: MIME type for a given attachment, for instance 'audio/wav'
+        vmDuration:
+          type: integer
+          format: int32
+          description: 'Supported for `Voicemail` only. Duration of a voicemail in
+
+            seconds
+
+            '
+        fileName:
+          type: string
+          description: Name of a file attached
+        size:
+          type: integer
+          format: int32
+          description: Size of attachment in bytes
+        height:
+          type: integer
+          format: int32
+          description: Attachment height in pixels if available
+        width:
+          type: integer
+          format: int32
+          description: Attachment width in pixels if available
+    MessageAvailabilityEnum:
+      type: string
+      enum:
+      - Alive
+      - Deleted
+      - Purged
+      description: 'Message availability status. Message in ''Deleted'' state is still
+
+        preserved with all its attachments and can be restored. ''Purged'' means
+
+        that all attachments are already deleted and the message itself is about
+
+        to be physically deleted shortly
+
+        '
+    SyncInfoMessages:
+      type: object
+      properties:
+        syncType:
+          $ref: '#/components/schemas/SyncTypeEnum'
+        syncToken:
+          type: string
+          description: Synchronization token
+        syncTime:
+          type: string
+          description: 'Last synchronization date/time in ISO 8601 format including
+
+            timezone, for example 2016-03-10T18:07:52.534Z
+
+            '
+          format: date-time
+        olderRecordsExist:
+          type: boolean
+          default: false
+      description: Sync type, token and time
+    GetMessageInfoMultiResponse:
+      allOf:
+      - $ref: '#/components/schemas/MultipartResponseEntryBase'
+      - type: object
+        required:
+        - body
+        properties:
+          body:
+            $ref: '#/components/schemas/GetMessageInfoResponse'
+    VoicemailMessageEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        event:
+          type: string
+          description: Event filter URI
+        timestamp:
+          type: string
+          description: Date/time of sending a notification in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format including timezone, for example *2016-03-10T18:07:52.534Z*
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
+        body:
+          $ref: '#/components/schemas/VoicemailMessageEventBody'
+    FaxResolutionEnum:
+      type: string
+      description: 'Fax only. Resolution of a fax message. ''High'' for black and
+
+        white image scanned at 200 dpi, ''Low'' for black and white image scanned
+
+        at 100 dpi
+
+        '
+      enum:
+      - High
+      - Low
+    UpdateMessageRequest:
+      type: object
+      required:
+      - readStatus
+      properties:
+        readStatus:
+          $ref: '#/components/schemas/MessageReadStatusEnum'
+    FaxErrorCodeEnum:
+      type: string
+      enum:
+      - AllLinesInUse
+      - Undefined
+      - NoFaxSendPermission
+      - NoInternationalPermission
+      - NoFaxMachine
+      - NoAnswer
+      - LineBusy
+      - CallerHungUp
+      - NotEnoughCredits
+      - SentPartially
+      - InternationalCallingDisabled
+      - DestinationCountryDisabled
+      - UnknownCountryCode
+      - NotAccepted
+      - InvalidNumber
+      - CallDeclined
+      - TooManyCallsPerLine
+      - CallFailed
+      - RenderingFailed
+      - TooManyPages
+      - ReturnToDBQueue
+      - NoCallTime
+      - WrongNumber
+      - ProhibitedNumber
+      - InternalError
+      - FaxSendingProhibited
+      - ThePhoneIsBlacklisted
+      - UserNotFound
+      - ConvertError
+      - DBGeneralError
+      - SkypeBillingFailed
+      - AccountSuspended
+      - ProhibitedDestination
+      - InternationalDisabled
+    SenderInfo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number in E.164 (with '+' sign) format
+        extensionNumber:
+          type: string
+          description: Extension number
+        location:
+          type: string
+          description: 'Contains party location (city, state) if one can be determined
+
+            from phoneNumber. This property is filled only when phoneNumber is not
+
+            empty and server can calculate location information from it (for example,
+
+            this information is unavailable for US toll-free numbers)
+
+            '
+        name:
+          type: string
+          description: 'Symbolic name associated with a caller/callee. If the phone
+
+            does not belong to the known extension, only the location is returned,
+
+            the name is not determined then
+
+            '
+      description: Extension Type. For GCM transport type '_from' property should be used || Message sender information
+    MessageReadStatusEnum:
+      description: Message read status
+      type: string
+      enum:
+      - Read
+      - Unread
+    MessagePriorityEnum:
+      type: string
+      description: Message priority
+      enum:
+      - Normal
+      - High
+    MessageAttachmentTypeEnum:
+      type: string
+      description: Type of message attachment
+      enum:
+      - AudioRecording
+      - AudioTranscription
+      - Text
+      - SourceDocument
+      - RenderedDocument
+      - MmsAttachment
     InboundMessageEvent:
       type: object
       properties:
@@ -992,73 +1216,198 @@ components:
         ownerId:
           type: string
           description: Internal identifier of a subscription owner extension
-    InstantMessageEventBody:
+    MessageStoreCallerInfoResponseTo:
       type: object
       properties:
-        id:
+        extensionNumber:
           type: string
-          description: Internal identifier of a message
-        to:
-          type: array
-          description: Message receiver(s) information
-          items:
-            $ref: '#/components/schemas/NotificationRecipientInfo'
-        from:
-          $ref: '#/components/schemas/SenderInfo'
-        type:
-          type: string
-          description: Type of message. The default value is 'SMS'
-        creationTime:
-          type: string
-          description: 'Message creation date/time in ISO 8601 format including timezone,
+          description: 'Extension short number (usually 3 or 4 digits). This property
 
-            for example 2016-03-10T18:07:52.534Z
+            is filled when parties communicate by means of short internal numbers,
+
+            for example when calling to other extension or sending/receiving Company
+
+            Pager messages
 
             '
-          format: date-time
-        lastModifiedTime:
+        extensionId:
           type: string
-          description: 'Date/time when the message was modified in ISO 8601 format including
+        location:
+          type: string
+          description: 'Contains party location (city, state) if one can be determined
 
-            timezone, for example 2016-03-10T18:07:52.534Z
+            from a phone number. This property is filled only when `phoneNumber` is not
+
+            empty and a server can calculate location information from it (for example,
+
+            this information is unavailable for US toll-free numbers)
 
             '
-          format: date-time
-        readStatus:
-          $ref: '#/components/schemas/MessageReadStatusEnum'
-        priority:
-          $ref: '#/components/schemas/MessagePriorityEnum'
-        attachments:
-          type: array
-          description: Message attachment data
-          items:
-            $ref: '#/components/schemas/MessageAttachmentInfo'
-        direction:
-          $ref: '#/components/schemas/MessageDirectionEnum'
-        availability:
-          $ref: '#/components/schemas/MessageAvailabilityEnum'
-        subject:
-          type: string
-          description: 'Message subject. It replicates message text which is also returned
+        target:
+          type: boolean
+          description: 'The `true` value specifies that message is sent exactly to this recipient.
 
-            as an attachment
+            Returned in the `to` field for group MMS. Useful if one extension has several
+
+            phone numbers''
 
             '
         messageStatus:
           $ref: '#/components/schemas/MessageStatusEnum'
-        conversationId:
+        faxErrorCode:
+          $ref: '#/components/schemas/FaxErrorCodeEnum'
+        name:
           type: string
-          description: 'Deprecated. Identifier of a conversation the message belongs
+          description: 'Symbolic name associated with a party. If the phone does not
 
-            to
+            belong to the known extension, only the location is returned, the name
+
+            is not determined then
 
             '
-        conversation:
-          $ref: '#/components/schemas/ConversationInfo'
-        ownerId:
+        phoneNumber:
           type: string
-          description: Internal identifier of a subscription owner extension
-      description: Notification payload body
+          description: 'Phone number of a party. Usually it is a plain number including
+
+            country and area code like 18661234567. But sometimes it could be returned
+
+            from database with some formatting applied, for example (866)123-4567.
+
+            This property is filled in all cases where parties communicate by means
+
+            of global phone numbers, for example when calling to direct numbers or
+
+            sending/receiving SMS
+
+            '
+        recipientId:
+          type: string
+          description: Internal identifier of a message recipient
+    ConversationInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a conversation
+        uri:
+          type: string
+          format: uri
+          description: Deprecated. Link to a conversation resource
+      description: SMS and Pager only. Information about a conversation the message belongs to
+    MessageEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        event:
+          type: string
+          description: Event filter URI
+        timestamp:
+          type: string
+          description: 'Date/time of sending a notification in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+            format including timezone, for example *2016-03-10T18:07:52.534Z*
+
+            '
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        body:
+          $ref: '#/components/schemas/MessageEventBody'
+    MessagingNavigationInfoURI:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+      description: Canonical URI for the corresponding page of the list
+    MessageStoreCallerInfoResponseFrom:
+      type: object
+      properties:
+        extensionNumber:
+          type: string
+          description: 'Extension short number (usually 3 or 4 digits). This property
+
+            is filled when parties communicate by means of short internal numbers,
+
+            for example when calling to other extension or sending/receiving Company
+
+            Pager message
+
+            '
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        location:
+          type: string
+          description: 'Contains party location (city, state) if one can be determined
+
+            from phoneNumber. This property is filled only when phoneNumber is not
+
+            empty and server can calculate location information from it (for example,
+
+            this information is unavailable for US toll-free numbers)
+
+            '
+        name:
+          type: string
+          description: 'Symbolic name associated with a party. If the phone does not
+
+            belong to the known extension, only the location is returned, the name
+
+            is not determined then
+
+            '
+        phoneNumber:
+          type: string
+          description: 'Phone number of a party. Usually it is a plain number including
+
+            country and area code like 18661234567. But sometimes it could be returned
+
+            from database with some formatting applied, for example (866)123-4567.
+
+            This property is filled in all cases where parties communicate by means
+
+            of global phone numbers, for example when calling to direct numbers or
+
+            sending/receiving SMS
+
+            '
+      description: Sender information
+    InstantMessageEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        event:
+          type: string
+          description: Event filter URI
+        timestamp:
+          type: string
+          description: 'Date/time of sending a notification in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+            format including timezone, for example *2016-03-10T18:07:52.534Z*
+
+            '
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        body:
+          $ref: '#/components/schemas/InstantMessageEventBody'
+    UpdateMessageBulkRequest:
+      type: array
+      minItems: 1
+      items:
+        allOf:
+        - $ref: '#/components/schemas/MultipartRequestEntryBase'
+        - type: object
+          required:
+          - body
+          properties:
+            body:
+              $ref: '#/components/schemas/UpdateMessageRequest'
     GetMessageInfoResponse:
       type: object
       properties:
@@ -1212,259 +1561,6 @@ components:
             cover page. Maximum length is limited to 1024 symbols
 
             '
-    InstantMessageEvent:
-      type: object
-      properties:
-        uuid:
-          type: string
-          description: Universally unique identifier of a notification
-        event:
-          type: string
-          description: Event filter URI
-        timestamp:
-          type: string
-          description: 'Date/time of sending a notification in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-
-            format including timezone, for example *2016-03-10T18:07:52.534Z*
-
-            '
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        body:
-          $ref: '#/components/schemas/InstantMessageEventBody'
-    SyncTypeEnum:
-      type: string
-      enum:
-      - FSync
-      - ISync
-      description: "Type of message synchronization request:\n  - FSync -- full sync\n  - ISync -- incremental sync\n"
-    SyncInfoMessages:
-      type: object
-      properties:
-        syncType:
-          $ref: '#/components/schemas/SyncTypeEnum'
-        syncToken:
-          type: string
-          description: Synchronization token
-        syncTime:
-          type: string
-          description: 'Last synchronization date/time in ISO 8601 format including
-
-            timezone, for example 2016-03-10T18:07:52.534Z
-
-            '
-          format: date-time
-        olderRecordsExist:
-          type: boolean
-          default: false
-      description: Sync type, token and time
-    UpdateMessageRequest:
-      type: object
-      required:
-      - readStatus
-      properties:
-        readStatus:
-          $ref: '#/components/schemas/MessageReadStatusEnum'
-    NotificationInfo:
-      type: object
-      properties:
-        alert:
-          $ref: '#/components/schemas/AlertInfo'
-        badge:
-          type: string
-          description: Number of incoming messages
-        sound:
-          type: string
-          description: Message sound
-        content-available:
-          type: string
-          description: Content availability
-        category:
-          type: string
-          description: Category of a message
-      description: Information on a notification
-    MessageStoreCallerInfoResponseTo:
-      type: object
-      properties:
-        extensionNumber:
-          type: string
-          description: 'Extension short number (usually 3 or 4 digits). This property
-
-            is filled when parties communicate by means of short internal numbers,
-
-            for example when calling to other extension or sending/receiving Company
-
-            Pager messages
-
-            '
-        extensionId:
-          type: string
-        location:
-          type: string
-          description: 'Contains party location (city, state) if one can be determined
-
-            from a phone number. This property is filled only when `phoneNumber` is not
-
-            empty and a server can calculate location information from it (for example,
-
-            this information is unavailable for US toll-free numbers)
-
-            '
-        target:
-          type: boolean
-          description: 'The `true` value specifies that message is sent exactly to this recipient.
-
-            Returned in the `to` field for group MMS. Useful if one extension has several
-
-            phone numbers''
-
-            '
-        messageStatus:
-          $ref: '#/components/schemas/MessageStatusEnum'
-        faxErrorCode:
-          $ref: '#/components/schemas/FaxErrorCodeEnum'
-        name:
-          type: string
-          description: 'Symbolic name associated with a party. If the phone does not
-
-            belong to the known extension, only the location is returned, the name
-
-            is not determined then
-
-            '
-        phoneNumber:
-          type: string
-          description: 'Phone number of a party. Usually it is a plain number including
-
-            country and area code like 18661234567. But sometimes it could be returned
-
-            from database with some formatting applied, for example (866)123-4567.
-
-            This property is filled in all cases where parties communicate by means
-
-            of global phone numbers, for example when calling to direct numbers or
-
-            sending/receiving SMS
-
-            '
-        recipientId:
-          type: string
-          description: Internal identifier of a message recipient
-    MessageReadStatusEnum:
-      description: Message read status
-      type: string
-      enum:
-      - Read
-      - Unread
-    PatchMessageRequest:
-      type: object
-      description: Either `readStatus` or `availability` or both are required
-      properties:
-        readStatus:
-          $ref: '#/components/schemas/MessageReadStatusEnum'
-        availability:
-          $ref: '#/components/schemas/MessageAvailabilityEnum'
-    MessageDirectionEnum:
-      type: string
-      enum:
-      - Inbound
-      - Outbound
-      description: 'Text message direction. Note that for some message types not all
-
-        directions are allowed. For example voicemail messages can
-
-        be only inbound
-
-        '
-    MessageAttachmentInfo:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: Internal identifier of a message attachment
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a message attachment
-        type:
-          $ref: '#/components/schemas/MessageAttachmentTypeEnum'
-        contentType:
-          type: string
-          description: MIME type for a given attachment, for instance 'audio/wav'
-        vmDuration:
-          type: integer
-          format: int32
-          description: 'Supported for `Voicemail` only. Duration of a voicemail in
-
-            seconds
-
-            '
-        fileName:
-          type: string
-          description: Name of a file attached
-        size:
-          type: integer
-          format: int32
-          description: Size of attachment in bytes
-        height:
-          type: integer
-          format: int32
-          description: Attachment height in pixels if available
-        width:
-          type: integer
-          format: int32
-          description: Attachment width in pixels if available
-    FaxResolutionEnum:
-      type: string
-      description: 'Fax only. Resolution of a fax message. ''High'' for black and
-
-        white image scanned at 200 dpi, ''Low'' for black and white image scanned
-
-        at 100 dpi
-
-        '
-      enum:
-      - High
-      - Low
-    MessageAvailabilityEnum:
-      type: string
-      enum:
-      - Alive
-      - Deleted
-      - Purged
-      description: 'Message availability status. Message in ''Deleted'' state is still
-
-        preserved with all its attachments and can be restored. ''Purged'' means
-
-        that all attachments are already deleted and the message itself is about
-
-        to be physically deleted shortly
-
-        '
-    MessagingNavigationInfoURI:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-      description: Canonical URI for the corresponding page of the list
-    MultipartResponseEntryBase:
-      type: object
-      required:
-      - resourceId
-      - status
-      properties:
-        resourceId:
-          type: string
-          description: Internal identifier of a resource
-          example: '1724099032020'
-        status:
-          type: integer
-          format: int32
-          description: HTTP status code of an operation on given resource
-          example: 200
     NotificationRecipientInfo:
       type: object
       properties:
@@ -1503,169 +1599,6 @@ components:
             the name is not determined then
 
             '
-    MultipartRequestEntryBase:
-      type: object
-      properties:
-        resourceId:
-          type: string
-          description: Internal identifier of a resource (required when alternative syntax with '*' is used)
-          example: '1724099032020'
-    ConversationInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a conversation
-        uri:
-          type: string
-          format: uri
-          description: Deprecated. Link to a conversation resource
-      description: SMS and Pager only. Information about a conversation the message belongs to
-    UpdateMessageBulkRequest:
-      type: array
-      minItems: 1
-      items:
-        allOf:
-        - $ref: '#/components/schemas/MultipartRequestEntryBase'
-        - type: object
-          required:
-          - body
-          properties:
-            body:
-              $ref: '#/components/schemas/UpdateMessageRequest'
-    GetMessageList:
-      required:
-      - navigation
-      - paging
-      - records
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a list of user messages
-        records:
-          type: array
-          description: List of records with message information
-          items:
-            $ref: '#/components/schemas/GetMessageInfoResponse'
-        navigation:
-          $ref: '#/components/schemas/MessagingNavigationInfo'
-        paging:
-          $ref: '#/components/schemas/MessagingPagingInfo'
-    MessageTypeEnum:
-      type: string
-      enum:
-      - Fax
-      - SMS
-      - VoiceMail
-      - Pager
-      description: Type of the message
-    MessageChanges:
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/MessageTypeEnum'
-        newCount:
-          type: integer
-          format: int32
-          description: Number of new messages. Can be omitted if the value is zero
-        updatedCount:
-          type: integer
-          format: int32
-          description: Number of updated messages. Can be omitted if the value is zero
-        newMessageIds:
-          description: Identifiers of the new messages, applicable for all message types
-          type: array
-          items:
-            type: integer
-            format: int64
-    MessagePriorityEnum:
-      type: string
-      description: Message priority
-      enum:
-      - Normal
-      - High
-    GetMessageInfoMultiResponse:
-      allOf:
-      - $ref: '#/components/schemas/MultipartResponseEntryBase'
-      - type: object
-        required:
-        - body
-        properties:
-          body:
-            $ref: '#/components/schemas/GetMessageInfoResponse'
-    MessageStoreConfiguration:
-      type: object
-      properties:
-        retentionPeriod:
-          maximum: 90
-          minimum: 7
-          type: integer
-          format: int32
-          description: 'Retention policy setting, specifying how long to keep messages;
-
-            the supported value range is 7-90 days. Currently, the retention period is supported for `Fax` and `Voicemail` messages only.
-
-            SMS messages are stored with no time limits
-
-            '
-    MessagingNavigationInfo:
-      type: object
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/MessagingNavigationInfoURI'
-        nextPage:
-          $ref: '#/components/schemas/MessagingNavigationInfoURI'
-        previousPage:
-          $ref: '#/components/schemas/MessagingNavigationInfoURI'
-        lastPage:
-          $ref: '#/components/schemas/MessagingNavigationInfoURI'
-      description: Information on navigation
-    MessageEventBody:
-      type: object
-      properties:
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-        lastUpdated:
-          type: string
-          description: 'Date/time when the message was last modified in ISO 8601 format
-
-            including timezone, for example 2016-03-10T18:07:52.534Z
-
-            '
-          format: date-time
-        changes:
-          type: array
-          description: Message Changes
-          items:
-            $ref: '#/components/schemas/MessageChanges'
-        ownerId:
-          type: string
-          description: Internal identifier of a subscription owner extension
-      description: Notification payload body
-    MessageEvent:
-      type: object
-      properties:
-        uuid:
-          type: string
-          description: Universally unique identifier of a notification
-        event:
-          type: string
-          description: Event filter URI
-        timestamp:
-          type: string
-          description: 'Date/time of sending a notification in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-
-            format including timezone, for example *2016-03-10T18:07:52.534Z*
-
-            '
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        body:
-          $ref: '#/components/schemas/MessageEventBody'
     GetMessageSyncResponse:
       required:
       - records
@@ -1683,29 +1616,74 @@ components:
             $ref: '#/components/schemas/GetMessageInfoResponse'
         syncInfo:
           $ref: '#/components/schemas/SyncInfoMessages'
+    InstantMessageEventBody:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a message
+        to:
+          type: array
+          description: Message receiver(s) information
+          items:
+            $ref: '#/components/schemas/NotificationRecipientInfo'
+        from:
+          $ref: '#/components/schemas/SenderInfo'
+        type:
+          type: string
+          description: Type of message. The default value is 'SMS'
+        creationTime:
+          type: string
+          description: 'Message creation date/time in ISO 8601 format including timezone,
+
+            for example 2016-03-10T18:07:52.534Z
+
+            '
+          format: date-time
+        lastModifiedTime:
+          type: string
+          description: 'Date/time when the message was modified in ISO 8601 format including
+
+            timezone, for example 2016-03-10T18:07:52.534Z
+
+            '
+          format: date-time
+        readStatus:
+          $ref: '#/components/schemas/MessageReadStatusEnum'
+        priority:
+          $ref: '#/components/schemas/MessagePriorityEnum'
+        attachments:
+          type: array
+          description: Message attachment data
+          items:
+            $ref: '#/components/schemas/MessageAttachmentInfo'
+        direction:
+          $ref: '#/components/schemas/MessageDirectionEnum'
+        availability:
+          $ref: '#/components/schemas/MessageAvailabilityEnum'
+        subject:
+          type: string
+          description: 'Message subject. It replicates message text which is also returned
+
+            as an attachment
+
+            '
+        messageStatus:
+          $ref: '#/components/schemas/MessageStatusEnum'
+        conversationId:
+          type: string
+          description: 'Deprecated. Identifier of a conversation the message belongs
+
+            to
+
+            '
+        conversation:
+          $ref: '#/components/schemas/ConversationInfo'
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
+      description: Notification payload body
   parameters:
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    ContentDispositionFilename:
-      name: contentDispositionFilename
-      in: query
-      description: The default filename of the file to be downloaded
-      required: false
-      schema:
-        type: string
     ContentDisposition:
       name: contentDisposition
       in: query
@@ -1716,12 +1694,34 @@ components:
         enum:
         - Inline
         - Attachment
+    ContentDispositionFilename:
+      name: contentDispositionFilename
+      in: query
+      description: The default filename of the file to be downloaded
+      required: false
+      schema:
+        type: string
     AccountId:
       name: accountId
       in: path
       description: 'Internal identifier of the RingCentral account
 
         (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

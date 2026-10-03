@@ -77,31 +77,33 @@ paths:
       x-user-permission: EditAssignedRoles
 components:
   schemas:
-    BasicExtensionInfoResource:
+    RolesTimezoneResource:
       type: object
       properties:
+        uri:
+          type: string
+          format: uri
         id:
           type: string
         name:
           type: string
-        extensionNumber:
+        description:
           type: string
-    CurrencyResource:
-      type: object
-      properties:
-        id:
-          type: string
-        code:
-          type: string
-        name:
-          type: string
-        symbol:
-          type: string
-        minorSymbol:
+        bias:
           type: string
     BusinessSiteCollectionRequest:
       type: object
       properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/RolesBusinessSiteResource'
+    BusinessSiteCollectionResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
         records:
           type: array
           items:
@@ -133,44 +135,6 @@ components:
           $ref: '#/components/schemas/RolesRegionalSettingsResource'
         businessAddress:
           $ref: '#/components/schemas/ContactAddressInfoResource'
-    RolesTimezoneResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        bias:
-          type: string
-    RolesCountryResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        id:
-          type: string
-        name:
-          type: string
-        isoCode:
-          type: string
-        callingCode:
-          type: string
-        emergencyCalling:
-          type: boolean
-        numberSelling:
-          type: boolean
-        loginAllowed:
-          type: boolean
-        freeSoftphoneLine:
-          type: boolean
-        signupAllowed:
-          type: boolean
     RolesRegionalSettingsResource:
       type: object
       properties:
@@ -200,6 +164,19 @@ components:
           type: string
         localeCode:
           type: string
+    CurrencyResource:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        symbol:
+          type: string
+        minorSymbol:
+          type: string
     ContactAddressInfoResource:
       type: object
       properties:
@@ -213,23 +190,46 @@ components:
           type: string
         country:
           type: string
-    BusinessSiteCollectionResource:
+    BasicExtensionInfoResource:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        extensionNumber:
+          type: string
+    RolesCountryResource:
       type: object
       properties:
         uri:
           type: string
           format: uri
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/RolesBusinessSiteResource'
+        id:
+          type: string
+        name:
+          type: string
+        isoCode:
+          type: string
+        callingCode:
+          type: string
+        emergencyCalling:
+          type: boolean
+        numberSelling:
+          type: boolean
+        loginAllowed:
+          type: boolean
+        freeSoftphoneLine:
+          type: boolean
+        signupAllowed:
+          type: boolean
   parameters:
-    ExtensionId:
-      name: extensionId
+    AccountId:
+      name: accountId
       in: path
-      description: 'Internal identifier of the RingCentral extension/user
+      description: 'Internal identifier of the RingCentral account
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true
@@ -239,12 +239,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

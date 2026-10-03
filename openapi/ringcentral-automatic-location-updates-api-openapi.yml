@@ -1460,20 +1460,114 @@ paths:
       x-user-permission: ConfigureEmergencyMaps
 components:
   schemas:
-    PageNavigationModel:
+    EmergencyAddressType:
+      type: string
+      enum:
+      - LocationWithElins
+      - LocationWithEndpoint
+    CreateMultipleWirelessPointsResponse:
       type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
       properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-    PrivateIpRangeInfoRequest:
+        task:
+          $ref: '#/components/schemas/BulkTaskInfo'
+    SwitchInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the network switch resource
+        id:
+          type: string
+          description: Internal identifier of a network switch
+        chassisId:
+          type: string
+          description: Unique identifier of a network switch
+        port:
+          type: string
+          description: Switch entity extension for better diversity. Should be used together with chassisId.
+        name:
+          type: string
+          description: Name of a network switch
+        site:
+          $ref: '#/components/schemas/SwitchSiteInfo'
+        emergencyAddress:
+          $ref: '#/components/schemas/EmergencyAddressInfo'
+        emergencyLocation:
+          $ref: '#/components/schemas/EmergencyLocationInfo'
+    ERLLocationInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an emergency response location
+        name:
+          type: string
+          description: Emergency response location name
+        addressFormatId:
+          type: string
+          description: Address format ID
+      description: Emergency response location information
+    ShortSiteInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a site extension
+        name:
+          type: string
+          description: Extension user first name
+    BulkTaskInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a task for multiple switches creation
+        status:
+          type: string
+          description: Status of a task
+          enum:
+          - Accepted
+          - Failed
+        creationTime:
+          type: string
+          format: date-time
+          description: Task creation time
+        lastModifiedTime:
+          type: string
+          format: date-time
+          description: Time of the task latest modification
+    SwitchValidated:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a switch
+        chassisId:
+          type: string
+          description: Unique identifier of a network switch
+        port:
+          type: string
+          description: Switch entity extension for better diversity. Should be used together with chassisId.
+        status:
+          type: string
+          description: Validation result status
+          enum:
+          - Valid
+          - Invalid
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    CreateMultipleSwitchesResponse:
+      type: object
+      properties:
+        task:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkTaskInfo'
+      description: Information on a task for multiple switches creation
+    PublicIpRangeInfo:
       type: object
       properties:
         id:
@@ -1482,22 +1576,82 @@ components:
           type: string
         endIp:
           type: string
+        matched:
+          type: boolean
+    AutomaticLocationUpdatesPhoneNumberInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of a phone number
+        phoneNumber:
+          type: string
+          description: Phone number
+    AutomaticLocationUpdatesSiteInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a site
+        uri:
+          type: string
+          format: uri
+          description: Link to a site resource
         name:
           type: string
-          description: Network name
-        emergencyAddress:
-          $ref: '#/components/schemas/LocationUpdatesEmergencyAddressInfoRequest'
-        emergencyLocationId:
+          description: Name of a site
+        code:
           type: string
-          description: 'Emergency response location (address) internal identifier.
+          description: Site code value. Returned only if specified
+      description: 'Site data. If multi-site feature is turned on for the account,
 
-            Only one of a pair `emergencyAddress` or `emergencyLocationId` should
+        then ID of a site must be specified. In order to assign a wireless
 
-            be specified, otherwise the error is returned
+        point to the main site (company) site ID should be set to `main-site`
+
+        '
+    LocationOwnerInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user - private location owner
+        extensionNumber:
+          type: string
+          description: Extension number of a location number
+        name:
+          type: string
+          description: Name of a location owner
+    WirelessPointsList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a wireless points resource
+        records:
+          type: array
+          description: List of wireless points with assigned emergency addresses
+          items:
+            $ref: '#/components/schemas/WirelessPointInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    SwitchSiteInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Internal identifier of a site. The company identifier value
+
+            is ''main-site''
 
             '
-        emergencyLocation:
-          $ref: '#/components/schemas/ERLLocationInfo'
+        name:
+          type: string
+          description: Name of a site
     CommonEmergencyLocationAddressInfoAu:
       type: object
       properties:
@@ -1556,33 +1710,349 @@ components:
         customerName:
           type: string
           description: Customer name
-    NetworksList:
+    CreateSwitchInfo:
+      required:
+      - chassisId
+      type: object
+      properties:
+        chassisId:
+          type: string
+          description: 'Unique identifier of a network switch. The supported formats are: XX:XX:XX:XX:XX:XX (symbols 0-9 and A-F) for MAC address and X.X.X.X for IP address (symbols 0-255)'
+        port:
+          type: string
+          description: Switch entity extension for better diversity. Should be used together with chassisId.
+        name:
+          type: string
+          description: Name of a network switch
+        site:
+          $ref: '#/components/schemas/SwitchSiteInfo'
+        emergencyAddress:
+          $ref: '#/components/schemas/EmergencyAddressInfo'
+        emergencyLocation:
+          $ref: '#/components/schemas/EmergencyLocationInfo'
+    AutomaticLocationUpdatesUserList:
       type: object
       properties:
         uri:
           type: string
           format: uri
-          description: Link to a networks resource
+          description: Link to the users list resource
         records:
           type: array
           items:
-            $ref: '#/components/schemas/NetworkInfo'
+            $ref: '#/components/schemas/AutomaticLocationUpdatesUserInfo'
         navigation:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
-    CreateMultipleSwitchesRequest:
+    LocationUpdatesEmergencyAddressInfoRequest:
+      type: object
+      properties:
+        country:
+          type: string
+          description: Country name
+        countryId:
+          type: string
+          description: Internal identifier of a country
+        countryIsoCode:
+          type: string
+          description: ISO code of a country
+        countryName:
+          type: string
+          description: Full name of a country
+        customerName:
+          type: string
+          description: Customer name
+        state:
+          type: string
+          description: State/Province name. Mandatory for the USA, the UK and Canada
+        stateId:
+          type: string
+          description: Internal identifier of a state
+        stateIsoCode:
+          type: string
+          description: ISO code of a state
+        stateName:
+          type: string
+          description: Full name of a state
+        city:
+          type: string
+          description: City name
+        street:
+          type: string
+          description: First line address
+        street2:
+          type: string
+          description: 'Second line address (apartment, suite, unit, building, floor,
+
+            etc.)
+
+            '
+        zip:
+          type: string
+          description: Postal (Zip) code
+      description: 'Emergency address assigned to the switch. Only one of a pair `emergencyAddress`
+
+        or `emergencyLocationId` should be specified, otherwise the error is returned
+
+        '
+    AutomaticLocationUpdatesUserInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a device
+        fullName:
+          type: string
+          description: User name
+        extensionNumber:
+          type: string
+        featureEnabled:
+          type: boolean
+          description: Specifies whether Automatic Location Updates feature is enabled
+        type:
+          type: string
+          description: User extension type
+          enum:
+          - User
+          - Limited
+        site:
+          $ref: '#/components/schemas/AutomaticLocationUpdatesSiteInfo'
+        department:
+          type: string
+          description: Department name
+    EmergencyAddressAutoUpdateSiteInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a site
+        name:
+          type: string
+          description: Name pf a site
+    CommonEmergencyLocationAddressInfo:
+      anyOf:
+      - $ref: '#/components/schemas/CommonEmergencyLocationAddressInfoDefault'
+      - $ref: '#/components/schemas/CommonEmergencyLocationAddressInfoAu'
+      - $ref: '#/components/schemas/CommonEmergencyLocationAddressInfoFr'
+    NetworkInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a network
+        uri:
+          type: string
+          format: uri
+          description: Link to a network resource
+        name:
+          type: string
+        site:
+          $ref: '#/components/schemas/AutomaticLocationUpdatesSiteInfo'
+        publicIpRanges:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicIpRangeInfo'
+        privateIpRanges:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrivateIpRangeInfo'
+    EmergencyLocationResponseResource:
+      allOf:
+      - $ref: '#/components/schemas/CommonEmergencyLocationResource'
+      - type: object
+        properties:
+          trusted:
+            type: boolean
+            description: If 'true' address validation for non-us addresses is skipped
+    AutomaticLocationUpdatesDeviceInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a device
+        type:
+          $ref: '#/components/schemas/AutomaticLocationUpdatesDeviceType'
+        serial:
+          type: string
+          description: Serial number for HardPhone (is returned only when the phone is shipped and provisioned)
+        featureEnabled:
+          type: boolean
+          description: Specifies if Automatic Location Updates feature is enabled
+        name:
+          type: string
+          description: Device name
+        model:
+          $ref: '#/components/schemas/AutomaticLocationUpdatesModelInfo'
+        site:
+          $ref: '#/components/schemas/AutomaticLocationUpdatesSiteInfo'
+        phoneLines:
+          type: array
+          description: Phone lines information
+          items:
+            $ref: '#/components/schemas/AutomaticLocationUpdatesPhoneLine'
+    AutomaticLocationUpdatesPhoneLineType:
+      type: string
+      enum:
+      - Unknown
+      - Standalone
+      - StandaloneFree
+      - BlaPrimary
+      - BlaSecondary
+      - BLF
+    EmergencyLocationUsageStatus:
+      type: string
+      enum:
+      - Active
+      - Inactive
+    SwitchesList:
       type: object
       properties:
         records:
           type: array
+          description: Switches map
           items:
-            $ref: '#/components/schemas/CreateSwitchInfo'
-    CreateMultipleWirelessPointsResponse:
+            $ref: '#/components/schemas/SwitchInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    PrivateIpRangeInfoRequest:
       type: object
       properties:
-        task:
-          $ref: '#/components/schemas/BulkTaskInfo'
+        id:
+          type: string
+        startIp:
+          type: string
+        endIp:
+          type: string
+        name:
+          type: string
+          description: Network name
+        emergencyAddress:
+          $ref: '#/components/schemas/LocationUpdatesEmergencyAddressInfoRequest'
+        emergencyLocationId:
+          type: string
+          description: 'Emergency response location (address) internal identifier.
+
+            Only one of a pair `emergencyAddress` or `emergencyLocationId` should
+
+            be specified, otherwise the error is returned
+
+            '
+        emergencyLocation:
+          $ref: '#/components/schemas/ERLLocationInfo'
+    AddressStatus:
+      type: string
+      description: Emergency address status
+      enum:
+      - Valid
+      - Invalid
+      - Provisioning
+    CommonEmergencyLocationResource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Internal identifier of an emergency response location
+
+            '
+        address:
+          $ref: '#/components/schemas/CommonEmergencyLocationAddressInfo'
+        name:
+          type: string
+          description: Emergency response location name
+        site:
+          $ref: '#/components/schemas/ShortSiteInfo'
+        addressStatus:
+          $ref: '#/components/schemas/AddressStatus'
+        usageStatus:
+          $ref: '#/components/schemas/UsageStatus'
+        syncStatus:
+          $ref: '#/components/schemas/SyncStatus'
+        addressType:
+          $ref: '#/components/schemas/EmergencyAddressType'
+        visibility:
+          $ref: '#/components/schemas/Visibility'
+        owners:
+          type: array
+          description: List of private location owners
+          items:
+            $ref: '#/components/schemas/LocationOwnerInfo'
+        addressFormatId:
+          type: string
+          description: Address format ID
+      description: Company emergency response location details
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    TaskResultRecordErrorsInfo:
+      type: object
+      properties:
+        errorCode:
+          type: string
+        message:
+          type: string
+        parameterName:
+          type: string
+        description:
+          type: string
+    EmergencyAddressInfo:
+      allOf:
+      - $ref: '#/components/schemas/CommonEmergencyLocationAddressInfo'
+      - type: object
+        properties:
+          syncStatus:
+            type: string
+            description: 'Resulting status of emergency address synchronization. Returned
+
+              for ''Get Device Info'' request if `syncEmergencyAddress` parameter is set
+
+              to `true`
+
+              '
+            enum:
+            - Verified
+            - Updated
+            - Deleted
+            - NotRequired
+            - Unsupported
+            - Failed
+    UpdateSwitchInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a switch
+        chassisId:
+          type: string
+          description: 'Unique identifier of a network switch. The supported formats
+
+            are: XX:XX:XX:XX:XX:XX (symbols 0-9 and A-F) for MAC address and X.X.X.X
+
+            for IP address (symbols 0-255)
+
+            '
+        port:
+          type: string
+          description: Switch entity extension for better diversity. Should be used together with chassisId.
+        name:
+          type: string
+          description: Name of a network switch
+        site:
+          $ref: '#/components/schemas/SwitchSiteInfo'
+        emergencyAddress:
+          $ref: '#/components/schemas/EmergencyAddressInfo'
     TaskResultInfo:
       type: object
       properties:
@@ -1592,21 +2062,71 @@ components:
           items:
             $ref: '#/components/schemas/TaskResultRecord'
       description: Task detailed result. Returned for failed and completed tasks
-    SyncStatus:
+    Visibility:
       type: string
-      description: 'Resulting status of emergency address synchronization. Returned
+      description: 'Visibility of an emergency response location. If `Private`
 
-        if `syncEmergencyAddress` parameter is set to `true`
+        is set, then location is visible only for the restricted number of users,
+
+        specified in `owners` array
 
         '
+      default: Public
       enum:
-      - Verified
-      - Updated
-      - Deleted
-      - ActivationProcess
-      - NotRequired
-      - Unsupported
-      - Failed
+      - Private
+      - Public
+    AutomaticLocationUpdatesPhoneLine:
+      type: object
+      properties:
+        lineType:
+          $ref: '#/components/schemas/AutomaticLocationUpdatesPhoneLineType'
+        phoneInfo:
+          $ref: '#/components/schemas/AutomaticLocationUpdatesPhoneNumberInfo'
+    UpdateMultipleSwitchesRequest:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateSwitchInfo'
+    UpdateNetworkRequest:
+      type: object
+      required:
+      - name
+      - publicIpRanges
+      - privateIpRanges
+      properties:
+        id:
+          type: string
+          example: '2874044'
+          description: Internal identifier of a network
+        name:
+          type: string
+        site:
+          $ref: '#/components/schemas/AutomaticLocationUpdatesSiteInfo'
+        publicIpRanges:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicIpRangeInfo'
+        privateIpRanges:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrivateIpRangeInfoRequest'
+    EmergencyLocationInfo:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an emergency response location
+        name:
+          type: string
+          description: Emergency response location name
+        addressFormatId:
+          type: string
+          description: Address format ID
+      description: Emergency response location information
     TaskResultRecord:
       type: object
       properties:
@@ -1629,27 +2149,28 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TaskResultRecordErrorsInfo'
-    CreateUserEmergencyLocationRequest:
+    UpdateWirelessPoint:
       type: object
       properties:
+        id:
+          type: string
+          description: Internal identifier of a wireless point
+        bssid:
+          type: string
+          description: 'Unique 48-bit identifier of wireless access point that follows
+
+            MAC address conventions. Mask: XX:XX:XX:XX:XX:XX, where X can be a symbol
+
+            in the range of 0-9 or A-F
+
+            '
         name:
           type: string
-          description: Name of a new personal emergency response location
-        addressFormatId:
-          type: string
-          description: Address format ID
-        trusted:
-          type: boolean
-          description: If 'true' address validation for non-us addresses is skipped
-        address:
-          $ref: '#/components/schemas/CommonEmergencyLocationAddressInfo'
-    AutomaticLocationUpdatesModelFeature:
-      type: string
-      enum:
-      - BLA
-      - Intercom
-      - Paging
-      - HELD
+          description: Name of a wireless access point
+        site:
+          $ref: '#/components/schemas/EmergencyAddressAutoUpdateSiteInfo'
+        emergencyAddress:
+          $ref: '#/components/schemas/EmergencyAddressInfo'
     CommonEmergencyLocationAddressInfoFr:
       type: object
       properties:
@@ -1707,35 +2228,19 @@ components:
         customerName:
           type: string
           description: Customer name
-    AutomaticLocationUpdatesSiteInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a site
-        uri:
-          type: string
-          format: uri
-          description: Link to a site resource
-        name:
-          type: string
-          description: Name of a site
-        code:
-          type: string
-          description: Site code value. Returned only if specified
-      description: 'Site data. If multi-site feature is turned on for the account,
-
-        then ID of a site must be specified. In order to assign a wireless
-
-        point to the main site (company) site ID should be set to `main-site`
-
-        '
     UpdateMultipleSwitchesResponse:
       type: object
       properties:
         task:
           $ref: '#/components/schemas/BulkTaskInfo'
-    UpdateWirelessPoint:
+    UpdateMultipleWirelessPointsRequest:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateWirelessPoint'
+    WirelessPointValidated:
       type: object
       properties:
         id:
@@ -1743,20 +2248,306 @@ components:
           description: Internal identifier of a wireless point
         bssid:
           type: string
-          description: 'Unique 48-bit identifier of wireless access point that follows
+          description: 'Unique 48-bit identifier of the wireless access point that
 
-            MAC address conventions. Mask: XX:XX:XX:XX:XX:XX, where X can be a symbol
-
-            in the range of 0-9 or A-F
+            follows MAC address conventions
 
             '
+        status:
+          type: string
+          description: Validation result status
+          enum:
+          - Valid
+          - Invalid
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    CreateWirelessPoint:
+      required:
+      - bssid
+      - name
+      type: object
+      properties:
+        bssid:
+          type: string
+          description: 'Unique 48-bit identifier of wireless access point that follows MAC address conventions.  Mask: XX:XX:XX:XX:XX:XX, where X can be a symbol in the range of 0-9 or A-F'
         name:
           type: string
-          description: Name of a wireless access point
+          description: Wireless access point name
         site:
           $ref: '#/components/schemas/EmergencyAddressAutoUpdateSiteInfo'
         emergencyAddress:
           $ref: '#/components/schemas/EmergencyAddressInfo'
+        emergencyLocation:
+          $ref: '#/components/schemas/EmergencyLocationInfo'
+    AutomaticLocationUpdatesModelFeature:
+      type: string
+      enum:
+      - BLA
+      - Intercom
+      - Paging
+      - HELD
+    CommonEmergencyLocationAddressInfoDefault:
+      type: object
+      properties:
+        country:
+          type: string
+          description: Country name
+        countryId:
+          type: string
+          description: Internal identifier of a country
+        countryIsoCode:
+          type: string
+          description: ISO code of a country
+        countryName:
+          type: string
+          description: Full name of a country
+        state:
+          type: string
+          description: 'State/Province name. Mandatory for the USA, the UK and Canada
+
+            '
+        stateId:
+          type: string
+          description: Internal identifier of a state
+        stateIsoCode:
+          type: string
+          description: ISO code of a state
+        stateName:
+          type: string
+          description: Full name of a state
+        city:
+          type: string
+          description: City name
+        street:
+          type: string
+          description: First line address
+        street2:
+          type: string
+          description: 'Second line address (apartment, suite, unit, building, floor,
+
+            etc.)
+
+            '
+        zip:
+          type: string
+          description: Postal (Zip) code
+        customerName:
+          type: string
+          description: Customer name
+    NetworksList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a networks resource
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/NetworkInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CreateMultipleSwitchesRequest:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateSwitchInfo'
+    EmergencyLocationRequestResource:
+      allOf:
+      - $ref: '#/components/schemas/EmergencyLocationInfoRequest'
+      - type: object
+        properties:
+          trusted:
+            type: boolean
+            description: If 'true' address validation for non-us addresses is skipped
+    GetLocationDeletionMultiResponse:
+      type: object
+      properties:
+        deletion:
+          type: string
+          enum:
+          - Forbidden
+          - Restricted
+          - Allowed
+        reassignment:
+          type: string
+          enum:
+          - Forbidden
+          - Allowed
+        emergencyLocations:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocationDeletionInfo'
+    CreateMultipleWirelessPointsRequest:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateWirelessPoint'
+    UsageStatus:
+      type: string
+      description: Status of emergency response location usage.
+      enum:
+      - Active
+      - Inactive
+    AssignMultipleDevicesAutomaticLocationUpdates:
+      type: object
+      properties:
+        enabledDeviceIds:
+          type: array
+          items:
+            type: string
+            description: List of common devices for feature activation
+        disabledDeviceIds:
+          type: array
+          items:
+            type: string
+            description: List of common devices for feature disabling
+    EmergencyAddressStatus:
+      type: string
+      enum:
+      - Valid
+      - Invalid
+      - Provisioning
+    EmergencyAddressAutoUpdateUsersBulkAssignResource:
+      type: object
+      properties:
+        enabledUserIds:
+          type: array
+          items:
+            type: string
+        disabledUserIds:
+          type: array
+          items:
+            type: string
+    UpdateMultipleWirelessPointsResponse:
+      type: object
+      properties:
+        task:
+          $ref: '#/components/schemas/BulkTaskInfo'
+    ValidationError:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        parameterName:
+          type: string
+          description: Name of invalid parameter
+    ValidateMultipleSwitchesRequest:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/SwitchInfo'
+    CreateUserEmergencyLocationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of a new personal emergency response location
+        addressFormatId:
+          type: string
+          description: Address format ID
+        trusted:
+          type: boolean
+          description: If 'true' address validation for non-us addresses is skipped
+        address:
+          $ref: '#/components/schemas/CommonEmergencyLocationAddressInfo'
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    WirelessPointInfo:
+      required:
+      - bssid
+      - emergencyAddress
+      - name
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the wireless point resource
+        id:
+          type: string
+          description: Internal identifier of a wireless point
+        bssid:
+          type: string
+          description: Unique 48-bit identifier of the wireless access point that follows MAC address conventions
+        name:
+          type: string
+          description: Wireless access point name
+        site:
+          $ref: '#/components/schemas/EmergencyAddressAutoUpdateSiteInfo'
+        emergencyAddress:
+          $ref: '#/components/schemas/EmergencyAddressInfo'
+        emergencyLocation:
+          $ref: '#/components/schemas/ERLLocationInfo'
+        emergencyLocationId:
+          type: string
+          description: Deprecated. Emergency response location (address) internal identifier. Only one of a pair `emergencyAddress` or `emergencyLocationId` should be specified, otherwise the error is returned
+    EmergencyLocationsResource:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommonEmergencyLocationResource'
+        paging:
+          $ref: '#/components/schemas/EmergencyLocationsPaging'
+    SyncStatus:
+      type: string
+      description: 'Resulting status of emergency address synchronization. Returned
+
+        if `syncEmergencyAddress` parameter is set to `true`
+
+        '
+      enum:
+      - Verified
+      - Updated
+      - Deleted
+      - ActivationProcess
+      - NotRequired
+      - Unsupported
+      - Failed
+    LocationDeletionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        deletion:
+          type: string
+          description: 'Identifies the possibility and status of emergency location
+
+            deletion
+
+            '
+          enum:
+          - Failed
+          - Completed
+          - Forbidden
+          - Restricted
+          - Allowed
+        errors:
+          $ref: '#/components/schemas/LocationDeletionErrorInfo'
     PrivateIpRangeInfo:
       type: object
       properties:
@@ -1791,6 +2582,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SwitchValidated'
+    AutomaticLocationUpdatesDeviceType:
+      type: string
+      description: Device type
+      default: HardPhone
+      enum:
+      - HardPhone
+      - SoftPhone
+      - OtherPhone
+    CreateNetworkRequest:
+      type: object
+      required:
+      - name
+      - publicIpRanges
+      - privateIpRanges
+      properties:
+        name:
+          type: string
+        site:
+          $ref: '#/components/schemas/AutomaticLocationUpdatesSiteInfo'
+        publicIpRanges:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicIpRangeInfo'
+        privateIpRanges:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrivateIpRangeInfoRequest'
     EnumeratedPagingModel:
       type: object
       required:
@@ -1861,237 +2679,95 @@ components:
 
             '
           example: 25
-    LocationUpdatesEmergencyAddressInfoRequest:
-      type: object
-      properties:
-        country:
-          type: string
-          description: Country name
-        countryId:
-          type: string
-          description: Internal identifier of a country
-        countryIsoCode:
-          type: string
-          description: ISO code of a country
-        countryName:
-          type: string
-          description: Full name of a country
-        customerName:
-          type: string
-          description: Customer name
-        state:
-          type: string
-          description: State/Province name. Mandatory for the USA, the UK and Canada
-        stateId:
-          type: string
-          description: Internal identifier of a state
-        stateIsoCode:
-          type: string
-          description: ISO code of a state
-        stateName:
-          type: string
-          description: Full name of a state
-        city:
-          type: string
-          description: City name
-        street:
-          type: string
-          description: First line address
-        street2:
-          type: string
-          description: 'Second line address (apartment, suite, unit, building, floor,
-
-            etc.)
-
-            '
-        zip:
-          type: string
-          description: Postal (Zip) code
-      description: 'Emergency address assigned to the switch. Only one of a pair `emergencyAddress`
-
-        or `emergencyLocationId` should be specified, otherwise the error is returned
-
-        '
-    TaskResultRecordErrorsInfo:
+    LocationDeletionErrorInfo:
       type: object
       properties:
         errorCode:
           type: string
+          description: Error code
         message:
           type: string
-        parameterName:
+          description: Error message
+        additionalInfo:
           type: string
-        description:
-          type: string
-    AssignMultipleDevicesAutomaticLocationUpdates:
+          description: Additional attribute for this error, for example `parameterName`
+    ValidateMultipleWirelessPointsRequest:
       type: object
       properties:
-        enabledDeviceIds:
-          type: array
-          items:
-            type: string
-            description: List of common devices for feature activation
-        disabledDeviceIds:
-          type: array
-          items:
-            type: string
-            description: List of common devices for feature disabling
-    NetworkInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a network
-        uri:
-          type: string
-          format: uri
-          description: Link to a network resource
-        name:
-          type: string
-        site:
-          $ref: '#/components/schemas/AutomaticLocationUpdatesSiteInfo'
-        publicIpRanges:
-          type: array
-          items:
-            $ref: '#/components/schemas/PublicIpRangeInfo'
-        privateIpRanges:
-          type: array
-          items:
-            $ref: '#/components/schemas/PrivateIpRangeInfo'
-    SwitchInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the network switch resource
-        id:
-          type: string
-          description: Internal identifier of a network switch
-        chassisId:
-          type: string
-          description: Unique identifier of a network switch
-        port:
-          type: string
-          description: Switch entity extension for better diversity. Should be used together with chassisId.
-        name:
-          type: string
-          description: Name of a network switch
-        site:
-          $ref: '#/components/schemas/SwitchSiteInfo'
-        emergencyAddress:
-          $ref: '#/components/schemas/EmergencyAddressInfo'
-        emergencyLocation:
-          $ref: '#/components/schemas/EmergencyLocationInfo'
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    CommonEmergencyLocationAddressInfoDefault:
-      type: object
-      properties:
-        country:
-          type: string
-          description: Country name
-        countryId:
-          type: string
-          description: Internal identifier of a country
-        countryIsoCode:
-          type: string
-          description: ISO code of a country
-        countryName:
-          type: string
-          description: Full name of a country
-        state:
-          type: string
-          description: 'State/Province name. Mandatory for the USA, the UK and Canada
-
-            '
-        stateId:
-          type: string
-          description: Internal identifier of a state
-        stateIsoCode:
-          type: string
-          description: ISO code of a state
-        stateName:
-          type: string
-          description: Full name of a state
-        city:
-          type: string
-          description: City name
-        street:
-          type: string
-          description: First line address
-        street2:
-          type: string
-          description: 'Second line address (apartment, suite, unit, building, floor,
-
-            etc.)
-
-            '
-        zip:
-          type: string
-          description: Postal (Zip) code
-        customerName:
-          type: string
-          description: Customer name
-    WirelessPointsList:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a wireless points resource
         records:
           type: array
-          description: List of wireless points with assigned emergency addresses
           items:
             $ref: '#/components/schemas/WirelessPointInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    SwitchesList:
+    AutomaticLocationUpdatesModelInfo:
       type: object
       properties:
-        records:
-          type: array
-          description: Switches map
-          items:
-            $ref: '#/components/schemas/SwitchInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    UpdateMultipleWirelessPointsRequest:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/UpdateWirelessPoint'
-    CreateWirelessPoint:
-      required:
-      - bssid
-      - name
-      type: object
-      properties:
-        bssid:
+        id:
           type: string
-          description: 'Unique 48-bit identifier of wireless access point that follows MAC address conventions.  Mask: XX:XX:XX:XX:XX:XX, where X can be a symbol in the range of 0-9 or A-F'
+          description: Device model identifier
         name:
           type: string
-          description: Wireless access point name
-        site:
-          $ref: '#/components/schemas/EmergencyAddressAutoUpdateSiteInfo'
-        emergencyAddress:
-          $ref: '#/components/schemas/EmergencyAddressInfo'
-        emergencyLocation:
-          $ref: '#/components/schemas/EmergencyLocationInfo'
+          description: Device name
+        features:
+          type: array
+          description: Device feature or multiple features supported
+          items:
+            $ref: '#/components/schemas/AutomaticLocationUpdatesModelFeature'
+      description: HardPhone model information
+    ValidateMultipleWirelessPointsResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/WirelessPointValidated'
+    ListDevicesAutomaticLocationUpdates:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a devices resource
+        records:
+          type: array
+          description: 'List of the user(s) devices with the current status of Emergency
+
+            Address Auto Update Feature
+
+            '
+          items:
+            $ref: '#/components/schemas/AutomaticLocationUpdatesDeviceInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    EmergencyLocationsPaging:
+      required:
+      - page
+      - totalPages
+      - perPage
+      - totalElements
+      - pageStart
+      - pageEnd
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+        perPage:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int32
+        pageStart:
+          type: integer
+          format: int32
+        pageEnd:
+          type: integer
+          format: int32
     AutomaticLocationUpdatesTaskInfo:
       type: object
       properties:
@@ -2124,153 +2800,6 @@ components:
           - SwitchesBulkUpdate
         result:
           $ref: '#/components/schemas/TaskResultInfo'
-    EmergencyAddressInfo:
-      allOf:
-      - $ref: '#/components/schemas/CommonEmergencyLocationAddressInfo'
-      - type: object
-        properties:
-          syncStatus:
-            type: string
-            description: 'Resulting status of emergency address synchronization. Returned
-
-              for ''Get Device Info'' request if `syncEmergencyAddress` parameter is set
-
-              to `true`
-
-              '
-            enum:
-            - Verified
-            - Updated
-            - Deleted
-            - NotRequired
-            - Unsupported
-            - Failed
-    CreateMultipleSwitchesResponse:
-      type: object
-      properties:
-        task:
-          type: array
-          items:
-            $ref: '#/components/schemas/BulkTaskInfo'
-      description: Information on a task for multiple switches creation
-    AutomaticLocationUpdatesPhoneLineType:
-      type: string
-      enum:
-      - Unknown
-      - Standalone
-      - StandaloneFree
-      - BlaPrimary
-      - BlaSecondary
-      - BLF
-    UpdateMultipleWirelessPointsResponse:
-      type: object
-      properties:
-        task:
-          $ref: '#/components/schemas/BulkTaskInfo'
-    LocationDeletionErrorInfo:
-      type: object
-      properties:
-        errorCode:
-          type: string
-          description: Error code
-        message:
-          type: string
-          description: Error message
-        additionalInfo:
-          type: string
-          description: Additional attribute for this error, for example `parameterName`
-    EmergencyLocationsPaging:
-      required:
-      - page
-      - totalPages
-      - perPage
-      - totalElements
-      - pageStart
-      - pageEnd
-      type: object
-      properties:
-        page:
-          type: integer
-          format: int32
-        totalPages:
-          type: integer
-          format: int32
-        perPage:
-          type: integer
-          format: int32
-        totalElements:
-          type: integer
-          format: int32
-        pageStart:
-          type: integer
-          format: int32
-        pageEnd:
-          type: integer
-          format: int32
-    EmergencyLocationsResource:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/CommonEmergencyLocationResource'
-        paging:
-          $ref: '#/components/schemas/EmergencyLocationsPaging'
-    EmergencyLocationInfo:
-      type: object
-      required:
-      - id
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an emergency response location
-        name:
-          type: string
-          description: Emergency response location name
-        addressFormatId:
-          type: string
-          description: Address format ID
-      description: Emergency response location information
-    WirelessPointInfo:
-      required:
-      - bssid
-      - emergencyAddress
-      - name
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the wireless point resource
-        id:
-          type: string
-          description: Internal identifier of a wireless point
-        bssid:
-          type: string
-          description: Unique 48-bit identifier of the wireless access point that follows MAC address conventions
-        name:
-          type: string
-          description: Wireless access point name
-        site:
-          $ref: '#/components/schemas/EmergencyAddressAutoUpdateSiteInfo'
-        emergencyAddress:
-          $ref: '#/components/schemas/EmergencyAddressInfo'
-        emergencyLocation:
-          $ref: '#/components/schemas/ERLLocationInfo'
-        emergencyLocationId:
-          type: string
-          description: Deprecated. Emergency response location (address) internal identifier. Only one of a pair `emergencyAddress` or `emergencyLocationId` should be specified, otherwise the error is returned
-    PublicIpRangeInfo:
-      type: object
-      properties:
-        id:
-          type: string
-        startIp:
-          type: string
-        endIp:
-          type: string
-        matched:
-          type: boolean
     EmergencyLocationInfoRequest:
       type: object
       properties:
@@ -2313,551 +2842,7 @@ components:
           default: Public
           enum:
           - Public
-    UsageStatus:
-      type: string
-      description: Status of emergency response location usage.
-      enum:
-      - Active
-      - Inactive
-    AutomaticLocationUpdatesPhoneLine:
-      type: object
-      properties:
-        lineType:
-          $ref: '#/components/schemas/AutomaticLocationUpdatesPhoneLineType'
-        phoneInfo:
-          $ref: '#/components/schemas/AutomaticLocationUpdatesPhoneNumberInfo'
-    Visibility:
-      type: string
-      description: 'Visibility of an emergency response location. If `Private`
-
-        is set, then location is visible only for the restricted number of users,
-
-        specified in `owners` array
-
-        '
-      default: Public
-      enum:
-      - Private
-      - Public
-    AutomaticLocationUpdatesModelInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Device model identifier
-        name:
-          type: string
-          description: Device name
-        features:
-          type: array
-          description: Device feature or multiple features supported
-          items:
-            $ref: '#/components/schemas/AutomaticLocationUpdatesModelFeature'
-      description: HardPhone model information
-    ListDevicesAutomaticLocationUpdates:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a devices resource
-        records:
-          type: array
-          description: 'List of the user(s) devices with the current status of Emergency
-
-            Address Auto Update Feature
-
-            '
-          items:
-            $ref: '#/components/schemas/AutomaticLocationUpdatesDeviceInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    EmergencyAddressType:
-      type: string
-      enum:
-      - LocationWithElins
-      - LocationWithEndpoint
-    EmergencyLocationResponseResource:
-      allOf:
-      - $ref: '#/components/schemas/CommonEmergencyLocationResource'
-      - type: object
-        properties:
-          trusted:
-            type: boolean
-            description: If 'true' address validation for non-us addresses is skipped
-    ValidateMultipleWirelessPointsResponse:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/WirelessPointValidated'
-    AutomaticLocationUpdatesUserList:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the users list resource
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/AutomaticLocationUpdatesUserInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    SwitchValidated:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a switch
-        chassisId:
-          type: string
-          description: Unique identifier of a network switch
-        port:
-          type: string
-          description: Switch entity extension for better diversity. Should be used together with chassisId.
-        status:
-          type: string
-          description: Validation result status
-          enum:
-          - Valid
-          - Invalid
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ValidationError'
-    AddressStatus:
-      type: string
-      description: Emergency address status
-      enum:
-      - Valid
-      - Invalid
-      - Provisioning
-    CreateNetworkRequest:
-      type: object
-      required:
-      - name
-      - publicIpRanges
-      - privateIpRanges
-      properties:
-        name:
-          type: string
-        site:
-          $ref: '#/components/schemas/AutomaticLocationUpdatesSiteInfo'
-        publicIpRanges:
-          type: array
-          items:
-            $ref: '#/components/schemas/PublicIpRangeInfo'
-        privateIpRanges:
-          type: array
-          items:
-            $ref: '#/components/schemas/PrivateIpRangeInfoRequest'
-    EmergencyLocationUsageStatus:
-      type: string
-      enum:
-      - Active
-      - Inactive
-    CreateSwitchInfo:
-      required:
-      - chassisId
-      type: object
-      properties:
-        chassisId:
-          type: string
-          description: 'Unique identifier of a network switch. The supported formats are: XX:XX:XX:XX:XX:XX (symbols 0-9 and A-F) for MAC address and X.X.X.X for IP address (symbols 0-255)'
-        port:
-          type: string
-          description: Switch entity extension for better diversity. Should be used together with chassisId.
-        name:
-          type: string
-          description: Name of a network switch
-        site:
-          $ref: '#/components/schemas/SwitchSiteInfo'
-        emergencyAddress:
-          $ref: '#/components/schemas/EmergencyAddressInfo'
-        emergencyLocation:
-          $ref: '#/components/schemas/EmergencyLocationInfo'
-    CreateMultipleWirelessPointsRequest:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/CreateWirelessPoint'
-    AutomaticLocationUpdatesPhoneNumberInfo:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: Internal identifier of a phone number
-        phoneNumber:
-          type: string
-          description: Phone number
-    ValidateMultipleSwitchesRequest:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/SwitchInfo'
-    CommonEmergencyLocationResource:
-      type: object
-      properties:
-        id:
-          type: string
-          description: 'Internal identifier of an emergency response location
-
-            '
-        address:
-          $ref: '#/components/schemas/CommonEmergencyLocationAddressInfo'
-        name:
-          type: string
-          description: Emergency response location name
-        site:
-          $ref: '#/components/schemas/ShortSiteInfo'
-        addressStatus:
-          $ref: '#/components/schemas/AddressStatus'
-        usageStatus:
-          $ref: '#/components/schemas/UsageStatus'
-        syncStatus:
-          $ref: '#/components/schemas/SyncStatus'
-        addressType:
-          $ref: '#/components/schemas/EmergencyAddressType'
-        visibility:
-          $ref: '#/components/schemas/Visibility'
-        owners:
-          type: array
-          description: List of private location owners
-          items:
-            $ref: '#/components/schemas/LocationOwnerInfo'
-        addressFormatId:
-          type: string
-          description: Address format ID
-      description: Company emergency response location details
-    LocationDeletionInfo:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        deletion:
-          type: string
-          description: 'Identifies the possibility and status of emergency location
-
-            deletion
-
-            '
-          enum:
-          - Failed
-          - Completed
-          - Forbidden
-          - Restricted
-          - Allowed
-        errors:
-          $ref: '#/components/schemas/LocationDeletionErrorInfo'
-    UpdateNetworkRequest:
-      type: object
-      required:
-      - name
-      - publicIpRanges
-      - privateIpRanges
-      properties:
-        id:
-          type: string
-          example: '2874044'
-          description: Internal identifier of a network
-        name:
-          type: string
-        site:
-          $ref: '#/components/schemas/AutomaticLocationUpdatesSiteInfo'
-        publicIpRanges:
-          type: array
-          items:
-            $ref: '#/components/schemas/PublicIpRangeInfo'
-        privateIpRanges:
-          type: array
-          items:
-            $ref: '#/components/schemas/PrivateIpRangeInfoRequest'
-    GetLocationDeletionMultiResponse:
-      type: object
-      properties:
-        deletion:
-          type: string
-          enum:
-          - Forbidden
-          - Restricted
-          - Allowed
-        reassignment:
-          type: string
-          enum:
-          - Forbidden
-          - Allowed
-        emergencyLocations:
-          type: array
-          items:
-            $ref: '#/components/schemas/LocationDeletionInfo'
-    UpdateMultipleSwitchesRequest:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/UpdateSwitchInfo'
-    AutomaticLocationUpdatesUserInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a device
-        fullName:
-          type: string
-          description: User name
-        extensionNumber:
-          type: string
-        featureEnabled:
-          type: boolean
-          description: Specifies whether Automatic Location Updates feature is enabled
-        type:
-          type: string
-          description: User extension type
-          enum:
-          - User
-          - Limited
-        site:
-          $ref: '#/components/schemas/AutomaticLocationUpdatesSiteInfo'
-        department:
-          type: string
-          description: Department name
-    SwitchSiteInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: 'Internal identifier of a site. The company identifier value
-
-            is ''main-site''
-
-            '
-        name:
-          type: string
-          description: Name of a site
-    UpdateSwitchInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a switch
-        chassisId:
-          type: string
-          description: 'Unique identifier of a network switch. The supported formats
-
-            are: XX:XX:XX:XX:XX:XX (symbols 0-9 and A-F) for MAC address and X.X.X.X
-
-            for IP address (symbols 0-255)
-
-            '
-        port:
-          type: string
-          description: Switch entity extension for better diversity. Should be used together with chassisId.
-        name:
-          type: string
-          description: Name of a network switch
-        site:
-          $ref: '#/components/schemas/SwitchSiteInfo'
-        emergencyAddress:
-          $ref: '#/components/schemas/EmergencyAddressInfo'
-    WirelessPointValidated:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a wireless point
-        bssid:
-          type: string
-          description: 'Unique 48-bit identifier of the wireless access point that
-
-            follows MAC address conventions
-
-            '
-        status:
-          type: string
-          description: Validation result status
-          enum:
-          - Valid
-          - Invalid
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ValidationError'
-    BulkTaskInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a task for multiple switches creation
-        status:
-          type: string
-          description: Status of a task
-          enum:
-          - Accepted
-          - Failed
-        creationTime:
-          type: string
-          format: date-time
-          description: Task creation time
-        lastModifiedTime:
-          type: string
-          format: date-time
-          description: Time of the task latest modification
-    ValidationError:
-      type: object
-      properties:
-        errorCode:
-          type: string
-          description: Error code
-        message:
-          type: string
-          description: Error message
-        parameterName:
-          type: string
-          description: Name of invalid parameter
-    EmergencyLocationRequestResource:
-      allOf:
-      - $ref: '#/components/schemas/EmergencyLocationInfoRequest'
-      - type: object
-        properties:
-          trusted:
-            type: boolean
-            description: If 'true' address validation for non-us addresses is skipped
-    LocationOwnerInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a user - private location owner
-        extensionNumber:
-          type: string
-          description: Extension number of a location number
-        name:
-          type: string
-          description: Name of a location owner
-    EmergencyAddressAutoUpdateUsersBulkAssignResource:
-      type: object
-      properties:
-        enabledUserIds:
-          type: array
-          items:
-            type: string
-        disabledUserIds:
-          type: array
-          items:
-            type: string
-    EmergencyAddressAutoUpdateSiteInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a site
-        name:
-          type: string
-          description: Name pf a site
-    CommonEmergencyLocationAddressInfo:
-      anyOf:
-      - $ref: '#/components/schemas/CommonEmergencyLocationAddressInfoDefault'
-      - $ref: '#/components/schemas/CommonEmergencyLocationAddressInfoAu'
-      - $ref: '#/components/schemas/CommonEmergencyLocationAddressInfoFr'
-    AutomaticLocationUpdatesDeviceType:
-      type: string
-      description: Device type
-      default: HardPhone
-      enum:
-      - HardPhone
-      - SoftPhone
-      - OtherPhone
-    EmergencyAddressStatus:
-      type: string
-      enum:
-      - Valid
-      - Invalid
-      - Provisioning
-    ValidateMultipleWirelessPointsRequest:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/WirelessPointInfo'
-    ERLLocationInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an emergency response location
-        name:
-          type: string
-          description: Emergency response location name
-        addressFormatId:
-          type: string
-          description: Address format ID
-      description: Emergency response location information
-    AutomaticLocationUpdatesDeviceInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a device
-        type:
-          $ref: '#/components/schemas/AutomaticLocationUpdatesDeviceType'
-        serial:
-          type: string
-          description: Serial number for HardPhone (is returned only when the phone is shipped and provisioned)
-        featureEnabled:
-          type: boolean
-          description: Specifies if Automatic Location Updates feature is enabled
-        name:
-          type: string
-          description: Device name
-        model:
-          $ref: '#/components/schemas/AutomaticLocationUpdatesModelInfo'
-        site:
-          $ref: '#/components/schemas/AutomaticLocationUpdatesSiteInfo'
-        phoneLines:
-          type: array
-          description: Phone lines information
-          items:
-            $ref: '#/components/schemas/AutomaticLocationUpdatesPhoneLine'
-    ShortSiteInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a site extension
-        name:
-          type: string
-          description: Extension user first name
   parameters:
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
     EmergencyLocationId:
       name: locationId
       in: path
@@ -2865,12 +2850,12 @@ components:
       required: true
       schema:
         type: string
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true
@@ -2896,6 +2881,21 @@ components:
         type: array
         items:
           type: string
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
   securitySchemes:
     OAuth2:
       type: oauth2

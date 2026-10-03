@@ -228,19 +228,42 @@ paths:
       x-user-permission: ReadCompanyInfo
 components:
   schemas:
-    PageNavigationModel:
+    ParameterizedErrorResponseModel:
       type: object
-      description: Links to other pages of the current result set
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    PageNavigationUri:
+      type: object
       additionalProperties: false
       properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    CallRecordingExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Link to an extension resource
+        extensionNumber:
+          type: string
+          description: Number of an extension
+        name:
+          type: string
+          description: Name of an extension
     GreetingResource:
       type: object
       properties:
@@ -262,6 +285,170 @@ components:
           enum:
           - Default
           - Custom
+    CallRecordingExtensionResource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+        extensionNumber:
+          type: string
+        type:
+          type: string
+        callDirection:
+          type: string
+          description: Direction of call
+          enum:
+          - Outbound
+          - Inbound
+          - All
+    CallRecordingSettingsResource:
+      type: object
+      properties:
+        onDemand:
+          $ref: '#/components/schemas/OnDemandResource'
+        automatic:
+          $ref: '#/components/schemas/AutomaticRecordingResource'
+        greetings:
+          type: array
+          description: Collection of Greeting Info
+          items:
+            $ref: '#/components/schemas/GreetingResource'
+    AutomaticRecordingResource:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Flag for controlling Automatic Call Recording settings
+        outboundCallTones:
+          type: boolean
+          description: Flag for controlling 'Play Call Recording Announcement for Outbound Calls' settings
+        outboundCallAnnouncement:
+          type: boolean
+          description: Flag for controlling 'Play periodic tones for outbound calls' settings
+        allowMute:
+          type: boolean
+          description: Flag for controlling 'Allow mute in auto call recording' settings
+        extensionCount:
+          type: integer
+          format: int32
+          description: Total amount of extension that are used in call recordings
+        retentionPeriod:
+          type: integer
+          format: int32
+          description: Retention period of a call recording, the default value is 90 days
+        maxNumberLimit:
+          type: integer
+          format: int32
+          description: Maximum number of automatic call recordings per account, the default value is 100 000
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    OnDemandResource:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Flag for controlling OnDemand Call Recording settings
+        retentionPeriod:
+          type: integer
+          format: int32
+          description: Retention period of a call recording, the default value is 90 days
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    BulkAccountCallRecordingsResource:
+      type: object
+      properties:
+        addedExtensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallRecordingExtensionResource'
+        updatedExtensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallRecordingExtensionResource'
+        removedExtensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallRecordingExtensionResource'
+    CallRecordingCustomGreetingData:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a custom company greeting
+        id:
+          type: string
+          description: Internal identifier of a custom company greeting
+      description: Custom greeting data
+    CallRecordingCustomGreeting:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - StartRecording
+          - StopRecording
+          - AutomaticRecording
+        custom:
+          $ref: '#/components/schemas/CallRecordingCustomGreetingData'
+        language:
+          $ref: '#/components/schemas/CallRecordingCustomGreetingLanguage'
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    CallRecordingExtensions:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to call recording extension list resource
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallRecordingExtensionInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
     EnumeratedPagingModel:
       type: object
       required:
@@ -332,49 +519,6 @@ components:
 
             '
           example: 25
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    AutomaticRecordingResource:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          description: Flag for controlling Automatic Call Recording settings
-        outboundCallTones:
-          type: boolean
-          description: Flag for controlling 'Play Call Recording Announcement for Outbound Calls' settings
-        outboundCallAnnouncement:
-          type: boolean
-          description: Flag for controlling 'Play periodic tones for outbound calls' settings
-        allowMute:
-          type: boolean
-          description: Flag for controlling 'Allow mute in auto call recording' settings
-        extensionCount:
-          type: integer
-          format: int32
-          description: Total amount of extension that are used in call recordings
-        retentionPeriod:
-          type: integer
-          format: int32
-          description: Retention period of a call recording, the default value is 90 days
-        maxNumberLimit:
-          type: integer
-          format: int32
-          description: Maximum number of automatic call recordings per account, the default value is 100 000
     CallRecordingCustomGreetings:
       type: object
       description: Returns data on call recording custom greetings.
@@ -383,18 +527,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CallRecordingCustomGreeting'
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
     CallRecordingCustomGreetingLanguage:
       type: object
       description: Custom greeting language
@@ -412,159 +544,60 @@ components:
         localeCode:
           type: string
           description: Language locale code
-    CallRecordingExtensions:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to call recording extension list resource
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallRecordingExtensionInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    CallRecordingCustomGreeting:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-          - StartRecording
-          - StopRecording
-          - AutomaticRecording
-        custom:
-          $ref: '#/components/schemas/CallRecordingCustomGreetingData'
-        language:
-          $ref: '#/components/schemas/CallRecordingCustomGreetingLanguage'
-    OnDemandResource:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          description: Flag for controlling OnDemand Call Recording settings
-        retentionPeriod:
-          type: integer
-          format: int32
-          description: Retention period of a call recording, the default value is 90 days
-    CallRecordingCustomGreetingData:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a custom company greeting
-        id:
-          type: string
-          description: Internal identifier of a custom company greeting
-      description: Custom greeting data
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    BulkAccountCallRecordingsResource:
-      type: object
-      properties:
-        addedExtensions:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallRecordingExtensionResource'
-        updatedExtensions:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallRecordingExtensionResource'
-        removedExtensions:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallRecordingExtensionResource'
-    CallRecordingExtensionInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an extension
-        uri:
-          type: string
-          format: uri
-          description: Link to an extension resource
-        extensionNumber:
-          type: string
-          description: Number of an extension
-        name:
-          type: string
-          description: Name of an extension
-    CallRecordingExtensionResource:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an extension
-        uri:
-          type: string
-          format: uri
-        extensionNumber:
-          type: string
-        type:
-          type: string
-        callDirection:
-          type: string
-          description: Direction of call
-          enum:
-          - Outbound
-          - Inbound
-          - All
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    CallRecordingSettingsResource:
-      type: object
-      properties:
-        onDemand:
-          $ref: '#/components/schemas/OnDemandResource'
-        automatic:
-          $ref: '#/components/schemas/AutomaticRecordingResource'
-        greetings:
-          type: array
-          description: Collection of Greeting Info
-          items:
-            $ref: '#/components/schemas/GreetingResource'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+  parameters:
+    GreetingId:
+      name: greetingId
+      in: path
+      description: Internal identifier of a greeting
+      required: true
+      schema:
+        type: string
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
   responses:
     NotFound:
       description: 'General response with **HTTP 404 "Not found"** status.<br>
 
         Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
 
         '
       content:
@@ -593,39 +626,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-  parameters:
-    GreetingId:
-      name: greetingId
-      in: path
-      description: Internal identifier of a greeting
-      required: true
-      schema:
-        type: string
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
   securitySchemes:
     OAuth2:
       type: oauth2

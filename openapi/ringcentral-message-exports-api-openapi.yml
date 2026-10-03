@@ -111,6 +111,37 @@ paths:
       x-app-permission: ReadMessages
 components:
   schemas:
+    MessageStoreReportArchive:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArchiveInfo'
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
     MessageStoreReport:
       type: object
       properties:
@@ -163,62 +194,22 @@ components:
           example:
           - Fax
           - VoiceMail
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    MessageStoreReportArchive:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/ArchiveInfo'
-    ArchiveInfo:
-      type: object
-      properties:
-        size:
-          type: integer
-          format: int64
-          description: Archive size in bytes
-          example: 201412
-        uri:
-          type: string
-          format: uri
-          description: Link for archive download
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    PicMessageTypeEnum:
-      type: string
-      description: Type of messages to be collected
-      enum:
-      - Fax
-      - SMS
-      - VoiceMail
-      - Pager
-      example: Fax
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
     CreateMessageStoreReportRequest:
       type: object
       properties:
@@ -246,34 +237,43 @@ components:
           example:
           - Fax
           - VoiceMail
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    ParameterizedErrorResponseModel:
+    ApiError:
       type: object
-      description: Standard error response which may include parameterized errors
+      description: Generalized API error structure suitable for any error type
       required:
-      - errors
+      - errorCode
+      - message
       properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    PicMessageTypeEnum:
+      type: string
+      description: Type of messages to be collected
+      enum:
+      - Fax
+      - SMS
+      - VoiceMail
+      - Pager
+      example: Fax
+    ArchiveInfo:
+      type: object
+      properties:
+        size:
+          type: integer
+          format: int64
+          description: Archive size in bytes
+          example: 201412
+        uri:
+          type: string
+          format: uri
+          description: Link for archive download
   responses:
     InternalError:
       description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>

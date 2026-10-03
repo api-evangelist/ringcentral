@@ -324,6 +324,15 @@ components:
           type: string
           description: Internal identifier of the user editing the note
       description: Returned for the note being edited (locked) at the current moment. Information on the user editing the note
+    TMNoteList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMNoteInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
     TMCreateNoteRequest:
       required:
       - title
@@ -335,6 +344,22 @@ components:
         body:
           type: string
           description: Contents of a note; HTML markup text. Max allowed length is 1048576 characters (1 Mb).
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+    TMCreatorInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user who created a note/task
+      description: Note creator information
     TMNoteWithBodyInfo:
       allOf:
       - $ref: '#/components/schemas/TMNoteInfo'
@@ -343,29 +368,6 @@ components:
           body:
             type: string
             description: Text of a note
-    LastModifiedByInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of the user who last updated the note
-      description: Note last modification information
-    TMCreatorInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a user who created a note/task
-      description: Note creator information
-    TMNoteList:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/TMNoteInfo'
-        navigation:
-          $ref: '#/components/schemas/TMNavigationInfo'
     TMNoteInfo:
       type: object
       properties:
@@ -407,15 +409,13 @@ components:
           type: string
           enum:
           - Note
-    TMNavigationInfo:
+    LastModifiedByInfo:
       type: object
       properties:
-        prevPageToken:
+        id:
           type: string
-          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-        nextPageToken:
-          type: string
-          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+          description: Internal identifier of the user who last updated the note
+      description: Note last modification information
   securitySchemes:
     OAuth2:
       type: oauth2

@@ -400,6 +400,154 @@ paths:
       x-throttling-group: Medium
 components:
   schemas:
+    GreetingTypeEnum:
+      type: string
+      description: Type of greeting, specifying the case when the greeting is played.
+      enum:
+      - Introductory
+      - Announcement
+      - AutomaticRecording
+      - BlockedCallersAll
+      - BlockedCallersSpecific
+      - BlockedNoCallerId
+      - BlockedPayPhones
+      - ConnectingMessage
+      - ConnectingAudio
+      - StartRecording
+      - StopRecording
+      - Voicemail
+      - Unavailable
+      - InterruptPrompt
+      - HoldMusic
+      - Company
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    DictionaryGreetingInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a greeting
+        uri:
+          type: string
+          format: uri
+          description: Link to a greeting
+        name:
+          type: string
+          description: Name of a greeting
+        usageType:
+          type: string
+          description: Usage type of greeting, specifying if the greeting is applied for user extension or department (call queue) extension.
+          enum:
+          - UserExtensionAnsweringRule
+          - ExtensionAnsweringRule
+          - DepartmentExtensionAnsweringRule
+          - BlockedCalls
+          - CallRecording
+          - CompanyAnsweringRule
+          - CompanyAfterHoursAnsweringRule
+          - LimitedExtensionAnsweringRule
+          - VoicemailExtensionAnsweringRule
+          - AnnouncementExtensionAnsweringRule
+          - SharedLinesGroupAnsweringRule
+        text:
+          type: string
+          description: Text of a greeting, if any
+        contentUri:
+          type: string
+          format: uri
+          description: Link to a greeting content (audio file), if any
+        type:
+          $ref: '#/components/schemas/GreetingTypeEnum'
+        category:
+          type: string
+          description: Category of a greeting, specifying data form. The category value 'None' specifies that greetings of a certain type ('Introductory', 'ConnectingAudio', etc.) are switched off for an extension = ['Music', 'Message', 'RingTones', 'None']
+          enum:
+          - Music
+          - Message
+          - RingTones
+          - None
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    AnsweringRuleQueryRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an answering rule
+    CustomUserGreetingInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a custom user greeting
+        id:
+          type: string
+          description: Internal identifier of a custom user greeting
+        type:
+          type: string
+          description: Type of custom user greeting
+          enum:
+          - Introductory
+          - Announcement
+          - InterruptPrompt
+          - ConnectingAudio
+          - ConnectingMessage
+          - Voicemail
+          - Unavailable
+          - HoldMusic
+          - PronouncedName
+          - TemplateGreeting
+        contentType:
+          type: string
+          description: Content media type
+          enum:
+          - audio/mpeg
+          - audio/wav
+        contentUri:
+          type: string
+          format: uri
+          description: Link to a greeting content (audio file)
+        answeringRule:
+          $ref: '#/components/schemas/CustomGreetingAnsweringRuleInfo'
+    CustomCompanyGreetingLanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a greeting language
+        uri:
+          type: string
+          format: uri
+          description: Link to a greeting language
+        name:
+          type: string
+          description: Name of a greeting language
+        localeCode:
+          type: string
+          description: Locale code of a greeting language
+      description: Information on a greeting language. Supported for types 'StopRecording', 'StartRecording', 'AutomaticRecording'
     PageNavigationModel:
       type: object
       description: Links to other pages of the current result set
@@ -413,6 +561,67 @@ components:
           $ref: '#/components/schemas/PageNavigationUri'
         lastPage:
           $ref: '#/components/schemas/PageNavigationUri'
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    CustomCompanyGreetingInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to an extension custom greeting
+        id:
+          type: string
+          description: Internal identifier of an answering rule
+        type:
+          type: string
+          description: Type of company greeting
+          enum:
+          - Company
+          - StartRecording
+          - StopRecording
+          - AutomaticRecording
+          - TemplateGreeting
+        contentType:
+          type: string
+          description: Content media type
+          enum:
+          - audio/mpeg
+          - audio/wav
+        contentUri:
+          type: string
+          format: uri
+          description: Link to a greeting content (audio file)
+        answeringRule:
+          $ref: '#/components/schemas/CustomGreetingAnsweringRuleInfo'
+        language:
+          $ref: '#/components/schemas/CustomCompanyGreetingLanguageInfo'
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
     EnumeratedPagingModel:
       type: object
       required:
@@ -483,6 +692,17 @@ components:
 
             '
           example: 25
+    CustomGreetingAnsweringRuleInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an answering rule
+        id:
+          type: string
+          description: Internal identifier of an answering rule
+      description: Information on an answering rule that the greeting is applied to
     ApiErrorWithParameter:
       description: 'The error model with additional attributes which can be used for HTTP 400/409
 
@@ -499,37 +719,6 @@ components:
           parameterValue:
             type: string
             description: The value of the API parameter/attribute which caused the error
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    CustomGreetingAnsweringRuleInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of an answering rule
-        id:
-          type: string
-          description: Internal identifier of an answering rule
-      description: Information on an answering rule that the greeting is applied to
     DictionaryGreetingList:
       type: object
       properties:
@@ -546,248 +735,7 @@ components:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
-    CustomUserGreetingInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a custom user greeting
-        id:
-          type: string
-          description: Internal identifier of a custom user greeting
-        type:
-          type: string
-          description: Type of custom user greeting
-          enum:
-          - Introductory
-          - Announcement
-          - InterruptPrompt
-          - ConnectingAudio
-          - ConnectingMessage
-          - Voicemail
-          - Unavailable
-          - HoldMusic
-          - PronouncedName
-          - TemplateGreeting
-        contentType:
-          type: string
-          description: Content media type
-          enum:
-          - audio/mpeg
-          - audio/wav
-        contentUri:
-          type: string
-          format: uri
-          description: Link to a greeting content (audio file)
-        answeringRule:
-          $ref: '#/components/schemas/CustomGreetingAnsweringRuleInfo'
-    CustomCompanyGreetingLanguageInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a greeting language
-        uri:
-          type: string
-          format: uri
-          description: Link to a greeting language
-        name:
-          type: string
-          description: Name of a greeting language
-        localeCode:
-          type: string
-          description: Locale code of a greeting language
-      description: Information on a greeting language. Supported for types 'StopRecording', 'StartRecording', 'AutomaticRecording'
-    GreetingTypeEnum:
-      type: string
-      description: Type of greeting, specifying the case when the greeting is played.
-      enum:
-      - Introductory
-      - Announcement
-      - AutomaticRecording
-      - BlockedCallersAll
-      - BlockedCallersSpecific
-      - BlockedNoCallerId
-      - BlockedPayPhones
-      - ConnectingMessage
-      - ConnectingAudio
-      - StartRecording
-      - StopRecording
-      - Voicemail
-      - Unavailable
-      - InterruptPrompt
-      - HoldMusic
-      - Company
-    AnsweringRuleQueryRequest:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an answering rule
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    CustomCompanyGreetingInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to an extension custom greeting
-        id:
-          type: string
-          description: Internal identifier of an answering rule
-        type:
-          type: string
-          description: Type of company greeting
-          enum:
-          - Company
-          - StartRecording
-          - StopRecording
-          - AutomaticRecording
-          - TemplateGreeting
-        contentType:
-          type: string
-          description: Content media type
-          enum:
-          - audio/mpeg
-          - audio/wav
-        contentUri:
-          type: string
-          format: uri
-          description: Link to a greeting content (audio file)
-        answeringRule:
-          $ref: '#/components/schemas/CustomGreetingAnsweringRuleInfo'
-        language:
-          $ref: '#/components/schemas/CustomCompanyGreetingLanguageInfo'
-    DictionaryGreetingInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a greeting
-        uri:
-          type: string
-          format: uri
-          description: Link to a greeting
-        name:
-          type: string
-          description: Name of a greeting
-        usageType:
-          type: string
-          description: Usage type of greeting, specifying if the greeting is applied for user extension or department (call queue) extension.
-          enum:
-          - UserExtensionAnsweringRule
-          - ExtensionAnsweringRule
-          - DepartmentExtensionAnsweringRule
-          - BlockedCalls
-          - CallRecording
-          - CompanyAnsweringRule
-          - CompanyAfterHoursAnsweringRule
-          - LimitedExtensionAnsweringRule
-          - VoicemailExtensionAnsweringRule
-          - AnnouncementExtensionAnsweringRule
-          - SharedLinesGroupAnsweringRule
-        text:
-          type: string
-          description: Text of a greeting, if any
-        contentUri:
-          type: string
-          format: uri
-          description: Link to a greeting content (audio file), if any
-        type:
-          $ref: '#/components/schemas/GreetingTypeEnum'
-        category:
-          type: string
-          description: Category of a greeting, specifying data form. The category value 'None' specifies that greetings of a certain type ('Introductory', 'ConnectingAudio', etc.) are switched off for an extension = ['Music', 'Message', 'RingTones', 'None']
-          enum:
-          - Music
-          - Message
-          - RingTones
-          - None
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
   parameters:
-    Page:
-      name: page
-      in: query
-      description: The result set page number (1-indexed) to return
-      required: false
-      explode: false
-      schema:
-        type: integer
-        format: int32
-        minimum: 1
-        maximum: 1000
-        default: 1
-      example: 1
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    GreetingId:
-      name: greetingId
-      in: path
-      description: Internal identifier of a greeting
-      required: true
-      schema:
-        type: string
-    ContentDispositionFilename:
-      name: contentDispositionFilename
-      in: query
-      description: The default filename of the file to be downloaded
-      required: false
-      schema:
-        type: string
-    ContentDisposition:
-      name: contentDisposition
-      in: query
-      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
-      required: false
-      schema:
-        type: string
-        enum:
-        - Inline
-        - Attachment
     PerPage:
       name: perPage
       in: query
@@ -805,6 +753,43 @@ components:
         maximum: 1000
         default: 100
       example: 100
+    GreetingId:
+      name: greetingId
+      in: path
+      description: Internal identifier of a greeting
+      required: true
+      schema:
+        type: string
+    Page:
+      name: page
+      in: query
+      description: The result set page number (1-indexed) to return
+      required: false
+      explode: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 1000
+        default: 1
+      example: 1
+    ContentDisposition:
+      name: contentDisposition
+      in: query
+      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
+      required: false
+      schema:
+        type: string
+        enum:
+        - Inline
+        - Attachment
+    ContentDispositionFilename:
+      name: contentDispositionFilename
+      in: query
+      description: The default filename of the file to be downloaded
+      required: false
+      schema:
+        type: string
     AccountId:
       name: accountId
       in: path
@@ -820,11 +805,36 @@ components:
         type: string
         default: '~'
       example: '~'
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
   responses:
     NotFound:
       description: 'General response with **HTTP 404 "Not found"** status.<br>
 
         Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
 
         '
       content:
@@ -853,16 +863,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
   securitySchemes:
     OAuth2:
       type: oauth2

@@ -120,143 +120,6 @@ paths:
       x-app-permission: ReadCallRecording
       x-user-permission: ReadCallRecording
 components:
-  schemas:
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    CallRecordingIds:
-      type: object
-      required:
-      - records
-      properties:
-        records:
-          type: array
-          description: Call recordings ID(s) to delete
-          items:
-            type: string
-          minItems: 1
-          maxItems: 100
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
-    GetCallRecordingResponse:
-      type: object
-      required:
-      - id
-      - contentUri
-      - contentType
-      - duration
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a call recording
-        contentUri:
-          type: string
-          format: uri
-          description: 'Link to a call recording binary content. Has to be retrieved with proper authorization
-
-            (access token must be passed via `Authorization` header or query parameter)
-
-            '
-        contentType:
-          type: string
-          description: Call recording file MIME format. Supported format is `audio/wav` and `audio/mpeg`
-          example: audio/wav
-        duration:
-          type: integer
-          format: int32
-          description: Recorded call duration
-  parameters:
-    ContentDisposition:
-      name: contentDisposition
-      in: query
-      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
-      required: false
-      schema:
-        type: string
-        enum:
-        - Inline
-        - Attachment
-    CallRecordingId:
-      name: recordingId
-      in: path
-      description: Internal identifier of a call recording (returned in Call Log)
-      required: true
-      schema:
-        type: string
-        example: '625387632786'
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    ContentDispositionFilename:
-      name: contentDispositionFilename
-      in: query
-      description: The default filename of the file to be downloaded
-      required: false
-      schema:
-        type: string
   responses:
     InternalError:
       description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
@@ -272,16 +135,6 @@ components:
       description: 'General response with **HTTP 403 "Forbidden"** status.<br>
 
         Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
 
         '
       content:
@@ -310,6 +163,153 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+  schemas:
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    GetCallRecordingResponse:
+      type: object
+      required:
+      - id
+      - contentUri
+      - contentType
+      - duration
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a call recording
+        contentUri:
+          type: string
+          format: uri
+          description: 'Link to a call recording binary content. Has to be retrieved with proper authorization
+
+            (access token must be passed via `Authorization` header or query parameter)
+
+            '
+        contentType:
+          type: string
+          description: Call recording file MIME format. Supported format is `audio/wav` and `audio/mpeg`
+          example: audio/wav
+        duration:
+          type: integer
+          format: int32
+          description: Recorded call duration
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    CallRecordingIds:
+      type: object
+      required:
+      - records
+      properties:
+        records:
+          type: array
+          description: Call recordings ID(s) to delete
+          items:
+            type: string
+          minItems: 1
+          maxItems: 100
+  parameters:
+    ContentDisposition:
+      name: contentDisposition
+      in: query
+      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
+      required: false
+      schema:
+        type: string
+        enum:
+        - Inline
+        - Attachment
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    CallRecordingId:
+      name: recordingId
+      in: path
+      description: Internal identifier of a call recording (returned in Call Log)
+      required: true
+      schema:
+        type: string
+        example: '625387632786'
+    ContentDispositionFilename:
+      name: contentDispositionFilename
+      in: query
+      description: The default filename of the file to be downloaded
+      required: false
+      schema:
+        type: string
   securitySchemes:
     OAuth2:
       type: oauth2

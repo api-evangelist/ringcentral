@@ -313,6 +313,30 @@ paths:
       x-app-permission: EditExtensions
 components:
   schemas:
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    ParameterizedErrorResponseModel:
+      type: object
+      description: Standard error response which may include parameterized errors
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiErrorWithParameter'
     MessageTemplateRequest:
       type: object
       required:
@@ -325,22 +349,6 @@ components:
           $ref: '#/components/schemas/TemplateInfo'
         site:
           $ref: '#/components/schemas/Site'
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
     TemplateInfo:
       type: object
       description: Text message template information
@@ -360,33 +368,6 @@ components:
         name:
           type: string
           description: Custom name of a site
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    MessageTemplateResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a template
-        displayName:
-          type: string
-          description: Name of a template
-        body:
-          $ref: '#/components/schemas/TemplateInfo'
-        scope:
-          $ref: '#/components/schemas/VisibilityType'
-        site:
-          $ref: '#/components/schemas/Site'
     ApiErrorWithParameter:
       description: 'The error model with additional attributes which can be used for HTTP 400/409
 
@@ -403,6 +384,22 @@ components:
           parameterValue:
             type: string
             description: The value of the API parameter/attribute which caused the error
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
     MessageTemplatesListResponse:
       type: object
       properties:
@@ -411,40 +408,35 @@ components:
           description: List of text message templates
           items:
             $ref: '#/components/schemas/MessageTemplateResponse'
-    ParameterizedErrorResponseModel:
-      type: object
-      description: Standard error response which may include parameterized errors
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiErrorWithParameter'
     VisibilityType:
       type: string
       description: Specifies if a template is available on a user (Personal) or a company (Company) level
       enum:
       - Company
       - Personal
+    MessageTemplateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a template
+        displayName:
+          type: string
+          description: Name of a template
+        body:
+          $ref: '#/components/schemas/TemplateInfo'
+        scope:
+          $ref: '#/components/schemas/VisibilityType'
+        site:
+          $ref: '#/components/schemas/Site'
   parameters:
-    ExtensionId:
-      name: extensionId
+    TemplateId:
+      name: templateId
       in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
+      description: Internal identifier of a text message template
       required: true
-      style: simple
-      explode: false
       schema:
         type: string
-        default: '~'
-      example: '~'
     AccountId:
       name: accountId
       in: path
@@ -460,13 +452,21 @@ components:
         type: string
         default: '~'
       example: '~'
-    TemplateId:
-      name: templateId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: Internal identifier of a text message template
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
       required: true
+      style: simple
+      explode: false
       schema:
         type: string
+        default: '~'
+      example: '~'
   responses:
     NotFound:
       description: 'General response with **HTTP 404 "Not found"** status.<br>

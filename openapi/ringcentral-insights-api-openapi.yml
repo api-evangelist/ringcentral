@@ -64,6 +64,201 @@ paths:
       x-app-permission: AI
 components:
   schemas:
+    ContentInput:
+      type: object
+      properties:
+        contentUri:
+          type: string
+          description: Publicly facing uri
+          format: uri
+    UtteranceInsightsUnit:
+      required:
+      - name
+      - value
+      type: object
+      properties:
+        name:
+          type: string
+          example: Emotion
+          enum:
+          - Emotion
+        value:
+          type: string
+          example: Neutral
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+      additionalProperties:
+        type: string
+    AudioInput:
+      required:
+      - encoding
+      - languageCode
+      allOf:
+      - $ref: '#/components/schemas/ContentInput'
+      - type: object
+        properties:
+          encoding:
+            type: string
+            description: The encoding of the original audio
+            example: Wav
+            enum:
+            - Mpeg
+            - Mp4
+            - Wav
+            - Webm
+            - Webp
+            - Aac
+            - Avi
+            - Ogg
+          languageCode:
+            type: string
+            description: Language spoken in the audio file.
+            example: en-US
+          source:
+            type: string
+            description: 'Source of the audio file eg: Phone, RingCentral, GoogleMeet, Zoom etc'
+            example: RingCentral
+          audioType:
+            type: string
+            description: Type of the audio
+            example: CallCenter
+            enum:
+            - CallCenter
+            - Meeting
+            - EarningsCalls
+            - Interview
+            - PressConference
+            - Voicemail
+    InteractionInput:
+      allOf:
+      - $ref: '#/components/schemas/DiarizeInput'
+      - type: object
+        properties:
+          insights:
+            type: array
+            items:
+              $ref: '#/components/schemas/InsightsEnum'
+          speechContexts:
+            type: array
+            description: Indicates the words/phrases that will be used for boosting the transcript. This can help to boost accuracy for cases like Person Names, Company names etc.
+            items:
+              $ref: '#/components/schemas/SpeechContextPhrasesInput'
+    SpeechContextPhrasesInput:
+      required:
+      - phrases
+      type: object
+      minItems: 1
+      maxItems: 50
+      properties:
+        phrases:
+          type: array
+          description: Words or Phrases to boost
+          example:
+          - Mohit
+          - Sushant
+          - RingCentral
+          items:
+            type: string
+    InteractionObject:
+      type: object
+      properties:
+        utteranceInsights:
+          type: array
+          items:
+            $ref: '#/components/schemas/UtteranceInsightsObject'
+        speakerInsights:
+          $ref: '#/components/schemas/SpeakerInsightsObject'
+        conversationalInsights:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationalInsightsUnit'
+    UtteranceInsightsObject:
+      required:
+      - end
+      - start
+      - text
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        text:
+          type: string
+          example: Hello! This is John.
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        speakerId:
+          type: string
+          example: JohnDoe
+        wordTimings:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordTimingsUnit'
+        insights:
+          type: array
+          items:
+            $ref: '#/components/schemas/UtteranceInsightsUnit'
+    SpeakerInsightsUnit:
+      required:
+      - name
+      - values
+      type: object
+      properties:
+        name:
+          type: string
+          example: TalkToListenRatio
+          enum:
+          - Energy
+          - Pace
+          - TalkToListenRatio
+          - QuestionsAsked
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpeakerInsightsValuesItems'
+    WordTimingsUnit:
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        word:
+          type: string
+          example: Hello
+    CaiAsyncApiResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+    SpeakerInsightsValuesItems:
+      required:
+      - speakerId
+      - value
+      type: object
+      properties:
+        speakerId:
+          type: string
+          example: JohnDoe
+        value:
+          type: string
+          description: The value corresponding to the insight for the speaker
+          example: 20:80
+      additionalProperties:
+        type: string
     ConversationalInsightsUnit:
       required:
       - name
@@ -85,114 +280,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ConversationalInsightsUnitValues'
-    InsightsEnum:
-      type: string
-      enum:
-      - All
-      - KeyPhrases
-      - Emotion
-      - AbstractiveSummaryLong
-      - AbstractiveSummaryShort
-      - ExtractiveSummary
-      - Topics
-      - TalkToListenRatio
-      - Energy
-      - Pace
-      - QuestionsAsked
-    InteractionInput:
-      allOf:
-      - $ref: '#/components/schemas/DiarizeInput'
-      - type: object
-        properties:
-          insights:
-            type: array
-            items:
-              $ref: '#/components/schemas/InsightsEnum'
-          speechContexts:
-            type: array
-            description: Indicates the words/phrases that will be used for boosting the transcript. This can help to boost accuracy for cases like Person Names, Company names etc.
-            items:
-              $ref: '#/components/schemas/SpeechContextPhrasesInput'
-    InteractionObject:
+    InteractionApiResponse:
       type: object
       properties:
-        utteranceInsights:
-          type: array
-          items:
-            $ref: '#/components/schemas/UtteranceInsightsObject'
-        speakerInsights:
-          $ref: '#/components/schemas/SpeakerInsightsObject'
-        conversationalInsights:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConversationalInsightsUnit'
-    WordTimingsUnit:
-      type: object
-      properties:
-        start:
-          type: number
-          format: float
-          example: 0.3
-        end:
-          type: number
-          format: float
-          example: 5.1
-        word:
+        status:
           type: string
-          example: Hello
-    SpeakerInsightsUnit:
-      required:
-      - name
-      - values
-      type: object
-      properties:
-        name:
-          type: string
-          example: TalkToListenRatio
           enum:
-          - Energy
-          - Pace
-          - TalkToListenRatio
-          - QuestionsAsked
-        values:
-          type: array
-          items:
-            $ref: '#/components/schemas/SpeakerInsightsValuesItems'
-    UtteranceInsightsUnit:
-      required:
-      - name
-      - value
-      type: object
-      properties:
-        name:
-          type: string
-          example: Emotion
-          enum:
-          - Emotion
-        value:
-          type: string
-          example: Neutral
-        confidence:
-          type: number
-          format: float
-          example: 0.97
-      additionalProperties:
-        type: string
-    SpeakerInsightsValuesItems:
-      required:
-      - speakerId
-      - value
-      type: object
-      properties:
-        speakerId:
-          type: string
-          example: JohnDoe
-        value:
-          type: string
-          description: The value corresponding to the insight for the speaker
-          example: 20:80
-      additionalProperties:
-        type: string
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/InteractionObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
     ConversationalInsightsUnitValues:
       required:
       - end
@@ -239,66 +338,6 @@ components:
           example: Or or you can add another tab and have it resigned.
       additionalProperties:
         type: string
-    InteractionApiResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          oneOf:
-          - $ref: '#/components/schemas/InteractionObject'
-          - $ref: '#/components/schemas/CaiErrorResponse'
-    SpeechContextPhrasesInput:
-      required:
-      - phrases
-      type: object
-      minItems: 1
-      maxItems: 50
-      properties:
-        phrases:
-          type: array
-          description: Words or Phrases to boost
-          example:
-          - Mohit
-          - Sushant
-          - RingCentral
-          items:
-            type: string
-    ContentInput:
-      type: object
-      properties:
-        contentUri:
-          type: string
-          description: Publicly facing uri
-          format: uri
-    CaiErrorCodeResponse:
-      required:
-      - errorCode
-      - message
-      type: object
-      properties:
-        errorCode:
-          type: string
-          enum:
-          - CAI-101
-          - CAI-102
-          - CAI-103
-          - CAI-104
-          - CAI-105
-          - CAI-106
-          - CAI-107
-          - CAI-108
-          - CAI-109
-          - CAI-110
-        message:
-          type: string
-          description: Helpful description of the errorCode
-        parameterName:
-          type: string
-          description: Name of parameter if specified in the message
     CaiErrorResponse:
       type: object
       properties:
@@ -306,17 +345,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CaiErrorCodeResponse'
-    SpeakerInsightsObject:
-      type: object
-      properties:
-        speakerCount:
-          type: integer
-          format: int32
-          example: 2
-        insights:
-          type: array
-          items:
-            $ref: '#/components/schemas/SpeakerInsightsUnit'
     DiarizeInput:
       allOf:
       - $ref: '#/components/schemas/AudioInput'
@@ -342,85 +370,67 @@ components:
           enableVoiceActivityDetection:
             type: boolean
             description: Apply voice activity detection.
-    CaiAsyncApiResponse:
+    SpeakerInsightsObject:
       type: object
       properties:
-        jobId:
-          type: string
-    AudioInput:
-      required:
-      - encoding
-      - languageCode
-      allOf:
-      - $ref: '#/components/schemas/ContentInput'
-      - type: object
-        properties:
-          encoding:
-            type: string
-            description: The encoding of the original audio
-            example: Wav
-            enum:
-            - Mpeg
-            - Mp4
-            - Wav
-            - Webm
-            - Webp
-            - Aac
-            - Avi
-            - Ogg
-          languageCode:
-            type: string
-            description: Language spoken in the audio file.
-            example: en-US
-          source:
-            type: string
-            description: 'Source of the audio file eg: Phone, RingCentral, GoogleMeet, Zoom etc'
-            example: RingCentral
-          audioType:
-            type: string
-            description: Type of the audio
-            example: CallCenter
-            enum:
-            - CallCenter
-            - Meeting
-            - EarningsCalls
-            - Interview
-            - PressConference
-            - Voicemail
-    UtteranceInsightsObject:
-      required:
-      - end
-      - start
-      - text
-      type: object
-      properties:
-        start:
-          type: number
-          format: float
-          example: 0.3
-        end:
-          type: number
-          format: float
-          example: 5.1
-        text:
-          type: string
-          example: Hello! This is John.
-        confidence:
-          type: number
-          format: float
-          example: 0.97
-        speakerId:
-          type: string
-          example: JohnDoe
-        wordTimings:
-          type: array
-          items:
-            $ref: '#/components/schemas/WordTimingsUnit'
+        speakerCount:
+          type: integer
+          format: int32
+          example: 2
         insights:
           type: array
           items:
-            $ref: '#/components/schemas/UtteranceInsightsUnit'
+            $ref: '#/components/schemas/SpeakerInsightsUnit'
+    InsightsEnum:
+      type: string
+      enum:
+      - All
+      - KeyPhrases
+      - Emotion
+      - AbstractiveSummaryLong
+      - AbstractiveSummaryShort
+      - ExtractiveSummary
+      - Topics
+      - TalkToListenRatio
+      - Energy
+      - Pace
+      - QuestionsAsked
+    CaiErrorCodeResponse:
+      required:
+      - errorCode
+      - message
+      type: object
+      properties:
+        errorCode:
+          type: string
+          enum:
+          - CAI-101
+          - CAI-102
+          - CAI-103
+          - CAI-104
+          - CAI-105
+          - CAI-106
+          - CAI-107
+          - CAI-108
+          - CAI-109
+          - CAI-110
+        message:
+          type: string
+          description: Helpful description of the errorCode
+        parameterName:
+          type: string
+          description: Name of parameter if specified in the message
   parameters:
+    Webhook:
+      name: webhook
+      in: query
+      description: The webhook URI to which the job response will be returned
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+        format: uri
     CallbackRequestId:
       name: RCRequestId
       deprecated: true
@@ -435,16 +445,6 @@ components:
       explode: false
       schema:
         type: string
-    Webhook:
-      name: webhook
-      in: query
-      description: The webhook URI to which the job response will be returned
-      required: true
-      style: form
-      explode: true
-      schema:
-        type: string
-        format: uri
   requestBodies:
     InteractionAnalyticsRequest:
       description: Interaction Analytics API Input Format
