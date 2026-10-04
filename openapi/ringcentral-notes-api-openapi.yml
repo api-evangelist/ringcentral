@@ -317,33 +317,6 @@ paths:
       x-app-permission: TeamMessaging
 components:
   schemas:
-    LockedByInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of the user editing the note
-      description: Returned for the note being edited (locked) at the current moment. Information on the user editing the note
-    TMNoteList:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/TMNoteInfo'
-        navigation:
-          $ref: '#/components/schemas/TMNavigationInfo'
-    TMCreateNoteRequest:
-      required:
-      - title
-      type: object
-      properties:
-        title:
-          type: string
-          description: Title of a note. Max allowed length is 250 characters
-        body:
-          type: string
-          description: Contents of a note; HTML markup text. Max allowed length is 1048576 characters (1 Mb).
     TMNavigationInfo:
       type: object
       properties:
@@ -353,21 +326,6 @@ components:
         nextPageToken:
           type: string
           description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-    TMCreatorInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a user who created a note/task
-      description: Note creator information
-    TMNoteWithBodyInfo:
-      allOf:
-      - $ref: '#/components/schemas/TMNoteInfo'
-      - type: object
-        properties:
-          body:
-            type: string
-            description: Text of a note
     TMNoteInfo:
       type: object
       properties:
@@ -409,6 +367,17 @@ components:
           type: string
           enum:
           - Note
+    TMCreateNoteRequest:
+      required:
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of a note. Max allowed length is 250 characters
+        body:
+          type: string
+          description: Contents of a note; HTML markup text. Max allowed length is 1048576 characters (1 Mb).
     LastModifiedByInfo:
       type: object
       properties:
@@ -416,6 +385,37 @@ components:
           type: string
           description: Internal identifier of the user who last updated the note
       description: Note last modification information
+    TMCreatorInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user who created a note/task
+      description: Note creator information
+    LockedByInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of the user editing the note
+      description: Returned for the note being edited (locked) at the current moment. Information on the user editing the note
+    TMNoteList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMNoteInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+    TMNoteWithBodyInfo:
+      allOf:
+      - $ref: '#/components/schemas/TMNoteInfo'
+      - type: object
+        properties:
+          body:
+            type: string
+            description: Text of a note
   securitySchemes:
     OAuth2:
       type: oauth2

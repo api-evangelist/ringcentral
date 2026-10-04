@@ -695,189 +695,7 @@ paths:
       x-availability: High
       x-app-permission: A2PSMS
 components:
-  parameters:
-    BatchId:
-      name: batchId
-      in: path
-      required: true
-      description: Internal identifier of a message batch to be retrieved
-      example: '55577'
-      schema:
-        type: string
-    QueryBatchId:
-      name: batchId
-      in: query
-      required: false
-      description: Internal identifier of a message batch to filter the response
-      example: '55577'
-      schema:
-        type: string
-    SmsDateTo:
-      name: dateTo
-      in: query
-      required: false
-      description: The end of the time range to filter the results in ISO 8601 format including timezone. Default is the current time
-      schema:
-        type: string
-        format: date-time
-      example: '2020-11-25T16:07:52.597Z'
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    SmsDirection:
-      name: direction
-      in: query
-      required: false
-      description: 'Direction of a message to filter the message list result.
-
-        By default, there is no filter applied - both Inbound and Outbound messages are returned
-
-        '
-      schema:
-        $ref: '#/components/schemas/SmsDirectionEnum'
-      example: Inbound
-    SmsDateFrom:
-      name: dateFrom
-      in: query
-      required: false
-      description: The end of the time range to filter the results in ISO 8601 format including timezone. Default is the 'dateTo' minus 24 hours
-      schema:
-        type: string
-        format: date-time
-      example: '2020-11-09T16:07:52.597Z'
   schemas:
-    MessageStatusesResponse:
-      type: object
-      description: The messages status object with details of each status
-      properties:
-        queued:
-          $ref: '#/components/schemas/MessageStatusCounts'
-        delivered:
-          $ref: '#/components/schemas/MessageStatusCounts'
-        deliveryFailed:
-          $ref: '#/components/schemas/MessageStatusCounts'
-        sent:
-          $ref: '#/components/schemas/MessageStatusCounts'
-        sendingFailed:
-          $ref: '#/components/schemas/MessageStatusCounts'
-    SmsDirectionEnum:
-      type: string
-      description: Direction of the SMS message
-      enum:
-      - Inbound
-      - Outbound
-    OptOutListResponse:
-      type: object
-      description: The list of opt outs
-      properties:
-        records:
-          type: array
-          description: List of individual opt-out number records
-          items:
-            $ref: '#/components/schemas/OptOutResponse'
-        paging:
-          $ref: '#/components/schemas/PagingResource'
-    BatchListResponse:
-      type: object
-      description: The list of batches retrieved for an account and other filter criteria such as fromPhoneNumber, date specified in the request.
-      properties:
-        records:
-          type: array
-          description: An array containing individual batches
-          items:
-            $ref: '#/components/schemas/MessageBatchResponse'
-        paging:
-          $ref: '#/components/schemas/PagingResource'
-    MessageListMessageResponse:
-      type: object
-      description: The short detail of the message in the get batch response
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: The Id of the message
-          example: 1234
-        batchId:
-          type: string
-          description: Internal identifier of a batch the message was submitted in
-          example: '12345'
-        from:
-          type: string
-          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format from which the message is sent
-          example: '+15551234567'
-        to:
-          type: array
-          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format to which a message is sent
-          example:
-          - '+15551234567'
-          items:
-            type: string
-        creationTime:
-          type: string
-          format: date-time
-          description: The time at which the message was created
-        lastModifiedTime:
-          type: string
-          format: date-time
-          description: The time at which the messages was last updated
-        messageStatus:
-          $ref: '#/components/schemas/SmsStatusEnum'
-        segmentCount:
-          type: integer
-          description: Number of segments of a message
-          format: int32
-          example: 1
-        text:
-          type: string
-          description: Text of a message. Returned if the `view` parameter is set to 'Detailed'
-        cost:
-          type: number
-          description: Cost of a message
-          format: double
-          example: 0.007
-        direction:
-          $ref: '#/components/schemas/SmsDirectionEnum'
-        errorCode:
-          type: string
-          description: The RC error code of the message sending failure reason
-          example: SMS-RC-503
-    SmsStatusEnum:
-      type: string
-      description: Current status of a message
-      example: Queued
-      enum:
-      - Queued
-      - Delivered
-      - Sent
-      - SendingFailed
-      - DeliveryFailed
-    ASGErrorResponse:
-      type: object
-      description: Error response
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Error code
-          example: CMN-101
-        message:
-          type: string
-          description: Human-readable description of the error. Not suitable for end users.
-          example: AccountId 1234 is invalid
     OptOutBulkAssignRequest:
       type: object
       description: Consists of `from` field and `optOuts` and `optIns` lists. Both `optOuts` and `optIns` can be empty but not simultaneously - at least one of the lists must be entered."
@@ -904,6 +722,12 @@ components:
           example:
           - '+15551237799'
           - '+15551237798'
+    SmsDirectionEnum:
+      type: string
+      description: Direction of the SMS message
+      enum:
+      - Inbound
+      - Outbound
     MessageListResponse:
       type: object
       properties:
@@ -915,52 +739,153 @@ components:
         paging:
           $ref: '#/components/schemas/PagingResource'
       description: List of messages retrieved for an account and other filter criteria such as `batchId` and `fromPhoneNumber` specified in the request
-    PagingResource:
+    MessageStatusCounts:
       type: object
-      description: Pagination details
+      description: Message status parameters
       properties:
-        pageToken:
-          type: string
-          description: Page token of the current response list
-          example: pgt1
-        perPage:
+        cost:
+          type: number
+          format: float
+          description: Total cost of all messages with this status code
+        count:
           type: integer
+          description: Count of messages with this status code
           format: int32
-          description: Number of records per page
-          example: 3
-        firstPageToken:
-          type: string
-          description: First page token of the current filter criteria
-          example: fpgt1
-        previousPageToken:
-          type: string
-          description: Previous page token of the current filter criteria
-          example: lpgt1
-        nextPageToken:
-          type: string
-          description: Next page token of the current filter criteria
-          example: npgt1
-    MessageCreateRequest:
+          example: 7
+        errorCodeCounts:
+          type: object
+          description: Message sending/delivery errors. Returned in `deliveryFailed` and `sendingFailed` resources
+          additionalProperties:
+            type: integer
+            description: Count of messages with this error code
+            format: int32
+            example: 5
+    OptOutResponse:
       type: object
-      description: Single individual SMS resource
-      required:
-      - to
+      description: Opt-out record
       properties:
+        from:
+          type: string
+          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format from which the recipient has opted out
+          example: '+15551234567'
+        to:
+          type: string
+          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format which is opted out
+          example: '+15551234567'
+        status:
+          type: string
+          description: Status of a phone number
+          enum:
+          - OptIn
+          - OptOut
+        source:
+          type: string
+          enum:
+          - Recipient
+          - Account
+          - Upstream
+          - Carrier
+    OptOutBulkAssignResponse:
+      type: object
+      description: The results of adding opt-outs and opt-ins
+      properties:
+        optIns:
+          type: object
+          description: Contains successful and failed opt-ins
+          properties:
+            successful:
+              type: array
+              description: Recipients' phone numbers which opt-ins were successfully added for.
+              items:
+                type: string
+              example:
+              - '+15551237799'
+            failed:
+              type: array
+              description: Recipients' phone numbers which opt-ins were failed to be added for. Plus, error messages
+              items:
+                $ref: '#/components/schemas/OptOutBulkAssignFailedEntry'
+              example:
+              - to: '+15551237798'
+                errorMessage: Unexpected issue on removing an opt-out from bulk-assign request
+        optOuts:
+          type: object
+          description: Contains successful and failed opt-outs
+          properties:
+            successful:
+              type: array
+              description: Recipients' phone numbers which opt-outs were successfully added for.
+              items:
+                type: string
+              example:
+              - '+15551237755'
+            failed:
+              type: array
+              description: Recipients' phone numbers which opt-outs were failed to be added for. Plus, error messages
+              items:
+                $ref: '#/components/schemas/OptOutBulkAssignFailedEntry'
+              example:
+              - to: '+15551237756'
+                errorMessage: Unexpected issue on creating an opt-out from bulk-assign request
+    BatchListResponse:
+      type: object
+      description: The list of batches retrieved for an account and other filter criteria such as fromPhoneNumber, date specified in the request.
+      properties:
+        records:
+          type: array
+          description: An array containing individual batches
+          items:
+            $ref: '#/components/schemas/MessageBatchResponse'
+        paging:
+          $ref: '#/components/schemas/PagingResource'
+    MessageStatusesResponse:
+      type: object
+      description: The messages status object with details of each status
+      properties:
+        queued:
+          $ref: '#/components/schemas/MessageStatusCounts'
+        delivered:
+          $ref: '#/components/schemas/MessageStatusCounts'
+        deliveryFailed:
+          $ref: '#/components/schemas/MessageStatusCounts'
+        sent:
+          $ref: '#/components/schemas/MessageStatusCounts'
+        sendingFailed:
+          $ref: '#/components/schemas/MessageStatusCounts'
+    RejectedRecipientResponseResource:
+      type: object
+      description: The rejected recipient details
+      properties:
+        index:
+          type: integer
+          description: The index of the messages list in the send batch request where the invalid recipient was found
+          format: int64
+          example: 1
         to:
           type: array
           items:
             type: string
-          description: 'List of phone numbers in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
-
-            format, recipients of this message. Currently only one number is supported
-
-            '
+          description: The invalid recipient number as found in the request
           example:
-          - '15551234477'
-        text:
+          - '29395'
+        errorCode:
           type: string
-          description: Text to send, maximum number of characters is 1000
-          example: Hello, World!
+          description: The error code
+          example: CMN-100
+        description:
+          type: string
+          description: The description of the error
+          example: The recipient is invalid
+    SmsStatusEnum:
+      type: string
+      description: Current status of a message
+      example: Queued
+      enum:
+      - Queued
+      - Delivered
+      - Sent
+      - SendingFailed
+      - DeliveryFailed
     MessageBatchCreateRequest:
       required:
       - from
@@ -1053,130 +978,27 @@ components:
 
             '
           example: 0.007
-    MessageStatusCounts:
+    MessageCreateRequest:
       type: object
-      description: Message status parameters
+      description: Single individual SMS resource
+      required:
+      - to
       properties:
-        cost:
-          type: number
-          format: float
-          description: Total cost of all messages with this status code
-        count:
-          type: integer
-          description: Count of messages with this status code
-          format: int32
-          example: 7
-        errorCodeCounts:
-          type: object
-          description: Message sending/delivery errors. Returned in `deliveryFailed` and `sendingFailed` resources
-          additionalProperties:
-            type: integer
-            description: Count of messages with this error code
-            format: int32
-            example: 5
-    RejectedRecipientResponseResource:
-      type: object
-      description: The rejected recipient details
-      properties:
-        index:
-          type: integer
-          description: The index of the messages list in the send batch request where the invalid recipient was found
-          format: int64
-          example: 1
         to:
           type: array
           items:
             type: string
-          description: The invalid recipient number as found in the request
+          description: 'List of phone numbers in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I)
+
+            format, recipients of this message. Currently only one number is supported
+
+            '
           example:
-          - '29395'
-        errorCode:
+          - '15551234477'
+        text:
           type: string
-          description: The error code
-          example: CMN-100
-        description:
-          type: string
-          description: The description of the error
-          example: The recipient is invalid
-    OptOutBulkAssignFailedEntry:
-      type: object
-      description: Represents a failure of adding opt-out / opt-in. A pair of a recipient phone number and an error message
-      properties:
-        to:
-          type: string
-          description: A recipient phone number
-          example: '+15551237756'
-        errorMessage:
-          type: string
-          description: An error happened on adding opt-out / opt-in
-          example: Unexpected issue on creating an opt-out from bulk-assign request
-    OptOutBulkAssignResponse:
-      type: object
-      description: The results of adding opt-outs and opt-ins
-      properties:
-        optIns:
-          type: object
-          description: Contains successful and failed opt-ins
-          properties:
-            successful:
-              type: array
-              description: Recipients' phone numbers which opt-ins were successfully added for.
-              items:
-                type: string
-              example:
-              - '+15551237799'
-            failed:
-              type: array
-              description: Recipients' phone numbers which opt-ins were failed to be added for. Plus, error messages
-              items:
-                $ref: '#/components/schemas/OptOutBulkAssignFailedEntry'
-              example:
-              - to: '+15551237798'
-                errorMessage: Unexpected issue on removing an opt-out from bulk-assign request
-        optOuts:
-          type: object
-          description: Contains successful and failed opt-outs
-          properties:
-            successful:
-              type: array
-              description: Recipients' phone numbers which opt-outs were successfully added for.
-              items:
-                type: string
-              example:
-              - '+15551237755'
-            failed:
-              type: array
-              description: Recipients' phone numbers which opt-outs were failed to be added for. Plus, error messages
-              items:
-                $ref: '#/components/schemas/OptOutBulkAssignFailedEntry'
-              example:
-              - to: '+15551237756'
-                errorMessage: Unexpected issue on creating an opt-out from bulk-assign request
-    OptOutResponse:
-      type: object
-      description: Opt-out record
-      properties:
-        from:
-          type: string
-          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format from which the recipient has opted out
-          example: '+15551234567'
-        to:
-          type: string
-          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format which is opted out
-          example: '+15551234567'
-        status:
-          type: string
-          description: Status of a phone number
-          enum:
-          - OptIn
-          - OptOut
-        source:
-          type: string
-          enum:
-          - Recipient
-          - Account
-          - Upstream
-          - Carrier
+          description: Text to send, maximum number of characters is 1000
+          example: Hello, World!
     MessageDetailsResponse:
       type: object
       description: Complete details of the message
@@ -1230,6 +1052,184 @@ components:
           type: string
           description: The RC error code of the message sending failure reason
           example: SMS-RC-503
+    OptOutBulkAssignFailedEntry:
+      type: object
+      description: Represents a failure of adding opt-out / opt-in. A pair of a recipient phone number and an error message
+      properties:
+        to:
+          type: string
+          description: A recipient phone number
+          example: '+15551237756'
+        errorMessage:
+          type: string
+          description: An error happened on adding opt-out / opt-in
+          example: Unexpected issue on creating an opt-out from bulk-assign request
+    MessageListMessageResponse:
+      type: object
+      description: The short detail of the message in the get batch response
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The Id of the message
+          example: 1234
+        batchId:
+          type: string
+          description: Internal identifier of a batch the message was submitted in
+          example: '12345'
+        from:
+          type: string
+          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format from which the message is sent
+          example: '+15551234567'
+        to:
+          type: array
+          description: Phone number in [E.164](https://www.itu.int/rec/T-REC-E.164-201011-I) format to which a message is sent
+          example:
+          - '+15551234567'
+          items:
+            type: string
+        creationTime:
+          type: string
+          format: date-time
+          description: The time at which the message was created
+        lastModifiedTime:
+          type: string
+          format: date-time
+          description: The time at which the messages was last updated
+        messageStatus:
+          $ref: '#/components/schemas/SmsStatusEnum'
+        segmentCount:
+          type: integer
+          description: Number of segments of a message
+          format: int32
+          example: 1
+        text:
+          type: string
+          description: Text of a message. Returned if the `view` parameter is set to 'Detailed'
+        cost:
+          type: number
+          description: Cost of a message
+          format: double
+          example: 0.007
+        direction:
+          $ref: '#/components/schemas/SmsDirectionEnum'
+        errorCode:
+          type: string
+          description: The RC error code of the message sending failure reason
+          example: SMS-RC-503
+    OptOutListResponse:
+      type: object
+      description: The list of opt outs
+      properties:
+        records:
+          type: array
+          description: List of individual opt-out number records
+          items:
+            $ref: '#/components/schemas/OptOutResponse'
+        paging:
+          $ref: '#/components/schemas/PagingResource'
+    ASGErrorResponse:
+      type: object
+      description: Error response
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Error code
+          example: CMN-101
+        message:
+          type: string
+          description: Human-readable description of the error. Not suitable for end users.
+          example: AccountId 1234 is invalid
+    PagingResource:
+      type: object
+      description: Pagination details
+      properties:
+        pageToken:
+          type: string
+          description: Page token of the current response list
+          example: pgt1
+        perPage:
+          type: integer
+          format: int32
+          description: Number of records per page
+          example: 3
+        firstPageToken:
+          type: string
+          description: First page token of the current filter criteria
+          example: fpgt1
+        previousPageToken:
+          type: string
+          description: Previous page token of the current filter criteria
+          example: lpgt1
+        nextPageToken:
+          type: string
+          description: Next page token of the current filter criteria
+          example: npgt1
+  parameters:
+    SmsDateFrom:
+      name: dateFrom
+      in: query
+      required: false
+      description: The end of the time range to filter the results in ISO 8601 format including timezone. Default is the 'dateTo' minus 24 hours
+      schema:
+        type: string
+        format: date-time
+      example: '2020-11-09T16:07:52.597Z'
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    SmsDirection:
+      name: direction
+      in: query
+      required: false
+      description: 'Direction of a message to filter the message list result.
+
+        By default, there is no filter applied - both Inbound and Outbound messages are returned
+
+        '
+      schema:
+        $ref: '#/components/schemas/SmsDirectionEnum'
+      example: Inbound
+    QueryBatchId:
+      name: batchId
+      in: query
+      required: false
+      description: Internal identifier of a message batch to filter the response
+      example: '55577'
+      schema:
+        type: string
+    BatchId:
+      name: batchId
+      in: path
+      required: true
+      description: Internal identifier of a message batch to be retrieved
+      example: '55577'
+      schema:
+        type: string
+    SmsDateTo:
+      name: dateTo
+      in: query
+      required: false
+      description: The end of the time range to filter the results in ISO 8601 format including timezone. Default is the current time
+      schema:
+        type: string
+        format: date-time
+      example: '2020-11-25T16:07:52.597Z'
   securitySchemes:
     OAuth2:
       type: oauth2

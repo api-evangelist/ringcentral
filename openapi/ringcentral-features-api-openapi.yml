@@ -117,15 +117,6 @@ paths:
       x-user-permission: ReadExtensions
 components:
   schemas:
-    ParamsInfo:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Parameter name
-        value:
-          type: string
-          description: Parameter value
     FeatureInfo:
       type: object
       properties:
@@ -151,6 +142,13 @@ components:
             $ref: '#/components/schemas/ParamsInfo'
         reason:
           $ref: '#/components/schemas/ReasonInfo'
+    FeatureList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureInfo'
     ReasonInfo:
       type: object
       properties:
@@ -174,20 +172,22 @@ components:
         is set to `false`
 
         '
-    FeatureList:
+    ParamsInfo:
       type: object
       properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/FeatureInfo'
+        name:
+          type: string
+          description: Parameter name
+        value:
+          type: string
+          description: Parameter value
   parameters:
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true
@@ -197,12 +197,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    ExtensionId:
-      name: extensionId
+    AccountId:
+      name: accountId
       in: path
-      description: 'Internal identifier of the RingCentral extension/user
+      description: 'Internal identifier of the RingCentral account
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true

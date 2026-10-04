@@ -390,196 +390,6 @@ paths:
       x-user-permission: CallQueueToCallQueue
 components:
   schemas:
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    UserCallQueues:
-      type: object
-      properties:
-        records:
-          type: array
-          description: List of queues where an extension is an agent
-          items:
-            $ref: '#/components/schemas/QueueShortInfoResource'
-    CallQueueOverflowSettings:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          description: Call queue overflow status
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallQueueInfo'
-    BulkAssignItem:
-      type: object
-      properties:
-        departmentId:
-          type: string
-        addedExtensionIds:
-          type: array
-          items:
-            type: string
-        removedExtensionIds:
-          type: array
-          items:
-            type: string
-    CallQueueIdResource:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a call queue
-    ExtensionInfo:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: Internal identifier of an extension
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of an extension
-        name:
-          type: string
-          description: Extension name
-        extensionNumber:
-          type: string
-          description: Extension short number
-        partnerId:
-          type: string
-          description: 'For partner applications. Internal identifier of an extension
-
-            created by partner. The RingCentral supports the mapping of accounts and
-
-            stores the corresponding account ID/extension ID for each partner ID of
-
-            a client application. In request URIs partner IDs are accepted instead
-
-            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
-
-            Though in response URIs contain the corresponding account IDs and extension
-
-            IDs. In all request and response bodies these values are reflected via
-
-            partnerId attributes of account and extension
-
-            '
-      description: 'Information on the extension, to which the phone number is assigned.
-
-        Returned only for the request of Account phone number list
-
-        '
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-    QueueShortInfoResource:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Call queue extension identifier
-        name:
-          type: string
-          description: Call queue name (read-only)
-    CallQueueInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a call queue
-        id:
-          type: string
-          description: Internal identifier of a call queue
-        extensionNumber:
-          type: string
-          description: Extension number of a call queue
-        name:
-          type: string
-          description: Name of a call queue
-        status:
-          type: string
-          description: Call queue status
-          enum:
-          - Enabled
-          - Disabled
-          - NotActivated
-        subType:
-          type: string
-          description: Indicates whether it is an emergency call queue extension or not
-          enum:
-          - Emergency
-    DepartmentMemberList:
-      type: object
-      description: 'Please note that legacy ''Department'' extension type corresponds to
-
-        ''Call Queue'' extensions in modern RingCentral product terminology
-
-        '
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URL of the resource
-        records:
-          type: array
-          description: List of call queue member extensions
-          items:
-            $ref: '#/components/schemas/ExtensionInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    CallQueueDetails:
-      allOf:
-      - $ref: '#/components/schemas/CallQueueInfo'
-      - type: object
-        properties:
-          serviceLevelSettings:
-            $ref: '#/components/schemas/CallQueueServiceLevelSettings'
-          editableMemberStatus:
-            type: boolean
-            description: Allows members to change their queue status
-          alertTimer:
-            type: integer
-            format: int32
-            description: 'Alert timer or pickup setting. Delay time in seconds before call queue group members are notified when calls are queued
-
-              '
-            enum:
-            - 5
-            - 10
-            - 15
-            - 20
-            - 30
-            - 45
-            - 60
-            - 120
-            - 180
-            - 240
-            - 300
-            - 360
-            - 420
-            - 480
-            - 540
-            - 600
     DepartmentBulkAssignResource:
       type: object
       description: 'Please note that legacy ''Department'' extension type corresponds to
@@ -592,97 +402,24 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BulkAssignItem'
-    EnumeratedPagingModel:
-      type: object
-      required:
-      - perPage
-      additionalProperties: false
-      properties:
-        perPage:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'Current page size, describes how many items are in each page.
-
-            Matches "perPage" parameter from the request.
-
-            '
-          example: 50
-        page:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'The current page number. 1-indexed, so the first page is 1
-
-            by default. May be omitted if result is empty (because non-existent page
-
-            was specified or perPage=0 was requested)
-
-            '
-          example: 5
-        pageStart:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based number of the first element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 0
-        pageEnd:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based index of the last element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 5
-        totalPages:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of pages in a dataset. May be omitted for
-
-            some resources due to performance reasons
-
-            '
-          example: 25
-        totalElements:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of elements in a dataset. May be omitted for
-
-            some resource due to performance reasons
-
-            '
-          example: 25
-    CallQueues:
-      required:
-      - navigation
-      - paging
-      - records
-      - uri
+    UserCallQueues:
       type: object
       properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a call queues resource
         records:
           type: array
-          description: List of call queues
+          description: List of queues where an extension is an agent
           items:
-            $ref: '#/components/schemas/CallQueueInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
+            $ref: '#/components/schemas/QueueShortInfoResource'
+    CallQueueOverflowSettingsRequestResource:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Call queue overflow status
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CallQueueIdResource'
     CallQueueMembers:
       required:
       - navigation
@@ -764,7 +501,164 @@ components:
 
             '
       description: Call queue service level settings
-    CallQueueOverflowSettingsRequestResource:
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    CallQueueInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call queue
+        id:
+          type: string
+          description: Internal identifier of a call queue
+        extensionNumber:
+          type: string
+          description: Extension number of a call queue
+        name:
+          type: string
+          description: Name of a call queue
+        status:
+          type: string
+          description: Call queue status
+          enum:
+          - Enabled
+          - Disabled
+          - NotActivated
+        subType:
+          type: string
+          description: Indicates whether it is an emergency call queue extension or not
+          enum:
+          - Emergency
+    CallQueueDetails:
+      allOf:
+      - $ref: '#/components/schemas/CallQueueInfo'
+      - type: object
+        properties:
+          serviceLevelSettings:
+            $ref: '#/components/schemas/CallQueueServiceLevelSettings'
+          editableMemberStatus:
+            type: boolean
+            description: Allows members to change their queue status
+          alertTimer:
+            type: integer
+            format: int32
+            description: 'Alert timer or pickup setting. Delay time in seconds before call queue group members are notified when calls are queued
+
+              '
+            enum:
+            - 5
+            - 10
+            - 15
+            - 20
+            - 30
+            - 45
+            - 60
+            - 120
+            - 180
+            - 240
+            - 300
+            - 360
+            - 420
+            - 480
+            - 540
+            - 600
+    ExtensionInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        name:
+          type: string
+          description: Extension name
+        extensionNumber:
+          type: string
+          description: Extension short number
+        partnerId:
+          type: string
+          description: 'For partner applications. Internal identifier of an extension
+
+            created by partner. The RingCentral supports the mapping of accounts and
+
+            stores the corresponding account ID/extension ID for each partner ID of
+
+            a client application. In request URIs partner IDs are accepted instead
+
+            of regular RingCentral native IDs as path parameters using `pid=XXX` clause.
+
+            Though in response URIs contain the corresponding account IDs and extension
+
+            IDs. In all request and response bodies these values are reflected via
+
+            partnerId attributes of account and extension
+
+            '
+      description: 'Information on the extension, to which the phone number is assigned.
+
+        Returned only for the request of Account phone number list
+
+        '
+    CallQueues:
+      required:
+      - navigation
+      - paging
+      - records
+      - uri
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call queues resource
+        records:
+          type: array
+          description: List of call queues
+          items:
+            $ref: '#/components/schemas/CallQueueInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    DepartmentMemberList:
+      type: object
+      description: 'Please note that legacy ''Department'' extension type corresponds to
+
+        ''Call Queue'' extensions in modern RingCentral product terminology
+
+        '
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URL of the resource
+        records:
+          type: array
+          description: List of call queue member extensions
+          items:
+            $ref: '#/components/schemas/ExtensionInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    CallQueueOverflowSettings:
       type: object
       properties:
         enabled:
@@ -773,7 +667,113 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/CallQueueIdResource'
+            $ref: '#/components/schemas/CallQueueInfo'
+    CallQueueIdResource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a call queue
+    BulkAssignItem:
+      type: object
+      properties:
+        departmentId:
+          type: string
+        addedExtensionIds:
+          type: array
+          items:
+            type: string
+        removedExtensionIds:
+          type: array
+          items:
+            type: string
+    QueueShortInfoResource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Call queue extension identifier
+        name:
+          type: string
+          description: Call queue name (read-only)
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
   parameters:
     AccountId:
       name: accountId

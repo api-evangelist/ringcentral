@@ -77,64 +77,6 @@ paths:
       x-user-permission: EditAssignedRoles
 components:
   schemas:
-    RolesTimezoneResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        bias:
-          type: string
-    BusinessSiteCollectionRequest:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/RolesBusinessSiteResource'
-    BusinessSiteCollectionResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/RolesBusinessSiteResource'
-    RolesBusinessSiteResource:
-      type: object
-      required:
-      - id
-      properties:
-        uri:
-          type: string
-          description: Link to a business site resource
-        id:
-          type: string
-        email:
-          type: string
-          format: email
-        code:
-          type: string
-        name:
-          type: string
-        extensionNumber:
-          type: string
-        callerIdName:
-          type: string
-        operator:
-          $ref: '#/components/schemas/BasicExtensionInfoResource'
-        regionalSettings:
-          $ref: '#/components/schemas/RolesRegionalSettingsResource'
-        businessAddress:
-          $ref: '#/components/schemas/ContactAddressInfoResource'
     RolesRegionalSettingsResource:
       type: object
       properties:
@@ -164,6 +106,73 @@ components:
           type: string
         localeCode:
           type: string
+    RolesTimezoneResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        bias:
+          type: string
+    RolesBusinessSiteResource:
+      type: object
+      required:
+      - id
+      properties:
+        uri:
+          type: string
+          description: Link to a business site resource
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        code:
+          type: string
+        name:
+          type: string
+        extensionNumber:
+          type: string
+        callerIdName:
+          type: string
+        operator:
+          $ref: '#/components/schemas/BasicExtensionInfoResource'
+        regionalSettings:
+          $ref: '#/components/schemas/RolesRegionalSettingsResource'
+        businessAddress:
+          $ref: '#/components/schemas/ContactAddressInfoResource'
+    BusinessSiteCollectionResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/RolesBusinessSiteResource'
+    BasicExtensionInfoResource:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        extensionNumber:
+          type: string
+    BusinessSiteCollectionRequest:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/RolesBusinessSiteResource'
     CurrencyResource:
       type: object
       properties:
@@ -190,15 +199,6 @@ components:
           type: string
         country:
           type: string
-    BasicExtensionInfoResource:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        extensionNumber:
-          type: string
     RolesCountryResource:
       type: object
       properties:
@@ -224,12 +224,12 @@ components:
         signupAllowed:
           type: boolean
   parameters:
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true
@@ -239,12 +239,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    ExtensionId:
-      name: extensionId
+    AccountId:
+      name: accountId
       in: path
-      description: 'Internal identifier of the RingCentral extension/user
+      description: 'Internal identifier of the RingCentral account
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true

@@ -436,12 +436,23 @@ paths:
       x-throttling-group: Light
 components:
   schemas:
-    DefaultUserRoleRequest:
+    DefaultUserRole:
       type: object
       properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a default role resource
         id:
           type: string
-          description: Internal identifier of a user role to be set as default
+          description: Internal identifier of a default role
+        displayName:
+          maxLength: 128
+          minLength: 0
+          pattern: ^((?!(<|>|\/|\")).)*$
+          type: string
+          description: Custom name of a default role
+          example: My Custom User Role
     AssignedRoleResource:
       type: object
       properties:
@@ -466,6 +477,71 @@ components:
         siteRestricted:
           type: boolean
           description: Site restricted flag
+    AssignedRolesResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedRoleResource'
+    PermissionIdResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+        siteCompatible:
+          type: string
+          description: Site compatibility flag set for permission
+          enum:
+          - Compatible
+          - Incompatible
+          - Independent
+        readOnly:
+          type: boolean
+          description: Specifies if the permission is editable on UI (if set to `true`) or not (if set to `false`)
+        assignable:
+          type: boolean
+          description: Specifies if the permission can be assigned by the account administrator
+        permissionsCapabilities:
+          $ref: '#/components/schemas/PermissionsCapabilities'
+    PermissionsCapabilities:
+      type: object
+      description: Advanced permissions capabilities. Returned if `advancedPermissions` query parameter is set to `true`.
+      properties:
+        enabled:
+          type: boolean
+          description: Specifies whether the user is enabled with the listed permission or not
+        manageEnabled:
+          type: boolean
+          description: Specifies if the user can manage the listed permission and is allowed to enable it on other users
+        grantEnabled:
+          type: boolean
+          description: Specifies if the users who were enabled with the listed permission can grant it further to other users
+    BulkRoleAssignResource:
+      type: object
+      properties:
+        siteRestricted:
+          type: boolean
+          example: true
+        siteCompatible:
+          type: boolean
+        uri:
+          type: string
+          format: uri
+        addedExtensionIds:
+          type: array
+          items:
+            type: string
+        removedExtensionIds:
+          type: array
+          items:
+            type: string
     RoleResource:
       type: object
       properties:
@@ -520,20 +596,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PermissionIdResource'
-    PermissionsCapabilities:
-      type: object
-      description: Advanced permissions capabilities. Returned if `advancedPermissions` query parameter is set to `true`.
-      properties:
-        enabled:
-          type: boolean
-          description: Specifies whether the user is enabled with the listed permission or not
-        manageEnabled:
-          type: boolean
-          description: Specifies if the user can manage the listed permission and is allowed to enable it on other users
-        grantEnabled:
-          type: boolean
-          description: Specifies if the users who were enabled with the listed permission can grant it further to other users
-    AssignedRolesResource:
+    RolesCollectionResource:
       type: object
       properties:
         uri:
@@ -542,96 +605,17 @@ components:
         records:
           type: array
           items:
-            $ref: '#/components/schemas/AssignedRoleResource'
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    ExtensionWithRolesCollectionResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExtensionWithRolesResource'
+            $ref: '#/components/schemas/RoleResource'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
         navigation:
           $ref: '#/components/schemas/PageNavigationModel'
-    BulkRoleAssignResource:
+    DefaultUserRoleRequest:
       type: object
       properties:
-        siteRestricted:
-          type: boolean
-          example: true
-        siteCompatible:
-          type: boolean
-        uri:
-          type: string
-          format: uri
-        addedExtensionIds:
-          type: array
-          items:
-            type: string
-        removedExtensionIds:
-          type: array
-          items:
-            type: string
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-    ExtensionWithRolesResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        extensionId:
-          type: string
-        roles:
-          type: array
-          items:
-            $ref: '#/components/schemas/AssignedRoleResource'
-    PermissionIdResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
         id:
           type: string
-        siteCompatible:
-          type: string
-          description: Site compatibility flag set for permission
-          enum:
-          - Compatible
-          - Incompatible
-          - Independent
-        readOnly:
-          type: boolean
-          description: Specifies if the permission is editable on UI (if set to `true`) or not (if set to `false`)
-        assignable:
-          type: boolean
-          description: Specifies if the permission can be assigned by the account administrator
-        permissionsCapabilities:
-          $ref: '#/components/schemas/PermissionsCapabilities'
+          description: Internal identifier of a user role to be set as default
     EnumeratedPagingModel:
       type: object
       required:
@@ -702,24 +686,15 @@ components:
 
             '
           example: 25
-    DefaultUserRole:
+    PageNavigationUri:
       type: object
+      additionalProperties: false
       properties:
         uri:
           type: string
+          description: Canonical URI to retrieve the particular page of the result set
           format: uri
-          description: Link to a default role resource
-        id:
-          type: string
-          description: Internal identifier of a default role
-        displayName:
-          maxLength: 128
-          minLength: 0
-          pattern: ^((?!(<|>|\/|\")).)*$
-          type: string
-          description: Custom name of a default role
-          example: My Custom User Role
-    RolesCollectionResource:
+    ExtensionWithRolesCollectionResource:
       type: object
       properties:
         uri:
@@ -728,11 +703,36 @@ components:
         records:
           type: array
           items:
-            $ref: '#/components/schemas/RoleResource'
+            $ref: '#/components/schemas/ExtensionWithRolesResource'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
         navigation:
           $ref: '#/components/schemas/PageNavigationModel'
+    ExtensionWithRolesResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        extensionId:
+          type: string
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedRoleResource'
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
   parameters:
     PerPage:
       name: perPage
@@ -751,6 +751,21 @@ components:
         maximum: 1000
         default: 100
       example: 100
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
     Page:
       name: page
       in: query
@@ -770,21 +785,6 @@ components:
       description: 'Internal identifier of the RingCentral account
 
         (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

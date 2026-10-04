@@ -185,34 +185,7 @@ components:
           format: uri
         id:
           type: string
-    PermissionCategoryCollectionResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/PermissionCategoryResource'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-    PermissionsCapabilities:
-      type: object
-      description: Advanced permissions capabilities. Returned if `advancedPermissions` query parameter is set to `true`.
-      properties:
-        enabled:
-          type: boolean
-          description: Specifies whether the user is enabled with the listed permission or not
-        manageEnabled:
-          type: boolean
-          description: Specifies if the user can manage the listed permission and is allowed to enable it on other users
-        grantEnabled:
-          type: boolean
-          description: Specifies if the users who were enabled with the listed permission can grant it further to other users
-    PermissionCategoryResource:
+    PermissionResource:
       type: object
       properties:
         uri:
@@ -224,41 +197,25 @@ components:
           type: string
         description:
           type: string
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
+        assignable:
+          type: boolean
+          default: false
+        readOnly:
+          type: boolean
+          default: false
+        siteCompatible:
           type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    PermissionCollectionResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        records:
+          description: Site compatibility flag set for permission
+          enum:
+          - Incompatible
+          - Compatible
+          - Independent
+        category:
+          $ref: '#/components/schemas/PermissionCategoryIdResource'
+        includedPermissions:
           type: array
           items:
-            $ref: '#/components/schemas/PermissionResource'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
+            $ref: '#/components/schemas/PermissionIdResource'
     AuthProfileCheckResource:
       type: object
       properties:
@@ -270,16 +227,14 @@ components:
           default: false
         details:
           $ref: '#/components/schemas/ActivePermissionResource'
-    AuthProfileResource:
+    PermissionCategoryIdResource:
       type: object
       properties:
         uri:
           type: string
           format: uri
-        permissions:
-          type: array
-          items:
-            $ref: '#/components/schemas/ActivePermissionResource'
+        id:
+          type: string
     PermissionIdResource:
       type: object
       properties:
@@ -303,7 +258,39 @@ components:
           description: Specifies if the permission can be assigned by the account administrator
         permissionsCapabilities:
           $ref: '#/components/schemas/PermissionsCapabilities'
-    PermissionCategoryIdResource:
+    PermissionsCapabilities:
+      type: object
+      description: Advanced permissions capabilities. Returned if `advancedPermissions` query parameter is set to `true`.
+      properties:
+        enabled:
+          type: boolean
+          description: Specifies whether the user is enabled with the listed permission or not
+        manageEnabled:
+          type: boolean
+          description: Specifies if the user can manage the listed permission and is allowed to enable it on other users
+        grantEnabled:
+          type: boolean
+          description: Specifies if the users who were enabled with the listed permission can grant it further to other users
+    ActivePermissionResource:
+      type: object
+      properties:
+        permission:
+          $ref: '#/components/schemas/PermissionIdResource'
+        effectiveRole:
+          $ref: '#/components/schemas/RoleIdResource'
+        scopes:
+          type: array
+          items:
+            type: string
+            enum:
+            - Account
+            - AllExtensions
+            - Federation
+            - NonUserExtensions
+            - RoleBased
+            - Self
+            - UserExtensions
+    PermissionCategoryResource:
       type: object
       properties:
         uri:
@@ -311,6 +298,38 @@ components:
           format: uri
         id:
           type: string
+        displayName:
+          type: string
+        description:
+          type: string
+    PermissionCategoryCollectionResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionCategoryResource'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+    PermissionCollectionResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionResource'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
     EnumeratedPagingModel:
       type: object
       required:
@@ -381,56 +400,37 @@ components:
 
             '
           example: 25
-    ActivePermissionResource:
+    PageNavigationUri:
       type: object
+      additionalProperties: false
       properties:
-        permission:
-          $ref: '#/components/schemas/PermissionIdResource'
-        effectiveRole:
-          $ref: '#/components/schemas/RoleIdResource'
-        scopes:
-          type: array
-          items:
-            type: string
-            enum:
-            - Account
-            - AllExtensions
-            - Federation
-            - NonUserExtensions
-            - RoleBased
-            - Self
-            - UserExtensions
-    PermissionResource:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    AuthProfileResource:
       type: object
       properties:
         uri:
           type: string
           format: uri
-        id:
-          type: string
-        displayName:
-          type: string
-        description:
-          type: string
-        assignable:
-          type: boolean
-          default: false
-        readOnly:
-          type: boolean
-          default: false
-        siteCompatible:
-          type: string
-          description: Site compatibility flag set for permission
-          enum:
-          - Incompatible
-          - Compatible
-          - Independent
-        category:
-          $ref: '#/components/schemas/PermissionCategoryIdResource'
-        includedPermissions:
+        permissions:
           type: array
           items:
-            $ref: '#/components/schemas/PermissionIdResource'
+            $ref: '#/components/schemas/ActivePermissionResource'
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
   parameters:
     PerPage:
       name: perPage
@@ -449,6 +449,21 @@ components:
         maximum: 1000
         default: 100
       example: 100
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
     Page:
       name: page
       in: query
@@ -468,21 +483,6 @@ components:
       description: 'Internal identifier of the RingCentral account
 
         (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

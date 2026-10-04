@@ -286,6 +286,18 @@ paths:
       x-user-permission: ReadCompanyInfo
 components:
   schemas:
+    CustomFieldResource:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '1032854'
+        name:
+          type: string
+          example: Rank
+        value:
+          type: string
+          example: '5'
     SearchDirectoryContactType:
       type: string
       description: Type of directory contact to filter
@@ -307,60 +319,12 @@ components:
       - GroupCallPickup
       - External
       example: User
-    FederationResource:
-      type: object
-      properties:
-        accounts:
-          type: array
-          items:
-            $ref: '#/components/schemas/FederatedAccountResource'
-        creationTime:
-          type: string
-          format: date-time
-        displayName:
-          type: string
-        id:
-          type: string
-        lastModifiedTime:
-          type: string
-          format: date-time
-        type:
-          $ref: '#/components/schemas/FederationType'
-    AccountDirectoryProfileImageResource:
-      type: object
-      properties:
-        etag:
-          type: string
-          example: tag
-        uri:
-          type: string
-          format: uri
-    SearchDirectoryExtensionType:
+    FederationType:
       type: string
-      description: Type of extension to filter the contacts
+      description: Federation type
       enum:
-      - User
-      - Department
-      - Announcement
-      - Voicemail
-      - DigitalUser
-      - VirtualUser
-      - FaxUser
-      - PagingOnly
-      - SharedLinesGroup
-      - IvrMenu
-      - ApplicationExtension
-      - ParkLocation
-      - Limited
-      - Bot
-      - Site
-      - Room
-      - ProxyAdmin
-      - DelegatedLinesGroup
-      - FlexibleUser
-      - GroupCallPickup
-      - RoomConnector
-      example: User
+      - Regular
+      - AdminOnly
     GroupResource:
       type: object
       properties:
@@ -411,6 +375,45 @@ components:
         code:
           type: string
           example: '1007'
+    ExternalIntegrationResource:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '9813'
+        typeId:
+          type: string
+          example: '1'
+        type:
+          type: string
+          example: External
+        displayName:
+          type: string
+          example: Integration X
+        routingType:
+          type: string
+          example: Account
+        outboundEdgeId:
+          type: string
+          example: '1726'
+    AccountDirectoryProfileImageResource:
+      type: object
+      properties:
+        etag:
+          type: string
+          example: tag
+        uri:
+          type: string
+          format: uri
+    CallQueueResource:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '873014540006'
+        name:
+          type: string
+          example: Sales CQ
     DirectoryResource:
       required:
       - records
@@ -423,22 +426,49 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ContactResource'
-    FederationType:
-      type: string
-      description: Federation type
-      enum:
-      - Regular
-      - AdminOnly
-    ContactSubTypeEnum:
-      type: string
-      description: Extension subtype
-      example: Unknown
-      enum:
-      - Unknown
-      - VideoPro
-      - VideoProPlus
-      - DigitalSignage
-      - Emergency
+    FederatedAccountResource:
+      type: object
+      required:
+      - id
+      properties:
+        companyName:
+          type: string
+        conflictCount:
+          type: integer
+          format: int32
+        federatedName:
+          type: string
+        id:
+          type: string
+        linkCreationTime:
+          type: string
+          format: date-time
+        mainNumber:
+          $ref: '#/components/schemas/PhoneNumberResource'
+    FederationResource:
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/FederatedAccountResource'
+        creationTime:
+          type: string
+          format: date-time
+        displayName:
+          type: string
+        id:
+          type: string
+        lastModifiedTime:
+          type: string
+          format: date-time
+        type:
+          $ref: '#/components/schemas/FederationType'
+    SearchDirectoryExtensionTypes:
+      type: array
+      description: Types of extension to filter the contacts
+      items:
+        $ref: '#/components/schemas/SearchDirectoryExtensionType'
     SearchDirectoryEntriesRequest:
       type: object
       properties:
@@ -536,16 +566,13 @@ components:
         department: R&D department
         page: 1
         perPage: 30
-    ADGErrorResponse:
-      type: object
-      properties:
-        errors:
-          type: array
-          description: Collection of all gathered errors
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/ADGError'
-      description: Format of response in case that any error occurred during request processing
+    FederationTypes:
+      type: string
+      description: Federation types for search
+      enum:
+      - All
+      - Regular
+      - AdminOnly
     AccountResource:
       required:
       - id
@@ -562,140 +589,6 @@ components:
           example: '400131426008'
         mainNumber:
           $ref: '#/components/schemas/PhoneNumberResource'
-    PhoneNumberResource:
-      type: object
-      properties:
-        formattedPhoneNumber:
-          type: string
-          example: +1 (205) 6812029
-        phoneNumber:
-          type: string
-          example: '+12056812029'
-        type:
-          type: string
-          example: VoiceFax
-        label:
-          type: string
-          description: Custom user name of a phone number, if any
-          example: Boss
-        usageType:
-          type: string
-          description: Usage type of phone number
-          enum:
-          - MobileNumber
-          - ContactNumber
-          - DirectNumber
-          - ForwardedNumber
-          example: DirectNumber
-        hidden:
-          type: boolean
-          description: Specifies if a phone number should be hidden or not
-        primary:
-          type: boolean
-          description: Specifies if the number is primary, i.e. displayed as 'main number' and called by default
-    CallQueueResource:
-      type: object
-      properties:
-        id:
-          type: string
-          example: '873014540006'
-        name:
-          type: string
-          example: Sales CQ
-    EnumeratedPagingModel:
-      type: object
-      required:
-      - perPage
-      additionalProperties: false
-      properties:
-        perPage:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'Current page size, describes how many items are in each page.
-
-            Matches "perPage" parameter from the request.
-
-            '
-          example: 50
-        page:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'The current page number. 1-indexed, so the first page is 1
-
-            by default. May be omitted if result is empty (because non-existent page
-
-            was specified or perPage=0 was requested)
-
-            '
-          example: 5
-        pageStart:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based number of the first element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 0
-        pageEnd:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based index of the last element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 5
-        totalPages:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of pages in a dataset. May be omitted for
-
-            some resources due to performance reasons
-
-            '
-          example: 25
-        totalElements:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of elements in a dataset. May be omitted for
-
-            some resource due to performance reasons
-
-            '
-          example: 25
-    CustomFieldResource:
-      type: object
-      properties:
-        id:
-          type: string
-          example: '1032854'
-        name:
-          type: string
-          example: Rank
-        value:
-          type: string
-          example: '5'
-    CostCenterResource:
-      type: object
-      properties:
-        id:
-          type: string
-          example: '83266549237542'
-        code:
-          type: string
-          example: Main
-        name:
-          type: string
-          example: Cost Center A
     ContactResource:
       required:
       - id
@@ -797,37 +690,77 @@ components:
           $ref: '#/components/schemas/ExternalIntegrationResource'
         subType:
           $ref: '#/components/schemas/ContactSubTypeEnum'
-    SearchDirectoryExtensionTypes:
-      type: array
-      description: Types of extension to filter the contacts
-      items:
-        $ref: '#/components/schemas/SearchDirectoryExtensionType'
-    FederationTypes:
-      type: string
-      description: Federation types for search
-      enum:
-      - All
-      - Regular
-      - AdminOnly
-    FederatedAccountResource:
-      type: object
+    DirectoryRoleResource:
       required:
       - id
+      type: object
       properties:
-        companyName:
-          type: string
-        conflictCount:
-          type: integer
-          format: int32
-        federatedName:
-          type: string
         id:
           type: string
-        linkCreationTime:
+        name:
           type: string
-          format: date-time
-        mainNumber:
-          $ref: '#/components/schemas/PhoneNumberResource'
+        domain:
+          type: string
+        displayName:
+          type: string
+    ContactSubTypeEnum:
+      type: string
+      description: Extension subtype
+      example: Unknown
+      enum:
+      - Unknown
+      - VideoPro
+      - VideoProPlus
+      - DigitalSignage
+      - Emergency
+    SearchDirectoryExtensionType:
+      type: string
+      description: Type of extension to filter the contacts
+      enum:
+      - User
+      - Department
+      - Announcement
+      - Voicemail
+      - DigitalUser
+      - VirtualUser
+      - FaxUser
+      - PagingOnly
+      - SharedLinesGroup
+      - IvrMenu
+      - ApplicationExtension
+      - ParkLocation
+      - Limited
+      - Bot
+      - Site
+      - Room
+      - ProxyAdmin
+      - DelegatedLinesGroup
+      - FlexibleUser
+      - GroupCallPickup
+      - RoomConnector
+      example: User
+    CostCenterResource:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '83266549237542'
+        code:
+          type: string
+          example: Main
+        name:
+          type: string
+          example: Cost Center A
+    ADGErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          description: Collection of all gathered errors
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/ADGError'
+      description: Format of response in case that any error occurred during request processing
     ADGError:
       type: object
       properties:
@@ -855,54 +788,108 @@ components:
           description: Message that describes the error. This message can be used in UI.
           readOnly: true
       description: Description of an error occurred during request processing. This data type can be used only in readonly mode, no writing is allowed
-    DirectoryRoleResource:
+    EnumeratedPagingModel:
+      type: object
       required:
-      - id
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    PhoneNumberResource:
       type: object
       properties:
-        id:
+        formattedPhoneNumber:
           type: string
-        name:
+          example: +1 (205) 6812029
+        phoneNumber:
           type: string
-        domain:
-          type: string
-        displayName:
-          type: string
-    ExternalIntegrationResource:
-      type: object
-      properties:
-        id:
-          type: string
-          example: '9813'
-        typeId:
-          type: string
-          example: '1'
+          example: '+12056812029'
         type:
           type: string
-          example: External
-        displayName:
+          example: VoiceFax
+        label:
           type: string
-          example: Integration X
-        routingType:
+          description: Custom user name of a phone number, if any
+          example: Boss
+        usageType:
           type: string
-          example: Account
-        outboundEdgeId:
-          type: string
-          example: '1726'
+          description: Usage type of phone number
+          enum:
+          - MobileNumber
+          - ContactNumber
+          - DirectNumber
+          - ForwardedNumber
+          example: DirectNumber
+        hidden:
+          type: boolean
+          description: Specifies if a phone number should be hidden or not
+        primary:
+          type: boolean
+          description: Specifies if the number is primary, i.e. displayed as 'main number' and called by default
   parameters:
-    IfNoneMatch:
-      name: If-None-Match
-      in: header
-      required: false
-      description: 'User in GET requests to skip retrieving the data if the provided value matches current `ETag` associated with this resource.
-
-        The server checks the current resource ETag and returns the data only if mismatches the `If-None-Match` value,
-
-        otherwise `HTTP 304 Not Modified` status is returned.
-
-        '
-      schema:
-        type: string
     AccountId:
       name: accountId
       in: path
@@ -918,6 +905,19 @@ components:
         type: string
         default: '~'
       example: '~'
+    IfNoneMatch:
+      name: If-None-Match
+      in: header
+      required: false
+      description: 'User in GET requests to skip retrieving the data if the provided value matches current `ETag` associated with this resource.
+
+        The server checks the current resource ETag and returns the data only if mismatches the `If-None-Match` value,
+
+        otherwise `HTTP 304 Not Modified` status is returned.
+
+        '
+      schema:
+        type: string
   securitySchemes:
     OAuth2:
       type: oauth2

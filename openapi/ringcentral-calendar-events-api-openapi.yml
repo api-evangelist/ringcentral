@@ -232,44 +232,51 @@ paths:
       x-app-permission: TeamMessaging
 components:
   schemas:
-    EventRecurrenceInfo:
+    TMEventInfo:
       type: object
       properties:
-        schedule:
+        id:
           type: string
-          description: "Event recurrence settings. For non-periodic events the value \nis `None`. Must be greater or equal to event duration: 1- Day/Weekday; \n7 - Week; 28 - Month; 365 - Year\n"
-          enum:
-          - None
-          - Day
-          - Weekday
-          - Week
-          - Month
-          - Year
-        endingCondition:
+          description: Internal identifier of an event
+        creatorId:
           type: string
-          description: Condition of ending an event
-          enum:
-          - None
-          - Count
-          - Date
-        endingAfter:
-          type: integer
-          format: int32
-          description: "Count of event iterations. For periodic events only. Value range is 1 - 10. \nMust be specified if `endingCondition` is `Count`\n"
-        endingOn:
+          description: Internal identifier of a person created an event
+        title:
           type: string
-          description: "Iterations ending datetime for periodic events in \n[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format\n"
+          description: Event title
+        startTime:
+          type: string
           format: date-time
-    TMEventList:
-      type: object
-      properties:
-        records:
-          type: array
-          description: List of events created by the current user
-          items:
-            $ref: '#/components/schemas/TMEventInfo'
-        navigation:
-          $ref: '#/components/schemas/TMNavigationInfo'
+          description: Datetime of starting an event
+        endTime:
+          type: string
+          format: date-time
+          description: Datetime of ending an event
+        allDay:
+          type: boolean
+          description: Indicates whether an event has some specific time slot or lasts for the whole day(s)
+          default: false
+        recurrence:
+          $ref: '#/components/schemas/EventRecurrenceInfo'
+        color:
+          type: string
+          description: Color of Event title (including its presentation in Calendar)
+          default: Black
+          enum:
+          - Black
+          - Red
+          - Orange
+          - Yellow
+          - Green
+          - Blue
+          - Purple
+          - Magenta
+        location:
+          type: string
+          description: Event location
+        description:
+          type: string
+          description: Event details
     TMNavigationInfo:
       type: object
       properties:
@@ -328,51 +335,44 @@ components:
         description:
           type: string
           description: Event details
-    TMEventInfo:
+    TMEventList:
       type: object
       properties:
-        id:
+        records:
+          type: array
+          description: List of events created by the current user
+          items:
+            $ref: '#/components/schemas/TMEventInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
+    EventRecurrenceInfo:
+      type: object
+      properties:
+        schedule:
           type: string
-          description: Internal identifier of an event
-        creatorId:
-          type: string
-          description: Internal identifier of a person created an event
-        title:
-          type: string
-          description: Event title
-        startTime:
-          type: string
-          format: date-time
-          description: Datetime of starting an event
-        endTime:
-          type: string
-          format: date-time
-          description: Datetime of ending an event
-        allDay:
-          type: boolean
-          description: Indicates whether an event has some specific time slot or lasts for the whole day(s)
-          default: false
-        recurrence:
-          $ref: '#/components/schemas/EventRecurrenceInfo'
-        color:
-          type: string
-          description: Color of Event title (including its presentation in Calendar)
-          default: Black
+          description: "Event recurrence settings. For non-periodic events the value \nis `None`. Must be greater or equal to event duration: 1- Day/Weekday; \n7 - Week; 28 - Month; 365 - Year\n"
           enum:
-          - Black
-          - Red
-          - Orange
-          - Yellow
-          - Green
-          - Blue
-          - Purple
-          - Magenta
-        location:
+          - None
+          - Day
+          - Weekday
+          - Week
+          - Month
+          - Year
+        endingCondition:
           type: string
-          description: Event location
-        description:
+          description: Condition of ending an event
+          enum:
+          - None
+          - Count
+          - Date
+        endingAfter:
+          type: integer
+          format: int32
+          description: "Count of event iterations. For periodic events only. Value range is 1 - 10. \nMust be specified if `endingCondition` is `Count`\n"
+        endingOn:
           type: string
-          description: Event details
+          description: "Iterations ending datetime for periodic events in \n[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format\n"
+          format: date-time
   securitySchemes:
     OAuth2:
       type: oauth2

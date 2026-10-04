@@ -126,16 +126,20 @@ paths:
       x-throttling-group: Light
       x-app-permission: Video
 components:
-  responses:
-    RcvAccessForbidden:
-      description: Access forbidden
-    RcvInternalError:
-      description: Error processing data
-    RcvTimeout:
-      description: Data processing timeout
-    RcvBadRequest:
-      description: Bad request format
   schemas:
+    Host:
+      type: object
+      properties:
+        accountId:
+          type: string
+          description: Account id
+        extensionId:
+          type: string
+          description: Extension id
+        displayName:
+          type: string
+          description: Display name
+      description: Meeting host
     Paging:
       required:
       - currentPageToken
@@ -148,6 +152,69 @@ components:
           type: string
           description: Next page offset token
       description: Paging information
+    Recording:
+      required:
+      - id
+      - availabilityStatus
+      type: object
+      properties:
+        id:
+          type: string
+          description: Recording id
+        startTime:
+          type: integer
+          format: int64
+          description: Recording start time
+        url:
+          type: string
+          description: Secure Link to the recording file
+        metadata:
+          $ref: '#/components/schemas/JsValue'
+        status:
+          type: string
+          description: Recording processing status
+          enum:
+          - Processing
+          - Processed
+          - Error
+          - Corrupted
+          - InProgress
+          - Purged
+          - Failed
+        availabilityStatus:
+          type: string
+          description: Availability status
+          enum:
+          - Alive
+          - Deleted
+          - Purged
+          - NotAvailable
+        longSummary:
+          type: string
+          description: During meeting AI team analyze code and after meeting finished generates text summary about this meeting
+        shortSummary:
+          type: string
+          description: During meeting AI team analyze code and after meeting finished generates text summary about this meeting
+        keywords:
+          type: array
+          description: During meeting AI team analyze code and after meeting finished generates key words used in meeting
+          items:
+            type: string
+      description: Recording information
+    MeetingPage:
+      required:
+      - meetings
+      - paging
+      type: object
+      properties:
+        meetings:
+          type: array
+          description: Meetings array
+          items:
+            $ref: '#/components/schemas/Meeting'
+        paging:
+          $ref: '#/components/schemas/Paging'
+      description: Meetings page
     Meeting:
       required:
       - bridgeId
@@ -232,55 +299,6 @@ components:
           type: string
           description: Chat location
       description: Meeting information
-    Recording:
-      required:
-      - id
-      - availabilityStatus
-      type: object
-      properties:
-        id:
-          type: string
-          description: Recording id
-        startTime:
-          type: integer
-          format: int64
-          description: Recording start time
-        url:
-          type: string
-          description: Secure Link to the recording file
-        metadata:
-          $ref: '#/components/schemas/JsValue'
-        status:
-          type: string
-          description: Recording processing status
-          enum:
-          - Processing
-          - Processed
-          - Error
-          - Corrupted
-          - InProgress
-          - Purged
-          - Failed
-        availabilityStatus:
-          type: string
-          description: Availability status
-          enum:
-          - Alive
-          - Deleted
-          - Purged
-          - NotAvailable
-        longSummary:
-          type: string
-          description: During meeting AI team analyze code and after meeting finished generates text summary about this meeting
-        shortSummary:
-          type: string
-          description: During meeting AI team analyze code and after meeting finished generates text summary about this meeting
-        keywords:
-          type: array
-          description: During meeting AI team analyze code and after meeting finished generates key words used in meeting
-          items:
-            type: string
-      description: Recording information
     Participant:
       required:
       - type
@@ -312,33 +330,15 @@ components:
     JsValue:
       type: object
       properties: {}
-    MeetingPage:
-      required:
-      - meetings
-      - paging
-      type: object
-      properties:
-        meetings:
-          type: array
-          description: Meetings array
-          items:
-            $ref: '#/components/schemas/Meeting'
-        paging:
-          $ref: '#/components/schemas/Paging'
-      description: Meetings page
-    Host:
-      type: object
-      properties:
-        accountId:
-          type: string
-          description: Account id
-        extensionId:
-          type: string
-          description: Extension id
-        displayName:
-          type: string
-          description: Display name
-      description: Meeting host
+  responses:
+    RcvTimeout:
+      description: Data processing timeout
+    RcvBadRequest:
+      description: Bad request format
+    RcvInternalError:
+      description: Error processing data
+    RcvAccessForbidden:
+      description: Access forbidden
   parameters:
     RcvMeetingId:
       name: meetingId

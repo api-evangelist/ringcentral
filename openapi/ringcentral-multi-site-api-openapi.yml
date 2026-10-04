@@ -268,42 +268,36 @@ paths:
       x-user-permission: Sites
 components:
   schemas:
-    SiteUpdateRequest:
-      required:
-      - name
+    FormattingLocaleInfo:
       type: object
       properties:
+        id:
+          type: string
+          description: Internal identifier of a formatting language
+        localeCode:
+          type: string
+          description: Localization code of a formatting language
         name:
           type: string
-          description: Extension user first name
-        extensionNumber:
-          type: string
-          description: Extension number
-        callerIdName:
-          type: string
-          description: 'Custom name of a caller. Max number of characters is 15 (only
+          description: Official name of a formatting language
+      description: 'Formatting language preferences for numbers, dates and currencies
 
-            alphabetical symbols, numbers and commas are supported)
-
-            '
-        email:
-          type: string
-          format: email
-          description: Site extension contact email
-        businessAddress:
-          $ref: '#/components/schemas/ContactBusinessAddressInfo'
-        regionalSettings:
-          $ref: '#/components/schemas/RegionalSettings'
-        operator:
-          $ref: '#/components/schemas/OperatorInfo'
-    PageNavigationUri:
+        '
+    GreetingLanguageInfo:
       type: object
-      additionalProperties: false
       properties:
-        uri:
+        id:
           type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
+          description: Internal identifier of a greeting language
+        localeCode:
+          type: string
+          description: Localization code of a greeting language
+        name:
+          type: string
+          description: Official name of a greeting language
+      description: 'Information on language used for telephony greetings
+
+        '
     SiteIVRSettingsUpdate:
       type: object
       properties:
@@ -313,42 +307,55 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SiteIvrActionsUpdate'
-    SiteIVRSettings:
+    SiteIVRActionsExtensionInfo:
       type: object
       properties:
-        topMenu:
-          $ref: '#/components/schemas/SiteIVRTopMenu'
-        actions:
-          type: array
-          items:
-            $ref: '#/components/schemas/SiteIvrActions'
-    ContactBusinessAddressInfo:
+        id:
+          type: string
+          description: Internal identifier of an extension
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of an extension
+        name:
+          type: string
+          description: Name of an extension user
+      description: Extension information
+    CountryInfoMinimalModel:
       type: object
       properties:
-        country:
+        id:
           type: string
-          description: Country name of a user's company
-        state:
+          description: Internal identifier of a country
+        uri:
           type: string
-          description: 'State/province name of a user''s company. Mandatory
+          format: uri
+          description: Canonical URI of a country resource
+    CountryInfoShortModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoBasicModel'
+      - type: object
+        properties:
+          isoCode:
+            type: string
+            description: 'A ISO country code value complying with the
 
-            for the USA, UK and Canada
+              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
 
-            '
-        city:
-          type: string
-          description: City name of a user's company
-        street:
-          type: string
-          description: Street address of a user's company
-        zip:
-          type: string
-          description: Zip code of a user's company
-      description: 'User''s business address. The default is
+              format.
 
-        Company (Auto-Receptionist) settings
+              '
+          callingCode:
+            type: string
+            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
 
-        '
+              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
+
+              [E.164](http://en.wikipedia.org/wiki/E.164),
+
+              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
+
+              '
     SiteIVRActionsExtensionInfoUpdate:
       type: object
       properties:
@@ -380,30 +387,157 @@ components:
         The default is Company (Auto-Receptionist) settings
 
         '
-    SiteMembersBulkUpdate:
+    SiteUpdateRequest:
+      required:
+      - name
       type: object
       properties:
-        removedExtensionIds:
+        name:
+          type: string
+          description: Extension user first name
+        extensionNumber:
+          type: string
+          description: Extension number
+        callerIdName:
+          type: string
+          description: 'Custom name of a caller. Max number of characters is 15 (only
+
+            alphabetical symbols, numbers and commas are supported)
+
+            '
+        email:
+          type: string
+          format: email
+          description: Site extension contact email
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        regionalSettings:
+          $ref: '#/components/schemas/RegionalSettings'
+        operator:
+          $ref: '#/components/schemas/OperatorInfo'
+    SiteMembersList:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a site members list resource
+        records:
           type: array
-          description: List of removed extensions
           items:
-            type: string
-        addedExtensionIds:
-          type: array
-          description: List of added extensions
-          items:
-            type: string
-    SiteOperatorReference:
+            $ref: '#/components/schemas/SiteMemberInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+    SiteInfo:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of an operator extension
-      description: 'Site Fax/SMS recipient (operator) reference. Multi-level IVR should
+          description: Internal identifier of a site extension
+        uri:
+          type: string
+          format: uri
+          description: Link to a site resource
+        name:
+          type: string
+          description: Extension user first name
+        extensionNumber:
+          type: string
+          description: Extension number
+        callerIdName:
+          type: string
+          description: 'Custom name of a caller. Max number of characters is 15 (only
 
-        be enabled
+            alphabetical symbols, numbers and commas are supported)
+
+            '
+        email:
+          type: string
+          format: email
+          description: Site extension contact email
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        regionalSettings:
+          $ref: '#/components/schemas/RegionalSettings'
+        operator:
+          $ref: '#/components/schemas/OperatorInfo'
+        code:
+          type: string
+          description: 'Site code value. Returned only if specified
+
+            '
+    CountryInfoBasicModel:
+      allOf:
+      - $ref: '#/components/schemas/CountryInfoMinimalModel'
+      - type: object
+        properties:
+          name:
+            type: string
+            description: The official name of a country
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    SiteIVRTopMenuUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Internal identifier of an IVR menu extension
+
+            '
+      description: Top IVR Menu extension
+    ContactBusinessAddressInfo:
+      type: object
+      properties:
+        country:
+          type: string
+          description: Country name of a user's company
+        state:
+          type: string
+          description: 'State/province name of a user''s company. Mandatory
+
+            for the USA, UK and Canada
+
+            '
+        city:
+          type: string
+          description: City name of a user's company
+        street:
+          type: string
+          description: Street address of a user's company
+        zip:
+          type: string
+          description: Zip code of a user's company
+      description: 'User''s business address. The default is
+
+        Company (Auto-Receptionist) settings
 
         '
+    RegionalLanguageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a language set as regional
+        localeCode:
+          type: string
+          description: Localization code of a language set as regional
+        name:
+          type: string
+          description: Official name of a language set as regional
+      description: Information on a language set as regional
     SiteMemberInfo:
       type: object
       properties:
@@ -419,31 +553,85 @@ components:
           type: string
         name:
           type: string
-    CountryInfoShortModel:
-      allOf:
-      - $ref: '#/components/schemas/CountryInfoBasicModel'
-      - type: object
-        properties:
-          isoCode:
+    SiteIVRTopMenu:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an IVR menu extension
+        uri:
+          type: string
+          format: uri
+          description: Link to an IVR menu extension resource
+        name:
+          type: string
+          description: Full name of an IVR menu extension user
+      description: 'Top IVR Menu extension. Mandatory for MultiLevel mode
+
+        '
+    SiteMembersBulkUpdate:
+      type: object
+      properties:
+        removedExtensionIds:
+          type: array
+          description: List of removed extensions
+          items:
             type: string
-            description: 'A ISO country code value complying with the
-
-              [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
-
-              format.
-
-              '
-          callingCode:
+        addedExtensionIds:
+          type: array
+          description: List of added extensions
+          items:
             type: string
-            description: 'Country calling code defined by [ITU-T](http://en.wikipedia.org/wiki/ITU-T)
+    CreateSiteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Extension user first name
+        extensionNumber:
+          type: string
+          description: Extension number
+        callerIdName:
+          type: string
+          description: 'Custom name of a caller. Max number of characters is 15 (only
 
-              recommendations [E.123](http://en.wikipedia.org/wiki/E.123) and
+            alphabetical symbols, numbers and commas are supported)
 
-              [E.164](http://en.wikipedia.org/wiki/E.164),
+            '
+        email:
+          type: string
+          format: email
+          description: Extension user email
+        businessAddress:
+          $ref: '#/components/schemas/ContactBusinessAddressInfo'
+        regionalSettings:
+          $ref: '#/components/schemas/RegionalSettings'
+        operator:
+          $ref: '#/components/schemas/SiteOperatorReference'
+        code:
+          type: string
+          description: Site code value
+    OperatorInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an operator
+        uri:
+          type: string
+          format: uri
+          description: Link to an operator resource
+        extensionNumber:
+          type: string
+          description: Extension number (pin)
+        name:
+          type: string
+          description: Operator extension user full name
+      description: 'Site Fax/SMS recipient (operator) reference. Multi-level IVR should
 
-              see [Calling Codes](http://en.wikipedia.org/wiki/List_of_country_calling_codes)
+        be enabled
 
-              '
+        '
     SitesList:
       type: object
       properties:
@@ -459,51 +647,17 @@ components:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-    RegionalLanguageInfo:
+    SiteOperatorReference:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of a language set as regional
-        localeCode:
-          type: string
-          description: Localization code of a language set as regional
-        name:
-          type: string
-          description: Official name of a language set as regional
-      description: Information on a language set as regional
-    TimezoneInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a timezone
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a timezone
-        name:
-          type: string
-          description: Short name of a timezone
-        description:
-          type: string
-          description: Meaningful description of the timezone
-        bias:
-          type: string
-      description: Extension timezone information
+          description: Internal identifier of an operator extension
+      description: 'Site Fax/SMS recipient (operator) reference. Multi-level IVR should
+
+        be enabled
+
+        '
     SiteIvrActionsUpdate:
       type: object
       properties:
@@ -541,66 +695,69 @@ components:
         extension:
           $ref: '#/components/schemas/SiteIVRActionsExtensionInfoUpdate'
       description: Keys handling settings
-    FormattingLocaleInfo:
+    SiteIVRSettings:
       type: object
       properties:
-        id:
+        topMenu:
+          $ref: '#/components/schemas/SiteIVRTopMenu'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SiteIvrActions'
+    SiteIvrActions:
+      type: object
+      properties:
+        input:
           type: string
-          description: Internal identifier of a formatting language
-        localeCode:
+          enum:
+          - Star
+          - Hash
+          - NoInput
+        action:
           type: string
-          description: Localization code of a formatting language
-        name:
-          type: string
-          description: Official name of a formatting language
-      description: 'Formatting language preferences for numbers, dates and currencies
+          description: 'Key handling action:
 
-        '
-    CountryInfoMinimalModel:
+            - Repeat - repeat menu greeting, for Star and Hash only;
+
+            - ReturnToRoot - return to root IVR menu, for Star and Hash only;
+
+            - ReturnToPrevious - return to previous IVR menu, for Star and Hash only;
+
+            - Connect - connect to specific extension, for NoInput only;
+
+            - Disconnect - end call, for NoInput only.
+
+            '
+          enum:
+          - Repeat
+          - ReturnToRoot
+          - ReturnToPrevious
+          - ReturnToTopLevelMenu
+          - Connect
+          - Disconnect
+          - DoNothing
+        extension:
+          $ref: '#/components/schemas/SiteIVRActionsExtensionInfo'
+      description: Keys handling settings
+    TimezoneInfo:
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier of a country
+          description: Internal identifier of a timezone
         uri:
           type: string
           format: uri
-          description: Canonical URI of a country resource
-    SiteIVRActionsExtensionInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an extension
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of an extension
+          description: Canonical URI of a timezone
         name:
           type: string
-          description: Name of an extension user
-      description: Extension information
-    OperatorInfo:
-      type: object
-      properties:
-        id:
+          description: Short name of a timezone
+        description:
           type: string
-          description: Internal identifier of an operator
-        uri:
+          description: Meaningful description of the timezone
+        bias:
           type: string
-          format: uri
-          description: Link to an operator resource
-        extensionNumber:
-          type: string
-          description: Extension number (pin)
-        name:
-          type: string
-          description: Operator extension user full name
-      description: 'Site Fax/SMS recipient (operator) reference. Multi-level IVR should
-
-        be enabled
-
-        '
+      description: Extension timezone information
     EnumeratedPagingModel:
       type: object
       required:
@@ -671,171 +828,14 @@ components:
 
             '
           example: 25
-    SiteMembersList:
+    PageNavigationUri:
       type: object
+      additionalProperties: false
       properties:
         uri:
           type: string
+          description: Canonical URI to retrieve the particular page of the result set
           format: uri
-          description: Link to a site members list resource
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/SiteMemberInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    GreetingLanguageInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a greeting language
-        localeCode:
-          type: string
-          description: Localization code of a greeting language
-        name:
-          type: string
-          description: Official name of a greeting language
-      description: 'Information on language used for telephony greetings
-
-        '
-    CountryInfoBasicModel:
-      allOf:
-      - $ref: '#/components/schemas/CountryInfoMinimalModel'
-      - type: object
-        properties:
-          name:
-            type: string
-            description: The official name of a country
-    CreateSiteRequest:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Extension user first name
-        extensionNumber:
-          type: string
-          description: Extension number
-        callerIdName:
-          type: string
-          description: 'Custom name of a caller. Max number of characters is 15 (only
-
-            alphabetical symbols, numbers and commas are supported)
-
-            '
-        email:
-          type: string
-          format: email
-          description: Extension user email
-        businessAddress:
-          $ref: '#/components/schemas/ContactBusinessAddressInfo'
-        regionalSettings:
-          $ref: '#/components/schemas/RegionalSettings'
-        operator:
-          $ref: '#/components/schemas/SiteOperatorReference'
-        code:
-          type: string
-          description: Site code value
-    SiteIVRTopMenuUpdate:
-      type: object
-      properties:
-        id:
-          type: string
-          description: 'Internal identifier of an IVR menu extension
-
-            '
-      description: Top IVR Menu extension
-    SiteIvrActions:
-      type: object
-      properties:
-        input:
-          type: string
-          enum:
-          - Star
-          - Hash
-          - NoInput
-        action:
-          type: string
-          description: 'Key handling action:
-
-            - Repeat - repeat menu greeting, for Star and Hash only;
-
-            - ReturnToRoot - return to root IVR menu, for Star and Hash only;
-
-            - ReturnToPrevious - return to previous IVR menu, for Star and Hash only;
-
-            - Connect - connect to specific extension, for NoInput only;
-
-            - Disconnect - end call, for NoInput only.
-
-            '
-          enum:
-          - Repeat
-          - ReturnToRoot
-          - ReturnToPrevious
-          - ReturnToTopLevelMenu
-          - Connect
-          - Disconnect
-          - DoNothing
-        extension:
-          $ref: '#/components/schemas/SiteIVRActionsExtensionInfo'
-      description: Keys handling settings
-    SiteIVRTopMenu:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an IVR menu extension
-        uri:
-          type: string
-          format: uri
-          description: Link to an IVR menu extension resource
-        name:
-          type: string
-          description: Full name of an IVR menu extension user
-      description: 'Top IVR Menu extension. Mandatory for MultiLevel mode
-
-        '
-    SiteInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a site extension
-        uri:
-          type: string
-          format: uri
-          description: Link to a site resource
-        name:
-          type: string
-          description: Extension user first name
-        extensionNumber:
-          type: string
-          description: Extension number
-        callerIdName:
-          type: string
-          description: 'Custom name of a caller. Max number of characters is 15 (only
-
-            alphabetical symbols, numbers and commas are supported)
-
-            '
-        email:
-          type: string
-          format: email
-          description: Site extension contact email
-        businessAddress:
-          $ref: '#/components/schemas/ContactBusinessAddressInfo'
-        regionalSettings:
-          $ref: '#/components/schemas/RegionalSettings'
-        operator:
-          $ref: '#/components/schemas/OperatorInfo'
-        code:
-          type: string
-          description: 'Site code value. Returned only if specified
-
-            '
   parameters:
     AccountId:
       name: accountId

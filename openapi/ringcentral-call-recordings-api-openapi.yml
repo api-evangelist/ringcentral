@@ -131,20 +131,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
-    Forbidden:
-      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
 
-        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
 
         '
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
 
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
 
         '
       content:
@@ -163,16 +163,57 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
 
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
 
         '
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiErrorResponseModel'
+  parameters:
+    ContentDispositionFilename:
+      name: contentDispositionFilename
+      in: query
+      description: The default filename of the file to be downloaded
+      required: false
+      schema:
+        type: string
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    CallRecordingId:
+      name: recordingId
+      in: path
+      description: Internal identifier of a call recording (returned in Call Log)
+      required: true
+      schema:
+        type: string
+        example: '625387632786'
+    ContentDisposition:
+      name: contentDisposition
+      in: query
+      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
+      required: false
+      schema:
+        type: string
+        enum:
+        - Inline
+        - Attachment
   schemas:
     ApiErrorResponseModel:
       type: object
@@ -186,6 +227,34 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ApiError'
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
+    CallRecordingIds:
+      type: object
+      required:
+      - records
+      properties:
+        records:
+          type: array
+          description: Call recordings ID(s) to delete
+          items:
+            type: string
+          minItems: 1
+          maxItems: 100
     ParameterizedErrorResponseModel:
       type: object
       description: Standard error response which may include parameterized errors
@@ -241,75 +310,6 @@ components:
           type: integer
           format: int32
           description: Recorded call duration
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    CallRecordingIds:
-      type: object
-      required:
-      - records
-      properties:
-        records:
-          type: array
-          description: Call recordings ID(s) to delete
-          items:
-            type: string
-          minItems: 1
-          maxItems: 100
-  parameters:
-    ContentDisposition:
-      name: contentDisposition
-      in: query
-      description: Whether the content is expected to be displayed in the browser, or downloaded and saved locally
-      required: false
-      schema:
-        type: string
-        enum:
-        - Inline
-        - Attachment
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    CallRecordingId:
-      name: recordingId
-      in: path
-      description: Internal identifier of a call recording (returned in Call Log)
-      required: true
-      schema:
-        type: string
-        example: '625387632786'
-    ContentDispositionFilename:
-      name: contentDispositionFilename
-      in: query
-      description: The default filename of the file to be downloaded
-      required: false
-      schema:
-        type: string
   securitySchemes:
     OAuth2:
       type: oauth2

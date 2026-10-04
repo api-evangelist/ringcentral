@@ -397,6 +397,37 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TaskAttachment'
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+    TMCompleteTaskRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Completeness status
+          enum:
+          - Incomplete
+          - Complete
+        assignees:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of an assignee
+        completenessPercentage:
+          maximum: 100.0
+          minimum: 0
+          type: integer
+          format: int32
     TMCreateTaskRequest:
       required:
       - assignees
@@ -453,39 +484,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TMAttachmentInfo'
-    TaskRecurrenceInfo:
-      type: object
-      description: Task information
-      properties:
-        schedule:
-          type: string
-          description: Recurrence settings of a task. None for non-periodic tasks
-          default: None
-          enum:
-          - None
-          - Daily
-          - Weekdays
-          - Weekly
-          - Monthly
-          - Yearly
-        endingCondition:
-          type: string
-          description: Ending condition of a task
-          default: None
-          enum:
-          - None
-          - Count
-          - Date
-        endingAfter:
-          maximum: 10.0
-          minimum: 1
-          type: integer
-          format: int32
-          description: Count of iterations of periodic tasks
-        endingOn:
-          type: string
-          description: "End date of a periodic task in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) \nformat, UTC time zone\n"
-          format: date-time
     TMTaskList:
       type: object
       properties:
@@ -546,37 +544,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TMAttachmentInfo'
-    TMNavigationInfo:
-      type: object
-      properties:
-        prevPageToken:
-          type: string
-          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-        nextPageToken:
-          type: string
-          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-    TMCompleteTaskRequest:
-      type: object
-      properties:
-        status:
-          type: string
-          description: Completeness status
-          enum:
-          - Incomplete
-          - Complete
-        assignees:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: Internal identifier of an assignee
-        completenessPercentage:
-          maximum: 100.0
-          minimum: 0
-          type: integer
-          format: int32
     TaskAttachment:
       type: object
       properties:
@@ -609,6 +576,39 @@ components:
           - Note
           - Event
           - Card
+    TaskRecurrenceInfo:
+      type: object
+      description: Task information
+      properties:
+        schedule:
+          type: string
+          description: Recurrence settings of a task. None for non-periodic tasks
+          default: None
+          enum:
+          - None
+          - Daily
+          - Weekdays
+          - Weekly
+          - Monthly
+          - Yearly
+        endingCondition:
+          type: string
+          description: Ending condition of a task
+          default: None
+          enum:
+          - None
+          - Count
+          - Date
+        endingAfter:
+          maximum: 10.0
+          minimum: 1
+          type: integer
+          format: int32
+          description: Count of iterations of periodic tasks
+        endingOn:
+          type: string
+          description: "End date of a periodic task in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) \nformat, UTC time zone\n"
+          format: date-time
   securitySchemes:
     OAuth2:
       type: oauth2

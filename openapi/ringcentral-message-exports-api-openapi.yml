@@ -111,13 +111,34 @@ paths:
       x-app-permission: ReadMessages
 components:
   schemas:
-    MessageStoreReportArchive:
+    ArchiveInfo:
       type: object
       properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/ArchiveInfo'
+        size:
+          type: integer
+          format: int64
+          description: Archive size in bytes
+          example: 201412
+        uri:
+          type: string
+          format: uri
+          description: Link for archive download
+    ApiError:
+      type: object
+      description: Generalized API error structure suitable for any error type
+      required:
+      - errorCode
+      - message
+      properties:
+        errorCode:
+          type: string
+          description: Logical error code (typically, 3 letters followed with number, dash separated)
+          example: XXX-123
+        message:
+          type: string
+          description: User-friendly error message
+          example: Something went wrong
+      additionalProperties: true
     ApiErrorResponseModel:
       type: object
       description: Standard error response model which is returned in case of any unsuccessful operation
@@ -130,6 +151,15 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ApiError'
+    PicMessageTypeEnum:
+      type: string
+      description: Type of messages to be collected
+      enum:
+      - Fax
+      - SMS
+      - VoiceMail
+      - Pager
+      example: Fax
     ParameterizedErrorResponseModel:
       type: object
       description: Standard error response which may include parameterized errors
@@ -142,6 +172,56 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ApiErrorWithParameter'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    MessageStoreReportArchive:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArchiveInfo'
+    CreateMessageStoreReportRequest:
+      type: object
+      properties:
+        dateTo:
+          type: string
+          format: date-time
+          description: 'The end of the time range to collect message records in ISO 8601 format including timezone.
+
+            Default is the current time
+
+            '
+        dateFrom:
+          type: string
+          format: date-time
+          description: 'The beginning of the time range to collect call log records in ISO 8601 format including timezone.
+
+            Default is the current time minus 24 hours
+
+            '
+        messageTypes:
+          type: array
+          description: Types of messages to be collected. If not specified, all messages without message type filtering will be returned. Multiple values are accepted
+          items:
+            $ref: '#/components/schemas/PicMessageTypeEnum'
+          example:
+          - Fax
+          - VoiceMail
     MessageStoreReport:
       type: object
       properties:
@@ -194,119 +274,6 @@ components:
           example:
           - Fax
           - VoiceMail
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    CreateMessageStoreReportRequest:
-      type: object
-      properties:
-        dateTo:
-          type: string
-          format: date-time
-          description: 'The end of the time range to collect message records in ISO 8601 format including timezone.
-
-            Default is the current time
-
-            '
-        dateFrom:
-          type: string
-          format: date-time
-          description: 'The beginning of the time range to collect call log records in ISO 8601 format including timezone.
-
-            Default is the current time minus 24 hours
-
-            '
-        messageTypes:
-          type: array
-          description: Types of messages to be collected. If not specified, all messages without message type filtering will be returned. Multiple values are accepted
-          items:
-            $ref: '#/components/schemas/PicMessageTypeEnum'
-          example:
-          - Fax
-          - VoiceMail
-    ApiError:
-      type: object
-      description: Generalized API error structure suitable for any error type
-      required:
-      - errorCode
-      - message
-      properties:
-        errorCode:
-          type: string
-          description: Logical error code (typically, 3 letters followed with number, dash separated)
-          example: XXX-123
-        message:
-          type: string
-          description: User-friendly error message
-          example: Something went wrong
-      additionalProperties: true
-    PicMessageTypeEnum:
-      type: string
-      description: Type of messages to be collected
-      enum:
-      - Fax
-      - SMS
-      - VoiceMail
-      - Pager
-      example: Fax
-    ArchiveInfo:
-      type: object
-      properties:
-        size:
-          type: integer
-          format: int64
-          description: Archive size in bytes
-          example: 201412
-        uri:
-          type: string
-          format: uri
-          description: Link for archive download
-  responses:
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
-
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
   parameters:
     PicTaskId:
       name: taskId
@@ -331,6 +298,39 @@ components:
         type: string
         default: '~'
       example: '~'
+  responses:
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
   securitySchemes:
     OAuth2:
       type: oauth2

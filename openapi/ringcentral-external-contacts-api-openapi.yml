@@ -428,37 +428,85 @@ paths:
       x-user-permission: ReadPersonalContacts
 components:
   schemas:
-    ContactList:
+    SyncInfo:
+      type: object
+      properties:
+        syncType:
+          type: string
+          enum:
+          - FSync
+          - ISync
+        syncToken:
+          type: string
+        syncTime:
+          type: string
+          format: date-time
+        olderRecordsExist:
+          type: boolean
+          default: false
+    AddressBookBulkUploadResource:
+      required:
+      - extensionId
+      - contacts
+      type: object
+      properties:
+        extensionId:
+          type: string
+        contacts:
+          type: array
+          minItems: 1
+          maxItems: 10000
+          items:
+            $ref: '#/components/schemas/AddressBookBulkContactResource'
+    UserContactsNavigationInfoUri:
       type: object
       properties:
         uri:
           type: string
           format: uri
-          description: Link to the list of user personal contacts
-        records:
-          type: array
-          description: 'List of personal contacts from the extension address book
-
-            '
-          items:
-            $ref: '#/components/schemas/PersonalContactResource'
-        navigation:
-          $ref: '#/components/schemas/UserContactsNavigationInfo'
-        paging:
-          $ref: '#/components/schemas/UserContactsPagingInfo'
-        groups:
-          $ref: '#/components/schemas/UserContactsGroupsInfo'
-    AddressBookBulkUploadRequest:
-      required:
-      - records
+      description: Canonical URI for a corresponding page of a list
+    FavoriteContactList:
       type: object
       properties:
+        uri:
+          type: string
+          format: uri
         records:
           type: array
-          minItems: 1
-          maxItems: 500
           items:
-            $ref: '#/components/schemas/AddressBookBulkUploadResource'
+            $ref: '#/components/schemas/FavoriteContactResource'
+    UserContactsGroupsInfo:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to the list of address book groups
+      description: Information on address book groups
+    ExtensionFavoritesEvent:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier of a notification
+        event:
+          type: string
+          description: Event filter URI
+        timestamp:
+          format: date-time
+          type: string
+          description: 'Date/time of sending a notification in
+
+            [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+
+            format including timezone, for example *2016-03-10T18:07:52.534Z*
+
+            '
+        subscriptionId:
+          type: string
+          description: Internal identifier of a subscription
+        body:
+          $ref: '#/components/schemas/ExtensionFavoritesEventBody'
     PersonalContactRequest:
       type: object
       properties:
@@ -571,13 +619,289 @@ components:
         ringtoneIndex:
           type: string
           description: Contact ringtone. Max number of symbols is 64
-    UserContactsNavigationInfoUri:
+    ContactList:
       type: object
       properties:
         uri:
           type: string
           format: uri
-      description: Canonical URI for a corresponding page of a list
+          description: Link to the list of user personal contacts
+        records:
+          type: array
+          description: 'List of personal contacts from the extension address book
+
+            '
+          items:
+            $ref: '#/components/schemas/PersonalContactResource'
+        navigation:
+          $ref: '#/components/schemas/UserContactsNavigationInfo'
+        paging:
+          $ref: '#/components/schemas/UserContactsPagingInfo'
+        groups:
+          $ref: '#/components/schemas/UserContactsGroupsInfo'
+    UserContactsNavigationInfo:
+      type: object
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
+        nextPage:
+          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
+        previousPage:
+          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
+        lastPage:
+          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
+      description: Information on navigation
+    AddressBookBulkContactAddressInfo:
+      type: object
+      properties:
+        country:
+          type: string
+          description: 'Country name of the extension user company. Not returned for Address
+
+            Book
+
+            '
+        state:
+          type: string
+          description: State/province name of the extension user company
+        city:
+          type: string
+          description: City name of the extension user company
+        street:
+          type: string
+          description: Street address of the extension user company
+        zip:
+          type: string
+          description: Zip code of the extension user company
+    ContactAddressInfo:
+      type: object
+      properties:
+        street:
+          type: string
+          description: Street address
+          example: 20 Davis Dr.
+        city:
+          type: string
+          description: City name
+          example: Belmont
+        country:
+          type: string
+          description: Country name
+        state:
+          type: string
+          description: State/province name
+          example: CA
+        zip:
+          type: string
+          description: Zip/Postal code
+          example: '94002'
+    AddressBookBulkUploadResponse:
+      description: 'Information on a task for adding multiple contacts to multiple extensions
+
+        '
+      required:
+      - id
+      - uri
+      - creationTime
+      - lastModifiedTime
+      - status
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a task
+        uri:
+          type: string
+          format: uri
+          description: Link for the task status retrieval
+        status:
+          type: string
+          description: Task status
+          enum:
+          - Accepted
+          - InProgress
+          - Completed
+          - Failed
+        creationTime:
+          type: string
+          format: date-time
+          description: Date/time of a task creation
+        lastModifiedTime:
+          type: string
+          format: date-time
+          description: Date/time of a task latest update
+        results:
+          $ref: '#/components/schemas/AddressBookBulkUploadTaskResult'
+    AddressBookBulkUploadRequest:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/AddressBookBulkUploadResource'
+    AddressBookSync:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonalContactResource'
+        syncInfo:
+          $ref: '#/components/schemas/SyncInfo'
+        nextPageId:
+          type: integer
+          format: int64
+        nextPageUri:
+          type: string
+          format: uri
+    AddressBookBulkUploadTaskResult:
+      type: object
+      properties:
+        affectedItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddressBookBulkUploadResource'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorEntity'
+    FavoriteContactResource:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        extensionId:
+          type: string
+        accountId:
+          type: string
+        contactId:
+          type: string
+    ExtensionFavoritesEventBody:
+      type: object
+      properties:
+        extensionId:
+          type: string
+          description: Internal identifier of an extension
+        ownerId:
+          type: string
+          description: Internal identifier of a subscription owner extension
+      description: Notification payload body
+    AddressBookBulkContactResource:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email of a contact
+          example: charlie.williams@example.com
+        notes:
+          type: string
+          description: Notes for a contact
+          example: '#1 Customer'
+        company:
+          type: string
+          description: Company name of a contact
+          example: Example, Inc.
+        firstName:
+          type: string
+          description: First name of a contact
+          example: Charlie
+        lastName:
+          type: string
+          description: Last name of a contact
+          example: Williams
+        jobTitle:
+          type: string
+          description: Job title of a contact
+          example: CEO
+        birthday:
+          type: string
+          description: Date of birth of a contact
+          format: date-time
+        webPage:
+          type: string
+          description: Link to a contact home page
+          example: http://www.example.com
+        middleName:
+          type: string
+          description: Middle name of a contact
+          example: J
+        nickName:
+          type: string
+          description: Nick name of a contact
+          example: The Boss
+        email2:
+          type: string
+          format: email
+          description: Second email of a contact
+          example: charlie-example@gmail.com
+        email3:
+          type: string
+          format: email
+          description: Third email of the contact
+          example: theboss-example@hotmail.com
+        homePhone:
+          type: string
+          description: Home phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        homePhone2:
+          type: string
+          description: Second home phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessPhone:
+          type: string
+          description: Business phone of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessPhone2:
+          type: string
+          description: Second business phone of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        mobilePhone:
+          type: string
+          description: Mobile phone of the contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessFax:
+          type: string
+          description: Business fax number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        companyPhone:
+          type: string
+          description: Company number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        assistantPhone:
+          type: string
+          description: Phone number of a contact assistant in e.164 (with "+") format
+          example: '+15551234567'
+        carPhone:
+          type: string
+          description: Car phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        otherPhone:
+          type: string
+          description: Other phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        otherFax:
+          type: string
+          description: Other fax number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        callbackPhone:
+          type: string
+          description: Callback phone number of a contact in e.164 (with "+") format
+          example: '+15551234567'
+        businessAddress:
+          $ref: '#/components/schemas/AddressBookBulkContactAddressInfo'
+        homeAddress:
+          $ref: '#/components/schemas/AddressBookBulkContactAddressInfo'
+        otherAddress:
+          $ref: '#/components/schemas/AddressBookBulkContactAddressInfo'
     PersonalContactResource:
       type: object
       properties:
@@ -713,135 +1037,6 @@ components:
         ringtoneIndex:
           type: string
           description: Contact ringtone. Max number of symbols is 64
-    AddressBookBulkContactAddressInfo:
-      type: object
-      properties:
-        country:
-          type: string
-          description: 'Country name of the extension user company. Not returned for Address
-
-            Book
-
-            '
-        state:
-          type: string
-          description: State/province name of the extension user company
-        city:
-          type: string
-          description: City name of the extension user company
-        street:
-          type: string
-          description: Street address of the extension user company
-        zip:
-          type: string
-          description: Zip code of the extension user company
-    SyncInfo:
-      type: object
-      properties:
-        syncType:
-          type: string
-          enum:
-          - FSync
-          - ISync
-        syncToken:
-          type: string
-        syncTime:
-          type: string
-          format: date-time
-        olderRecordsExist:
-          type: boolean
-          default: false
-    ExtensionFavoritesEventBody:
-      type: object
-      properties:
-        extensionId:
-          type: string
-          description: Internal identifier of an extension
-        ownerId:
-          type: string
-          description: Internal identifier of a subscription owner extension
-      description: Notification payload body
-    ContactAddressInfo:
-      type: object
-      properties:
-        street:
-          type: string
-          description: Street address
-          example: 20 Davis Dr.
-        city:
-          type: string
-          description: City name
-          example: Belmont
-        country:
-          type: string
-          description: Country name
-        state:
-          type: string
-          description: State/province name
-          example: CA
-        zip:
-          type: string
-          description: Zip/Postal code
-          example: '94002'
-    AddressBookBulkUploadResponse:
-      description: 'Information on a task for adding multiple contacts to multiple extensions
-
-        '
-      required:
-      - id
-      - uri
-      - creationTime
-      - lastModifiedTime
-      - status
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a task
-        uri:
-          type: string
-          format: uri
-          description: Link for the task status retrieval
-        status:
-          type: string
-          description: Task status
-          enum:
-          - Accepted
-          - InProgress
-          - Completed
-          - Failed
-        creationTime:
-          type: string
-          format: date-time
-          description: Date/time of a task creation
-        lastModifiedTime:
-          type: string
-          format: date-time
-          description: Date/time of a task latest update
-        results:
-          $ref: '#/components/schemas/AddressBookBulkUploadTaskResult'
-    UserContactsNavigationInfo:
-      type: object
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
-        nextPage:
-          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
-        previousPage:
-          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
-        lastPage:
-          $ref: '#/components/schemas/UserContactsNavigationInfoUri'
-      description: Information on navigation
-    FavoriteContactList:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/FavoriteContactResource'
     UserContactsPagingInfo:
       type: object
       properties:
@@ -898,100 +1093,6 @@ components:
             '
           format: int32
       description: Information on paging
-    FavoriteCollection:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/FavoriteContactResource'
-    AddressBookBulkUploadResource:
-      required:
-      - extensionId
-      - contacts
-      type: object
-      properties:
-        extensionId:
-          type: string
-        contacts:
-          type: array
-          minItems: 1
-          maxItems: 10000
-          items:
-            $ref: '#/components/schemas/AddressBookBulkContactResource'
-    AddressBookSync:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/PersonalContactResource'
-        syncInfo:
-          $ref: '#/components/schemas/SyncInfo'
-        nextPageId:
-          type: integer
-          format: int64
-        nextPageUri:
-          type: string
-          format: uri
-    UserContactsGroupsInfo:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the list of address book groups
-      description: Information on address book groups
-    ExtensionFavoritesEvent:
-      type: object
-      properties:
-        uuid:
-          type: string
-          description: Universally unique identifier of a notification
-        event:
-          type: string
-          description: Event filter URI
-        timestamp:
-          format: date-time
-          type: string
-          description: 'Date/time of sending a notification in
-
-            [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-
-            format including timezone, for example *2016-03-10T18:07:52.534Z*
-
-            '
-        subscriptionId:
-          type: string
-          description: Internal identifier of a subscription
-        body:
-          $ref: '#/components/schemas/ExtensionFavoritesEventBody'
-    FavoriteContactResource:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        extensionId:
-          type: string
-        accountId:
-          type: string
-        contactId:
-          type: string
-    AddressBookBulkUploadTaskResult:
-      type: object
-      properties:
-        affectedItems:
-          type: array
-          items:
-            $ref: '#/components/schemas/AddressBookBulkUploadResource'
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorEntity'
     ErrorEntity:
       type: object
       properties:
@@ -1007,115 +1108,67 @@ components:
         parameterValue:
           type: string
           description: Value of invalid parameter
-    AddressBookBulkContactResource:
+    FavoriteCollection:
       type: object
       properties:
-        email:
-          type: string
-          format: email
-          description: Email of a contact
-          example: charlie.williams@example.com
-        notes:
-          type: string
-          description: Notes for a contact
-          example: '#1 Customer'
-        company:
-          type: string
-          description: Company name of a contact
-          example: Example, Inc.
-        firstName:
-          type: string
-          description: First name of a contact
-          example: Charlie
-        lastName:
-          type: string
-          description: Last name of a contact
-          example: Williams
-        jobTitle:
-          type: string
-          description: Job title of a contact
-          example: CEO
-        birthday:
-          type: string
-          description: Date of birth of a contact
-          format: date-time
-        webPage:
-          type: string
-          description: Link to a contact home page
-          example: http://www.example.com
-        middleName:
-          type: string
-          description: Middle name of a contact
-          example: J
-        nickName:
-          type: string
-          description: Nick name of a contact
-          example: The Boss
-        email2:
-          type: string
-          format: email
-          description: Second email of a contact
-          example: charlie-example@gmail.com
-        email3:
-          type: string
-          format: email
-          description: Third email of the contact
-          example: theboss-example@hotmail.com
-        homePhone:
-          type: string
-          description: Home phone number of a contact in e.164 (with "+") format
-          example: '+15551234567'
-        homePhone2:
-          type: string
-          description: Second home phone number of a contact in e.164 (with "+") format
-          example: '+15551234567'
-        businessPhone:
-          type: string
-          description: Business phone of a contact in e.164 (with "+") format
-          example: '+15551234567'
-        businessPhone2:
-          type: string
-          description: Second business phone of a contact in e.164 (with "+") format
-          example: '+15551234567'
-        mobilePhone:
-          type: string
-          description: Mobile phone of the contact in e.164 (with "+") format
-          example: '+15551234567'
-        businessFax:
-          type: string
-          description: Business fax number of a contact in e.164 (with "+") format
-          example: '+15551234567'
-        companyPhone:
-          type: string
-          description: Company number of a contact in e.164 (with "+") format
-          example: '+15551234567'
-        assistantPhone:
-          type: string
-          description: Phone number of a contact assistant in e.164 (with "+") format
-          example: '+15551234567'
-        carPhone:
-          type: string
-          description: Car phone number of a contact in e.164 (with "+") format
-          example: '+15551234567'
-        otherPhone:
-          type: string
-          description: Other phone number of a contact in e.164 (with "+") format
-          example: '+15551234567'
-        otherFax:
-          type: string
-          description: Other fax number of a contact in e.164 (with "+") format
-          example: '+15551234567'
-        callbackPhone:
-          type: string
-          description: Callback phone number of a contact in e.164 (with "+") format
-          example: '+15551234567'
-        businessAddress:
-          $ref: '#/components/schemas/AddressBookBulkContactAddressInfo'
-        homeAddress:
-          $ref: '#/components/schemas/AddressBookBulkContactAddressInfo'
-        otherAddress:
-          $ref: '#/components/schemas/AddressBookBulkContactAddressInfo'
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteContactResource'
   parameters:
+    ContactId:
+      name: contactId
+      in: path
+      description: 'Internal identifier of a contact record in the RingCentral database
+
+        '
+      required: true
+      schema:
+        type: integer
+        format: int64
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ContactIds:
+      name: contactId
+      in: path
+      description: The list of contact identifiers (comma-separated)
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: array
+        minItems: 1
+        items:
+          type: integer
+          format: int64
     PerPage:
       name: perPage
       in: query
@@ -1146,59 +1199,6 @@ components:
         maximum: 1000
         default: 1
       example: 1
-    ContactIds:
-      name: contactId
-      in: path
-      description: The list of contact identifiers (comma-separated)
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: array
-        minItems: 1
-        items:
-          type: integer
-          format: int64
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    ContactId:
-      name: contactId
-      in: path
-      description: 'Internal identifier of a contact record in the RingCentral database
-
-        '
-      required: true
-      schema:
-        type: integer
-        format: int64
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
   securitySchemes:
     OAuth2:
       type: oauth2

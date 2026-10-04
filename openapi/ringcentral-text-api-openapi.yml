@@ -103,81 +103,11 @@ paths:
       x-app-permission: AI
 components:
   schemas:
-    SummaryOutputUnit:
-      type: object
-      properties:
-        name:
-          type: string
-          example: AbstractiveShort
-          enum:
-          - Extractive
-          - AbstractiveLong
-          - AbstractiveShort
-          - All
-        values:
-          type: array
-          description: Summary output units sorted by their occurrence in the conversation
-          items:
-            $ref: '#/components/schemas/SummaryTimingsUnit'
-    PunctuateApiResponse:
-      oneOf:
-      - $ref: '#/components/schemas/PunctuateOutput'
-      - $ref: '#/components/schemas/CaiErrorResponse'
-    PunctuateApiOutput:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          $ref: '#/components/schemas/PunctuateApiResponse'
-    SummaryUnit:
-      required:
-      - text
-      - speakerId
-      - start
-      - end
-      type: object
-      properties:
-        speakerId:
-          type: string
-          example: JohnDoe
-        text:
-          type: string
-          example: Hello! This is John.
-        start:
-          type: number
-          format: float
-          example: 0.3
-        end:
-          type: number
-          format: float
-          example: 5.1
     CaiAsyncApiResponse:
       type: object
       properties:
         jobId:
           type: string
-    PunctuateInput:
-      required:
-      - texts
-      type: object
-      properties:
-        texts:
-          type: array
-          items:
-            type: string
-    PunctuateOutput:
-      required:
-      - texts
-      type: object
-      properties:
-        texts:
-          type: array
-          items:
-            type: string
     SummaryApiOutput:
       type: object
       properties:
@@ -188,6 +118,17 @@ components:
           - Fail
         response:
           $ref: '#/components/schemas/SummaryApiResponse'
+    CaiErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaiErrorCodeResponse'
+    SummaryApiResponse:
+      oneOf:
+      - $ref: '#/components/schemas/SummaryOutput'
+      - $ref: '#/components/schemas/CaiErrorResponse'
     SummaryInput:
       required:
       - summaryType
@@ -208,44 +149,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SummaryUnit'
-    SummaryTimingsUnit:
-      required:
-      - value
-      type: object
-      properties:
-        confidence:
-          type: number
-          format: float
-          example: 0.97
-        value:
-          type: string
-          example: This meeting is focussed on rise of on demand marketplaces, online marketplaces and regulated services
-        start:
-          type: number
-          format: float
-          example: 0.3
-        end:
-          type: number
-          format: float
-          example: 3600.1
-    SummaryApiResponse:
+    PunctuateApiResponse:
       oneOf:
-      - $ref: '#/components/schemas/SummaryOutput'
+      - $ref: '#/components/schemas/PunctuateOutput'
       - $ref: '#/components/schemas/CaiErrorResponse'
-    CaiErrorResponse:
+    SummaryOutputUnit:
       type: object
       properties:
-        errors:
+        name:
+          type: string
+          example: AbstractiveShort
+          enum:
+          - Extractive
+          - AbstractiveLong
+          - AbstractiveShort
+          - All
+        values:
           type: array
+          description: Summary output units sorted by their occurrence in the conversation
           items:
-            $ref: '#/components/schemas/CaiErrorCodeResponse'
-    SummaryOutput:
-      type: object
-      properties:
-        summaries:
-          type: array
-          items:
-            $ref: '#/components/schemas/SummaryOutputUnit'
+            $ref: '#/components/schemas/SummaryTimingsUnit'
     CaiErrorCodeResponse:
       required:
       - errorCode
@@ -271,28 +194,84 @@ components:
         parameterName:
           type: string
           description: Name of parameter if specified in the message
+    SummaryOutput:
+      type: object
+      properties:
+        summaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/SummaryOutputUnit'
+    PunctuateOutput:
+      required:
+      - texts
+      type: object
+      properties:
+        texts:
+          type: array
+          items:
+            type: string
+    SummaryTimingsUnit:
+      required:
+      - value
+      type: object
+      properties:
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        value:
+          type: string
+          example: This meeting is focussed on rise of on demand marketplaces, online marketplaces and regulated services
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 3600.1
+    PunctuateApiOutput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          $ref: '#/components/schemas/PunctuateApiResponse'
+    PunctuateInput:
+      required:
+      - texts
+      type: object
+      properties:
+        texts:
+          type: array
+          items:
+            type: string
+    SummaryUnit:
+      required:
+      - text
+      - speakerId
+      - start
+      - end
+      type: object
+      properties:
+        speakerId:
+          type: string
+          example: JohnDoe
+        text:
+          type: string
+          example: Hello! This is John.
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
   requestBodies:
-    PunctuateCallbackRequest:
-      description: Punctuate Callback Output
-      content:
-        application/json:
-          schema:
-            allOf:
-            - type: object
-              properties:
-                jobId:
-                  type: string
-                creationTime:
-                  type: string
-                  format: date-time
-                completionTime:
-                  type: string
-                  format: date-time
-                expirationTime:
-                  type: string
-                  format: date-time
-            - $ref: '#/components/schemas/PunctuateApiOutput'
-      required: true
     SummaryCallbackRequest:
       description: Summary Callback Output
       content:
@@ -320,6 +299,27 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PunctuateInput'
+      required: true
+    PunctuateCallbackRequest:
+      description: Punctuate Callback Output
+      content:
+        application/json:
+          schema:
+            allOf:
+            - type: object
+              properties:
+                jobId:
+                  type: string
+                creationTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time
+                expirationTime:
+                  type: string
+                  format: date-time
+            - $ref: '#/components/schemas/PunctuateApiOutput'
       required: true
     SummaryRequest:
       description: Summary Input Format

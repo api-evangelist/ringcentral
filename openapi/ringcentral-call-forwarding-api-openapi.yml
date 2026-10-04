@@ -216,6 +216,62 @@ paths:
       x-user-permission: EditUserForwardingFlipNumbers
 components:
   schemas:
+    UpdateForwardingNumberRequest:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Forwarding/Call flip phone number
+        label:
+          type: string
+          description: Forwarding/Call flip number title
+        flipNumber:
+          type: string
+          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
+        type:
+          type: string
+          description: Forwarding phone number type
+          enum:
+          - Home
+          - Mobile
+          - Work
+          - PhoneLine
+          - Outage
+          - Other
+          - BusinessMobilePhone
+          - ExternalCarrier
+    ForwardingNumberResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        id:
+          type: string
+        phoneNumber:
+          type: string
+        label:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+            enum:
+            - CallFlip
+            - CallForwarding
+        flipNumber:
+          pattern: '[1-8]'
+          type: string
+        type:
+          type: string
+          description: Forwarding phone number type
+          enum:
+          - Home
+          - Mobile
+          - Work
+          - PhoneLine
+          - Outage
+          - Other
     ParameterizedErrorResponseModel:
       type: object
       description: Standard error response which may include parameterized errors
@@ -228,27 +284,29 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ApiErrorWithParameter'
-    PageNavigationUri:
+    CreateForwardingNumberDeviceInfo:
       type: object
-      additionalProperties: false
       properties:
-        uri:
+        id:
           type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    PageNavigationModel:
+          description: Internal identifier of the other extension device
+      description: 'Forwarding device information. Applicable for ''PhoneLine'' type only.
+
+        Cannot be specified together with ''phoneNumber'' parameter
+
+        '
+    ApiErrorResponseModel:
       type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
       properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
     ApiError:
       type: object
       description: Generalized API error structure suitable for any error type
@@ -265,64 +323,6 @@ components:
           description: User-friendly error message
           example: Something went wrong
       additionalProperties: true
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    GetExtensionForwardingNumberListResponse:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to the forwarding number list resource
-        records:
-          type: array
-          description: List of forwarding phone numbers
-          items:
-            $ref: '#/components/schemas/ForwardingNumberInfo'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-    ForwardingNumberId:
-      type: object
-      properties:
-        forwardingNumberId:
-          type: string
-          description: Forwarding number id
-    CreateForwardingNumberRequest:
-      type: object
-      properties:
-        flipNumber:
-          type: integer
-          format: int32
-          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
-        phoneNumber:
-          type: string
-          description: Forwarding/Call flip phone number
-        label:
-          type: string
-          description: Forwarding/Call flip number title
-        type:
-          type: string
-          description: Forwarding/Call flip phone type. If specified, 'label' attribute value is ignored. The default value is 'Other'
-          enum:
-          - PhoneLine
-          - Home
-          - Mobile
-          - Work
-          - Other
-        device:
-          $ref: '#/components/schemas/CreateForwardingNumberDeviceInfo'
     EnumeratedPagingModel:
       type: object
       required:
@@ -393,38 +393,59 @@ components:
 
             '
           example: 25
-    ForwardingNumberResource:
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    CreateForwardingNumberRequest:
       type: object
       properties:
-        uri:
-          type: string
-          format: uri
-        id:
-          type: string
+        flipNumber:
+          type: integer
+          format: int32
+          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
         phoneNumber:
           type: string
+          description: Forwarding/Call flip phone number
         label:
           type: string
-        features:
-          type: array
-          items:
-            type: string
-            enum:
-            - CallFlip
-            - CallForwarding
-        flipNumber:
-          pattern: '[1-8]'
-          type: string
+          description: Forwarding/Call flip number title
         type:
           type: string
-          description: Forwarding phone number type
+          description: Forwarding/Call flip phone type. If specified, 'label' attribute value is ignored. The default value is 'Other'
           enum:
+          - PhoneLine
           - Home
           - Mobile
           - Work
-          - PhoneLine
-          - Outage
           - Other
+        device:
+          $ref: '#/components/schemas/CreateForwardingNumberDeviceInfo'
     DeleteForwardingNumbersRequest:
       type: object
       properties:
@@ -488,58 +509,110 @@ components:
             name:
               type: string
               description: Extension name
-    CreateForwardingNumberDeviceInfo:
+    ForwardingNumberId:
       type: object
       properties:
-        id:
+        forwardingNumberId:
           type: string
-          description: Internal identifier of the other extension device
-      description: 'Forwarding device information. Applicable for ''PhoneLine'' type only.
-
-        Cannot be specified together with ''phoneNumber'' parameter
-
-        '
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    UpdateForwardingNumberRequest:
+          description: Forwarding number id
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    GetExtensionForwardingNumberListResponse:
       type: object
       properties:
-        phoneNumber:
+        uri:
           type: string
-          description: Forwarding/Call flip phone number
-        label:
-          type: string
-          description: Forwarding/Call flip number title
-        flipNumber:
-          type: string
-          description: Number assigned to the call flip phone number, corresponds to the shortcut dial number
-        type:
-          type: string
-          description: Forwarding phone number type
-          enum:
-          - Home
-          - Mobile
-          - Work
-          - PhoneLine
-          - Outage
-          - Other
-          - BusinessMobilePhone
-          - ExternalCarrier
+          format: uri
+          description: Link to the forwarding number list resource
+        records:
+          type: array
+          description: List of forwarding phone numbers
+          items:
+            $ref: '#/components/schemas/ForwardingNumberInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+  responses:
+    ServiceNotAvailable:
+      description: 'General response with **HTTP 503 "Service not available"** status.<br>
+
+        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
   parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
     PerPage:
       name: perPage
       in: query
@@ -564,21 +637,6 @@ components:
       required: true
       schema:
         type: string
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
     Page:
       name: page
       in: query
@@ -592,64 +650,6 @@ components:
         maximum: 1000
         default: 1
       example: 1
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-  responses:
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
-
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    ServiceNotAvailable:
-      description: 'General response with **HTTP 503 "Service not available"** status.<br>
-
-        Reasons: server cannot process the request because of being overloaded, misconfiguration or other issues.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
-
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
   securitySchemes:
     OAuth2:
       type: oauth2
