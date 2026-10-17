@@ -254,37 +254,56 @@ paths:
       x-user-permission: ReadExtensions
 components:
   schemas:
-    CallMonitoringGroupMemberInfo:
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    CallMonitoringGroup:
       type: object
       properties:
         uri:
           type: string
           format: uri
-          description: Link to a call monitoring group member
+          description: Link to a call monitoring group resource
         id:
           type: string
-          description: 'Internal identifier of a call monitoring group member
-
-            '
-        extensionNumber:
+          description: Internal identifier of a group
+        name:
           type: string
-          description: 'Extension number of a call monitoring group member
-
-            '
-        permissions:
+          description: Name of a group
+    CreateCallMonitoringGroupRequest:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of a group
+    CallMonitoringGroupMemberList:
+      required:
+      - navigation
+      - paging
+      - records
+      - uri
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Link to a call monitoring group members resource
+        records:
           type: array
+          description: List of a call monitoring group members
           items:
-            type: string
-            description: 'Call monitoring permission; multiple values are allowed:
-
-              - `Monitoring` - User can monitor a group;
-
-              - `Monitored` - User can be monitored.
-
-              '
-            enum:
-            - Monitoring
-            - Monitored
+            $ref: '#/components/schemas/CallMonitoringGroupMemberInfo'
+        navigation:
+          $ref: '#/components/schemas/PageNavigationModel'
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
     CallMonitoringBulkAssign:
       type: object
       properties:
@@ -300,27 +319,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CallMonitoringExtensionInfo'
-    CallMonitoringGroups:
-      required:
-      - navigation
-      - paging
-      - records
-      - uri
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a call monitoring groups resource
-        records:
-          type: array
-          description: List of call monitoring group members
-          items:
-            $ref: '#/components/schemas/CallMonitoringGroup'
-        navigation:
-          $ref: '#/components/schemas/PageNavigationModel'
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
     CallMonitoringExtensionInfo:
       type: object
       properties:
@@ -345,20 +343,20 @@ components:
             enum:
             - Monitoring
             - Monitored
-    CallMonitoringGroup:
+    PageNavigationModel:
       type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
       properties:
-        uri:
-          type: string
-          format: uri
-          description: Link to a call monitoring group resource
-        id:
-          type: string
-          description: Internal identifier of a group
-        name:
-          type: string
-          description: Name of a group
-    CallMonitoringGroupMemberList:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+    CallMonitoringGroups:
       required:
       - navigation
       - paging
@@ -369,12 +367,12 @@ components:
         uri:
           type: string
           format: uri
-          description: Link to a call monitoring group members resource
+          description: Link to a call monitoring groups resource
         records:
           type: array
-          description: List of a call monitoring group members
+          description: List of call monitoring group members
           items:
-            $ref: '#/components/schemas/CallMonitoringGroupMemberInfo'
+            $ref: '#/components/schemas/CallMonitoringGroup'
         navigation:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
@@ -449,35 +447,37 @@ components:
 
             '
           example: 25
-    PageNavigationUri:
+    CallMonitoringGroupMemberInfo:
       type: object
-      additionalProperties: false
       properties:
         uri:
           type: string
-          description: Canonical URI to retrieve the particular page of the result set
           format: uri
-    CreateCallMonitoringGroupRequest:
-      required:
-      - name
-      type: object
-      properties:
-        name:
+          description: Link to a call monitoring group member
+        id:
           type: string
-          description: Name of a group
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
+          description: 'Internal identifier of a call monitoring group member
+
+            '
+        extensionNumber:
+          type: string
+          description: 'Extension number of a call monitoring group member
+
+            '
+        permissions:
+          type: array
+          items:
+            type: string
+            description: 'Call monitoring permission; multiple values are allowed:
+
+              - `Monitoring` - User can monitor a group;
+
+              - `Monitored` - User can be monitored.
+
+              '
+            enum:
+            - Monitoring
+            - Monitored
   parameters:
     AccountId:
       name: accountId

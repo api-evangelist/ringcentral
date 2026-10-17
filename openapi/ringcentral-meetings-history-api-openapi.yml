@@ -127,9 +127,21 @@ paths:
       x-app-permission: Video
 components:
   schemas:
-    Host:
+    JsValue:
+      type: object
+      properties: {}
+    Participant:
+      required:
+      - type
+      - id
       type: object
       properties:
+        type:
+          type: string
+          description: Participant type
+        id:
+          type: string
+          description: id
         accountId:
           type: string
           description: Account id
@@ -139,82 +151,13 @@ components:
         displayName:
           type: string
           description: Display name
-      description: Meeting host
-    Paging:
-      required:
-      - currentPageToken
-      type: object
-      properties:
-        currentPageToken:
+        callerId:
           type: string
-          description: Current offset token
-        nextPageToken:
+          description: Caller id
+        correlationId:
+          description: Pass-thru parameter in join url
           type: string
-          description: Next page offset token
-      description: Paging information
-    Recording:
-      required:
-      - id
-      - availabilityStatus
-      type: object
-      properties:
-        id:
-          type: string
-          description: Recording id
-        startTime:
-          type: integer
-          format: int64
-          description: Recording start time
-        url:
-          type: string
-          description: Secure Link to the recording file
-        metadata:
-          $ref: '#/components/schemas/JsValue'
-        status:
-          type: string
-          description: Recording processing status
-          enum:
-          - Processing
-          - Processed
-          - Error
-          - Corrupted
-          - InProgress
-          - Purged
-          - Failed
-        availabilityStatus:
-          type: string
-          description: Availability status
-          enum:
-          - Alive
-          - Deleted
-          - Purged
-          - NotAvailable
-        longSummary:
-          type: string
-          description: During meeting AI team analyze code and after meeting finished generates text summary about this meeting
-        shortSummary:
-          type: string
-          description: During meeting AI team analyze code and after meeting finished generates text summary about this meeting
-        keywords:
-          type: array
-          description: During meeting AI team analyze code and after meeting finished generates key words used in meeting
-          items:
-            type: string
-      description: Recording information
-    MeetingPage:
-      required:
-      - meetings
-      - paging
-      type: object
-      properties:
-        meetings:
-          type: array
-          description: Meetings array
-          items:
-            $ref: '#/components/schemas/Meeting'
-        paging:
-          $ref: '#/components/schemas/Paging'
-      description: Meetings page
+      description: Participant information
     Meeting:
       required:
       - bridgeId
@@ -299,18 +242,70 @@ components:
           type: string
           description: Chat location
       description: Meeting information
-    Participant:
+    Recording:
       required:
-      - type
       - id
+      - availabilityStatus
       type: object
       properties:
-        type:
-          type: string
-          description: Participant type
         id:
           type: string
-          description: id
+          description: Recording id
+        startTime:
+          type: integer
+          format: int64
+          description: Recording start time
+        url:
+          type: string
+          description: Secure Link to the recording file
+        metadata:
+          $ref: '#/components/schemas/JsValue'
+        status:
+          type: string
+          description: Recording processing status
+          enum:
+          - Processing
+          - Processed
+          - Error
+          - Corrupted
+          - InProgress
+          - Purged
+          - Failed
+        availabilityStatus:
+          type: string
+          description: Availability status
+          enum:
+          - Alive
+          - Deleted
+          - Purged
+          - NotAvailable
+        longSummary:
+          type: string
+          description: During meeting AI team analyze code and after meeting finished generates text summary about this meeting
+        shortSummary:
+          type: string
+          description: During meeting AI team analyze code and after meeting finished generates text summary about this meeting
+        keywords:
+          type: array
+          description: During meeting AI team analyze code and after meeting finished generates key words used in meeting
+          items:
+            type: string
+      description: Recording information
+    Paging:
+      required:
+      - currentPageToken
+      type: object
+      properties:
+        currentPageToken:
+          type: string
+          description: Current offset token
+        nextPageToken:
+          type: string
+          description: Next page offset token
+      description: Paging information
+    Host:
+      type: object
+      properties:
         accountId:
           type: string
           description: Account id
@@ -320,21 +315,26 @@ components:
         displayName:
           type: string
           description: Display name
-        callerId:
-          type: string
-          description: Caller id
-        correlationId:
-          description: Pass-thru parameter in join url
-          type: string
-      description: Participant information
-    JsValue:
+      description: Meeting host
+    MeetingPage:
+      required:
+      - meetings
+      - paging
       type: object
-      properties: {}
+      properties:
+        meetings:
+          type: array
+          description: Meetings array
+          items:
+            $ref: '#/components/schemas/Meeting'
+        paging:
+          $ref: '#/components/schemas/Paging'
+      description: Meetings page
   responses:
-    RcvTimeout:
-      description: Data processing timeout
     RcvBadRequest:
       description: Bad request format
+    RcvTimeout:
+      description: Data processing timeout
     RcvInternalError:
       description: Error processing data
     RcvAccessForbidden:

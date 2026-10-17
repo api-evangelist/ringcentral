@@ -117,7 +117,37 @@ paths:
       x-app-permission: EditAccounts
       x-user-permission: Users
 components:
+  parameters:
+    FieldId:
+      name: fieldId
+      in: path
+      description: Custom field identifier
+      required: true
+      schema:
+        type: string
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
   schemas:
+    CustomFieldList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomFieldModel'
     CustomFieldModel:
       type: object
       properties:
@@ -143,42 +173,12 @@ components:
         displayName:
           type: string
           description: Custom field display name
-    CustomFieldList:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomFieldModel'
     CustomFieldUpdateRequest:
       type: object
       properties:
         displayName:
           type: string
           description: Custom field display name
-  parameters:
-    AccountId:
-      name: accountId
-      in: path
-      description: 'Internal identifier of the RingCentral account
-
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
-    FieldId:
-      name: fieldId
-      in: path
-      description: Custom field identifier
-      required: true
-      schema:
-        type: string
   securitySchemes:
     OAuth2:
       type: oauth2

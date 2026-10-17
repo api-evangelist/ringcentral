@@ -365,69 +365,60 @@ paths:
       x-throttling-group: Heavy
       x-app-permission: ReadWebinars
 components:
-  responses:
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
-
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
-
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    Forbidden:
-      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
-
-        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
   schemas:
-    WcsSessionGlobalListResource:
+    WcsSessionWithLocaleCodeModel:
+      allOf:
+      - $ref: '#/components/schemas/WcsSessionBaseModel'
+      - type: object
+        properties:
+          localeCode:
+            type: string
+            description: Session locale code. Can't be blank or null
+            maxLength: 8
+            minLength: 2
+            example: en-US
+    WcsSessionStatusModel:
+      type: string
+      description: Session status (for the purposes of Configuration service)
+      enum:
+      - Scheduled
+      - Active
+      - Finished
+      example: Scheduled
+    RcwPagingForwardModel:
       type: object
       required:
-      - records
-      - paging
+      - pageToken
+      - perPage
       properties:
-        records:
-          type: array
-          minItems: 0
-          items:
-            $ref: '#/components/schemas/SessionGlobalListEntry'
-        paging:
-          $ref: '#/components/schemas/RcwPagingModel'
-    RcwLinkedUserModel:
-      type: object
-      description: The internal IDs of RC-authenticated users.
-      properties:
-        linkedUser:
-          $ref: '#/components/schemas/RcwDomainUserModel'
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: Number of items per page
+          example: 100
+        pageToken:
+          type: string
+          description: Current page token
+        nextPageToken:
+          type: string
+          description: Next page token (absent for the last page of the result set)
+        previousPageToken:
+          type: string
+          description: 'Previous page token (absent for the first page of the result set)
+
+            May be omitted if the result set does not support backward navigation.
+
+            '
+    RcwPagingModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwPagingForwardModel'
+      - type: object
+        properties:
+          previousPageToken:
+            type: string
+            description: Previous page token (absent for the first page of the result set)
     ParameterizedErrorResponseModel:
       type: object
       description: Standard error response which may include parameterized errors
@@ -440,31 +431,6 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ApiErrorWithParameter'
-    WcsSessionStatusModel:
-      type: string
-      description: Session status (for the purposes of Configuration service)
-      enum:
-      - Scheduled
-      - Active
-      - Finished
-      example: Scheduled
-    SessionGlobalListEntry:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceBaseModel'
-      - type: object
-        required:
-        - webinar
-        properties:
-          webinar:
-            $ref: '#/components/schemas/WcsWebinarRefModel'
-      - $ref: '#/components/schemas/WcsSessionWithLocaleCodeModel'
-    WebinarGeneratedModel:
-      type: object
-      required:
-      - host
-      properties:
-        host:
-          $ref: '#/components/schemas/WcsHostModel'
     RcwResourceBaseModel:
       allOf:
       - $ref: '#/components/schemas/RcwImmutableResourceIdModel'
@@ -483,25 +449,52 @@ components:
             description: Object last modification time
             format: date-time
             readOnly: true
-    WebinarBaseModel:
+    WcsSessionGlobalListResource:
+      type: object
+      required:
+      - records
+      - paging
+      properties:
+        records:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/SessionGlobalListEntry'
+        paging:
+          $ref: '#/components/schemas/RcwPagingModel'
+    RcwImmutableResourceIdModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal object ID
+          minLength: 1
+          maxLength: 20
+          example: '78654321'
+          readOnly: true
+    WcsWebinarRefModel:
       allOf:
+      - $ref: '#/components/schemas/RcwResourceIdModel'
       - $ref: '#/components/schemas/WebinarInfoModel'
+      - required:
+        - title
       - type: object
         properties:
-          settings:
-            $ref: '#/components/schemas/WcsWebinarSettingsModel'
-    ApiErrorResponseModel:
+          host:
+            $ref: '#/components/schemas/RcwLinkedUserModel'
+    RcwLinkedUserModel:
       type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
+      description: The internal IDs of RC-authenticated users.
       properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
+        linkedUser:
+          $ref: '#/components/schemas/RcwDomainUserModel'
+    WebinarGeneratedModel:
+      type: object
+      required:
+      - host
+      properties:
+        host:
+          $ref: '#/components/schemas/WcsHostModel'
     ApiError:
       type: object
       description: Generalized API error structure suitable for any error type
@@ -518,6 +511,168 @@ components:
           description: User-friendly error message
           example: Something went wrong
       additionalProperties: true
+    RcwDomainUserModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwUserModel'
+      - type: object
+        required:
+        - domain
+        properties:
+          domain:
+            type: string
+            description: Identity domain
+            enum:
+            - pbx
+            - ilm
+            default: pbx
+    WebinarListResource:
+      type: object
+      required:
+      - records
+      - paging
+      properties:
+        records:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/WcsWebinarResource'
+        paging:
+          $ref: '#/components/schemas/RcwPagingModel'
+    WebinarBaseModel:
+      allOf:
+      - $ref: '#/components/schemas/WebinarInfoModel'
+      - type: object
+        properties:
+          settings:
+            $ref: '#/components/schemas/WcsWebinarSettingsModel'
+    WcsWebinarResource:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - $ref: '#/components/schemas/WebinarBaseModel'
+      - $ref: '#/components/schemas/WebinarGeneratedModel'
+    ApiErrorResponseModel:
+      type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
+    WcsHostModel:
+      type: object
+      required:
+      - entitled
+      properties:
+        entitled:
+          type: boolean
+          description: Describes host's license, 'true' - license is active
+      allOf:
+      - $ref: '#/components/schemas/RcwUserModel'
+      - $ref: '#/components/schemas/RcwLinkedUserModel'
+    WcsSessionGeneratedModel:
+      type: object
+      properties:
+        videoBridgeId:
+          type: string
+          description: The RCV bridge id
+          readOnly: true
+          example: '839874770'
+        videoBridgePassword:
+          type: string
+          format: password
+          readOnly: true
+          x-sensitive-data: masked
+          description: The RCV bridge password. Returned only if requested by Host/Co-host/Panelist and a password for the bridge is set.
+          example: abc123
+        videoBridgePstnPassword:
+          type: string
+          format: password
+          readOnly: true
+          x-sensitive-data: masked
+          description: The RCV bridge PSTN password. Returned only if requested by Host/Co-host/Panelist and a PSTN password for the bridge is set.
+          example: abc123
+        attendeeJoinUri:
+          type: string
+          format: uri
+          readOnly: true
+          maxLength: 256
+          minLength: 5
+          description: The URI for attendees to join the Webinar (if it is a public webinar)
+          example: https://v.ringcentral.com/w/a/join/iuyef77fsj473wn10ashjfk34
+        hasUnsentInvites:
+          type: boolean
+          readOnly: true
+          description: Calculated attribute indicating if there are any unsent/deferred invites to session participants
+    WebinarCreationRequest:
+      allOf:
+      - $ref: '#/components/schemas/WebinarBaseModel'
+      - required:
+        - title
+      - type: object
+        properties:
+          host:
+            $ref: '#/components/schemas/RcwLinkedUserModel'
+    WebinarInfoModel:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Webinar title
+          minLength: 1
+          maxLength: 512
+          x-sensitive-data: masked
+          example: All-Hands Webinar
+        description:
+          type: string
+          description: User-friendly description of the Webinar
+          minLength: 0
+          maxLength: 4096
+          x-sensitive-data: masked
+          example: Quarterly All-hands event to present recent news about our company to employees
+    ApiErrorWithParameter:
+      description: 'The error model with additional attributes which can be used for HTTP 400/409
+
+        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
+
+        '
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - type: object
+        properties:
+          parameterName:
+            type: string
+            description: The name of the API parameter/attribute which caused the error
+          parameterValue:
+            type: string
+            description: The value of the API parameter/attribute which caused the error
+    SessionGlobalListEntry:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - type: object
+        required:
+        - webinar
+        properties:
+          webinar:
+            $ref: '#/components/schemas/WcsWebinarRefModel'
+      - $ref: '#/components/schemas/WcsSessionWithLocaleCodeModel'
+    RcwResourceIdModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal object ID
+          minLength: 1
+          maxLength: 20
+          example: '78654321'
+    WcsSessionResource:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - $ref: '#/components/schemas/WcsSessionWithLocaleCodeModel'
+      - $ref: '#/components/schemas/WcsSessionGeneratedModel'
     WcsSessionBaseModel:
       type: object
       required:
@@ -581,164 +736,6 @@ components:
           minLength: 5
           description: The URI to join the webinar as a host
           example: https://v.ringcentral.com/w/join/de7yd8ew7yfsdfjh899843rgj
-    WebinarCreationRequest:
-      allOf:
-      - $ref: '#/components/schemas/WebinarBaseModel'
-      - required:
-        - title
-      - type: object
-        properties:
-          host:
-            $ref: '#/components/schemas/RcwLinkedUserModel'
-    WebinarListResource:
-      type: object
-      required:
-      - records
-      - paging
-      properties:
-        records:
-          type: array
-          minItems: 0
-          items:
-            $ref: '#/components/schemas/WcsWebinarResource'
-        paging:
-          $ref: '#/components/schemas/RcwPagingModel'
-    RcwImmutableResourceIdModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal object ID
-          minLength: 1
-          maxLength: 20
-          example: '78654321'
-          readOnly: true
-    RcwPagingForwardModel:
-      type: object
-      required:
-      - pageToken
-      - perPage
-      properties:
-        perPage:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: Number of items per page
-          example: 100
-        pageToken:
-          type: string
-          description: Current page token
-        nextPageToken:
-          type: string
-          description: Next page token (absent for the last page of the result set)
-        previousPageToken:
-          type: string
-          description: 'Previous page token (absent for the first page of the result set)
-
-            May be omitted if the result set does not support backward navigation.
-
-            '
-    WcsHostModel:
-      type: object
-      required:
-      - entitled
-      properties:
-        entitled:
-          type: boolean
-          description: Describes host's license, 'true' - license is active
-      allOf:
-      - $ref: '#/components/schemas/RcwUserModel'
-      - $ref: '#/components/schemas/RcwLinkedUserModel'
-    RcwResourceIdModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal object ID
-          minLength: 1
-          maxLength: 20
-          example: '78654321'
-    RcwPagingModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwPagingForwardModel'
-      - type: object
-        properties:
-          previousPageToken:
-            type: string
-            description: Previous page token (absent for the first page of the result set)
-    WcsSessionGeneratedModel:
-      type: object
-      properties:
-        videoBridgeId:
-          type: string
-          description: The RCV bridge id
-          readOnly: true
-          example: '839874770'
-        videoBridgePassword:
-          type: string
-          format: password
-          readOnly: true
-          x-sensitive-data: masked
-          description: The RCV bridge password. Returned only if requested by Host/Co-host/Panelist and a password for the bridge is set.
-          example: abc123
-        videoBridgePstnPassword:
-          type: string
-          format: password
-          readOnly: true
-          x-sensitive-data: masked
-          description: The RCV bridge PSTN password. Returned only if requested by Host/Co-host/Panelist and a PSTN password for the bridge is set.
-          example: abc123
-        attendeeJoinUri:
-          type: string
-          format: uri
-          readOnly: true
-          maxLength: 256
-          minLength: 5
-          description: The URI for attendees to join the Webinar (if it is a public webinar)
-          example: https://v.ringcentral.com/w/a/join/iuyef77fsj473wn10ashjfk34
-        hasUnsentInvites:
-          type: boolean
-          readOnly: true
-          description: Calculated attribute indicating if there are any unsent/deferred invites to session participants
-    WebinarInfoModel:
-      type: object
-      properties:
-        title:
-          type: string
-          description: Webinar title
-          minLength: 1
-          maxLength: 512
-          x-sensitive-data: masked
-          example: All-Hands Webinar
-        description:
-          type: string
-          description: User-friendly description of the Webinar
-          minLength: 0
-          maxLength: 4096
-          x-sensitive-data: masked
-          example: Quarterly All-hands event to present recent news about our company to employees
-    ApiErrorWithParameter:
-      description: 'The error model with additional attributes which can be used for HTTP 400/409
-
-        This is a deprecated model: "ApiError" model can be used instead with arbitrary additional parameters
-
-        '
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - type: object
-        properties:
-          parameterName:
-            type: string
-            description: The name of the API parameter/attribute which caused the error
-          parameterValue:
-            type: string
-            description: The value of the API parameter/attribute which caused the error
-    WcsWebinarResource:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceBaseModel'
-      - $ref: '#/components/schemas/WebinarBaseModel'
-      - $ref: '#/components/schemas/WebinarGeneratedModel'
     RcwUserModel:
       type: object
       required:
@@ -888,56 +885,31 @@ components:
           type: boolean
           description: Indicate if the moderated Q&A enabled for webinar
           default: false
-    RcwDomainUserModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwUserModel'
-      - type: object
-        required:
-        - domain
-        properties:
-          domain:
-            type: string
-            description: Identity domain
-            enum:
-            - pbx
-            - ilm
-            default: pbx
-    WcsSessionWithLocaleCodeModel:
-      allOf:
-      - $ref: '#/components/schemas/WcsSessionBaseModel'
-      - type: object
-        properties:
-          localeCode:
-            type: string
-            description: Session locale code. Can't be blank or null
-            maxLength: 8
-            minLength: 2
-            example: en-US
-    WcsSessionResource:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceBaseModel'
-      - $ref: '#/components/schemas/WcsSessionWithLocaleCodeModel'
-      - $ref: '#/components/schemas/WcsSessionGeneratedModel'
-    WcsWebinarRefModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwResourceIdModel'
-      - $ref: '#/components/schemas/WebinarInfoModel'
-      - required:
-        - title
-      - type: object
-        properties:
-          host:
-            $ref: '#/components/schemas/RcwLinkedUserModel'
   parameters:
-    WcsEndTimeFrom:
-      name: endTimeFrom
-      in: query
-      description: The beginning of the time window by 'endTime' (it is calculated as scheduledStartTime+scheduledDuration)
+    RcwSessionId:
+      name: sessionId
+      in: path
+      description: Identifier of the Session.
       required: true
+      style: simple
       explode: false
       schema:
         type: string
-        format: date-time
+        minLength: 1
+        maxLength: 20
+      example: '353535353'
+    PageToken:
+      name: pageToken
+      in: query
+      description: 'The token indicating the particular page of the result set to be retrieved.
+
+        If omitted the first page will be returned.
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: string
     HostUserId:
       name: hostUserId
       in: query
@@ -954,18 +926,24 @@ components:
           maxLength: 20
       example:
       - '77777777'
-    RcwSessionId:
-      name: sessionId
-      in: path
-      description: Identifier of the Session.
+    WcsEndTimeFrom:
+      name: endTimeFrom
+      in: query
+      description: The beginning of the time window by 'endTime' (it is calculated as scheduledStartTime+scheduledDuration)
       required: true
-      style: simple
       explode: false
       schema:
         type: string
-        minLength: 1
-        maxLength: 20
-      example: '353535353'
+        format: date-time
+    WcsCreationTimeFrom:
+      name: creationTimeFrom
+      in: query
+      description: The beginning of the time window by 'creationTime' .
+      required: true
+      explode: false
+      schema:
+        type: string
+        format: date-time
     RcwWebinarId:
       name: webinarId
       in: path
@@ -995,27 +973,49 @@ components:
         maximum: 1000
         default: 100
       example: 100
-    PageToken:
-      name: pageToken
-      in: query
-      description: 'The token indicating the particular page of the result set to be retrieved.
+  responses:
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
 
-        If omitted the first page will be returned.
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
 
         '
-      required: false
-      explode: false
-      schema:
-        type: string
-    WcsCreationTimeFrom:
-      name: creationTimeFrom
-      in: query
-      description: The beginning of the time window by 'creationTime' .
-      required: true
-      explode: false
-      schema:
-        type: string
-        format: date-time
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
   securitySchemes:
     OAuth2:
       type: oauth2

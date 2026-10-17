@@ -100,6 +100,29 @@ paths:
       x-app-permission: RingOut
 components:
   schemas:
+    GetRingOutStatusResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a RingOut call
+        uri:
+          type: string
+          description: Link to a RingOut call resource
+          format: uri
+        status:
+          $ref: '#/components/schemas/RingOutStatusInfo'
+    MakeRingOutCountryInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Dialing plan country identifier
+      description: 'Optional. Dialing plan country data. If not specified, then an extension
+
+        home country is applied by default
+
+        '
     MakeRingOutRequest:
       required:
       - from
@@ -152,24 +175,6 @@ components:
         2nd leg of a RingOut call
 
         '
-    MakeRingOutCountryInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Dialing plan country identifier
-      description: 'Optional. Dialing plan country data. If not specified, then an extension
-
-        home country is applied by default
-
-        '
-    MakeRingOutCallerIdInfo:
-      type: object
-      properties:
-        phoneNumber:
-          type: string
-          description: Phone number in E.164 format
-      description: Phone number which will be displayed to the called party
     RingOutStatusInfo:
       type: object
       properties:
@@ -222,25 +227,20 @@ components:
           - NotEnoughFunds
           - NoSuchUser
       description: RingOut status information
-    GetRingOutStatusResponse:
+    MakeRingOutCallerIdInfo:
       type: object
       properties:
-        id:
+        phoneNumber:
           type: string
-          description: Internal identifier of a RingOut call
-        uri:
-          type: string
-          description: Link to a RingOut call resource
-          format: uri
-        status:
-          $ref: '#/components/schemas/RingOutStatusInfo'
+          description: Phone number in E.164 format
+      description: Phone number which will be displayed to the called party
   parameters:
-    ExtensionId:
-      name: extensionId
+    AccountId:
+      name: accountId
       in: path
-      description: 'Internal identifier of the RingCentral extension/user
+      description: 'Internal identifier of the RingCentral account
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true
@@ -250,12 +250,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

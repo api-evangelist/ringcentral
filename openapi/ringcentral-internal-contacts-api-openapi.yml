@@ -286,6 +286,161 @@ paths:
       x-user-permission: ReadCompanyInfo
 components:
   schemas:
+    PhoneNumberResource:
+      type: object
+      properties:
+        formattedPhoneNumber:
+          type: string
+          example: +1 (205) 6812029
+        phoneNumber:
+          type: string
+          example: '+12056812029'
+        type:
+          type: string
+          example: VoiceFax
+        label:
+          type: string
+          description: Custom user name of a phone number, if any
+          example: Boss
+        usageType:
+          type: string
+          description: Usage type of phone number
+          enum:
+          - MobileNumber
+          - ContactNumber
+          - DirectNumber
+          - ForwardedNumber
+          example: DirectNumber
+        hidden:
+          type: boolean
+          description: Specifies if a phone number should be hidden or not
+        primary:
+          type: boolean
+          description: Specifies if the number is primary, i.e. displayed as 'main number' and called by default
+    FederationResource:
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/FederatedAccountResource'
+        creationTime:
+          type: string
+          format: date-time
+        displayName:
+          type: string
+        id:
+          type: string
+        lastModifiedTime:
+          type: string
+          format: date-time
+        type:
+          $ref: '#/components/schemas/FederationType'
+    CallQueueResource:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '873014540006'
+        name:
+          type: string
+          example: Sales CQ
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
+
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    SearchDirectoryExtensionType:
+      type: string
+      description: Type of extension to filter the contacts
+      enum:
+      - User
+      - Department
+      - Announcement
+      - Voicemail
+      - DigitalUser
+      - VirtualUser
+      - FaxUser
+      - PagingOnly
+      - SharedLinesGroup
+      - IvrMenu
+      - ApplicationExtension
+      - ParkLocation
+      - Limited
+      - Bot
+      - Site
+      - Room
+      - ProxyAdmin
+      - DelegatedLinesGroup
+      - FlexibleUser
+      - GroupCallPickup
+      - RoomConnector
+      example: User
     CustomFieldResource:
       type: object
       properties:
@@ -319,62 +474,33 @@ components:
       - GroupCallPickup
       - External
       example: User
-    FederationType:
-      type: string
-      description: Federation type
-      enum:
-      - Regular
-      - AdminOnly
-    GroupResource:
+    ADGError:
       type: object
       properties:
-        id:
+        errorCode:
           type: string
-          example: '63723034'
-        name:
-          type: string
-          example: Leaders
-    OrderBy:
-      type: object
-      properties:
-        index:
-          type: integer
-          format: int32
-          default: 1
-          description: Sorting priority index, starting from '1'. Optional if only one element in `orderBy` array is specified
-          example: 1
-        fieldName:
-          type: string
-          description: Field name by which to sort the contacts
+          description: Code that characterizes this error. Code uniquely identifies the source of the error.
+          readOnly: true
           enum:
-          - firstName
-          - lastName
-          - extensionNumber
-          - phoneNumber
-          - email
-          - jobTitle
-          - department
-          example: department
-        direction:
+          - ErrorCode{code='ADG-000', httpStatus=503, description='Service temporary unavailable.'}
+          - ErrorCode{code='ADG-010', httpStatus=503, description='Federation data temporary unavailable.'}
+          - ErrorCode{code='ADG-001', httpStatus=500, description='Service internal error.'}
+          - ErrorCode{code='ADG-100', httpStatus=403, description='Insufficient permissions.'}
+          - ErrorCode{code='ADG-101', httpStatus=403, description='Unauthorized access.'}
+          - ErrorCode{code='ADG-102', httpStatus=405, description='Method not allowed.'}
+          - ErrorCode{code='ADG-111', httpStatus=400, description='Need Content-Type header.'}
+          - ErrorCode{code='ADG-112', httpStatus=400, description='Request body is invalid.'}
+          - ErrorCode{code='ADG-121', httpStatus=400, description='Parameter [${paramName}] is invalid. ${additionalInfo:-}'}
+          - ErrorCode{code='ADG-115', httpStatus=415, description='Unsupported Media Type.'}
+          - ErrorCode{code='ADG-105', httpStatus=404, description='Current account is not linked to any federation.'}
+          - ErrorCode{code='ADG-107', httpStatus=404, description='Account not found.'}
+          - ErrorCode{code='ADG-122', httpStatus=404, description='Contact not found.'}
+          - ErrorCode{code='ADG-200', httpStatus=404, description='Invalid URI'}
+        message:
           type: string
-          default: Asc
-          description: Sorting direction
-          enum:
-          - Asc
-          - Desc
-          example: Asc
-    BusinessSiteResource:
-      type: object
-      properties:
-        id:
-          type: string
-          example: '872781820006'
-        name:
-          type: string
-          example: Sales site
-        code:
-          type: string
-          example: '1007'
+          description: Message that describes the error. This message can be used in UI.
+          readOnly: true
+      description: Description of an error occurred during request processing. This data type can be used only in readonly mode, no writing is allowed
     ExternalIntegrationResource:
       type: object
       properties:
@@ -396,79 +522,44 @@ components:
         outboundEdgeId:
           type: string
           example: '1726'
-    AccountDirectoryProfileImageResource:
-      type: object
-      properties:
-        etag:
-          type: string
-          example: tag
-        uri:
-          type: string
-          format: uri
-    CallQueueResource:
+    DirectoryRoleResource:
+      required:
+      - id
       type: object
       properties:
         id:
           type: string
-          example: '873014540006'
         name:
           type: string
-          example: Sales CQ
-    DirectoryResource:
-      required:
-      - records
-      - paging
-      type: object
-      properties:
-        paging:
-          $ref: '#/components/schemas/EnumeratedPagingModel'
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/ContactResource'
-    FederatedAccountResource:
-      type: object
+        domain:
+          type: string
+        displayName:
+          type: string
+    AccountResource:
       required:
       - id
+      type: object
       properties:
         companyName:
           type: string
-        conflictCount:
-          type: integer
-          format: int32
+          example: My lovely company
         federatedName:
           type: string
+          example: Lovely Holding
         id:
           type: string
-        linkCreationTime:
-          type: string
-          format: date-time
+          example: '400131426008'
         mainNumber:
           $ref: '#/components/schemas/PhoneNumberResource'
-    FederationResource:
+    GroupResource:
       type: object
       properties:
-        accounts:
-          type: array
-          items:
-            $ref: '#/components/schemas/FederatedAccountResource'
-        creationTime:
-          type: string
-          format: date-time
-        displayName:
-          type: string
         id:
           type: string
-        lastModifiedTime:
+          example: '63723034'
+        name:
           type: string
-          format: date-time
-        type:
-          $ref: '#/components/schemas/FederationType'
-    SearchDirectoryExtensionTypes:
-      type: array
-      description: Types of extension to filter the contacts
-      items:
-        $ref: '#/components/schemas/SearchDirectoryExtensionType'
+          example: Leaders
     SearchDirectoryEntriesRequest:
       type: object
       properties:
@@ -566,6 +657,11 @@ components:
         department: R&D department
         page: 1
         perPage: 30
+    SearchDirectoryExtensionTypes:
+      type: array
+      description: Types of extension to filter the contacts
+      items:
+        $ref: '#/components/schemas/SearchDirectoryExtensionType'
     FederationTypes:
       type: string
       description: Federation types for search
@@ -573,22 +669,90 @@ components:
       - All
       - Regular
       - AdminOnly
-    AccountResource:
-      required:
-      - id
+    ADGErrorResponse:
       type: object
       properties:
-        companyName:
-          type: string
-          example: My lovely company
-        federatedName:
-          type: string
-          example: Lovely Holding
+        errors:
+          type: array
+          description: Collection of all gathered errors
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/ADGError'
+      description: Format of response in case that any error occurred during request processing
+    DirectoryResource:
+      required:
+      - records
+      - paging
+      type: object
+      properties:
+        paging:
+          $ref: '#/components/schemas/EnumeratedPagingModel'
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactResource'
+    BusinessSiteResource:
+      type: object
+      properties:
         id:
           type: string
-          example: '400131426008'
-        mainNumber:
-          $ref: '#/components/schemas/PhoneNumberResource'
+          example: '872781820006'
+        name:
+          type: string
+          example: Sales site
+        code:
+          type: string
+          example: '1007'
+    OrderBy:
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
+          default: 1
+          description: Sorting priority index, starting from '1'. Optional if only one element in `orderBy` array is specified
+          example: 1
+        fieldName:
+          type: string
+          description: Field name by which to sort the contacts
+          enum:
+          - firstName
+          - lastName
+          - extensionNumber
+          - phoneNumber
+          - email
+          - jobTitle
+          - department
+          example: department
+        direction:
+          type: string
+          default: Asc
+          description: Sorting direction
+          enum:
+          - Asc
+          - Desc
+          example: Asc
+    CostCenterResource:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '83266549237542'
+        code:
+          type: string
+          example: Main
+        name:
+          type: string
+          example: Cost Center A
+    AccountDirectoryProfileImageResource:
+      type: object
+      properties:
+        etag:
+          type: string
+          example: tag
+        uri:
+          type: string
+          format: uri
     ContactResource:
       required:
       - id
@@ -690,19 +854,6 @@ components:
           $ref: '#/components/schemas/ExternalIntegrationResource'
         subType:
           $ref: '#/components/schemas/ContactSubTypeEnum'
-    DirectoryRoleResource:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        domain:
-          type: string
-        displayName:
-          type: string
     ContactSubTypeEnum:
       type: string
       description: Extension subtype
@@ -713,182 +864,31 @@ components:
       - VideoProPlus
       - DigitalSignage
       - Emergency
-    SearchDirectoryExtensionType:
+    FederationType:
       type: string
-      description: Type of extension to filter the contacts
+      description: Federation type
       enum:
-      - User
-      - Department
-      - Announcement
-      - Voicemail
-      - DigitalUser
-      - VirtualUser
-      - FaxUser
-      - PagingOnly
-      - SharedLinesGroup
-      - IvrMenu
-      - ApplicationExtension
-      - ParkLocation
-      - Limited
-      - Bot
-      - Site
-      - Room
-      - ProxyAdmin
-      - DelegatedLinesGroup
-      - FlexibleUser
-      - GroupCallPickup
-      - RoomConnector
-      example: User
-    CostCenterResource:
-      type: object
-      properties:
-        id:
-          type: string
-          example: '83266549237542'
-        code:
-          type: string
-          example: Main
-        name:
-          type: string
-          example: Cost Center A
-    ADGErrorResponse:
-      type: object
-      properties:
-        errors:
-          type: array
-          description: Collection of all gathered errors
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/ADGError'
-      description: Format of response in case that any error occurred during request processing
-    ADGError:
-      type: object
-      properties:
-        errorCode:
-          type: string
-          description: Code that characterizes this error. Code uniquely identifies the source of the error.
-          readOnly: true
-          enum:
-          - ErrorCode{code='ADG-000', httpStatus=503, description='Service temporary unavailable.'}
-          - ErrorCode{code='ADG-010', httpStatus=503, description='Federation data temporary unavailable.'}
-          - ErrorCode{code='ADG-001', httpStatus=500, description='Service internal error.'}
-          - ErrorCode{code='ADG-100', httpStatus=403, description='Insufficient permissions.'}
-          - ErrorCode{code='ADG-101', httpStatus=403, description='Unauthorized access.'}
-          - ErrorCode{code='ADG-102', httpStatus=405, description='Method not allowed.'}
-          - ErrorCode{code='ADG-111', httpStatus=400, description='Need Content-Type header.'}
-          - ErrorCode{code='ADG-112', httpStatus=400, description='Request body is invalid.'}
-          - ErrorCode{code='ADG-121', httpStatus=400, description='Parameter [${paramName}] is invalid. ${additionalInfo:-}'}
-          - ErrorCode{code='ADG-115', httpStatus=415, description='Unsupported Media Type.'}
-          - ErrorCode{code='ADG-105', httpStatus=404, description='Current account is not linked to any federation.'}
-          - ErrorCode{code='ADG-107', httpStatus=404, description='Account not found.'}
-          - ErrorCode{code='ADG-122', httpStatus=404, description='Contact not found.'}
-          - ErrorCode{code='ADG-200', httpStatus=404, description='Invalid URI'}
-        message:
-          type: string
-          description: Message that describes the error. This message can be used in UI.
-          readOnly: true
-      description: Description of an error occurred during request processing. This data type can be used only in readonly mode, no writing is allowed
-    EnumeratedPagingModel:
+      - Regular
+      - AdminOnly
+    FederatedAccountResource:
       type: object
       required:
-      - perPage
-      additionalProperties: false
+      - id
       properties:
-        perPage:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'Current page size, describes how many items are in each page.
-
-            Matches "perPage" parameter from the request.
-
-            '
-          example: 50
-        page:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'The current page number. 1-indexed, so the first page is 1
-
-            by default. May be omitted if result is empty (because non-existent page
-
-            was specified or perPage=0 was requested)
-
-            '
-          example: 5
-        pageStart:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based number of the first element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 0
-        pageEnd:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based index of the last element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 5
-        totalPages:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of pages in a dataset. May be omitted for
-
-            some resources due to performance reasons
-
-            '
-          example: 25
-        totalElements:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of elements in a dataset. May be omitted for
-
-            some resource due to performance reasons
-
-            '
-          example: 25
-    PhoneNumberResource:
-      type: object
-      properties:
-        formattedPhoneNumber:
+        companyName:
           type: string
-          example: +1 (205) 6812029
-        phoneNumber:
+        conflictCount:
+          type: integer
+          format: int32
+        federatedName:
           type: string
-          example: '+12056812029'
-        type:
+        id:
           type: string
-          example: VoiceFax
-        label:
+        linkCreationTime:
           type: string
-          description: Custom user name of a phone number, if any
-          example: Boss
-        usageType:
-          type: string
-          description: Usage type of phone number
-          enum:
-          - MobileNumber
-          - ContactNumber
-          - DirectNumber
-          - ForwardedNumber
-          example: DirectNumber
-        hidden:
-          type: boolean
-          description: Specifies if a phone number should be hidden or not
-        primary:
-          type: boolean
-          description: Specifies if the number is primary, i.e. displayed as 'main number' and called by default
+          format: date-time
+        mainNumber:
+          $ref: '#/components/schemas/PhoneNumberResource'
   parameters:
     AccountId:
       name: accountId

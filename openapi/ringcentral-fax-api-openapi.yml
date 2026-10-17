@@ -141,76 +141,6 @@ paths:
       x-throttling-group: Light
 components:
   schemas:
-    FaxRequestTo:
-      type: object
-      properties:
-        phoneNumber:
-          type: string
-          description: Phone number in E.164 (with '+' sign) format
-          example: '+18661234567'
-        name:
-          type: string
-          description: Name of a fax recipient that will be listed on a fax cover page
-    MessagePriorityEnum:
-      type: string
-      description: Message priority
-      enum:
-      - Normal
-      - High
-    FaxCoverPageInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: 'Internal identifier of a fax cover page. The supported value
-
-            range is 0-13 (for language setting en-US) and 0, 15-28
-
-            (for all other languages)
-
-            '
-        name:
-          type: string
-          description: Name of a fax cover page pattern
-    MessageAvailabilityEnum:
-      type: string
-      enum:
-      - Alive
-      - Deleted
-      - Purged
-      description: 'Message availability status. Message in ''Deleted'' state is still
-
-        preserved with all its attachments and can be restored. ''Purged'' means
-
-        that all attachments are already deleted and the message itself is about
-
-        to be physically deleted shortly
-
-        '
-    FaxResolutionEnum:
-      type: string
-      description: 'Fax only. Resolution of a fax message. ''High'' for black and
-
-        white image scanned at 200 dpi, ''Low'' for black and white image scanned
-
-        at 100 dpi
-
-        '
-      enum:
-      - High
-      - Low
-    MessageDirectionEnum:
-      type: string
-      enum:
-      - Inbound
-      - Outbound
-      description: 'Text message direction. Note that for some message types not all
-
-        directions are allowed. For example voicemail messages can
-
-        be only inbound
-
-        '
     FaxResponseTo:
       type: object
       properties:
@@ -238,28 +168,67 @@ components:
             this information is unavailable for US toll-free numbers)
 
             '
-    MessageStatusEnum:
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
+    MessageAttachmentInfoIntId:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Internal identifier of a message attachment
+          format: int64
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI of a message attachment
+        type:
+          type: string
+          description: Type of message attachment
+          enum:
+          - AudioRecording
+          - AudioTranscription
+          - Text
+          - SourceDocument
+          - RenderedDocument
+          - MmsAttachment
+        contentType:
+          type: string
+          description: MIME type for a given attachment, for instance 'audio/wav'
+        filename:
+          type: string
+          description: Name of a file attached
+        size:
+          type: integer
+          format: int32
+          description: Size of an attachment in bytes
+    FaxRequestTo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Phone number in E.164 (with '+' sign) format
+          example: '+18661234567'
+        name:
+          type: string
+          description: Name of a fax recipient that will be listed on a fax cover page
+    MessagePriorityEnum:
       type: string
-      description: 'Message status. Different message types may have different
-
-        allowed status values. For outbound faxes the aggregated message status
-
-        is returned. If, for outbound message, a status for at least one recipient is ''Queued'', then
-
-        the ''Queued'' value is returned. If a status for at least one recipient is
-
-        ''SendingFailed'', then the ''SendingFailed'' value is returned. In other cases
-
-        the ''Sent'' status is returned
-
-        '
+      description: Message priority
       enum:
-      - Queued
-      - Sent
-      - Delivered
-      - DeliveryFailed
-      - SendingFailed
-      - Received
+      - Normal
+      - High
+    MessageReadStatusEnum:
+      description: Message read status
+      type: string
+      enum:
+      - Read
+      - Unread
     MessageStoreCallerInfoResponseFrom:
       type: object
       properties:
@@ -313,121 +282,18 @@ components:
 
             '
       description: Sender information
-    EnumeratedPagingModel:
-      type: object
-      required:
-      - perPage
-      additionalProperties: false
-      properties:
-        perPage:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'Current page size, describes how many items are in each page.
-
-            Matches "perPage" parameter from the request.
-
-            '
-          example: 50
-        page:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: 'The current page number. 1-indexed, so the first page is 1
-
-            by default. May be omitted if result is empty (because non-existent page
-
-            was specified or perPage=0 was requested)
-
-            '
-          example: 5
-        pageStart:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based number of the first element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 0
-        pageEnd:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The zero-based index of the last element on the current page.
-
-            Omitted if the page is omitted or result is empty
-
-            '
-          example: 5
-        totalPages:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of pages in a dataset. May be omitted for
-
-            some resources due to performance reasons
-
-            '
-          example: 25
-        totalElements:
-          type: integer
-          format: int32
-          minimum: 0
-          description: 'The total number of elements in a dataset. May be omitted for
-
-            some resource due to performance reasons
-
-            '
-          example: 25
-    PageNavigationUri:
-      type: object
-      additionalProperties: false
-      properties:
-        uri:
-          type: string
-          description: Canonical URI to retrieve the particular page of the result set
-          format: uri
-    MessageAttachmentInfoIntId:
-      type: object
-      properties:
-        id:
-          type: integer
-          description: Internal identifier of a message attachment
-          format: int64
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI of a message attachment
-        type:
-          type: string
-          description: Type of message attachment
-          enum:
-          - AudioRecording
-          - AudioTranscription
-          - Text
-          - SourceDocument
-          - RenderedDocument
-          - MmsAttachment
-        contentType:
-          type: string
-          description: MIME type for a given attachment, for instance 'audio/wav'
-        filename:
-          type: string
-          description: Name of a file attached
-        size:
-          type: integer
-          format: int32
-          description: Size of an attachment in bytes
-    MessageReadStatusEnum:
-      description: Message read status
+    FaxResolutionEnum:
       type: string
+      description: 'Fax only. Resolution of a fax message. ''High'' for black and
+
+        white image scanned at 200 dpi, ''Low'' for black and white image scanned
+
+        at 100 dpi
+
+        '
       enum:
-      - Read
-      - Unread
+      - High
+      - Low
     FaxResponse:
       type: object
       properties:
@@ -509,6 +375,28 @@ components:
             cover page. Maximum length is limited to 1024 symbols
 
             '
+    MessageStatusEnum:
+      type: string
+      description: 'Message status. Different message types may have different
+
+        allowed status values. For outbound faxes the aggregated message status
+
+        is returned. If, for outbound message, a status for at least one recipient is ''Queued'', then
+
+        the ''Queued'' value is returned. If a status for at least one recipient is
+
+        ''SendingFailed'', then the ''SendingFailed'' value is returned. In other cases
+
+        the ''Sent'' status is returned
+
+        '
+      enum:
+      - Queued
+      - Sent
+      - Delivered
+      - DeliveryFailed
+      - SendingFailed
+      - Received
     ListFaxCoverPagesResponse:
       type: object
       properties:
@@ -523,6 +411,18 @@ components:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
+    MessageDirectionEnum:
+      type: string
+      enum:
+      - Inbound
+      - Outbound
+      description: 'Text message direction. Note that for some message types not all
+
+        directions are allowed. For example voicemail messages can
+
+        be only inbound
+
+        '
     PageNavigationModel:
       type: object
       description: Links to other pages of the current result set
@@ -536,13 +436,113 @@ components:
           $ref: '#/components/schemas/PageNavigationUri'
         lastPage:
           $ref: '#/components/schemas/PageNavigationUri'
-  parameters:
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
+    EnumeratedPagingModel:
+      type: object
+      required:
+      - perPage
+      additionalProperties: false
+      properties:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'Current page size, describes how many items are in each page.
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+            Matches "perPage" parameter from the request.
+
+            '
+          example: 50
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: 'The current page number. 1-indexed, so the first page is 1
+
+            by default. May be omitted if result is empty (because non-existent page
+
+            was specified or perPage=0 was requested)
+
+            '
+          example: 5
+        pageStart:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based number of the first element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 0
+        pageEnd:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The zero-based index of the last element on the current page.
+
+            Omitted if the page is omitted or result is empty
+
+            '
+          example: 5
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of pages in a dataset. May be omitted for
+
+            some resources due to performance reasons
+
+            '
+          example: 25
+        totalElements:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'The total number of elements in a dataset. May be omitted for
+
+            some resource due to performance reasons
+
+            '
+          example: 25
+    MessageAvailabilityEnum:
+      type: string
+      enum:
+      - Alive
+      - Deleted
+      - Purged
+      description: 'Message availability status. Message in ''Deleted'' state is still
+
+        preserved with all its attachments and can be restored. ''Purged'' means
+
+        that all attachments are already deleted and the message itself is about
+
+        to be physically deleted shortly
+
+        '
+    FaxCoverPageInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Internal identifier of a fax cover page. The supported value
+
+            range is 0-13 (for language setting en-US) and 0, 15-28
+
+            (for all other languages)
+
+            '
+        name:
+          type: string
+          description: Name of a fax cover page pattern
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      description: 'Internal identifier of the RingCentral account
+
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true
@@ -552,12 +552,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

@@ -153,6 +153,14 @@ paths:
       x-user-permission: ReadCompanyDevices
 components:
   schemas:
+    PageNavigationUri:
+      type: object
+      additionalProperties: false
+      properties:
+        uri:
+          type: string
+          description: Canonical URI to retrieve the particular page of the result set
+          format: uri
     PagingOnlyGroupDevices:
       type: object
       properties:
@@ -217,6 +225,19 @@ components:
             '
           items:
             type: string
+    PageNavigationModel:
+      type: object
+      description: Links to other pages of the current result set
+      additionalProperties: false
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        nextPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        previousPage:
+          $ref: '#/components/schemas/PageNavigationUri'
+        lastPage:
+          $ref: '#/components/schemas/PageNavigationUri'
     PagingOnlyGroupUsers:
       type: object
       properties:
@@ -235,22 +256,6 @@ components:
           $ref: '#/components/schemas/PageNavigationModel'
         paging:
           $ref: '#/components/schemas/EnumeratedPagingModel'
-    PagingGroupExtensionInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a paging group user extension
-        uri:
-          type: string
-          format: uri
-          description: Link to a paging group user extension
-        extensionNumber:
-          type: string
-          description: Extension number of a paging group user
-        name:
-          type: string
-          description: Name of a paging group user
     EnumeratedPagingModel:
       type: object
       required:
@@ -321,27 +326,22 @@ components:
 
             '
           example: 25
-    PageNavigationUri:
+    PagingGroupExtensionInfo:
       type: object
-      additionalProperties: false
       properties:
+        id:
+          type: string
+          description: Internal identifier of a paging group user extension
         uri:
           type: string
-          description: Canonical URI to retrieve the particular page of the result set
           format: uri
-    PageNavigationModel:
-      type: object
-      description: Links to other pages of the current result set
-      additionalProperties: false
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        nextPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        previousPage:
-          $ref: '#/components/schemas/PageNavigationUri'
-        lastPage:
-          $ref: '#/components/schemas/PageNavigationUri'
+          description: Link to a paging group user extension
+        extensionNumber:
+          type: string
+          description: Extension number of a paging group user
+        name:
+          type: string
+          description: Name of a paging group user
   parameters:
     AccountId:
       name: accountId

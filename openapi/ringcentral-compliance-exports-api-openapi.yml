@@ -148,6 +148,28 @@ components:
           items:
             type: string
       description: Information specified in request
+    DataExportTaskList:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataExportTask'
+        navigation:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfo'
+        paging:
+          $ref: '#/components/schemas/GlipDataExportPagingInfo'
+    GlipDataExportNavigationInfo:
+      type: object
+      properties:
+        firstPage:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
+        nextPage:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
+        previousPage:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
+        lastPage:
+          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
     GlipDataExportPagingInfo:
       type: object
       properties:
@@ -175,83 +197,6 @@ components:
           type: integer
           format: int32
           description: The total number of elements in a dataset. May be omitted for some resource due to performance reasons
-    CreateDataExportTaskRequest:
-      type: object
-      properties:
-        timeFrom:
-          type: string
-          format: date-time
-          description: Starting time for data collection. The default value is `timeTo` minus 24 hours. Max allowed time frame between `timeFrom` and `timeTo` is 6 months
-        timeTo:
-          type: string
-          format: date-time
-          description: Ending time for data collection. The default value is current time. Max allowed time frame between `timeFrom` and `timeTo` is 6 months
-        contacts:
-          type: array
-          description: 'List of contacts which data is collected. The following data will be exported: posts, tasks, events, etc. posted by the user(s); posts addressing the user(s) via direct and @Mentions; tasks assigned to the listed user(s). The list of 30 users per request is supported.'
-          items:
-            $ref: '#/components/schemas/DataExportTaskContactInfo'
-        chatIds:
-          type: array
-          description: List of chats from which the data (posts, files, tasks, events, notes, etc.) will be collected. Maximum number of chats supported is 10
-          items:
-            type: string
-    GlipDataExportNavigationInfoUri:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-          description: Canonical URI for the corresponding page of the list
-    GlipDataExportNavigationInfo:
-      type: object
-      properties:
-        firstPage:
-          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
-        nextPage:
-          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
-        previousPage:
-          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
-        lastPage:
-          $ref: '#/components/schemas/GlipDataExportNavigationInfoUri'
-    ExportTaskResultInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a dataset
-        uri:
-          type: string
-          format: uri
-          description: Link for downloading a dataset
-        size:
-          type: integer
-          format: int64
-          description: Size of ta dataset in bytes
-    DataExportTaskList:
-      type: object
-      properties:
-        tasks:
-          type: array
-          items:
-            $ref: '#/components/schemas/DataExportTask'
-        navigation:
-          $ref: '#/components/schemas/GlipDataExportNavigationInfo'
-        paging:
-          $ref: '#/components/schemas/GlipDataExportPagingInfo'
-    CreatorInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a user
-        firstName:
-          type: string
-          description: First name of a user
-        lastName:
-          type: string
-          description: Last name of a user
-      description: Task creator information
     DataExportTask:
       type: object
       properties:
@@ -287,6 +232,61 @@ components:
           description: Data collection archives. Returned by task ID
           items:
             $ref: '#/components/schemas/ExportTaskResultInfo'
+    GlipDataExportNavigationInfoUri:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: Canonical URI for the corresponding page of the list
+    ExportTaskResultInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a dataset
+        uri:
+          type: string
+          format: uri
+          description: Link for downloading a dataset
+        size:
+          type: integer
+          format: int64
+          description: Size of ta dataset in bytes
+    CreateDataExportTaskRequest:
+      type: object
+      properties:
+        timeFrom:
+          type: string
+          format: date-time
+          description: Starting time for data collection. The default value is `timeTo` minus 24 hours. Max allowed time frame between `timeFrom` and `timeTo` is 6 months
+        timeTo:
+          type: string
+          format: date-time
+          description: Ending time for data collection. The default value is current time. Max allowed time frame between `timeFrom` and `timeTo` is 6 months
+        contacts:
+          type: array
+          description: 'List of contacts which data is collected. The following data will be exported: posts, tasks, events, etc. posted by the user(s); posts addressing the user(s) via direct and @Mentions; tasks assigned to the listed user(s). The list of 30 users per request is supported.'
+          items:
+            $ref: '#/components/schemas/DataExportTaskContactInfo'
+        chatIds:
+          type: array
+          description: List of chats from which the data (posts, files, tasks, events, notes, etc.) will be collected. Maximum number of chats supported is 10
+          items:
+            type: string
+    CreatorInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a user
+        firstName:
+          type: string
+          description: First name of a user
+        lastName:
+          type: string
+          description: Last name of a user
+      description: Task creator information
   securitySchemes:
     OAuth2:
       type: oauth2

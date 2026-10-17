@@ -77,49 +77,6 @@ paths:
       x-user-permission: EditAssignedRoles
 components:
   schemas:
-    RolesRegionalSettingsResource:
-      type: object
-      properties:
-        timezone:
-          $ref: '#/components/schemas/RolesTimezoneResource'
-        homeCountry:
-          $ref: '#/components/schemas/RolesCountryResource'
-        language:
-          $ref: '#/components/schemas/RolesLanguageResource'
-        greetingLanguage:
-          $ref: '#/components/schemas/RolesLanguageResource'
-        formattingLocale:
-          $ref: '#/components/schemas/RolesLanguageResource'
-        timeFormat:
-          type: string
-          enum:
-          - 12h
-          - 24h
-        currency:
-          $ref: '#/components/schemas/CurrencyResource'
-    RolesLanguageResource:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        localeCode:
-          type: string
-    RolesTimezoneResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        bias:
-          type: string
     RolesBusinessSiteResource:
       type: object
       required:
@@ -147,25 +104,6 @@ components:
           $ref: '#/components/schemas/RolesRegionalSettingsResource'
         businessAddress:
           $ref: '#/components/schemas/ContactAddressInfoResource'
-    BusinessSiteCollectionResource:
-      type: object
-      properties:
-        uri:
-          type: string
-          format: uri
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/RolesBusinessSiteResource'
-    BasicExtensionInfoResource:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        extensionNumber:
-          type: string
     BusinessSiteCollectionRequest:
       type: object
       properties:
@@ -173,6 +111,19 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RolesBusinessSiteResource'
+    ContactAddressInfoResource:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+        country:
+          type: string
     CurrencyResource:
       type: object
       properties:
@@ -186,18 +137,28 @@ components:
           type: string
         minorSymbol:
           type: string
-    ContactAddressInfoResource:
+    BasicExtensionInfoResource:
       type: object
       properties:
-        street:
+        id:
           type: string
-        city:
+        name:
           type: string
-        state:
+        extensionNumber:
           type: string
-        zip:
+    RolesTimezoneResource:
+      type: object
+      properties:
+        uri:
           type: string
-        country:
+          format: uri
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        bias:
           type: string
     RolesCountryResource:
       type: object
@@ -223,13 +184,52 @@ components:
           type: boolean
         signupAllowed:
           type: boolean
+    BusinessSiteCollectionResource:
+      type: object
+      properties:
+        uri:
+          type: string
+          format: uri
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/RolesBusinessSiteResource'
+    RolesLanguageResource:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        localeCode:
+          type: string
+    RolesRegionalSettingsResource:
+      type: object
+      properties:
+        timezone:
+          $ref: '#/components/schemas/RolesTimezoneResource'
+        homeCountry:
+          $ref: '#/components/schemas/RolesCountryResource'
+        language:
+          $ref: '#/components/schemas/RolesLanguageResource'
+        greetingLanguage:
+          $ref: '#/components/schemas/RolesLanguageResource'
+        formattingLocale:
+          $ref: '#/components/schemas/RolesLanguageResource'
+        timeFormat:
+          type: string
+          enum:
+          - 12h
+          - 24h
+        currency:
+          $ref: '#/components/schemas/CurrencyResource'
   parameters:
-    ExtensionId:
-      name: extensionId
+    AccountId:
+      name: accountId
       in: path
-      description: 'Internal identifier of the RingCentral extension/user
+      description: 'Internal identifier of the RingCentral account
 
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+        (can be set to "~" to indicate that the account associated with current authorization session should be used)
 
         '
       required: true
@@ -239,12 +239,12 @@ components:
         type: string
         default: '~'
       example: '~'
-    AccountId:
-      name: accountId
+    ExtensionId:
+      name: extensionId
       in: path
-      description: 'Internal identifier of the RingCentral account
+      description: 'Internal identifier of the RingCentral extension/user
 
-        (can be set to "~" to indicate that the account associated with current authorization session should be used)
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
 
         '
       required: true

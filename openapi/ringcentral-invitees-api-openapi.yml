@@ -193,33 +193,83 @@ paths:
       x-app-permission: EditWebinars
 components:
   schemas:
-    WcsInviteeListResource:
+    RcwPagingForwardModel:
       type: object
       required:
-      - records
-      - paging
+      - pageToken
+      - perPage
       properties:
-        records:
-          type: array
-          minItems: 0
-          items:
-            $ref: '#/components/schemas/InviteeResource'
-        paging:
-          $ref: '#/components/schemas/RcwPagingModel'
-    RcwRoleAttributeModel:
+        perPage:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          description: Number of items per page
+          example: 100
+        pageToken:
+          type: string
+          description: Current page token
+        nextPageToken:
+          type: string
+          description: Next page token (absent for the last page of the result set)
+        previousPageToken:
+          type: string
+          description: 'Previous page token (absent for the first page of the result set)
+
+            May be omitted if the result set does not support backward navigation.
+
+            '
+    RcwBaseContactModel:
       type: object
-      description: The attribute declaration to indicate webinar session participant/invitee role
-      required:
-      - role
       properties:
-        role:
-          $ref: '#/components/schemas/RcwRoleEnum'
-    RcwLinkedUserModel:
-      type: object
-      description: The internal IDs of RC-authenticated users.
-      properties:
-        linkedUser:
-          $ref: '#/components/schemas/RcwDomainUserModel'
+        firstName:
+          type: string
+          description: First (given) name
+          maxLength: 64
+          example: John
+          x-sensitive-data: masked
+        lastName:
+          type: string
+          description: Last (family) name
+          maxLength: 64
+          example: Doe
+          x-sensitive-data: masked
+    AddInviteeRequest:
+      allOf:
+      - $ref: '#/components/schemas/InviteeContactModel'
+      - $ref: '#/components/schemas/RcwLinkedUserModel'
+      - $ref: '#/components/schemas/RcwRoleAttributeModel'
+      - $ref: '#/components/schemas/InviteeSettingsModel'
+    RcwPagingModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwPagingForwardModel'
+      - type: object
+        properties:
+          previousPageToken:
+            type: string
+            description: Previous page token (absent for the first page of the result set)
+    InviteeResource:
+      allOf:
+      - $ref: '#/components/schemas/InviteeBaseModel'
+      - $ref: '#/components/schemas/InviteeGeneratedModel'
+    RcwResourceBaseModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwImmutableResourceIdModel'
+      - type: object
+        required:
+        - creationTime
+        - lastModifiedTime
+        properties:
+          creationTime:
+            type: string
+            description: Object creation time
+            format: date-time
+            readOnly: true
+          lastModifiedTime:
+            type: string
+            description: Object last modification time
+            format: date-time
+            readOnly: true
     ParameterizedErrorResponseModel:
       type: object
       description: Standard error response which may include parameterized errors
@@ -249,31 +299,72 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RcwResourceIdModel'
-    InviteeBaseModel:
+    RcwEmailModel:
+      type: string
+      format: email
+      minLength: 1
+      maxLength: 256
+      example: john.doe@example.com
+      description: User's contact email
+      x-sensitive-data: normalized-anonymized
+    RcwImmutableResourceIdModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal object ID
+          minLength: 1
+          maxLength: 20
+          example: '78654321'
+          readOnly: true
+    RcwLinkedUserModel:
+      type: object
+      description: The internal IDs of RC-authenticated users.
+      properties:
+        linkedUser:
+          $ref: '#/components/schemas/RcwDomainUserModel'
+    BulkUpdateInviteesResponse:
+      type: object
+      properties:
+        addedInvitees:
+          type: array
+          items:
+            $ref: '#/components/schemas/InviteeResource'
+        updatedInvitees:
+          type: array
+          items:
+            $ref: '#/components/schemas/InviteeResource'
+        deletedInvitees:
+          type: array
+          items:
+            $ref: '#/components/schemas/RcwResourceIdModel'
+    WcsInviteeListResource:
+      type: object
+      required:
+      - records
+      - paging
+      properties:
+        records:
+          type: array
+          minItems: 0
+          items:
+            $ref: '#/components/schemas/InviteeResource'
+        paging:
+          $ref: '#/components/schemas/RcwPagingModel'
+    RcwDomainUserModel:
       allOf:
-      - $ref: '#/components/schemas/RcwResourceBaseModel'
-      - $ref: '#/components/schemas/InviteeContactModel'
-      - $ref: '#/components/schemas/RcwLinkedUserModel'
-      - $ref: '#/components/schemas/RcwRoleAttributeModel'
-      - $ref: '#/components/schemas/InviteeSettingsModel'
-    RcwResourceBaseModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwImmutableResourceIdModel'
+      - $ref: '#/components/schemas/RcwUserModel'
       - type: object
         required:
-        - creationTime
-        - lastModifiedTime
+        - domain
         properties:
-          creationTime:
+          domain:
             type: string
-            description: Object creation time
-            format: date-time
-            readOnly: true
-          lastModifiedTime:
-            type: string
-            description: Object last modification time
-            format: date-time
-            readOnly: true
+            description: Identity domain
+            enum:
+            - pbx
+            - ilm
+            default: pbx
     ApiError:
       type: object
       description: Generalized API error structure suitable for any error type
@@ -290,28 +381,19 @@ components:
           description: User-friendly error message
           example: Something went wrong
       additionalProperties: true
-    ApiErrorResponseModel:
-      type: object
-      description: Standard error response model which is returned in case of any unsuccessful operation
-      required:
-      - errors
-      properties:
-        errors:
-          type: array
-          description: The array of errors (there will be just one in the most of the cases)
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ApiError'
-    RcwImmutableResourceIdModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal object ID
-          minLength: 1
-          maxLength: 20
-          example: '78654321'
-          readOnly: true
+    RcwRoleEnum:
+      type: string
+      description: 'The role of the webinar session participant/invitee.
+
+        See also: [Understanding Webinar Roles](https://support.ringcentral.com/webinar/getting-started/understanding-ringcentral-webinar-roles.html)
+
+        '
+      enum:
+      - Panelist
+      - CoHost
+      - Host
+      - Attendee
+      example: Panelist
     InviteeSettingsModel:
       type: object
       properties:
@@ -327,62 +409,18 @@ components:
 
             '
           default: true
-    RcwPagingForwardModel:
+    ApiErrorResponseModel:
       type: object
+      description: Standard error response model which is returned in case of any unsuccessful operation
       required:
-      - pageToken
-      - perPage
+      - errors
       properties:
-        perPage:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
-          description: Number of items per page
-          example: 100
-        pageToken:
-          type: string
-          description: Current page token
-        nextPageToken:
-          type: string
-          description: Next page token (absent for the last page of the result set)
-        previousPageToken:
-          type: string
-          description: 'Previous page token (absent for the first page of the result set)
-
-            May be omitted if the result set does not support backward navigation.
-
-            '
-    RcwResourceIdModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal object ID
-          minLength: 1
-          maxLength: 20
-          example: '78654321'
-    RcwPagingModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwPagingForwardModel'
-      - type: object
-        properties:
-          previousPageToken:
-            type: string
-            description: Previous page token (absent for the first page of the result set)
-    AddInviteeRequest:
-      allOf:
-      - $ref: '#/components/schemas/InviteeContactModel'
-      - $ref: '#/components/schemas/RcwLinkedUserModel'
-      - $ref: '#/components/schemas/RcwRoleAttributeModel'
-      - $ref: '#/components/schemas/InviteeSettingsModel'
-    RcwInviteeTypeEnum:
-      type: string
-      description: The type of the webinar invitee
-      enum:
-      - User
-      - Room
-      default: User
+        errors:
+          type: array
+          description: The array of errors (there will be just one in the most of the cases)
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ApiError'
     ApiErrorWithParameter:
       description: 'The error model with additional attributes which can be used for HTTP 400/409
 
@@ -399,6 +437,35 @@ components:
           parameterValue:
             type: string
             description: The value of the API parameter/attribute which caused the error
+    InviteeBaseModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwResourceBaseModel'
+      - $ref: '#/components/schemas/InviteeContactModel'
+      - $ref: '#/components/schemas/RcwLinkedUserModel'
+      - $ref: '#/components/schemas/RcwRoleAttributeModel'
+      - $ref: '#/components/schemas/InviteeSettingsModel'
+    RcwResourceIdModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal object ID
+          minLength: 1
+          maxLength: 20
+          example: '78654321'
+    InviteeContactModel:
+      allOf:
+      - $ref: '#/components/schemas/RcwBaseContactModel'
+      - type: object
+        properties:
+          email:
+            $ref: '#/components/schemas/RcwEmailModel'
+          jobTitle:
+            type: string
+            description: Job title
+            maxLength: 64
+            x-sensitive-data: masked
+            example: Product Manager
     UpdateInviteeRequest:
       allOf:
       - $ref: '#/components/schemas/InviteeContactModel'
@@ -421,42 +488,6 @@ components:
           minLength: 1
           x-sensitive-data: masked
           description: Phone (PSTN) participant code
-    RcwEmailModel:
-      type: string
-      format: email
-      minLength: 1
-      maxLength: 256
-      example: john.doe@example.com
-      description: User's contact email
-      x-sensitive-data: normalized-anonymized
-    InviteeContactModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwBaseContactModel'
-      - type: object
-        properties:
-          email:
-            $ref: '#/components/schemas/RcwEmailModel'
-          jobTitle:
-            type: string
-            description: Job title
-            maxLength: 64
-            x-sensitive-data: masked
-            example: Product Manager
-    RcwBaseContactModel:
-      type: object
-      properties:
-        firstName:
-          type: string
-          description: First (given) name
-          maxLength: 64
-          example: John
-          x-sensitive-data: masked
-        lastName:
-          type: string
-          description: Last (family) name
-          maxLength: 64
-          example: Doe
-          x-sensitive-data: masked
     RcwUserModel:
       type: object
       required:
@@ -471,120 +502,22 @@ components:
           type: string
           maxLength: 256
           description: Account ID
-    RcwDomainUserModel:
-      allOf:
-      - $ref: '#/components/schemas/RcwUserModel'
-      - type: object
-        required:
-        - domain
-        properties:
-          domain:
-            type: string
-            description: Identity domain
-            enum:
-            - pbx
-            - ilm
-            default: pbx
-    BulkUpdateInviteesResponse:
+    RcwRoleAttributeModel:
       type: object
+      description: The attribute declaration to indicate webinar session participant/invitee role
+      required:
+      - role
       properties:
-        addedInvitees:
-          type: array
-          items:
-            $ref: '#/components/schemas/InviteeResource'
-        updatedInvitees:
-          type: array
-          items:
-            $ref: '#/components/schemas/InviteeResource'
-        deletedInvitees:
-          type: array
-          items:
-            $ref: '#/components/schemas/RcwResourceIdModel'
-    InviteeResource:
-      allOf:
-      - $ref: '#/components/schemas/InviteeBaseModel'
-      - $ref: '#/components/schemas/InviteeGeneratedModel'
-    RcwRoleEnum:
+        role:
+          $ref: '#/components/schemas/RcwRoleEnum'
+    RcwInviteeTypeEnum:
       type: string
-      description: 'The role of the webinar session participant/invitee.
-
-        See also: [Understanding Webinar Roles](https://support.ringcentral.com/webinar/getting-started/understanding-ringcentral-webinar-roles.html)
-
-        '
+      description: The type of the webinar invitee
       enum:
-      - Panelist
-      - CoHost
-      - Host
-      - Attendee
-      example: Panelist
-  responses:
-    InvalidRequest:
-      description: 'General response with **HTTP 400 "Bad request"** status.<br>
-
-        Reasons: unparsable request, path, query or body parameters are invalid.
-
-        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    NotFound:
-      description: 'General response with **HTTP 404 "Not found"** status.<br>
-
-        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    Conflict:
-      description: 'General response with **HTTP 409 "Conflict"** status.<br>
-
-        Reasons: the requested modification operation causes a conflict (for example, unique constraint violation).
-
-        The error definition may contain reference to particular parameter(s) which caused the conflict.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
-    InternalError:
-      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
-
-        Reasons: general server-side error.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
-    Forbidden:
-      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
-
-        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiErrorResponseModel'
+      - User
+      - Room
+      default: User
   parameters:
-    RcwInviteeId:
-      name: inviteeId
-      in: path
-      description: Identifier of the Session Invitee.
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 20
-      example: '77777777'
     RcwSessionId:
       name: sessionId
       in: path
@@ -597,6 +530,30 @@ components:
         minLength: 1
         maxLength: 20
       example: '353535353'
+    PageToken:
+      name: pageToken
+      in: query
+      description: 'The token indicating the particular page of the result set to be retrieved.
+
+        If omitted the first page will be returned.
+
+        '
+      required: false
+      explode: false
+      schema:
+        type: string
+    RcwInviteeId:
+      name: inviteeId
+      in: path
+      description: Identifier of the Session Invitee.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 20
+      example: '77777777'
     RcwWebinarId:
       name: webinarId
       in: path
@@ -626,18 +583,61 @@ components:
         maximum: 1000
         default: 100
       example: 100
-    PageToken:
-      name: pageToken
-      in: query
-      description: 'The token indicating the particular page of the result set to be retrieved.
+  responses:
+    Forbidden:
+      description: 'General response with **HTTP 403 "Forbidden"** status.<br>
 
-        If omitted the first page will be returned.
+        Reasons: the requested operation is forbidden because of certain resource state, lack of permissions, feature unavailability, etc.
 
         '
-      required: false
-      explode: false
-      schema:
-        type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    Conflict:
+      description: 'General response with **HTTP 409 "Conflict"** status.<br>
+
+        Reasons: the requested modification operation causes a conflict (for example, unique constraint violation).
+
+        The error definition may contain reference to particular parameter(s) which caused the conflict.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    NotFound:
+      description: 'General response with **HTTP 404 "Not found"** status.<br>
+
+        Reasons: the entity with given ID (typically specified in a path parameter), is not found or inaccessible
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
+    InvalidRequest:
+      description: 'General response with **HTTP 400 "Bad request"** status.<br>
+
+        Reasons: unparsable request, path, query or body parameters are invalid.
+
+        The error description may contain reference to particular parameter(s) which haven''t passed the validation.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ParameterizedErrorResponseModel'
+    InternalError:
+      description: 'General response with **HTTP 500 "Internal Server Error"** status.<br>
+
+        Reasons: general server-side error.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponseModel'
   securitySchemes:
     OAuth2:
       type: oauth2

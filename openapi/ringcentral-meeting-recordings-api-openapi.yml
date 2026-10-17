@@ -83,45 +83,6 @@ paths:
       x-app-permission: Video
 components:
   schemas:
-    CloudRecordings:
-      required:
-      - paging
-      - recordings
-      type: object
-      properties:
-        recordings:
-          type: array
-          description: Recordings array
-          items:
-            $ref: '#/components/schemas/CloudRecording'
-        paging:
-          $ref: '#/components/schemas/Paging'
-      description: Recordings page
-    Paging:
-      required:
-      - currentPageToken
-      type: object
-      properties:
-        currentPageToken:
-          type: string
-          description: Current offset token
-        nextPageToken:
-          type: string
-          description: Next page offset token
-      description: Paging information
-    Host:
-      type: object
-      properties:
-        accountId:
-          type: string
-          description: Account id
-        extensionId:
-          type: string
-          description: Extension id
-        displayName:
-          type: string
-          description: Display name
-      description: Meeting host
     CloudRecording:
       required:
       - displayName
@@ -163,22 +124,46 @@ components:
           type: string
           description: Date after which recording will be deleted
       description: Recording information
+    CloudRecordings:
+      required:
+      - paging
+      - recordings
+      type: object
+      properties:
+        recordings:
+          type: array
+          description: Recordings array
+          items:
+            $ref: '#/components/schemas/CloudRecording'
+        paging:
+          $ref: '#/components/schemas/Paging'
+      description: Recordings page
+    Host:
+      type: object
+      properties:
+        accountId:
+          type: string
+          description: Account id
+        extensionId:
+          type: string
+          description: Extension id
+        displayName:
+          type: string
+          description: Display name
+      description: Meeting host
+    Paging:
+      required:
+      - currentPageToken
+      type: object
+      properties:
+        currentPageToken:
+          type: string
+          description: Current offset token
+        nextPageToken:
+          type: string
+          description: Next page offset token
+      description: Paging information
   parameters:
-    ExtensionId:
-      name: extensionId
-      in: path
-      description: 'Internal identifier of the RingCentral extension/user
-
-        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
-
-        '
-      required: true
-      style: simple
-      explode: false
-      schema:
-        type: string
-        default: '~'
-      example: '~'
     RcvPerPage:
       name: perPage
       in: query
@@ -207,13 +192,28 @@ components:
         type: string
         default: '~'
       example: '~'
+    ExtensionId:
+      name: extensionId
+      in: path
+      description: 'Internal identifier of the RingCentral extension/user
+
+        (can be set to "~" to indicate that the extension associated with current authorization session should be used)
+
+        '
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '~'
+      example: '~'
   responses:
+    RcvNotFound:
+      description: Resource not found
     RcvInternalError:
       description: Error processing data
     RcvAccessForbidden:
       description: Access forbidden
-    RcvNotFound:
-      description: Resource not found
   securitySchemes:
     OAuth2:
       type: oauth2

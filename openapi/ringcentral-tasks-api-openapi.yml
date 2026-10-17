@@ -297,6 +297,144 @@ paths:
       x-app-permission: TeamMessaging
 components:
   schemas:
+    TMUpdateTaskRequest:
+      type: object
+      properties:
+        subject:
+          type: string
+          description: Task name/subject. Max allowed length is 250 characters.
+        assignees:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of an assignee
+        completenessCondition:
+          type: string
+          enum:
+          - Simple
+          - AllAssignees
+          - Percentage
+        startDate:
+          type: string
+          description: Task start date in UTC time zone
+          format: date-time
+        dueDate:
+          type: string
+          description: Task due date/time in UTC time zone
+          format: date-time
+        color:
+          type: string
+          enum:
+          - Black
+          - Red
+          - Orange
+          - Yellow
+          - Green
+          - Blue
+          - Purple
+          - Magenta
+        section:
+          type: string
+          description: Task section to group / search by. Max allowed length is 100 characters.
+        description:
+          type: string
+          description: Task details. Max allowed length is 102400 characters (100kB)
+        recurrence:
+          $ref: '#/components/schemas/TaskRecurrenceInfo'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMAttachmentInfo'
+    TaskRecurrenceInfo:
+      type: object
+      description: Task information
+      properties:
+        schedule:
+          type: string
+          description: Recurrence settings of a task. None for non-periodic tasks
+          default: None
+          enum:
+          - None
+          - Daily
+          - Weekdays
+          - Weekly
+          - Monthly
+          - Yearly
+        endingCondition:
+          type: string
+          description: Ending condition of a task
+          default: None
+          enum:
+          - None
+          - Count
+          - Date
+        endingAfter:
+          maximum: 10.0
+          minimum: 1
+          type: integer
+          format: int32
+          description: Count of iterations of periodic tasks
+        endingOn:
+          type: string
+          description: "End date of a periodic task in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) \nformat, UTC time zone\n"
+          format: date-time
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+    TMAttachmentInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of an attachment
+        type:
+          type: string
+          description: Type of an attachment
+          enum:
+          - File
+          - Note
+          - Event
+          - Card
+    TMCompleteTaskRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Completeness status
+          enum:
+          - Incomplete
+          - Complete
+        assignees:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Internal identifier of an assignee
+        completenessPercentage:
+          maximum: 100.0
+          minimum: 0
+          type: integer
+          format: int32
+    TMTaskList:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/TMTaskInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
     TMTaskInfo:
       type: object
       properties:
@@ -397,37 +535,24 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TaskAttachment'
-    TMNavigationInfo:
+    TaskAttachment:
       type: object
       properties:
-        prevPageToken:
+        id:
           type: string
-          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-        nextPageToken:
+          description: File ID.
+        type:
           type: string
-          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-    TMCompleteTaskRequest:
-      type: object
-      properties:
-        status:
-          type: string
-          description: Completeness status
+          description: Possible value - File. Attachment type (currently, only File is possible)
           enum:
-          - Incomplete
-          - Complete
-        assignees:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: Internal identifier of an assignee
-        completenessPercentage:
-          maximum: 100.0
-          minimum: 0
-          type: integer
-          format: int32
+          - File
+        name:
+          type: string
+          description: Name of the attached file (incl. extension name)
+        contentUri:
+          type: string
+          format: uri
+          description: URI
     TMCreateTaskRequest:
       required:
       - assignees
@@ -484,131 +609,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TMAttachmentInfo'
-    TMTaskList:
-      type: object
-      properties:
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/TMTaskInfo'
-        navigation:
-          $ref: '#/components/schemas/TMNavigationInfo'
-    TMUpdateTaskRequest:
-      type: object
-      properties:
-        subject:
-          type: string
-          description: Task name/subject. Max allowed length is 250 characters.
-        assignees:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: Internal identifier of an assignee
-        completenessCondition:
-          type: string
-          enum:
-          - Simple
-          - AllAssignees
-          - Percentage
-        startDate:
-          type: string
-          description: Task start date in UTC time zone
-          format: date-time
-        dueDate:
-          type: string
-          description: Task due date/time in UTC time zone
-          format: date-time
-        color:
-          type: string
-          enum:
-          - Black
-          - Red
-          - Orange
-          - Yellow
-          - Green
-          - Blue
-          - Purple
-          - Magenta
-        section:
-          type: string
-          description: Task section to group / search by. Max allowed length is 100 characters.
-        description:
-          type: string
-          description: Task details. Max allowed length is 102400 characters (100kB)
-        recurrence:
-          $ref: '#/components/schemas/TaskRecurrenceInfo'
-        attachments:
-          type: array
-          items:
-            $ref: '#/components/schemas/TMAttachmentInfo'
-    TaskAttachment:
-      type: object
-      properties:
-        id:
-          type: string
-          description: File ID.
-        type:
-          type: string
-          description: Possible value - File. Attachment type (currently, only File is possible)
-          enum:
-          - File
-        name:
-          type: string
-          description: Name of the attached file (incl. extension name)
-        contentUri:
-          type: string
-          format: uri
-          description: URI
-    TMAttachmentInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of an attachment
-        type:
-          type: string
-          description: Type of an attachment
-          enum:
-          - File
-          - Note
-          - Event
-          - Card
-    TaskRecurrenceInfo:
-      type: object
-      description: Task information
-      properties:
-        schedule:
-          type: string
-          description: Recurrence settings of a task. None for non-periodic tasks
-          default: None
-          enum:
-          - None
-          - Daily
-          - Weekdays
-          - Weekly
-          - Monthly
-          - Yearly
-        endingCondition:
-          type: string
-          description: Ending condition of a task
-          default: None
-          enum:
-          - None
-          - Count
-          - Date
-        endingAfter:
-          maximum: 10.0
-          minimum: 1
-          type: integer
-          format: int32
-          description: Count of iterations of periodic tasks
-        endingOn:
-          type: string
-          description: "End date of a periodic task in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) \nformat, UTC time zone\n"
-          format: date-time
   securitySchemes:
     OAuth2:
       type: oauth2

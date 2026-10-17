@@ -310,18 +310,209 @@ paths:
       x-app-permission: AI
 components:
   schemas:
-    ContentInput:
-      type: object
-      properties:
-        contentUri:
-          type: string
-          description: Publicly facing uri
-          format: uri
     CaiAsyncApiResponse:
       type: object
       properties:
         jobId:
           type: string
+    TranscribedObject:
+      required:
+      - transcript
+      - words
+      type: object
+      properties:
+        speakerCount:
+          type: integer
+          description: The number of speakers detected. Field is set only when enableSpeakerDiarization is true.
+          format: int32
+          example: 2
+        utterances:
+          type: array
+          description: Speaker wise utterances. Field is set only when enableSpeakerDiarization is true.
+          items:
+            $ref: '#/components/schemas/UtteranceObject'
+        words:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordSegment'
+        confidence:
+          type: number
+          description: Overall transcription confidence.
+          format: float
+        transcript:
+          type: string
+          description: The entire transcript with/without punctuations according to the input.
+    DiarizedObject:
+      required:
+      - speakerCount
+      - utterances
+      type: object
+      properties:
+        speakerCount:
+          type: integer
+          format: int32
+          example: 2
+        utterances:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiarizeSegment'
+    DiarizeApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/DiarizedObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    EnrollmentPatchInput:
+      required:
+      - content
+      - encoding
+      type: object
+      properties:
+        encoding:
+          type: string
+          description: The encoding of the original audio
+          example: Wav
+          enum:
+          - Mpeg
+          - Mp4
+          - Wav
+          - Webm
+          - Webp
+          - Aac
+          - Avi
+          - Ogg
+        languageCode:
+          type: string
+          description: Language spoken in the audio file.
+          example: en-US
+        content:
+          type: string
+          description: Base64-encoded audio file data.
+          example: base64EncodedAudioInput
+    WordTimingsUnit:
+      type: object
+      properties:
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        word:
+          type: string
+          example: Hello
+    EnrollmentInput:
+      required:
+      - content
+      - encoding
+      - speakerId
+      allOf:
+      - $ref: '#/components/schemas/EnrollmentPatchInput'
+      - type: object
+        properties:
+          speakerId:
+            type: string
+            description: The enrollment ID to be registered. Acceptable format [a-zA-Z0-9_]+
+            example: JohnDoe
+    IdentifyInput:
+      required:
+      - speakerIds
+      allOf:
+      - $ref: '#/components/schemas/AudioInput'
+      - type: object
+        properties:
+          speakerIds:
+            type: array
+            description: Set of enrolled speakers to be identified from the media.
+            example:
+            - speakerId1
+            - speakerId2
+            items:
+              type: string
+          enableVoiceActivityDetection:
+            type: boolean
+            description: Apply voice activity detection.
+    SpeakerIdentificationObject:
+      required:
+      - utterances
+      type: object
+      properties:
+        utterances:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiarizeSegment'
+    ListEnrolledSpeakers:
+      required:
+      - paging
+      - records
+      type: object
+      properties:
+        paging:
+          $ref: '#/components/schemas/PagingSchema'
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentStatus'
+    AsrInput:
+      allOf:
+      - $ref: '#/components/schemas/DiarizeInput'
+      - type: object
+        properties:
+          enablePunctuation:
+            type: boolean
+            description: Enables Smart Punctuation API.
+          enableSpeakerDiarization:
+            type: boolean
+            description: Tags each word corresponding to the speaker.
+            default: false
+          separateSpeakerPerChannel:
+            type: boolean
+            description: Indicates that the input audio is multi-channel and each channel has a separate speaker.
+            default: false
+          speechContexts:
+            type: array
+            description: Indicates the words/phrases that will be used for boosting the transcript. This can help to boost accuracy for cases like Person Names, Company names etc.
+            items:
+              $ref: '#/components/schemas/SpeechContextPhrasesInput'
+    SpeakerIdentifyApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/SpeakerIdentificationObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    PagingSchema:
+      required:
+      - page
+      - perPage
+      - totalPages
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          example: 2
+        totalPages:
+          type: integer
+          format: int32
+          example: 10
+        perPage:
+          type: integer
+          format: int32
+          example: 5
     EnrollmentStatus:
       required:
       - enrollmentComplete
@@ -355,6 +546,40 @@ components:
           description: Total duration of the enrollment in seconds.
           format: float
           example: 30.5
+    AsrApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - Success
+          - Fail
+        response:
+          oneOf:
+          - $ref: '#/components/schemas/TranscribedObject'
+          - $ref: '#/components/schemas/CaiErrorResponse'
+    DiarizeSegment:
+      required:
+      - end
+      - speakerId
+      - start
+      type: object
+      properties:
+        speakerId:
+          type: string
+          example: JohnDoe
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        confidence:
+          type: number
+          format: float
+          example: 0.97
     SpeechContextPhrasesInput:
       required:
       - phrases
@@ -371,46 +596,117 @@ components:
           - RingCentral
           items:
             type: string
-    TranscribedObject:
+    UtteranceObject:
       required:
-      - transcript
-      - words
+      - end
+      - start
+      - text
       type: object
       properties:
-        speakerCount:
-          type: integer
-          description: The number of speakers detected. Field is set only when enableSpeakerDiarization is true.
-          format: int32
-          example: 2
-        utterances:
-          type: array
-          description: Speaker wise utterances. Field is set only when enableSpeakerDiarization is true.
-          items:
-            $ref: '#/components/schemas/UtteranceObject'
-        words:
-          type: array
-          items:
-            $ref: '#/components/schemas/WordSegment'
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        text:
+          type: string
+          example: Hello! This is John.
         confidence:
           type: number
-          description: Overall transcription confidence.
           format: float
-        transcript:
+          example: 0.97
+        speakerId:
           type: string
-          description: The entire transcript with/without punctuations according to the input.
-    EnrollmentInput:
+          example: JohnDoe
+        wordTimings:
+          type: array
+          items:
+            $ref: '#/components/schemas/WordTimingsUnit'
+    WordSegment:
       required:
-      - content
-      - encoding
-      - speakerId
+      - end
+      - start
+      - word
+      type: object
+      properties:
+        speakerId:
+          type: string
+          example: JohnDoe
+        start:
+          type: number
+          format: float
+          example: 0.3
+        end:
+          type: number
+          format: float
+          example: 5.1
+        confidence:
+          type: number
+          format: float
+          example: 0.97
+        word:
+          type: string
+          example: hello
+    DiarizeInput:
       allOf:
-      - $ref: '#/components/schemas/EnrollmentPatchInput'
+      - $ref: '#/components/schemas/AudioInput'
       - type: object
         properties:
-          speakerId:
-            type: string
-            description: The enrollment ID to be registered. Acceptable format [a-zA-Z0-9_]+
-            example: JohnDoe
+          separateSpeakerPerChannel:
+            type: boolean
+            description: Set to True if the input audio is multi-channel and each channel has a separate speaker.
+            example: false
+          speakerCount:
+            type: integer
+            description: Number of speakers in the file, omit parameter if unknown
+            format: int32
+            example: 2
+          speakerIds:
+            type: array
+            description: Optional set of speakers to be identified from the call.
+            example:
+            - speakerId1
+            - speakerId2
+            items:
+              type: string
+          enableVoiceActivityDetection:
+            type: boolean
+            description: Apply voice activity detection.
+    CaiErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaiErrorCodeResponse'
+    CaiErrorCodeResponse:
+      required:
+      - errorCode
+      - message
+      type: object
+      properties:
+        errorCode:
+          type: string
+          enum:
+          - CAI-101
+          - CAI-102
+          - CAI-103
+          - CAI-104
+          - CAI-105
+          - CAI-106
+          - CAI-107
+          - CAI-108
+          - CAI-109
+          - CAI-110
+        message:
+          type: string
+          description: Helpful description of the errorCode
+        parameterName:
+          type: string
+          description: Name of parameter if specified in the message
     AudioInput:
       required:
       - encoding
@@ -451,310 +747,63 @@ components:
             - Interview
             - PressConference
             - Voicemail
-    DiarizedObject:
-      required:
-      - speakerCount
-      - utterances
+    ContentInput:
       type: object
       properties:
-        speakerCount:
-          type: integer
-          format: int32
-          example: 2
-        utterances:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiarizeSegment'
-    CaiErrorResponse:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/CaiErrorCodeResponse'
-    SpeakerIdentifyApiResponse:
-      type: object
-      properties:
-        status:
+        contentUri:
           type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          oneOf:
-          - $ref: '#/components/schemas/SpeakerIdentificationObject'
-          - $ref: '#/components/schemas/CaiErrorResponse'
-    AsrInput:
-      allOf:
-      - $ref: '#/components/schemas/DiarizeInput'
-      - type: object
-        properties:
-          enablePunctuation:
-            type: boolean
-            description: Enables Smart Punctuation API.
-          enableSpeakerDiarization:
-            type: boolean
-            description: Tags each word corresponding to the speaker.
-            default: false
-          separateSpeakerPerChannel:
-            type: boolean
-            description: Indicates that the input audio is multi-channel and each channel has a separate speaker.
-            default: false
-          speechContexts:
-            type: array
-            description: Indicates the words/phrases that will be used for boosting the transcript. This can help to boost accuracy for cases like Person Names, Company names etc.
-            items:
-              $ref: '#/components/schemas/SpeechContextPhrasesInput'
-    WordTimingsUnit:
-      type: object
-      properties:
-        start:
-          type: number
-          format: float
-          example: 0.3
-        end:
-          type: number
-          format: float
-          example: 5.1
-        word:
-          type: string
-          example: Hello
-    AsrApiResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          oneOf:
-          - $ref: '#/components/schemas/TranscribedObject'
-          - $ref: '#/components/schemas/CaiErrorResponse'
-    WordSegment:
-      required:
-      - end
-      - start
-      - word
-      type: object
-      properties:
-        speakerId:
-          type: string
-          example: JohnDoe
-        start:
-          type: number
-          format: float
-          example: 0.3
-        end:
-          type: number
-          format: float
-          example: 5.1
-        confidence:
-          type: number
-          format: float
-          example: 0.97
-        word:
-          type: string
-          example: hello
-    ListEnrolledSpeakers:
-      required:
-      - paging
-      - records
-      type: object
-      properties:
-        paging:
-          $ref: '#/components/schemas/PagingSchema'
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/EnrollmentStatus'
-    IdentifyInput:
-      required:
-      - speakerIds
-      allOf:
-      - $ref: '#/components/schemas/AudioInput'
-      - type: object
-        properties:
-          speakerIds:
-            type: array
-            description: Set of enrolled speakers to be identified from the media.
-            example:
-            - speakerId1
-            - speakerId2
-            items:
-              type: string
-          enableVoiceActivityDetection:
-            type: boolean
-            description: Apply voice activity detection.
-    DiarizeApiResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - Success
-          - Fail
-        response:
-          oneOf:
-          - $ref: '#/components/schemas/DiarizedObject'
-          - $ref: '#/components/schemas/CaiErrorResponse'
-    EnrollmentPatchInput:
-      required:
-      - content
-      - encoding
-      type: object
-      properties:
-        encoding:
-          type: string
-          description: The encoding of the original audio
-          example: Wav
-          enum:
-          - Mpeg
-          - Mp4
-          - Wav
-          - Webm
-          - Webp
-          - Aac
-          - Avi
-          - Ogg
-        languageCode:
-          type: string
-          description: Language spoken in the audio file.
-          example: en-US
-        content:
-          type: string
-          description: Base64-encoded audio file data.
-          example: base64EncodedAudioInput
-    DiarizeSegment:
-      required:
-      - end
-      - speakerId
-      - start
-      type: object
-      properties:
-        speakerId:
-          type: string
-          example: JohnDoe
-        start:
-          type: number
-          format: float
-          example: 0.3
-        end:
-          type: number
-          format: float
-          example: 5.1
-        confidence:
-          type: number
-          format: float
-          example: 0.97
-    PagingSchema:
-      required:
-      - page
-      - perPage
-      - totalPages
-      type: object
-      properties:
-        page:
-          type: integer
-          format: int32
-          example: 2
-        totalPages:
-          type: integer
-          format: int32
-          example: 10
-        perPage:
-          type: integer
-          format: int32
-          example: 5
-    DiarizeInput:
-      allOf:
-      - $ref: '#/components/schemas/AudioInput'
-      - type: object
-        properties:
-          separateSpeakerPerChannel:
-            type: boolean
-            description: Set to True if the input audio is multi-channel and each channel has a separate speaker.
-            example: false
-          speakerCount:
-            type: integer
-            description: Number of speakers in the file, omit parameter if unknown
-            format: int32
-            example: 2
-          speakerIds:
-            type: array
-            description: Optional set of speakers to be identified from the call.
-            example:
-            - speakerId1
-            - speakerId2
-            items:
-              type: string
-          enableVoiceActivityDetection:
-            type: boolean
-            description: Apply voice activity detection.
-    CaiErrorCodeResponse:
-      required:
-      - errorCode
-      - message
-      type: object
-      properties:
-        errorCode:
-          type: string
-          enum:
-          - CAI-101
-          - CAI-102
-          - CAI-103
-          - CAI-104
-          - CAI-105
-          - CAI-106
-          - CAI-107
-          - CAI-108
-          - CAI-109
-          - CAI-110
-        message:
-          type: string
-          description: Helpful description of the errorCode
-        parameterName:
-          type: string
-          description: Name of parameter if specified in the message
-    SpeakerIdentificationObject:
-      required:
-      - utterances
-      type: object
-      properties:
-        utterances:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiarizeSegment'
-    UtteranceObject:
-      required:
-      - end
-      - start
-      - text
-      type: object
-      properties:
-        start:
-          type: number
-          format: float
-          example: 0.3
-        end:
-          type: number
-          format: float
-          example: 5.1
-        text:
-          type: string
-          example: Hello! This is John.
-        confidence:
-          type: number
-          format: float
-          example: 0.97
-        speakerId:
-          type: string
-          example: JohnDoe
-        wordTimings:
-          type: array
-          items:
-            $ref: '#/components/schemas/WordTimingsUnit'
+          description: Publicly facing uri
+          format: uri
   requestBodies:
+    DiarizeCallbackRequest:
+      description: Speaker Diarization API Callback Output
+      content:
+        application/json:
+          schema:
+            allOf:
+            - type: object
+              properties:
+                jobId:
+                  type: string
+                creationTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time
+                expirationTime:
+                  type: string
+                  format: date-time
+            - $ref: '#/components/schemas/DiarizeApiResponse'
+      required: true
+    IdentifyRequest:
+      description: Speaker Identification API Input Format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentifyInput'
+      required: true
+    EnrollmentRequest:
+      description: Speaker Enrollment API Input Format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnrollmentInput'
+      required: true
+    DiarizeRequest:
+      description: Speaker Diarization API Input Format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DiarizeInput'
+      required: true
+    EnrollmentPatchRequest:
+      description: Patch Speaker Enrollment API Input Format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnrollmentPatchInput'
+      required: true
     SpeechToTextCallbackRequest:
       description: Speech to Text API Callback Output
       content:
@@ -776,26 +825,12 @@ components:
                   format: date-time
             - $ref: '#/components/schemas/AsrApiResponse'
       required: true
-    EnrollmentRequest:
-      description: Speaker Enrollment API Input Format
+    AsrRequest:
+      description: Speech to Text API Input Format
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/EnrollmentInput'
-      required: true
-    EnrollmentPatchRequest:
-      description: Patch Speaker Enrollment API Input Format
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/EnrollmentPatchInput'
-      required: true
-    DiarizeRequest:
-      description: Speaker Diarization API Input Format
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DiarizeInput'
+            $ref: '#/components/schemas/AsrInput'
       required: true
     SpeakerIdentifyCallbackRequest:
       description: Speaker Identification API Callback Output
@@ -818,52 +853,17 @@ components:
                   format: date-time
             - $ref: '#/components/schemas/SpeakerIdentifyApiResponse'
       required: true
-    AsrRequest:
-      description: Speech to Text API Input Format
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AsrInput'
-      required: true
-    IdentifyRequest:
-      description: Speaker Identification API Input Format
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/IdentifyInput'
-      required: true
-    DiarizeCallbackRequest:
-      description: Speaker Diarization API Callback Output
-      content:
-        application/json:
-          schema:
-            allOf:
-            - type: object
-              properties:
-                jobId:
-                  type: string
-                creationTime:
-                  type: string
-                  format: date-time
-                completionTime:
-                  type: string
-                  format: date-time
-                expirationTime:
-                  type: string
-                  format: date-time
-            - $ref: '#/components/schemas/DiarizeApiResponse'
-      required: true
   parameters:
-    Webhook:
-      name: webhook
-      in: query
-      description: The webhook URI to which the job response will be returned
+    SpeakerId:
+      name: speakerId
+      in: path
+      description: Speaker identifier of enrolled speaker
       required: true
-      style: form
-      explode: true
+      style: simple
+      explode: false
       schema:
         type: string
-        format: uri
+      example: JohnDoe
     CallbackRequestId:
       name: RCRequestId
       deprecated: true
@@ -878,16 +878,16 @@ components:
       explode: false
       schema:
         type: string
-    SpeakerId:
-      name: speakerId
-      in: path
-      description: Speaker identifier of enrolled speaker
+    Webhook:
+      name: webhook
+      in: query
+      description: The webhook URI to which the job response will be returned
       required: true
-      style: simple
-      explode: false
+      style: form
+      explode: true
       schema:
         type: string
-      example: JohnDoe
+        format: uri
   securitySchemes:
     OAuth2:
       type: oauth2

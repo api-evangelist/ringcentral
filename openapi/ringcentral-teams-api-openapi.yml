@@ -381,6 +381,24 @@ paths:
       x-app-permission: TeamMessaging
 components:
   schemas:
+    UpdateEveryoneTeamRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Everyone chat name. Maximum number of characters supported is 250
+        description:
+          type: string
+          description: Everyone chat description. Maximum number of characters supported is 1000
+    TMNavigationInfo:
+      type: object
+      properties:
+        prevPageToken:
+          type: string
+          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
+        nextPageToken:
+          type: string
+          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
     EveryoneTeamInfo:
       type: object
       properties:
@@ -406,49 +424,6 @@ components:
           type: string
           description: Chat last change datetime in ISO 8601 format
           format: date-time
-    TMTeamInfo:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Internal identifier of a team
-        type:
-          type: string
-          description: Type of chat
-          enum:
-          - Team
-        public:
-          type: boolean
-          description: Team access level
-        name:
-          type: string
-          description: Team name
-        description:
-          type: string
-          description: Team description
-        status:
-          type: string
-          description: Team status
-          enum:
-          - Active
-          - Archived
-        creationTime:
-          type: string
-          description: Team creation datetime in ISO 8601 format
-          format: date-time
-        lastModifiedTime:
-          type: string
-          description: Team last change datetime in ISO 8601 format
-          format: date-time
-    TMNavigationInfo:
-      type: object
-      properties:
-        prevPageToken:
-          type: string
-          description: Previous page token. To get previous page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
-        nextPageToken:
-          type: string
-          description: Next page token. To get next page, user should pass one of returned token in next request and, in turn, required page will be returned with new tokens
     TMAddTeamMembersRequest:
       required:
       - members
@@ -468,15 +443,18 @@ components:
                 format: email
                 description: Email of a person
             description: Conversation is opened
-    UpdateEveryoneTeamRequest:
+    TMTeamList:
+      required:
+      - records
       type: object
       properties:
-        name:
-          type: string
-          description: Everyone chat name. Maximum number of characters supported is 250
-        description:
-          type: string
-          description: Everyone chat description. Maximum number of characters supported is 1000
+        records:
+          type: array
+          description: List of teams
+          items:
+            $ref: '#/components/schemas/TMTeamInfo'
+        navigation:
+          $ref: '#/components/schemas/TMNavigationInfo'
     TMUpdateTeamRequest:
       type: object
       properties:
@@ -516,18 +494,6 @@ components:
                 type: string
                 format: email
                 description: Email of a person
-    TMTeamList:
-      required:
-      - records
-      type: object
-      properties:
-        records:
-          type: array
-          description: List of teams
-          items:
-            $ref: '#/components/schemas/TMTeamInfo'
-        navigation:
-          $ref: '#/components/schemas/TMNavigationInfo'
     TMRemoveTeamMembersRequest:
       required:
       - members
@@ -542,6 +508,40 @@ components:
               id:
                 type: string
                 description: Internal identifier of a person
+    TMTeamInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier of a team
+        type:
+          type: string
+          description: Type of chat
+          enum:
+          - Team
+        public:
+          type: boolean
+          description: Team access level
+        name:
+          type: string
+          description: Team name
+        description:
+          type: string
+          description: Team description
+        status:
+          type: string
+          description: Team status
+          enum:
+          - Active
+          - Archived
+        creationTime:
+          type: string
+          description: Team creation datetime in ISO 8601 format
+          format: date-time
+        lastModifiedTime:
+          type: string
+          description: Team last change datetime in ISO 8601 format
+          format: date-time
   securitySchemes:
     OAuth2:
       type: oauth2
